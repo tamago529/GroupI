@@ -37,6 +37,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Custom apps
+    'accounts.apps.AccountsConfig',
+    'follow.apps.FollowConfig',
+    'reservation.apps.ReservationConfig',
+    'reservation_management.apps.ReservationManagementConfig',
+    'review.apps.ReviewConfig',
+    'store.apps.StoreConfig',
+    'search.apps.SearchConfig',   
 ]
 
 MIDDLEWARE = [
@@ -103,9 +111,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ja'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tokyo'
 
 USE_I18N = True
 
