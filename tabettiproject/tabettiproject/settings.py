@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'reservations_management.apps.ReservationsManagementConfig',
     'reviews.apps.ReviewsConfig',
     'stores.apps.StoresConfig',
-    'search.apps.SearchConfig',   
+    'search.apps.SearchConfig', 
+    'operations.apps.OperationsConfig',  
 ]
 
 MIDDLEWARE = [
