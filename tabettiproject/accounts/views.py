@@ -2,6 +2,10 @@ from django.shortcuts import render
 
 from django.views.generic.base import TemplateView
 
+#共通機能の定義
+
+
+
 class admin_account_managementView(TemplateView):
     template_name = "admin_account_management.html"
 
