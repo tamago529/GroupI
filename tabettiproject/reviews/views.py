@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.views import TemplateView
+from django.views.generic.base import TemplateView
 
 class review_list_customerView(TemplateView):
     template_name = "review_list_customer.html"
