@@ -48,7 +48,7 @@ class store_account_application_confirmView(TemplateView):
     template_name = "store_account_application_confirm.html"
 
 class store_account_application_inputView(TemplateView):
-    template_name = "tore_account_application_input.html"
+    template_name = "store_account_application_input.html"
 
 class store_account_application_messageView(TemplateView):
     template_name = "store_account_application_message.html"
