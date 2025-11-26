@@ -39,11 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Custom apps
     'accounts.apps.AccountsConfig',
-    'follow.apps.FollowConfig',
-    'reservation.apps.ReservationConfig',
-    'reservation_management.apps.ReservationManagementConfig',
-    'review.apps.ReviewConfig',
-    'store.apps.StoreConfig',
+    'follows.apps.FollowsConfig',
+    'reservations.apps.ReservationsConfig',
+    'reservations_management.apps.ReservationsManagementConfig',
+    'reviews.apps.ReviewsConfig',
+    'stores.apps.StoresConfig',
     'search.apps.SearchConfig',   
 ]
 
