@@ -7,13 +7,13 @@
     {% block css %}{% endblock %}</head>
 <body class="store">
 
-    {% include 'shared/parts/header_store.html' %}
+    {% include '/store_header.html' %}
 
     <main class="content">
         {% block content %}{% endblock %}
     </main>
 
-    {% include 'shared/parts/footer_store.html' %}
+    {% include '/store_footer.html' %}
 
     <script src="{% static 'js/store.js' %}"></script>
     {% block js %}{% endblock %}</body></html>
