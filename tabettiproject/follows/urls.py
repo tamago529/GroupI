@@ -3,6 +3,6 @@ from .views import *
 
 app_name = "follows"
 urlpatterns = [
-    path("follow_list/", follow_listView.as_view(), name="follow_list"),
-    path("follower_list/", follower_listView.as_view(), name="follower_list"),
+    path("follow_list/", Customer_follow_listView.as_view(), name="customer_follow_list"),
+    path("follower_list/", Customer_follower_listView.as_view(), name="customer_follower_list"),
 ]

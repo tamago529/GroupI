@@ -4,9 +4,9 @@ from .views import *
 app_name = "reservations_management"
 
 urlpatterns = [
-    path("reservation_calendar/", reservation_calendarView.as_view(), name="reservation_calendar"),
-    path("reservation_ledger/", reservation_ledgerView.as_view(), name="reservation_ledger"),
-    path("customer_ledger/", customer_ledgerView.as_view(), name="customer_ledger"),
-    path("reservation_settings/", reservation_settingsView.as_view(), name="reservation_settings"),
-    path("seat_settings/", seat_settingsView.as_view(), name="seat_settings"),
+    path("reservation_calendar/", store_reservation_calendarView.as_view(), name="store_reservation_calendar"),
+    path("reservation_ledger/", store_reservation_ledgerView.as_view(), name="store_reservation_ledger"),
+    path("customer_ledger/", store_customer_ledgerView.as_view(), name="store_customer_ledger"),
+    path("reservation_settings/", store_reservation_settingsView.as_view(), name="store_reservation_settings"),
+    path("seat_settings/", store_seat_settingsView.as_view(), name="store_seat_settings"),
 ]

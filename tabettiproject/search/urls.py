@@ -4,8 +4,8 @@ from .views import *
 app_name = "search"
 
 urlpatterns = [
-  path("top/", topView.as_view(), name="top.html"),
-  path("genre_list/", genre_listView.as_view(), name="genre_list.html"),
-  path("search_list/", search_listView.as_view(), name="search_list.html")
+  path("top/", customer_topView.as_view(), name="customer_top.html"),
+  path("genre_list/", customer_genre_listView.as_view(), name="customer_genre_list.html"),
+  path("search_list/", customer_search_listView.as_view(), name="customer_search_list.html")
 
 ]
