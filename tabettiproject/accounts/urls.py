@@ -4,17 +4,17 @@ from .views import *
 app_name = "accounts"
 
 urlpatterns = [
-    path("admin_account_management/", company_account_managementView.as_view(), name="company_account_management)"),
-    path("admin_login/", company_loginView.as_view(), name="company_login"),
+    path("company_account_management/", company_account_managementView.as_view(), name="company_account_management)"),
+    path("company_login/", company_loginView.as_view(), name="company_login"),
     path("company_logout/", company_logoutView.as_view(), name="company_logout"),
     path("customer_login/", customer_loginView.as_view(), name="customer_login"),
     path("customer_logout/", customer_logoutView.as_view(), name="customer_logout"),
     path("customer_register/", customer_registerView.as_view(), name="customer_register"),
     path("customer_settings/", customer_settingsView.as_view(), name="customer_settings"),
-    path("mail_send/", customermail_sendView.as_view(), name="customermail_send"),
-    path("password_reset_complete/", customer_password_reset_completeView.as_view(), name="customer_password_reset_complete"),
-    path("password_reset_expire/", customer_password_reset_expireView.as_view(), name="customer_password_reset_expire"),
-    path("password_reset/", customer_password_resetView.as_view(), name="customer_password_reset"),
+    path("customermail_send/", customermail_sendView.as_view(), name="customermail_send"),
+    path("customer_password_reset_complete/", customer_password_reset_completeView.as_view(), name="customer_password_reset_complete"),
+    path("customer_password_reset_expire/", customer_password_reset_expireView.as_view(), name="customer_password_reset_expire"),
+    path("customer_password_reset/", customer_password_resetView.as_view(), name="customer_password_reset"),
     path("store_account_edit/", store_account_editView.as_view(), name="store_account_edit"),
     path("store_login/", store_loginView.as_view(), name="store_login"),
     path("store_register/", store_registerView.as_view(), name="store_register"),
