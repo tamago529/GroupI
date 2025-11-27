@@ -4,7 +4,7 @@ from .views import *
 app_name = "accounts"
 
 urlpatterns = [
-    path("company_account_management/", company_account_managementView.as_view(), name="company_account_management)"),
+    path("company_account_management/", company_account_managementView.as_view(), name="company_account_management"),
     path("company_login/", company_loginView.as_view(), name="company_login"),
     path("company_logout/", company_logoutView.as_view(), name="company_logout"),
     path("customer_login/", customer_loginView.as_view(), name="customer_login"),
@@ -21,10 +21,10 @@ urlpatterns = [
     path("store_account_application_confirm/", store_account_application_confirmView.as_view(), name="store_account_application_confirm"),
     path("store_account_application_input/", store_account_application_inputView.as_view(), name="store_account_application_input"),
     path("store_account_application_message/", store_account_application_messageView.as_view(), name="store_account_application_message"),
-    path("store_account_mail_sent/", store_account_mail_sentView.as_view(), name="tore_account_mail_sent"),
+    path("store_account_mail_sent/", store_account_mail_sentView.as_view(), name="store_account_mail_sent"),
     path("store_account_privacy/", store_account_privacyView.as_view(), name="store_account_privacy"),
     path("store_account_search/", store_account_searchView.as_view(), name="store_account_search"),
-    path("store_account_staff_confirm/" , store_account_staff_confirmView.as_view(),name="tore_account_staff_confirm"),
-    path("store_account_staff_input/",store_account_staff_inputView.as_view(),name="store_account_staff_input")
-
+    path("store_account_staff_confirm/" , store_account_staff_confirmView.as_view(),name="store_account_staff_confirm"),
+    path("store_account_staff_input/",store_account_staff_inputView.as_view(),name="store_account_staff_input"),
+    path("company_top/", company_topView.as_view(), name="company_top"),
 ]

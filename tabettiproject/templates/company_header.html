@@ -3,10 +3,10 @@
         <h1 class="logo">運用管理</h1>
         <nav>
             <ul>
-                <li><a href="{% url 'operations_top' %}">TOP</a></li>
-                <li><a href="{% url 'operations_account_management' %}">アカウント管理</a></li>
-                <li><a href="{% url 'operations_store_management' %}">店舗管理</a></li>
-                <li><a href="{% url 'operations_logout' %}">ログアウト</a></li>
+                <li><a href="{% url 'accounts:company_top' %}">TOP</a></li>
+                <li><a href="{% url 'accounts:company_account_management' %}">アカウント管理</a></li>
+                <li><a href="{% url 'stores:company_store_management' %}">店舗管理</a></li>
+                <li><a href="{% url 'accounts:company_logout' %}">ログアウト</a></li>
             </ul>
         </nav>
     </div></header>

@@ -10,13 +10,10 @@ class company_account_managementView(TemplateView):
     template_name = "company_account_management.html"
 
 class company_loginView(TemplateView):
-    template_name = "company_login.html"
+    template_name = "accounts/company_login.html"
 
 class company_account_managementView(TemplateView):
     template_name = "company_account_management.html"
-
-class company_loginView(TemplateView):
-    template_name = "company_login.html"
 
 class company_logoutView(TemplateView):
     template_name = "company_logout.html" 
@@ -87,3 +84,5 @@ class store_account_staff_confirmView(TemplateView):
 class store_account_staff_inputView(TemplateView):
     template_name = "store_account_staff_input.html"
 
+class company_topView(TemplateView):
+    template_name = "accounts/company_top.html"

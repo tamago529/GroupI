@@ -1,3 +1,4 @@
+{% load static %}
 <!-- shared/base_company.html --> <!DOCTYPE html><html lang="ja"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,13 +8,13 @@
     {% block css %}{% endblock %}</head>
 <body class="company">
 
-    {% include '/company_header.html' %}
+    {% include 'company_header.html' %}
 
     <main class="content">
         {% block content %}{% endblock %}
     </main>
 
-    {% include '/company_footer.html' %}
+    {% include 'company_footer.html' %}
 
     <script src="{% static 'js/company.js' %}"></script>
     {% block js %}{% endblock %}</body></html>
