@@ -6,7 +6,12 @@ app_name = "accounts"
 urlpatterns = [
     path("admin_account_management/", admin_account_managementView.as_view(), name="admin_account_management)"),
     path("admin_login/", admin_loginView.as_view(), name="admin_login"),
+    path("company_account_management/", company_account_managementView.as_view(), name="company_account_management"),
+    path("company_login/", company_loginView.as_view(), name="company_login"),
     path("company_logout/", company_logoutView.as_view(), name="company_logout"),
+    path("company_store_review_detail/", company_store_review_detailView.as_view(), name="company_store_review_detail"),
+    path("company_store_review/", company_store_reviewView.as_view(), name="company_store_review"),
+    path("company_top/", company_topView.as_view(), name="company_top"),
     path("customer_login/", Customer_loginView.as_view(), name="customer_login"),
     path("customer_logout/", Customer_logoutView.as_view(), name="customer_logout"),
     path("customer_register/", customer_registerView.as_view(), name="customer_register"),
@@ -26,5 +31,5 @@ urlpatterns = [
     path("store_account_search/", store_account_searchView.as_view(), name="store_account_search"),
     path("store_account_staff_confirm/" , store_account_staff_confirmView.as_view(),name="tore_account_staff_confirm"),
     path("store_account_staff_input/",store_account_staff_inputView.as_view(),name="store_account_staff_input")
-         
+
 ]

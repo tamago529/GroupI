@@ -12,8 +12,23 @@ class admin_account_managementView(TemplateView):
 class admin_loginView(TemplateView):
     template_name = "admin_login.html"
 
+class company_account_managementView(TemplateView):
+    template_name = "company_account_management.html"
+
+class company_loginView(TemplateView):
+    template_name = "company_login.html"
+
 class company_logoutView(TemplateView):
-    template_name = "company_logout.html"        
+    template_name = "company_logout.html" 
+
+class company_store_review_detailView(TemplateView):
+    template_name = "company_store_review_detail.html"
+
+class company_store_reviewView(TemplateView):
+    template_name = "company_store_review.html"
+
+class company_topView(TemplateView):
+    template_name = "company_top.html"       
 
 class Customer_loginView(TemplateView):
     template_name = "customer_login.html"
@@ -71,5 +86,4 @@ class store_account_staff_confirmView(TemplateView):
 
 class store_account_staff_inputView(TemplateView):
     template_name = "store_account_staff_input.html"
-           
-                
+
