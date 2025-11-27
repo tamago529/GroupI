@@ -1,30 +1,38 @@
 from django.shortcuts import render
 from django.views.generic.base import TemplateView
 
-class review_list_customerView(TemplateView):
-    template_name = "review_list_customer.html"
 
-class review_list_reviewerView(TemplateView):
-    template_name = "review_list_reviewer.html"
+class customer_review_listView(TemplateView):
+    template_name = "customer_review_list.html"
 
-class reviewer_detailView(TemplateView):
-    template_name = "reviewer_detail.html"
 
-class reviewer_searchView(TemplateView):
-    template_name = "reviewer_search.html"
+class customer_reviewer_review_listView(TemplateView):
+    template_name = "customer__reviewer_review_list.html"
 
-class review_report_customerView(TemplateView):
-    template_name = "review_report_customer.html"
 
-class review_report_storeView(TemplateView):
-    template_name = "review_report_store.html"
+class customer_reviewer_detailView(TemplateView):
+    template_name = "customer_reviewer_detail.html"
 
-class review_list_storeView(TemplateView):
-    template_name = "review_list_store.html"
 
-class review_list_companyView(TemplateView):
-    template_name = "review_list_company.html"
+class customer_reviewer_searchView(TemplateView):
+    template_name = "customer_reviewer_search.html"
+
+
+class customer_review_reportView(TemplateView):
+    template_name = "customer_review_report.html"
+
+
+class store_review_reportView(TemplateView):
+    template_name = "store_review_report.html"
+
+
+class store_review_listView(TemplateView):
+    template_name = "store_review_list.html"
+
+
+class company_review_listView(TemplateView):
+    template_name = "company_review_list.html"
+
 
 class customer_report_input(TemplateView):
     template_name = "customer_report_input.html"
-
