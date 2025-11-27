@@ -26,10 +26,6 @@ urlpatterns = [
     path('commons/', include('commons.urls'), name='commons'),
     
     path('follows/', include('follows.urls'), name='follows'),
-
-   
-    path('operations/', include('operations.urls'), name='operations'),
-
     
     path('reservations/', include('reservations.urls'), name='reservations'),
 
