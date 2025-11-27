@@ -6,11 +6,11 @@ from django.views.generic.base import TemplateView
 
 
 
-class admin_account_managementView(TemplateView):
-    template_name = "admin_account_management.html"
+class company_account_managementView(TemplateView):
+    template_name = "company_account_management.html"
 
-class admin_loginView(TemplateView):
-    template_name = "admin_login.html"
+class company_loginView(TemplateView):
+    template_name = "company_login.html"
 
 class company_account_managementView(TemplateView):
     template_name = "company_account_management.html"
@@ -30,10 +30,10 @@ class company_store_reviewView(TemplateView):
 class company_topView(TemplateView):
     template_name = "company_top.html"       
 
-class Customer_loginView(TemplateView):
+class customer_loginView(TemplateView):
     template_name = "customer_login.html"
 
-class Customer_logoutView(TemplateView):
+class customer_logoutView(TemplateView):
     template_name = "customer_logout.html"
 
 class customer_registerView(TemplateView):
@@ -42,17 +42,17 @@ class customer_registerView(TemplateView):
 class customer_settingsView(TemplateView):
     template_name = "customer_settings.html"
 
-class mail_sendView(TemplateView):
-    template_name = "mail_send.html"
+class customermail_sendView(TemplateView):
+    template_name = "customer_mail_send.html"
 
-class password_reset_completeView(TemplateView):
-    template_name = "password_reset_complete.html"
+class customer_password_reset_completeView(TemplateView):
+    template_name = "customer_password_reset_complete.html"
 
-class password_reset_expireView(TemplateView):                    
-    template_name = "password_reset_expire.html"
+class customer_password_reset_expireView(TemplateView):                    
+    template_name = "customer_password_reset_expire.html"
 
-class password_resetView(TemplateView):
-    template_name = "password_reset.html"
+class customer_password_resetView(TemplateView):
+    template_name = "customer_password_reset.html"
 
 class store_account_editView(TemplateView):
     template_name = "store_account_edit.html"
