@@ -1,0 +1,19 @@
+<!-- shared/base_store.html --> <!DOCTYPE html><html lang="ja"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}店舗管理サイト{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'css/store.css' %}">
+    {% block css %}{% endblock %}</head>
+<body class="store">
+
+    {% include 'shared/parts/header_store.html' %}
+
+    <main class="content">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include 'shared/parts/footer_store.html' %}
+
+    <script src="{% static 'js/store.js' %}"></script>
+    {% block js %}{% endblock %}</body></html>

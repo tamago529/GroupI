@@ -1,0 +1,19 @@
+<!-- shared/base_customer.html --> <!DOCTYPE html><html lang="ja"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}顧客サイト{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'css/customer.css' %}">
+    {% block css %}{% endblock %}</head>
+<body class="customer">
+
+    {% include 'shared/parts/header_customer.html' %}
+
+    <main class="content">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include 'shared/parts/footer_customer.html' %}
+
+    <script src="{% static 'js/customer.js' %}"></script>
+    {% block js %}{% endblock %}</body></html>
