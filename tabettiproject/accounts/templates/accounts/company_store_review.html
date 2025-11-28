@@ -1,3 +1,10 @@
 {% extends "company_base.html"  %}
-
+{% block content %}
 店舗アカウント審査運用画面
+
+<a href="{% url 'company_store_review_detail' %}">店舗アカウント審査詳細画面へ</a>
+
+<a href="{% url 'company_top' %}">運用トップへ</a>
+
+
+{% endblock %}

@@ -36,3 +36,6 @@ class company_review_listView(TemplateView):
 
 class customer_report_input(TemplateView):
     template_name = "reviews/customer_report_input.html"
+
+class reportView(TemplateView):
+    template_name = "reviews/report.html"
