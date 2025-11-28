@@ -158,6 +158,79 @@ class StoreOnlineReservation(models.Model):
         return f"Online Reservation Info for {self.store.store_name} on {self.date}"
 
 #----------------
+# 追加モデル：店舗画像・メニュー・申請・ログ・パスワード・仮申請
+#----------------
+class StoreImage(models.Model):
+    store = models.ForeignKey("Store", on_delete=models.CASCADE, verbose_name="店舗")
+    image_path = models.CharField(max_length=255, verbose_name="画像パス")
+    image_status = models.ForeignKey("ImageStatus", on_delete=models.PROTECT, verbose_name="画像ステータス")
+    class Meta:
+        db_table = "store_images"; verbose_name = "店舗画像"; verbose_name_plural = "店舗画像"
+    def __str__(self):
+        return self.image_path
+
+class StoreMenu(models.Model):
+    store = models.ForeignKey("Store", on_delete=models.CASCADE, verbose_name="店舗")
+    menu_name = models.CharField(max_length=100, verbose_name="メニュー名")
+    price = models.IntegerField(verbose_name="価格")
+    image_path = models.CharField(max_length=255, verbose_name="メニュー画像パス")
+    class Meta:
+        db_table = "store_menus"; verbose_name = "メニュー"; verbose_name_plural = "メニュー"
+    def __str__(self):
+        return self.menu_name
+
+class StoreAccountRequest(models.Model):
+    requester = models.ForeignKey("CustomerAccount", on_delete=models.CASCADE, verbose_name="申請者")
+    target_store = models.ForeignKey("Store", on_delete=models.CASCADE, verbose_name="対象店舗")
+    attachment = models.CharField(max_length=255, verbose_name="添付資料")
+    request_status = models.ForeignKey("ApplicationStatus", on_delete=models.PROTECT, verbose_name="申請ステータス")
+    store_name = models.CharField(max_length=100, verbose_name="店舗名")
+    branch_name = models.CharField(max_length=100, verbose_name="支店名")
+    email = models.EmailField(max_length=255, verbose_name="メールアドレス")
+    phone_number = models.CharField(max_length=20, verbose_name="電話番号")
+    address = models.CharField(max_length=255, verbose_name="住所")
+    applicant_name = models.CharField(max_length=100, verbose_name="申込者名")
+    relation_to_store = models.CharField(max_length=50, verbose_name="店舗との関係")
+    requested_at = models.DateTimeField(auto_now_add=True, verbose_name="申請日時")
+    approved_at = models.DateTimeField(null=True, blank=True, verbose_name="承認日時")
+    class Meta:
+        db_table = "store_account_requests"; verbose_name = "店舗アカウント申請"; verbose_name_plural = "店舗アカウント申請"
+    def __str__(self):
+        return f"Request by {self.applicant_name} for {self.store_name}"
+
+class StoreAccountRequestLog(models.Model):
+    request = models.ForeignKey("StoreAccountRequest", on_delete=models.CASCADE, verbose_name="申請")
+    request_status = models.ForeignKey("ApplicationStatus", on_delete=models.PROTECT, verbose_name="申請ステータス")
+    comment = models.TextField(verbose_name="コメント")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="更新日時")
+    class Meta:
+        db_table = "store_account_request_logs"; verbose_name = "店舗アカウント申請ログ"; verbose_name_plural = "店舗アカウント申請ログ"
+    def __str__(self):
+        return f"Log for Request ID {self.request.id} at {self.updated_at}"
+
+class PasswordResetLog(models.Model):
+    reset_token = models.CharField(max_length=255, primary_key=True, verbose_name="リセットトークン")
+    account = models.ForeignKey("Account", on_delete=models.CASCADE, verbose_name="アカウント")
+    expires_at = models.DateTimeField(verbose_name="有効期限")
+    used_flag = models.BooleanField(verbose_name="使用済みフラグ", default=False)
+    requested_at = models.DateTimeField(auto_now_add=True, verbose_name="リセット要求日時")
+    class Meta:
+        db_table = "password_reset_log"; verbose_name = "パスワードリセットログ"; verbose_name_plural = "パスワードリセットログ"
+    def __str__(self):
+        return f"Password Reset for {self.account.username} requested at {self.requested_at}"
+
+class TempRequestMailLog(models.Model):
+    temp_request_token = models.CharField(max_length=255, primary_key=True, verbose_name="仮申請メールトークン")
+    requester = models.ForeignKey("CustomerAccount", on_delete=models.CASCADE, verbose_name="申請者")
+    expires_at = models.DateTimeField(verbose_name="有効期限")
+    used_flag = models.BooleanField(verbose_name="使用済みフラグ", default=False)
+    requested_at = models.DateTimeField(auto_now_add=True, verbose_name="要求日時")
+    class Meta:
+        db_table = "temp_request_mail_log"; verbose_name = "仮申請メールログ"; verbose_name_plural = "仮申請メールログ"
+    def __str__(self):
+        return f"Temp Request Mail for {self.requester.nickname} requested at {self.requested_at}"
+
+#----------------
 # マスタ
 #----------------
 class AgeGroup(models.Model):
