@@ -1,0 +1,8 @@
+ネット予約履歴画面
+{% extends "customer_base.html" %}
+{% block content %}
+<a href = "{% url 'reservations:store_reservation_register' %}">ネット予約登録画面へ移動</a>
+<a href = "{% url 'reservations:store_reservation_confirm' %}">ネット予約確認画面へ移動</a>
+<a href = "{% url 'reservations:store_reservation_edit' %}">ネット予約変更画面へ移動</a>
+<a href = "{% url 'reservations:store_reservation_cancel' %}">ネット予約キャンセル画面へ移動</a>
+{% endblock %}
