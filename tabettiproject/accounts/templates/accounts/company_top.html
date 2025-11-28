@@ -1,2 +1,14 @@
-
+{% extends 'company_base.html' %}
+{% block content %}
 運用トップ画面
+
+<a href="{% url 'stores_review_list_store' %}">口コミ一覧（店舗）画面へ</a>
+<a href="{% url 'company_account_management' %}">アカウント管理運用画面へ</a>
+<a href="{% url 'company_store_review' %}">店舗アカウント審査運用画面へ</a>    
+<a href="{% url 'report' %}">報告管理へ</a>    
+<a href="{% url 'company_store_management' %}">店舗管理へ</a>  
+<a href="{% url 'company_logout' %}">ログアウトへ</a>    
+
+
+
+{% endblock %}

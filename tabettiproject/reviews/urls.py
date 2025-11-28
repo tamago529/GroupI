@@ -49,4 +49,10 @@ urlpatterns = [
         customer_report_input.as_view(),
         name="customer_report_input",
     ),
+
+    path(
+        "report/",
+        reportView.as_view(),
+        name="report"
+    ),
 ]

@@ -1,3 +1,9 @@
-
+{% extends 'store_base.html' %}
+{% block content %}
 
 店舗アカウント作成担当者情報入力画面
+
+<a href="{% url 'customer_top' %}">顧客トップ画面へ</a>   
+<a href="{% url 'store_account_staff_confirm' %}">店舗アカウント作成担当者情報確認画面へ</a>   
+
+{% endblock %}
