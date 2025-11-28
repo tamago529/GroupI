@@ -1,5 +1,7 @@
 from django.urls import path
 from .views import *
+from django.conf import settings
+from django.conf.urls.static import static
 
 app_name = "accounts"
 
@@ -30,4 +32,5 @@ urlpatterns = [
     path("store_account_staff_confirm/" , store_account_staff_confirmView.as_view(),name="store_account_staff_confirm"),
     path("store_account_staff_input/",store_account_staff_inputView.as_view(),name="store_account_staff_input"),
     path("company_top/", company_topView.as_view(), name="company_top"),
-]
+    path("customer_top/", customer_topView.as_view(), name="customer_top"),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

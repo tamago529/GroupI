@@ -83,3 +83,6 @@ class store_account_staff_inputView(TemplateView):
 
 class company_topView(TemplateView):
     template_name = "accounts/company_top.html"
+
+class customer_topView(TemplateView):
+    template_name = "accounts/customer_top.html"

@@ -1,5 +1,9 @@
 {% extends 'customer_base.html' %}
 
-<a href="{% url 'search:customer_top' %}">顧客トップへ</a>    
+{% block content %}
+
+<a href="{% url 'accounts:customer_top' %}">顧客トップへ</a>    
 
 顧客ログイン画面
+
+{% endblock %}

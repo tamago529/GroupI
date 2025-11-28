@@ -1,19 +1,29 @@
-<!-- base_customer.html --> <!DOCTYPE html><html lang="ja"><head>
+<!-- base_customer.html -->
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}顧客サイト{% endblock %}</title>
 
+    {% load static %}
     <link rel="stylesheet" href="{% static 'css/customer.css' %}">
-    {% block css %}{% endblock %}</head>
+    {% block css %}{% endblock %}
+</head>
+
 <body class="customer">
 
-    {% include '/customer_header.html' %}
+    {% include 'customer_header.html' %}
 
     <main class="content">
         {% block content %}{% endblock %}
     </main>
 
-    {% include '/customer_footer.html' %}
+    {% include 'customer_footer.html' %}
 
     <script src="{% static 'js/customer.js' %}"></script>
-    {% block js %}{% endblock %}</body></html>
+    {% block js %}{% endblock %}
+</body>
+
+</html>

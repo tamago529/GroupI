@@ -288,3 +288,4 @@ class ApplicationStatus(models.Model):
         db_table = "application_statuses"; verbose_name = "申請ステータスマスタ"; verbose_name_plural = "申請ステータスマスタ"
     def __str__(self):
         return self.status
+

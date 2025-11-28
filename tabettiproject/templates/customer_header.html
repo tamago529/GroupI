@@ -3,9 +3,9 @@
         <h1 class="logo">サイト名</h1>
         <nav>
             <ul>
-                <li><a href="{% url 'top' %}">トップ</a></li>
-                <li><a href="{% url 'customer_settings' %}">設定</a></li>
-                <li><a href="{% url 'customer_logout' %}">ログアウト</a></li>
+                <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
+                <li><a href="{% url 'accounts:customer_settings' %}">設定</a></li>
+                <li><a href="{% url 'accounts:customer_logout' %}">ログアウト</a></li>
             </ul>
         </nav>
     </div></header>
