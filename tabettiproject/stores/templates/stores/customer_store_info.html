@@ -1,0 +1,15 @@
+{% extends "stores_base.html" %}
+
+{% block title %}店舗新規登録確認画面{% endblock %}
+
+{% block content %}
+<h2>店舗新規登録確認画面</h2>
+
+<a href="{% url 'stores:customer_store_new_register' %}">戻る</a>
+<a href="{% url 'stores:map' %}">地図を見る</a>
+<a href="{% url 'stores:menu_course' %}">メニュー・コースを見る</a>
+<a href="{% url 'stores:store_basic_edit' %}">店舗基本情報編集</a>
+<a href="{% url 'reviews:customer_report_input' %}">店舗の誤りなどを報告する</a><!--顧客共通報告入力画面に遷移-->
+<a href="{% url 'reviews:customer_review_list' %}">口コミ</a>
+
+{% endblock %}
