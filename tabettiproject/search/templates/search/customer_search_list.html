@@ -1,0 +1,7 @@
+検索結果一覧画面
+{% extends "customer_base.html" %}
+{% block content %}
+<a href = "{% url 'search:customer_top' %}">トップ画面へ移動</a><br>
+<a href = "{% url 'search:customer_search_list' %}">検索結果一覧へ移動</a><br>
+<a href = "{% url 'search:customer_genre_list' %}">ジャンル一覧へ移動</a><br>
+{% endblock %}
