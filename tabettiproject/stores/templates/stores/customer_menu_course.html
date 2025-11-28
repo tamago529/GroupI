@@ -1,0 +1,6 @@
+メニューコース画面
+{% extends "customer_base.html" %}
+{% block content %}
+<a href = "{% url 'reservations:store_reservation_register' %}">ネット予約登録画面へ移動</a>
+<a href = "{% url 'stores:customer_map' %}">店舗基本情報（顧客）画面へ移動</a>
+{% endblock %}

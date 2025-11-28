@@ -1,0 +1,10 @@
+店舗管理運用画面
+{% extends "customer_base.html" %}
+{% block content %}
+<a href = "{% url 'stores:store_top' %}">店舗トップ画面へ移動</a>
+<a href = "{% url 'common:store_common_complete.html' %}">店舗共通完了画面へ移動</a>
+{% endblock %}
+
+<!-- 検索機能 -->
+<!-- 店舗一覧表示 -->
+<!-- 削除機能 -->
