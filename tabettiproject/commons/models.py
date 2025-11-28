@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser
 
 
 
+
 #----------------
 #アカウント
 #----------------
@@ -80,7 +81,8 @@ class Customer_Account(Account):
         max_length=100,
         verbose_name="タイトル",
     )
-    location = models.GeometryField(
+    location = models.CharField(
+        max_length=255,
         verbose_name="現在位置",
     )
     birth_date = models.DateField(
@@ -207,7 +209,8 @@ class Stores(models.Model):
     address = models.GeometryField(
         verbose_name="住所",
     )
-    map_location = models.GeometryField(
+    map_location = models.CharField(
+        max_length=255,
         verbose_name="地図",
     )
     area_id = models.ForeignKey(
