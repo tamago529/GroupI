@@ -1,0 +1,9 @@
+ネット予約管理画面（席設定）
+{% extends "company_base.html" %}
+{% block content %}
+<a href = "{% url 'reservations_management:store_reservation_calendar' %}">ネット予約管理画面（予約カレンダー）へ移動</a><br>
+<a href = "{% url 'reservations_management:store_reservation_ledger' %}">ネット予約管理画面（予約台帳）へ移動</a><br>
+<a href = "{% url 'reservations_management:store_customer_ledger' %}">ネット予約管理画面（顧客台帳）へ移動</a><br>
+<a href = "{% url 'reservations_management:store_reservation_settings' %}">ネット予約管理画面（ネット予約受付設定）へ移動</a><br>
+<a href = "{% url 'reservations_management:store_seat_settings' %}">ネット予約管理画面（席設定）へ移動</a><br>
+{% endblock %}
