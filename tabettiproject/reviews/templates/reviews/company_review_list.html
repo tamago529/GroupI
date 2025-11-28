@@ -1,0 +1,9 @@
+口コミ一覧(企業画面)  
+{% extends "company_base.html" %}
+{% block content %}
+<label>
+  <input type="checkbox" name="reported" value="1">
+  通報済み
+</label>
+<a href="{% url 'accounts:company_top' %}">戻る</a>
+{% endblock %}

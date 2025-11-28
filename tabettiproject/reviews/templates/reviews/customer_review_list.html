@@ -1,0 +1,8 @@
+口コミ一覧(顧客画面)
+{% extends "customer_base.html" %}
+{% block content %}
+<a href="{% url 'stores:company_store_info' %}">トップ</a>
+<a href="{% url 'stores:customer_menu_course' %}">メニューコース</a>
+<a href="{% url 'reviews:customer_review_list' %}">口コミ一覧</a>
+<a href="{% url 'stores:customer_map' %}">マップ</a>
+{% endblock %}
