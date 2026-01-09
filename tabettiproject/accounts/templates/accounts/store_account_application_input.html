@@ -1,4 +1,74 @@
 店舗アカウント作成本申請入力画面
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>店舗アカウント作成本申請入力画面</title>
+
+</head>
+<body>
+
+<h2>本申請入力フォーム</h2>
+
+<!-- 画像アップロード -->
+<div>
+    <label>画像アップロード：</label><br>
+    <input type="file">
+</div>
+<br>
+
+<!-- 店舗名 -->
+<div>
+    <label>店舗名：</label><br>
+    <input type="text">
+</div>
+<br>
+
+<!-- 電話番号 -->
+<div>
+    <label>電話番号：</label><br>
+    <input type="tel">
+</div>
+<br>
+
+<!-- 住所 -->
+<div>
+    <label>住所：</label><br>
+    <input type="text">
+</div>
+<br>
+
+<!-- 申込者名 -->
+<div>
+    <label>申込者名：</label><br>
+    <input type="text">
+</div>
+<br>
+
+<!-- 店舗との関係 -->
+<div>
+    <label>店舗との関係：</label><br>
+    <input type="text">
+</div>
+<br>
+
+<!-- メールアドレス -->
+<div>
+    <label>メールアドレス：</label><br>
+    <input type="email">
+</div>
+<br>
+
+
+<!-- 進むボタン（次画面へ） -->
+<div>
+    <a href="{% url 'accounts:store_account_application_confirm' %}">
+        <button>進む</button>
+    </a>
+</div>
+
+</body>
+</html>
 
 <a href="{% url 'accounts:store_account_application_confirm' %}">店舗アカウント作成本申請確認画面へ</a>    
 

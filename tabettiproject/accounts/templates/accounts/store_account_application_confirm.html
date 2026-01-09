@@ -1,10 +1,73 @@
-{% extends 'store_base.html' %}
-{% block content %}
-
 店舗アカウント作成本申請確認画面
 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>店舗アカウント作成本申請確認画面</title>
+</head>
+<body>
+
+<!-- 1 見出し -->
+<h2>本申請入力内容確認</h2>
+
+<!-- 2 営業許可証（画像プレビュー） -->
+<div>
+    <p>営業許可証</p>
+    <img src="{{ license_image_url }}" alt="営業許可証" width="300">
+</div>
+<br>
+
+<!-- 3 店舗名 -->
+<div>
+    <strong>店舗名：</strong>
+    <span>{{ shop_name }}</span>
+</div>
+<br>
+
+<!-- 4 電話番号 -->
+<div>
+    <strong>電話番号：</strong>
+    <span>{{ phone }}</span>
+</div>
+<br>
+
+<!-- 5 住所 -->
+<div>
+    <strong>住所：</strong>
+    <span>{{ address }}</span>
+</div>
+<br>
+
+<!-- 6 申請者名 -->
+<div>
+    <strong>申請者名：</strong>
+    <span>{{ applicant_name }}</span>
+</div>
+<br>
+
+<!-- 7 店舗との関係 -->
+<div>
+    <strong>店舗との関係：</strong>
+    <span>{{ relation }}</span>
+</div>
+<br>
+
+<!-- 8 メールアドレス -->
+<div>
+    <strong>メールアドレス：</strong>
+    <span>{{ email }}</span>
+</div>
+<br>
+
+<!-- 9 次へボタン -->
+<div>
+    <a href="{% url 'accounts:store_account_application_message' %}">
+        <button type="button">次へ</button>
+    </a>
+</div>
+
+</body>
+</html>
+
 <a href="{% url 'accounts:store_account_application_message' %}">店舗アカウント作成本申請メッセージへ</a>    
-
-
-{% endblock %}
-
