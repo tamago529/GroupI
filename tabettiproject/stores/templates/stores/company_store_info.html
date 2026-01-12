@@ -3,4 +3,111 @@
 {% block content %}
 <a href = "{% url 'reservations:store_reservation_history' %}">ネット予約履歴画面へ移動</a>
 <a href="{% url 'reviews:customer_reviewer_detail' %}">レビュアー詳細画面</a>
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>店舗ページ（口コミ本文空白）</title>
+  <style>
+    body { margin:0; font-family:"Noto Sans JP", sans-serif; background:#f5f5f5; }
+    .container { max-width:1100px; margin:20px auto; background:#fff; padding:16px; }
+    .header { border-bottom:1px solid #ddd; padding-bottom:12px; }
+    .shop-name { font-size:22px; font-weight:bold; }
+    .rating { color:#e53935; font-weight:bold; margin-top:4px; }
+    .tabs { display:flex; gap:16px; border-bottom:1px solid #eee; margin:16px 0; }
+    .tabs div { padding:8px 0; color:#666; }
+    .tabs .active { color:#000; font-weight:bold; border-bottom:2px solid #ff8a00; }
+
+    .main { display:flex; gap:24px; }
+    .left { flex:2.5; }
+    .right { flex:1; border-left:1px solid #eee; padding-left:16px; }
+
+    .photo-main { width:100%; height:260px; background:#ddd; margin-bottom:16px; }
+    .photo-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:16px; }
+    .photo-grid div { background:#ccc; height:80px; }
+
+    .section { margin-bottom:24px; }
+    .section h3 { font-size:16px; margin-bottom:8px; }
+
+    .reserve-box { border:1px solid #ddd; padding:12px; }
+    .reserve-box .phone { font-weight:bold; margin-bottom:8px; }
+    .calendar { background:#fafafa; height:220px; margin:8px 0; }
+    .reserve-btn { width:100%; background:#ff8a00; color:#fff; border:none; padding:10px; font-size:14px; cursor:pointer; }
+
+    .review { border-bottom:1px solid #eee; padding:12px 0; }
+    .review:last-child { border-bottom:none; }
+    .review .user { font-weight:bold; margin-bottom:6px; }
+    .review .text { height:48px; background:#f0f0f0; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="shop-name">宇都宮餃子 宇都宮駅前店</div>
+    <div class="rating">★★★☆☆ 3.25</div>
+  </div>
+
+  <div class="tabs">
+    <div>トップ</div>
+    <div>座席</div>
+    <div>メニュー・コース</div>
+    <div>写真</div>
+    <div class="active">口コミ</div>
+    <div>クーポン・地図</div>
+  </div>
+
+  <div class="main">
+
+    <div class="left">
+      <div class="photo-main"></div>
+
+      <div class="photo-grid">
+        <div></div><div></div><div></div><div></div><div></div>
+      </div>
+
+      <div class="section">
+        <h3>お店のこだわり</h3>
+        <p>※ ここは店舗紹介文エリア（省略）</p>
+      </div>
+
+      <div class="section">
+        <h3>口コミ</h3>
+
+        <div class="review">
+          <div class="user">ユーザーA</div>
+          <div class="text"></div>
+        </div>
+
+        <div class="review">
+          <div class="user">ユーザーB</div>
+          <div class="text"></div>
+        </div>
+
+        <div class="review">
+          <div class="user">ユーザーC</div>
+          <div class="text"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="reserve-box">
+        <div class="phone">050-5593-2957</div>
+        <div class="calendar"></div>
+        <button class="reserve-btn">予約する</button>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>
+
+
 {% endblock %}

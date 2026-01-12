@@ -4,12 +4,766 @@
 
 {% block content %}
 <h2>店舗基本情報画面</h2>
-
 <a href="{% url 'stores:customer_store_new_register' %}">戻る</a>
-<a href="{% url 'stores:map' %}">地図を見る</a>
-<a href="{% url 'stores:menu_course' %}">メニュー・コースを見る</a>
+<a href="{% url 'stores:customer_map' %}">地図を見る</a>
+<a href="{% url 'stores:customer_menu_course' %}">メニュー・コースを見る</a>
 <a href="{% url 'stores:store_basic_edit' %}">店舗基本情報編集</a>
-<a href="{% url 'reviews:customer_report_input' %}">店舗の誤りなどを報告する</a><!--顧客共通報告入力画面に遷移-->
+<a href="{% url 'reviews:customer_report_input' %}">店舗の誤りなどを報告する</a> <!-- 顧客共通報告入力画面に遷移 -->
 <a href="{% url 'reviews:customer_review_list' %}">口コミ</a>
+
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>店舗ページ（画面モック）</title>
+  <style>
+    :root{
+      --bg:#111;
+      --page:#ffffff;
+      --soft:#f6f3ea;
+      --line:#ded8c9;
+      --text:#333;
+      --muted:#6b6b6b;
+      --accent:#ff8a00;
+      --accent2:#2a8f3a;
+      --tab:#6a5a2a;
+      --tabText:#fff;
+      --shadow:0 10px 30px rgba(0,0,0,.18);
+      --radius:10px;
+      --font: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:var(--font);background:var(--bg);color:var(--text)}
+    a{color:#2a6adf;text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    .wrap{
+      max-width:1180px;
+      margin:24px auto;
+      background:var(--page);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    /* top header */
+    .topbar{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:10px 14px;
+      border-bottom:1px solid var(--line);
+      background:#fff;
+    }
+    .brand{
+      display:flex;align-items:center;gap:10px;font-weight:800;color:#ff7a00;
+    }
+    .search{
+      margin-left:12px;
+      flex:1 1 auto;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      max-width:520px;
+    }
+    .search input{
+      width:100%;
+      padding:8px 10px;
+      border:1px solid var(--line);
+      border-radius:8px;
+      background:#fff;
+      font-size:13px;
+    }
+    .search button{
+      padding:8px 12px;
+      border:1px solid var(--line);
+      border-radius:8px;
+      background:#f3f0e7;
+      cursor:pointer;
+      font-weight:700;
+      white-space:nowrap;
+    }
+    .toplinks{
+      margin-left:auto;
+      display:flex;
+      gap:12px;
+      font-size:12px;
+      color:var(--muted);
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    /* page head */
+    .head{
+      padding:14px;
+      border-bottom:1px solid var(--line);
+    }
+    .titleRow{
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+    }
+    .titleRow h1{
+      margin:0;
+      font-size:20px;
+      font-weight:900;
+      letter-spacing:.01em;
+      flex: 1 1 420px;
+    }
+    .rating{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .stars{color:#ffb400;font-size:13px}
+    .score{color:#d14;font-weight:900;font-size:14px}
+
+    /* tabs */
+    .tabs{
+      display:flex;
+      gap:0;
+      border-top:1px solid var(--line);
+      border-bottom:1px solid var(--line);
+      background:#fff;
+      overflow:auto;
+    }
+    .tab{
+      padding:10px 16px;
+      font-weight:800;
+      font-size:13px;
+      border-right:1px solid var(--line);
+      white-space:nowrap;
+      background:#fff;
+      color:#4a4a4a;
+    }
+    .tab.active{
+      background:var(--tab);
+      color:var(--tabText);
+    }
+    .tab small{font-weight:700;color:inherit;opacity:.9}
+
+    /* layout */
+    .main{
+      display:grid;
+      grid-template-columns: 1fr 340px;
+      gap:18px;
+      padding:14px;
+      background:#fff;
+    }
+    @media (max-width: 980px){
+      .main{grid-template-columns:1fr;}
+    }
+
+    /* left content cards */
+    .card{
+      border:1px solid var(--line);
+      border-radius:10px;
+      overflow:hidden;
+      background:var(--soft);
+      box-shadow: 0 1px 0 rgba(0,0,0,.03);
+      margin-bottom:14px;
+    }
+    .card .hd{
+      padding:10px 12px;
+      border-bottom:1px solid var(--line);
+      background:rgba(255,255,255,.35);
+      font-weight:900;
+      font-size:13px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .card .bd{padding:12px;background:transparent}
+
+    /* hero image + thumbs (like top screenshot) */
+    .heroGrid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+    }
+    .heroImg{
+      height:260px;
+      border:1px solid var(--line);
+      border-radius:10px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,138,0,.25), transparent 50%),
+        linear-gradient(180deg,#fff,#f3f0e7);
+      position:relative;
+      overflow:hidden;
+    }
+    .heroBadge{
+      position:absolute;
+      top:10px; left:10px;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      font-weight:900;
+      color:#444;
+    }
+    .thumbs{
+      display:grid;
+      grid-template-columns: repeat(10, minmax(0,1fr));
+      gap:6px;
+    }
+    .thumb{
+      aspect-ratio: 1 / 1;
+      border-radius:6px;
+      border:1px solid var(--line);
+      background:linear-gradient(180deg,#fff,#f2efe6);
+    }
+    @media (max-width: 980px){
+      .thumbs{grid-template-columns: repeat(8, minmax(0,1fr));}
+    }
+    @media (max-width: 520px){
+      .thumbs{grid-template-columns: repeat(6, minmax(0,1fr));}
+      .heroImg{height:210px;}
+    }
+
+    /* photo grid (like "投稿写真") */
+    .photoGrid{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap:8px;
+    }
+    .photo{
+      aspect-ratio: 1 / 1;
+      border-radius:10px;
+      border:1px solid var(--line);
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,0,0,.18), transparent 55%),
+        linear-gradient(180deg,#fff,#f2efe6);
+    }
+    @media (max-width: 680px){
+      .photoGrid{grid-template-columns: repeat(3, minmax(0,1fr));}
+    }
+
+    /* simple text blocks */
+    .lead{
+      font-size:13px;
+      color:#444;
+      line-height:1.7;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:12px;
+    }
+    .kakomi{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:10px;
+    }
+    .kItem{
+      border:1px solid var(--line);
+      border-radius:10px;
+      overflow:hidden;
+      background:#fff;
+    }
+    .kItem .img{height:120px;background:linear-gradient(180deg,#fff,#f2efe6)}
+    .kItem .tx{padding:10px;font-size:12px;color:#444;line-height:1.5}
+    @media (max-width: 680px){
+      .kakomi{grid-template-columns:1fr;}
+      .kItem .img{height:160px;}
+    }
+
+    /* right reservation sidebar */
+    .side{
+      position:sticky;
+      top:12px;
+      align-self:start;
+    }
+    @media (max-width: 980px){ .side{position:static;} }
+
+    .reserve{
+      border:1px solid var(--line);
+      border-radius:10px;
+      overflow:hidden;
+      background:#fff;
+    }
+    .reserveTop{
+      padding:12px;
+      border-bottom:1px solid var(--line);
+      background:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .tel{
+      font-weight:900;
+      font-size:14px;
+      color:#2c2c2c;
+    }
+    .reserveTop .mini{
+      font-size:11px;
+      color:var(--muted);
+      text-align:right;
+    }
+
+    .reserveBody{
+      padding:12px;
+      background:var(--soft);
+    }
+    .miniBtns{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .pill{
+      padding:6px 10px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:#fff;
+      font-size:12px;
+      font-weight:800;
+      cursor:pointer;
+    }
+    .pill.active{
+      border-color:var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .calendar{
+      border:1px solid var(--line);
+      border-radius:10px;
+      background:#fff;
+      overflow:hidden;
+      margin-bottom:10px;
+    }
+    .calHd{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:10px 12px;
+      border-bottom:1px solid var(--line);
+      font-weight:900;
+      font-size:13px;
+    }
+    .calGrid{
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap:1px;
+      background:var(--line);
+      padding:1px;
+    }
+    .day, .date{
+      background:#fff;
+      text-align:center;
+      padding:8px 0;
+      font-size:11px;
+    }
+    .day{font-weight:900;color:#666;background:#faf8f2}
+    .date{
+      cursor:pointer;
+      position:relative;
+    }
+    .date span{
+      display:inline-flex;
+      width:22px;height:22px;
+      border-radius:999px;
+      align-items:center;justify-content:center;
+    }
+    .date.available span{
+      background:rgba(255,138,0,.18);
+      color:#7a3c00;
+      font-weight:900;
+    }
+    .date.selected span{
+      background:var(--accent);
+      color:#fff;
+      font-weight:900;
+    }
+    .inputs{
+      display:grid;
+      gap:10px;
+    }
+    .inputs label{
+      font-size:12px;
+      color:#444;
+      font-weight:800;
+      display:grid;
+      gap:6px;
+    }
+    select, input[type="number"]{
+      width:100%;
+      padding:8px 10px;
+      border:1px solid #cfc7b4;
+      border-radius:8px;
+      background:#fff;
+      font-size:13px;
+    }
+    .reserveBtn{
+      width:100%;
+      margin-top:12px;
+      padding:12px 12px;
+      border:none;
+      border-radius:10px;
+      background:var(--accent);
+      color:#fff;
+      font-weight:900;
+      cursor:pointer;
+      font-size:14px;
+    }
+
+    /* info table (like 店舗情報 詳細) */
+    .infoTable{
+      border:1px solid var(--line);
+      border-radius:10px;
+      overflow:hidden;
+      background:#fff;
+    }
+    .infoRow{
+      display:grid;
+      grid-template-columns: 160px 1fr;
+      border-bottom:1px solid var(--line);
+    }
+    .infoRow:last-child{border-bottom:none}
+    .infoRow .k{
+      padding:10px 12px;
+      background:#f2efe6;
+      font-size:12px;
+      font-weight:900;
+      color:#444;
+      border-right:1px solid var(--line);
+    }
+    .infoRow .v{
+      padding:10px 12px;
+      font-size:12px;
+      color:#444;
+      background:#fff;
+    }
+    .mapBox{
+      height:180px;
+      border:1px solid var(--line);
+      border-radius:10px;
+      background:
+        radial-gradient(circle at 70% 40%, rgba(255,0,0,.20), transparent 55%),
+        linear-gradient(180deg,#fff,#f2efe6);
+    }
+
+    /* reviews */
+    .review{
+      display:grid;
+      grid-template-columns: 48px 1fr;
+      gap:10px;
+      padding:12px;
+      border:1px solid var(--line);
+      border-radius:10px;
+      background:#fff;
+      margin-bottom:10px;
+    }
+    .avatar{
+      width:48px;height:48px;border-radius:999px;
+      border:1px solid var(--line);
+      background:linear-gradient(180deg,#fff,#f2efe6);
+    }
+    .rHead{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .rName{font-weight:900;font-size:12px}
+    .rMeta{font-size:11px;color:var(--muted)}
+    .rText{
+      margin-top:6px;
+      font-size:12px;
+      line-height:1.7;
+      color:#444;
+    }
+    .rStars{color:#ffb400;font-size:12px}
+    .more{
+      display:flex;justify-content:center;margin-top:8px;
+    }
+    .more button{
+      padding:8px 12px;
+      border:1px solid var(--line);
+      border-radius:10px;
+      background:#fff;
+      cursor:pointer;
+      font-weight:900;
+      font-size:12px;
+    }
+
+    .footer{
+      padding:18px 14px;
+      border-top:1px solid var(--line);
+      background:#fff;
+      color:var(--muted);
+      font-size:11px;
+      text-align:center;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">食べログ <span style="font-size:11px;color:#999;font-weight:900;">20th</span></div>
+      <div class="search">
+        <input type="text" placeholder="キーワード・エリア・ジャンルで検索" />
+        <button type="button">検索</button>
+      </div>
+      <div class="toplinks">
+        <span>会員登録</span>
+        <span>ログイン</span>
+        <span>ヘルプ</span>
+      </div>
+    </div>
+
+    <div class="head">
+      <div class="titleRow">
+        <h1>宇都宮餃子（店舗ページの画面モック）</h1>
+        <div class="rating">
+          <span class="stars">★★★★★</span>
+          <span class="score">3.25</span>
+          <span>口コミ 240件</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="tabs" aria-label="ページ内タブ">
+      <div class="tab active">トップ</div>
+      <div class="tab">店舗</div>
+      <div class="tab">メニュー・コース</div>
+      <div class="tab">写真 <small>240</small></div>
+      <div class="tab">口コミ</div>
+      <div class="tab">クーポン</div>
+    </nav>
+
+    <div class="main">
+      <!-- LEFT -->
+      <div>
+        <section class="card">
+          <div class="hd">
+            <span>トップ（メイン画像）</span>
+            <span style="font-size:11px;color:var(--muted);font-weight:800;">サムネイル表示</span>
+          </div>
+          <div class="bd">
+            <div class="heroGrid">
+              <div class="heroImg">
+                <div class="heroBadge">画像エリア</div>
+              </div>
+              <div class="thumbs" aria-label="サムネイル">
+                <div class="thumb"></div><div class="thumb"></div><div class="thumb"></div><div class="thumb"></div><div class="thumb"></div>
+                <div class="thumb"></div><div class="thumb"></div><div class="thumb"></div><div class="thumb"></div><div class="thumb"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="hd">
+            <span>店舗紹介</span>
+            <span style="font-size:11px;color:var(--muted);font-weight:800;">（文章エリア）</span>
+          </div>
+          <div class="bd">
+            <div class="lead">
+              ここに店舗紹介文が入ります。画像では「こだわり」や「特徴」などの文章が表示されていました。<br />
+              このHTMLは画面構成を再現するためのモックです。
+            </div>
+
+            <div class="kakomi" aria-label="こだわりカード">
+              <div class="kItem">
+                <div class="img"></div>
+                <div class="tx"><b>こだわり 1</b><br/>説明テキストが入ります。</div>
+              </div>
+              <div class="kItem">
+                <div class="img"></div>
+                <div class="tx"><b>こだわり 2</b><br/>説明テキストが入ります。</div>
+              </div>
+              <div class="kItem">
+                <div class="img"></div>
+                <div class="tx"><b>こだわり 3</b><br/>説明テキストが入ります。</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="hd">
+            <span>投稿写真</span>
+            <a href="#">もっと見る</a>
+          </div>
+          <div class="bd">
+            <div class="photoGrid">
+              <div class="photo"></div><div class="photo"></div><div class="photo"></div><div class="photo"></div>
+              <div class="photo"></div><div class="photo"></div><div class="photo"></div><div class="photo"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="hd">
+            <span>店舗情報（詳細）</span>
+            <a href="#">編集する</a>
+          </div>
+          <div class="bd">
+            <div class="infoTable">
+              <div class="infoRow">
+                <div class="k">店舗名</div>
+                <div class="v">宇都宮餃子店</div>
+              </div>
+              <div class="infoRow">
+                <div class="k">ジャンル</div>
+                <div class="v">居酒屋・中華料理・ラーメン</div>
+              </div>
+              <div class="infoRow">
+                <div class="k">予約・お問い合わせ</div>
+                <div class="v">050-5593-2957</div>
+              </div>
+              <div class="infoRow">
+                <div class="k">予約可否</div>
+                <div class="v">予約可</div>
+              </div>
+              <div class="infoRow">
+                <div class="k">住所</div>
+                <div class="v">埼玉県新座市東北2-31-1</div>
+              </div>
+              <div class="infoRow">
+                <div class="k">地図</div>
+                <div class="v">
+                  <div class="mapBox" aria-label="地図エリア"></div>
+                  <div style="margin-top:6px;font-size:11px;color:var(--muted);">（Google Map表示エリア）</div>
+                </div>
+              </div>
+              <div class="infoRow">
+                <div class="k">交通手段</div>
+                <div class="v">志木駅南口から徒歩3分 / 志木駅から257m</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="hd">
+            <span>口コミ</span>
+            <a href="#">口コミ一覧へ</a>
+          </div>
+          <div class="bd">
+            <div class="review">
+              <div class="avatar"></div>
+              <div>
+                <div class="rHead">
+                  <div>
+                    <div class="rName">ユーザーA</div>
+                    <div class="rMeta"><span class="rStars">★★★★☆</span> ・ 2025/11/xx</div>
+                  </div>
+                  <div class="rMeta">訪問：ディナー</div>
+                </div>
+                <div class="rText">
+                  口コミ本文のモックです。実際の文章の代わりにダミーテキストを表示しています。
+                  味・接客・雰囲気などの評価が入る想定です。
+                </div>
+              </div>
+            </div>
+
+            <div class="review">
+              <div class="avatar"></div>
+              <div>
+                <div class="rHead">
+                  <div>
+                    <div class="rName">ユーザーB</div>
+                    <div class="rMeta"><span class="rStars">★★★☆☆</span> ・ 2025/11/xx</div>
+                  </div>
+                  <div class="rMeta">訪問：ランチ</div>
+                </div>
+                <div class="rText">
+                  口コミ本文のモックです。写真サムネイルや「参考になった」などのUIを追加することもできます。
+                </div>
+              </div>
+            </div>
+
+            <div class="more">
+              <button type="button">口コミをもっと見る</button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- RIGHT -->
+      <aside class="side" aria-label="予約パネル">
+        <div class="reserve">
+          <div class="reserveTop">
+            <div class="tel">050-5593-2957</div>
+            <div class="mini">
+              ネット予約<br/><b style="color:#444">受付中</b>
+            </div>
+          </div>
+
+          <div class="reserveBody">
+            <div class="miniBtns">
+              <button class="pill active" type="button">ネット予約</button>
+              <button class="pill" type="button">空席確認</button>
+              <button class="pill" type="button">クーポン</button>
+            </div>
+
+            <div class="calendar">
+              <div class="calHd">
+                <span>2025年11月</span>
+                <span style="color:var(--muted);font-size:11px;">カレンダー</span>
+              </div>
+              <div class="calGrid">
+                <div class="day">日</div><div class="day">月</div><div class="day">火</div><div class="day">水</div><div class="day">木</div><div class="day">金</div><div class="day">土</div>
+
+                <!-- 先頭の空白（例） -->
+                <div class="date"><span></span></div><div class="date"><span></span></div><div class="date"><span></span></div><div class="date"><span></span></div><div class="date"><span></span></div>
+                <div class="date available"><span>1</span></div><div class="date"><span>2</span></div>
+
+                <div class="date"><span>3</span></div><div class="date available"><span>4</span></div><div class="date"><span>5</span></div><div class="date"><span>6</span></div><div class="date"><span>7</span></div><div class="date available"><span>8</span></div><div class="date"><span>9</span></div>
+
+                <div class="date"><span>10</span></div><div class="date"><span>11</span></div><div class="date available"><span>12</span></div><div class="date"><span>13</span></div><div class="date selected"><span>14</span></div><div class="date"><span>15</span></div><div class="date available"><span>16</span></div>
+
+                <div class="date"><span>17</span></div><div class="date"><span>18</span></div><div class="date"><span>19</span></div><div class="date available"><span>20</span></div><div class="date"><span>21</span></div><div class="date"><span>22</span></div><div class="date"><span>23</span></div>
+
+                <div class="date available"><span>24</span></div><div class="date"><span>25</span></div><div class="date"><span>26</span></div><div class="date"><span>27</span></div><div class="date available"><span>28</span></div><div class="date"><span>29</span></div><div class="date"><span>30</span></div>
+              </div>
+            </div>
+
+            <div class="inputs">
+              <label>
+                人数
+                <select>
+                  <option>2名</option>
+                  <option>1名</option>
+                  <option>3名</option>
+                  <option>4名</option>
+                  <option>5名</option>
+                </select>
+              </label>
+
+              <label>
+                時間
+                <select>
+                  <option>19:00</option>
+                  <option>18:30</option>
+                  <option>20:00</option>
+                  <option>20:30</option>
+                </select>
+              </label>
+            </div>
+
+            <button class="reserveBtn" type="button">予約する</button>
+
+            <div style="margin-top:10px;font-size:11px;color:var(--muted);line-height:1.6;">
+              ※右側のカレンダー・人数・時間は画像のUI構成を再現したモックです。
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="footer">© mock page</div>
+  </div>
+</body>
+</html>
+
 
 {% endblock %}

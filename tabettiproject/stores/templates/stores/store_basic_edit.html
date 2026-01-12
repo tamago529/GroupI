@@ -7,4 +7,771 @@
 
 <a href="{% url 'stores:store_top' %}">店舗トップ画面に戻る</a>
 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>レストラン情報編集（モック）</title>
+  <style>
+    :root{
+      --bg:#f6f3ee;
+      --card:#ffffff;
+      --line:#e6e1d7;
+      --head:#f2eee6;
+      --text:#2b2b2b;
+      --muted:#6b6b6b;
+      --accent:#ff8a00;
+      --ok:#4f7f3a;
+      --danger:#c62828;
+      --link:#1a73e8;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN",system-ui,-apple-system,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    a{ color:var(--link); text-decoration:none; }
+    .topbar{
+      background:#fff;
+      border-bottom:1px solid var(--line);
+    }
+    .topbar-inner{
+      max-width:1200px;
+      margin:0 auto;
+      padding:10px 16px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .brand{
+      font-weight:900;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+    }
+    .brand-badge{
+      background:var(--accent);
+      color:#fff;
+      border-radius:999px;
+      font-size:12px;
+      padding:2px 8px;
+      font-weight:900;
+    }
+    .topnav{
+      margin-left:auto;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .pill{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:6px 10px;
+      cursor:pointer;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .container{
+      max-width:1200px;
+      margin:16px auto 40px;
+      padding:0 16px;
+    }
+
+    /* 店舗ヘッダー（左上のスクショ部分っぽく） */
+    .shop-head{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:14px 16px;
+      margin-bottom:14px;
+    }
+    .shop-title{
+      font-size:18px;
+      font-weight:900;
+      margin:0 0 6px;
+    }
+    .shop-meta{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .stars{
+      color:#e53935;
+      font-weight:900;
+    }
+    .tabs{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+      border-top:1px solid #f1ede6;
+      padding-top:10px;
+    }
+    .tab{
+      background:#fff;
+      border:1px solid var(--line);
+      border-bottom:3px solid transparent;
+      padding:8px 10px;
+      border-radius:8px;
+      font-size:12px;
+      color:#555;
+      font-weight:800;
+    }
+    .tab.active{
+      border-bottom-color:var(--accent);
+      color:#222;
+    }
+
+    .notice{
+      background:#fff;
+      border:1px solid var(--line);
+      border-left:5px solid var(--danger);
+      border-radius:10px;
+      padding:12px 14px;
+      margin-bottom:14px;
+      color:#444;
+      font-size:13px;
+      line-height:1.6;
+    }
+    .notice strong{ color:var(--danger); }
+
+    .layout{
+      display:grid;
+      grid-template-columns: 1fr 340px;
+      gap:16px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .layout{ grid-template-columns:1fr; }
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:10px;
+      overflow:hidden;
+    }
+    .card + .card{ margin-top:14px; }
+    .card-h{
+      background:var(--head);
+      border-bottom:1px solid var(--line);
+      padding:10px 14px;
+      font-size:13px;
+      font-weight:900;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .card-b{ padding:14px; }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 200px 1fr;
+      gap:10px 14px;
+      align-items:center;
+    }
+    @media (max-width: 720px){
+      .grid{ grid-template-columns:1fr; }
+    }
+
+    .label{
+      font-size:12px;
+      font-weight:900;
+      color:#444;
+    }
+    .req{
+      display:inline-block;
+      margin-left:6px;
+      font-size:11px;
+      font-weight:900;
+      color:#fff;
+      background:#d64500;
+      border-radius:4px;
+      padding:2px 6px;
+      vertical-align:middle;
+    }
+    .opt{
+      display:inline-block;
+      margin-left:6px;
+      font-size:11px;
+      font-weight:900;
+      color:#fff;
+      background:#777;
+      border-radius:4px;
+      padding:2px 6px;
+      vertical-align:middle;
+    }
+
+    input[type="text"],
+    input[type="url"],
+    input[type="tel"],
+    input[type="email"],
+    input[type="number"],
+    select,
+    textarea{
+      width:100%;
+      border:1px solid #d9d2c7;
+      border-radius:6px;
+      padding:9px 10px;
+      font-size:13px;
+      background:#fff;
+      outline:none;
+    }
+    textarea{ min-height:90px; resize:vertical; }
+    .hint{
+      margin-top:6px;
+      font-size:11px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .row > *{ flex:1; min-width:140px; }
+    .row.tight > *{ min-width:110px; }
+
+    .checks{
+      display:flex;
+      gap:10px 14px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .checks label{
+      font-size:12px;
+      font-weight:700;
+      color:#333;
+      display:flex;
+      gap:6px;
+      align-items:center;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    input[type="checkbox"], input[type="radio"]{
+      transform: translateY(1px);
+    }
+
+    .mapbox{
+      border:1px solid #d9d2c7;
+      border-radius:8px;
+      background:linear-gradient(180deg,#e7f1ff,#f6fbff);
+      height:220px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#345;
+      font-weight:900;
+      font-size:12px;
+      position:relative;
+      overflow:hidden;
+    }
+    .pin{
+      position:absolute;
+      width:14px;height:14px;border-radius:50%;
+      background:#ff4d4d;
+      box-shadow:0 0 0 6px rgba(255,77,77,.2);
+      left:56%; top:55%;
+    }
+    .btns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      margin-top:12px;
+    }
+    .btn{
+      border:none;
+      border-radius:6px;
+      padding:10px 14px;
+      font-size:13px;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .btn.primary{ background:var(--ok); color:#fff; }
+    .btn.secondary{ background:#666; color:#fff; }
+    .btn.ghost{ background:#fff; border:1px solid var(--line); color:#333; }
+
+    /* 右カラム（予約/電話/カレンダーみたいな枠） */
+    .sticky{
+      position:sticky;
+      top:14px;
+    }
+    @media (max-width: 980px){
+      .sticky{ position:static; }
+    }
+    .side-block{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:10px;
+      overflow:hidden;
+    }
+    .side-h{
+      background:var(--head);
+      border-bottom:1px solid var(--line);
+      padding:10px 12px;
+      font-weight:900;
+      font-size:13px;
+    }
+    .side-b{ padding:12px; }
+    .phone{
+      font-size:18px;
+      font-weight:900;
+      margin-bottom:10px;
+    }
+    .calendar{
+      background:#faf8f4;
+      border:1px solid var(--line);
+      border-radius:8px;
+      height:280px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--muted);
+      font-weight:900;
+      font-size:12px;
+      margin-bottom:10px;
+    }
+    .side-btn{
+      width:100%;
+      background:var(--accent);
+      color:#fff;
+      border:none;
+      border-radius:6px;
+      padding:10px 12px;
+      font-weight:900;
+      cursor:pointer;
+      font-size:13px;
+    }
+
+    footer{
+      margin-top:18px;
+      color:var(--muted);
+      font-size:11px;
+      text-align:center;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand"><span class="brand-badge">20+</span> 店舗情報編集（管理）</div>
+      <div class="topnav">
+        <button class="pill" type="button">ヘルプ</button>
+        <button class="pill" type="button">下書き</button>
+        <button class="pill" type="button">ログアウト</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- 店舗概要（スクショ左上っぽいブロック） -->
+    <section class="shop-head">
+      <h1 class="shop-title">元祖田舎っぺうどん 熊谷 久保島店</h1>
+      <div class="shop-meta">
+        <span class="stars">★★★☆☆ 3.14</span>
+        <span>口コミ 193</span>
+        <span>写真 300</span>
+        <span>ジャンル：うどん</span>
+      </div>
+      <div class="tabs">
+        <div class="tab">トップ</div>
+        <div class="tab">座席</div>
+        <div class="tab active">店舗情報編集</div>
+        <div class="tab">写真</div>
+        <div class="tab">口コミ</div>
+        <div class="tab">地図</div>
+      </div>
+    </section>
+
+    <!-- 注意文（赤文字の注意エリアっぽく） -->
+    <div class="notice">
+      <strong>店舗情報を更新する前に、内容をご確認ください。</strong><br/>
+      記載内容に不備がある場合、掲載までに時間がかかることがあります（モック文）。
+    </div>
+
+    <div class="layout">
+      <main>
+        <!-- 基本情報 -->
+        <section class="card">
+          <div class="card-h">
+            <div>基本情報 <span class="req">必須</span></div>
+            <div style="font-size:11px;color:#666;">レストラン情報入力</div>
+          </div>
+          <div class="card-b">
+            <div class="grid">
+              <div class="label">店舗名<span class="req">必須</span></div>
+              <div><input type="text" placeholder="店舗名を入力" value="元祖田舎っぺうどん 熊谷 久保島店"></div>
+
+              <div class="label">店舗名（カナ）<span class="req">必須</span></div>
+              <div><input type="text" placeholder="テンポメイ" value="ガンソイナカッペウドン クマガヤ クボジマテン"></div>
+
+              <div class="label">電話番号<span class="req">必須</span></div>
+              <div><input type="tel" placeholder="050-0000-0000" value="050-5593-2957"></div>
+
+              <div class="label">ジャンル<span class="req">必須</span></div>
+              <div class="row">
+                <select>
+                  <option selected>うどん</option>
+                  <option>そば</option>
+                  <option>ラーメン</option>
+                  <option>和食</option>
+                </select>
+                <select>
+                  <option selected>武蔵野うどん</option>
+                  <option>讃岐うどん</option>
+                  <option>手打ち</option>
+                </select>
+              </div>
+
+              <div class="label">キャッチコピー<span class="opt">任意</span></div>
+              <div>
+                <input type="text" placeholder="例：コシ強めの武蔵野うどん" value="">
+                <div class="hint">一覧表示などに使う短文。</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- エリア・オープン（スクショ上部のエリアっぽい） -->
+        <section class="card">
+          <div class="card-h">
+            <div>エリア・公開設定</div>
+            <div style="font-size:11px;color:#666;">オープン</div>
+          </div>
+          <div class="card-b">
+            <div class="grid">
+              <div class="label">エリア</div>
+              <div class="row">
+                <select>
+                  <option selected>埼玉県</option>
+                  <option>東京都</option>
+                  <option>群馬県</option>
+                </select>
+                <select>
+                  <option selected>熊谷・深谷・本庄</option>
+                  <option>大宮・浦和</option>
+                </select>
+              </div>
+
+              <div class="label">公開状態</div>
+              <div class="checks">
+                <label><input type="radio" name="open" checked>公開</label>
+                <label><input type="radio" name="open">非公開</label>
+                <label><input type="radio" name="open">審査中</label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 詳細情報入力（予約など） -->
+        <section class="card">
+          <div class="card-h">
+            <div>詳細情報入力</div>
+            <div style="font-size:11px;color:#666;">予約 / 予約受付</div>
+          </div>
+          <div class="card-b">
+            <div class="grid">
+              <div class="label">予約</div>
+              <div class="checks">
+                <label><input type="radio" name="reserve" checked>予約可</label>
+                <label><input type="radio" name="reserve">予約不可</label>
+                <label><input type="radio" name="reserve">不明</label>
+              </div>
+
+              <div class="label">予約の注意事項</div>
+              <div>
+                <textarea placeholder="例：混雑時はお時間をいただく場合があります。"></textarea>
+                <div class="hint">0/200（モック）</div>
+              </div>
+
+              <div class="label">交通手段</div>
+              <div>
+                <textarea placeholder="例：熊谷駅から車で10分／駐車場あり"></textarea>
+                <div class="hint">0/1000（モック）</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 営業時間（曜日別） -->
+        <section class="card">
+          <div class="card-h">
+            <div>営業時間</div>
+            <div style="font-size:11px;color:#666;">曜日別設定</div>
+          </div>
+          <div class="card-b">
+            <div class="grid">
+              <div class="label">月〜金</div>
+              <div class="row tight">
+                <input type="text" placeholder="10:30" value="10:30">
+                <span style="flex:0;min-width:auto;color:#666;font-weight:900;">〜</span>
+                <input type="text" placeholder="15:00" value="15:00">
+                <button class="btn ghost" type="button" style="flex:0;min-width:auto;">追加</button>
+              </div>
+
+              <div class="label">土日祝</div>
+              <div class="row tight">
+                <input type="text" placeholder="10:30" value="10:30">
+                <span style="flex:0;min-width:auto;color:#666;font-weight:900;">〜</span>
+                <input type="text" placeholder="15:00" value="15:00">
+                <button class="btn ghost" type="button" style="flex:0;min-width:auto;">追加</button>
+              </div>
+
+              <div class="label">定休日</div>
+              <div class="checks">
+                <label><input type="checkbox">月</label>
+                <label><input type="checkbox">火</label>
+                <label><input type="checkbox" checked>水</label>
+                <label><input type="checkbox">木</label>
+                <label><input type="checkbox">金</label>
+                <label><input type="checkbox">土</label>
+                <label><input type="checkbox">日</label>
+                <label><input type="checkbox">祝</label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 住所・地図 -->
+        <section class="card">
+          <div class="card-h">
+            <div>住所・地図</div>
+            <div style="font-size:11px;color:#666;">マップ</div>
+          </div>
+          <div class="card-b">
+            <div class="grid">
+              <div class="label">郵便番号<span class="req">必須</span></div>
+              <div class="row">
+                <input type="text" placeholder="000-0000" value="">
+                <button class="btn ghost" type="button" style="flex:0;min-width:auto;">住所検索</button>
+              </div>
+
+              <div class="label">住所<span class="req">必須</span></div>
+              <div>
+                <input type="text" placeholder="都道府県・市区町村・番地" value="">
+                <div class="hint">建物名は別欄で入力（モック）。</div>
+              </div>
+
+              <div class="label">建物名など</div>
+              <div><input type="text" placeholder="例：◯◯ビル1F" value=""></div>
+
+              <div class="label">地図</div>
+              <div>
+                <div class="mapbox">
+                  地図（プレースホルダー）
+                  <div class="pin"></div>
+                </div>
+                <div class="row" style="margin-top:8px;">
+                  <button class="btn ghost" type="button">ピンを調整</button>
+                  <button class="btn ghost" type="button">現在地から設定</button>
+                </div>
+                <div class="hint">実装では緯度/経度を保存し、地図上の位置を確定します。</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 座席・設備（チェックリストが多いスクショ部分） -->
+        <section class="card">
+          <div class="card-h">
+            <div>座席・設備</div>
+            <div style="font-size:11px;color:#666;">設備・禁煙/喫煙など</div>
+          </div>
+          <div class="card-b">
+            <div class="grid">
+              <div class="label">席数</div>
+              <div class="row tight">
+                <input type="number" placeholder="例：50" value="50">
+                <span style="flex:0;min-width:auto;color:#666;font-weight:900;">席</span>
+              </div>
+
+              <div class="label">席の種類</div>
+              <div class="checks">
+                <label><input type="checkbox" checked>テーブル</label>
+                <label><input type="checkbox">カウンター</label>
+                <label><input type="checkbox">座敷</label>
+                <label><input type="checkbox">個室</label>
+                <label><input type="checkbox">貸切可</label>
+              </div>
+
+              <div class="label">禁煙・喫煙</div>
+              <div class="checks">
+                <label><input type="radio" name="smoke" checked>全席禁煙</label>
+                <label><input type="radio" name="smoke">分煙</label>
+                <label><input type="radio" name="smoke">喫煙可</label>
+              </div>
+
+              <div class="label">駐車場</div>
+              <div class="checks">
+                <label><input type="radio" name="parking" checked>あり</label>
+                <label><input type="radio" name="parking">なし</label>
+                <label><input type="radio" name="parking">不明</label>
+              </div>
+
+              <div class="label">備考</div>
+              <div>
+                <textarea placeholder="例：駐車場◯台／お子様連れ歓迎"></textarea>
+                <div class="hint">0/500（モック）</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- メニュー / ドリンク（チェックが並ぶ部分） -->
+        <section class="card">
+          <div class="card-h">
+            <div>メニュー</div>
+            <div style="font-size:11px;color:#666;">ドリンク/料理</div>
+          </div>
+          <div class="card-b">
+            <div class="grid">
+              <div class="label">料理</div>
+              <div class="checks">
+                <label><input type="checkbox" checked>うどん</label>
+                <label><input type="checkbox">そば</label>
+                <label><input type="checkbox">丼もの</label>
+                <label><input type="checkbox">定食</label>
+                <label><input type="checkbox">天ぷら</label>
+              </div>
+
+              <div class="label">ドリンク</div>
+              <div class="checks">
+                <label><input type="checkbox">ビール</label>
+                <label><input type="checkbox">日本酒</label>
+                <label><input type="checkbox">焼酎</label>
+                <label><input type="checkbox">ワイン</label>
+                <label><input type="checkbox">ソフトドリンク</label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 予算・支払い方法（チェックが多い部分） -->
+        <section class="card">
+          <div class="card-h">
+            <div>予算・支払い方法</div>
+            <div style="font-size:11px;color:#666;">カード/電子マネー/QR</div>
+          </div>
+          <div class="card-b">
+            <div class="grid">
+              <div class="label">予算（昼）</div>
+              <div class="row">
+                <select>
+                  <option>〜999円</option>
+                  <option selected>1,000〜1,999円</option>
+                  <option>2,000〜2,999円</option>
+                </select>
+              </div>
+
+              <div class="label">予算（夜）</div>
+              <div class="row">
+                <select>
+                  <option selected>〜999円</option>
+                  <option>1,000〜1,999円</option>
+                  <option>2,000〜2,999円</option>
+                </select>
+              </div>
+
+              <div class="label">クレジットカード</div>
+              <div class="checks">
+                <label><input type="checkbox">VISA</label>
+                <label><input type="checkbox">Master</label>
+                <label><input type="checkbox">JCB</label>
+                <label><input type="checkbox">AMEX</label>
+              </div>
+
+              <div class="label">電子マネー</div>
+              <div class="checks">
+                <label><input type="checkbox">交通系IC</label>
+                <label><input type="checkbox">iD</label>
+                <label><input type="checkbox">QUICPay</label>
+              </div>
+
+              <div class="label">QR決済</div>
+              <div class="checks">
+                <label><input type="checkbox" checked>PayPay</label>
+                <label><input type="checkbox">楽天ペイ</label>
+                <label><input type="checkbox">d払い</label>
+                <label><input type="checkbox">au PAY</label>
+              </div>
+
+              <div class="label">サービス料</div>
+              <div class="checks">
+                <label><input type="radio" name="fee" checked>なし</label>
+                <label><input type="radio" name="fee">あり</label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 公式リンク（下部SNS入力のスクショ部分） -->
+        <section class="card">
+          <div class="card-h">
+            <div>公式リンク</div>
+            <div style="font-size:11px;color:#666;">SNS / ホームページ</div>
+          </div>
+          <div class="card-b">
+            <div class="grid">
+              <div class="label">ホームページ</div>
+              <div><input type="url" placeholder="https://..." value=""></div>
+
+              <div class="label">Facebook</div>
+              <div><input type="url" placeholder="https://www.facebook.com/..." value=""></div>
+
+              <div class="label">Instagram</div>
+              <div><input type="url" placeholder="https://www.instagram.com/..." value=""></div>
+
+              <div class="label">備考</div>
+              <div><textarea placeholder="例：臨時休業はInstagramで告知"></textarea></div>
+            </div>
+
+            <div class="btns">
+              <button class="btn secondary" type="button">戻る</button>
+              <button class="btn ghost" type="button">下書き保存</button>
+              <button class="btn primary" type="button">入力内容を保存する</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- 右カラム（電話・カレンダー風） -->
+      <aside class="sticky">
+        <div class="side-block">
+          <div class="side-h">予約情報（モック）</div>
+          <div class="side-b">
+            <div class="phone">050-5593-2957</div>
+            <div class="calendar">カレンダー表示（プレースホルダー）</div>
+            <button class="side-btn" type="button">予約する</button>
+            <div class="hint" style="margin-top:10px;">
+              ※ 右カラムはスクリーンショットの「電話・予約枠」を模したプレースホルダーです。
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      © モック画面（課題/設計用） — 実装時はバリデーション・権限・保存処理を追加してください
+    </footer>
+  </div>
+</body>
+</html>
+
+
 {% endblock %}

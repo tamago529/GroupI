@@ -11,14 +11,14 @@ class customer_common_confirmView(TemplateView):
 class errorView(TemplateView):
     template_name = 'error.html'
 
+class store_common_confirmView(TemplateView):
+    template_name = 'store_common_confirm.html'
+
 class store_common_completeView(TemplateView):
     template_name = 'store_common_complete.html'
-
-class store_common_confirmView(TemplateView):
-    template_name = 'store_common_confirm.html' 
 
 class company_common_confirmView(TemplateView):
     template_name = 'company_common_confirm.html' 
 
 class company_common_completeView(TemplateView):
-    template_name = 'company_common_complete.html'            
+    template_name = 'company_common_complete.html'

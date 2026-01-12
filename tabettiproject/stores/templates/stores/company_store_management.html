@@ -3,6 +3,95 @@
 {% block content %}
 <a href = "{% url 'stores:store_top' %}">店舗トップ画面へ移動</a>
 <a href = "{% url 'accounts:company_top' %}">運用トップ画面へ移動</a>
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>店舗検索画面</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Noto Sans JP", sans-serif;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 24px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 22px;
+    }
+    .search-area {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .search-area input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .search-area button {
+      padding: 10px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-search { background: #1976d2; color: #fff; }
+    .btn-clear { background: #9e9e9e; color: #fff; }
+    .btn-back { background: #555; color: #fff; }
+
+    .list {
+      border-top: 1px solid #ddd;
+    }
+    .item {
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .item:last-child { border-bottom: none; }
+    .shop-name {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>店舗検索</h1>
+
+    <div class="search-area">
+      <input type="text" placeholder="店舗名を入力してください" />
+      <button class="btn-search">検索</button>
+      <button class="btn-clear">削除</button>
+      <button class="btn-back">戻る</button>
+    </div>
+
+    <div class="list">
+      <div class="item">
+        <div class="shop-name">サンプル中華料理店</div>
+      </div>
+      <div class="item">
+        <div class="shop-name">餃子専門店 宇都宮</div>
+      </div>
+      <div class="item">
+        <div class="shop-name">ラーメン食堂 東京店</div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
+
 {% endblock %}
 
 <!-- 検索機能 -->
