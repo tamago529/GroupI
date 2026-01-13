@@ -1,5 +1,48 @@
-報告画面
 {% extends "company_base.html" %}
+<!--javascript関係のコードは書いていません-->
+
 {% block content %}
-<a href="{% url 'accounts:company_top' %}">戻る</a>
+<div class="report-wrapper">
+    <!-- 報告画面（既存の見出しテキスト） -->
+    <h1>報告画面</h1>
+
+    <!-- 報告リストエリア -->
+    <div class="report-grid">
+        {# 実際にはビューから渡された報告データのリストをループさせます #}
+        {% for report in reports %}
+            <div class="report-item" style="border: 1px solid #000; margin: 10px; padding: 10px;">
+                <!-- ユーザー名表示 -->
+                <p>ユーザー名: {{ report.user_name }}</p>
+                
+                <!-- ② 報告内容 (設計書通りh4タグ) -->
+                <h4>{{ report.content }}</h4>
+            </div>
+        {% empty %}
+            <p>現在、報告はありません。</p>
+        {% endfor %}
+
+        {# --- 画面設計イメージ確認用のダミー --- #}
+        <div class="report-item" style="border: 1px solid #000; margin: 10px; padding: 10px;">
+            <p>ユーザー名: サンプルユーザー</p>
+            <h4>不適切な口コミが含まれています。</h4>
+        </div>
+        {# -------------------------------------- #}
+    </div>
+
+    <!-- ① 戻るボタン (設計書通り種別:button / 分類:input) -->
+    <!-- JS関係は一旦コメントアウト -->
+    <div class="action-area">
+        <input type="button" value="戻る" id="back-to-top">
+    </div>
+
+</div>
+
+{# JavaScript関係の処理メモ #}
+<!-- 
+<script>
+    // 【TODO】戻るボタン（#back-to-top）が押下された際の処理
+    // window.location.href = "{% url 'accounts:company_top' %}";
+</script>
+-->
+
 {% endblock %}
