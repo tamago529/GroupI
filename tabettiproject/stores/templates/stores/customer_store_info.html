@@ -2,14 +2,304 @@
 
 {% block title %}顧客店舗基本情報画面{% endblock %}
 
+{% block css %}
+<style>
+    /* --------------------------------------------------------------------------
+        全体レイアウト：食べログの基本配色とフォント
+       -------------------------------------------------------------------------- */
+    .shop-main {
+        max-width: 1000px;
+        margin: 0 auto;
+        background-color: #fff;
+        border: 1px solid #e6e6e6;
+        color: #333;
+        font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+    }
+
+    /* 戻るボタンのエリア */
+    .back-nav {
+        padding: 10px 20px;
+        background-color: #f4f4f2;
+        border-bottom: 1px solid #e6e6e6;
+    }
+    .back-link {
+        font-size: 12px;
+        color: #06c;
+        text-decoration: none;
+    }
+
+    /* --------------------------------------------------------------------------
+        店舗ヘッダー：店名、スコア、タブナビ
+       -------------------------------------------------------------------------- */
+    .shop-header {
+        padding: 20px 20px 0 20px;
+    }
+
+    /* 公式バッジ */
+    .official-label {
+        background-color: #bfa37d;
+        color: #fff;
+        font-size: 11px;
+        padding: 2px 4px;
+        margin-right: 8px;
+        vertical-align: middle;
+    }
+
+    .shop-name {
+        display: inline;
+        font-size: 24px;
+        font-weight: bold;
+        vertical-align: middle;
+    }
+
+    /* スコア表示 */
+    .score-container {
+        display: flex;
+        align-items: baseline;
+        margin-top: 10px;
+        color: #e44d26;
+    }
+    .score-number {
+        font-size: 24px;
+        font-weight: bold;
+        margin-right: 10px;
+    }
+
+    /* タブメニュー（茶色の下線） */
+    .tab-menu {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        margin: 20px 0 0 0;
+        border-bottom: 2px solid #9c8e71;
+    }
+    .tab-menu li {
+        padding: 8px 16px;
+        border: 1px solid #e6e6e6;
+        border-bottom: none;
+        margin-right: 2px;
+        font-size: 14px;
+        font-weight: bold;
+        background: #fff;
+    }
+    .tab-menu li a {
+        text-decoration: none;
+        color: #333;
+    }
+    .tab-menu li.active {
+        background-color: #9c8e71;
+        color: #fff;
+        border-color: #9c8e71;
+    }
+
+    /* --------------------------------------------------------------------------
+        メインコンテンツ（2カラム）
+       -------------------------------------------------------------------------- */
+    .flex-body {
+        display: flex;
+        padding: 20px;
+    }
+    .left-content {
+        width: 650px;
+        margin-right: 20px;
+    }
+    .right-sidebar {
+        width: 300px;
+    }
+
+    /* --------------------------------------------------------------------------
+        左側：写真ギャラリー・店舗詳細
+       -------------------------------------------------------------------------- */
+    .photo-preview {
+        display: flex;
+        gap: 5px;
+        margin-bottom: 20px;
+    }
+    .photo-preview img {
+        width: 125px;
+        height: 125px;
+        object-fit: cover;
+        border: 1px solid #eee;
+    }
+
+    .info-title {
+        font-size: 18px;
+        border-left: 4px solid #9c8e71;
+        padding-left: 10px;
+        margin: 30px 0 15px 0;
+    }
+
+    /* 詳細テーブル：アクセシビリティ対応含む */
+    .detail-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        border-top: 2px solid #eee;
+    }
+    .detail-table caption {
+        clip: rect(1px, 1px, 1px, 1px);
+        height: 1px;
+        overflow: hidden;
+        position: absolute;
+        width: 1px;
+    }
+    .detail-table th {
+        width: 180px;
+        background-color: #fafaf8;
+        border: 1px solid #e6e6e6;
+        padding: 12px;
+        text-align: left;
+    }
+    .detail-table td {
+        border: 1px solid #e6e6e6;
+        padding: 12px;
+    }
+
+    /* 編集・報告リンク */
+    .footer-links {
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+        font-size: 12px;
+    }
+    .footer-links a {
+        color: #06c;
+        margin-right: 15px;
+        text-decoration: none;
+    }
+
+    /* --------------------------------------------------------------------------
+        右側：サイドバー（予約・広告）
+       -------------------------------------------------------------------------- */
+    .side-box {
+        border: 1px solid #e6e6e6;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    .btn-reserve {
+        display: block;
+        width: 100%;
+        background-color: #00a0e9;
+        color: #fff;
+        padding: 12px;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 4px;
+        text-decoration: none;
+        text-align: center;
+        margin-top: 10px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
+<div class="shop-main">
+    
+    <nav class="back-nav">
+        <a href="{% url 'stores:customer_store_new_register' %}" class="back-link">« 店舗登録へ戻る</a>
+    </nav>
+
+    <header class="shop-header">
+        <div class="title-area">
+            <span class="official-label">公式</span>
+            <h1 class="shop-name">幸せのパンケーキ 大宮店</h1>
+        </div>
+        
+        <div class="score-container">
+            <span class="stars">★★★☆☆</span>
+            <span class="score-number">3.09</span>
+            <a href="{% url 'reviews:customer_review_list' %}" style="color: #06c; font-size: 12px; text-decoration: none;">
+                口コミ 93人
+            </a>
+        </div>
+
+        <nav>
+            <ul class="tab-menu">
+                <li class="active">トップ</li>
+                <li><a href="{% url 'stores:customer_menu_course' %}">メニュー・コース</a></li>
+                <li>写真 (215)</li>
+                <li><a href="{% url 'reviews:customer_review_list' %}">口コミ (93)</a></li>
+                <li><a href="{% url 'stores:customer_map' %}">地図</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="flex-body">
+        
+        <main class="left-content">
+            <section class="photo-preview">
+                <img src="https://via.placeholder.com/150" alt="パンケーキ1" width="150" height="150">
+                <img src="https://via.placeholder.com/150" alt="パンケーキ2" width="150" height="150">
+                <img src="https://via.placeholder.com/150" alt="パンケーキ3" width="150" height="150">
+                <img src="https://via.placeholder.com/150" alt="内観" width="150" height="150">
+                <img src="https://via.placeholder.com/150" alt="外観" width="150" height="150">
+            </section>
+
+            <section>
+                <h2 class="info-title">店舗情報（詳細）</h2>
+                <table class="detail-table">
+                    <caption>幸せのパンケーキ 大宮店の詳細情報一覧</caption>
+                    <tbody>
+                        <tr>
+                            <th scope="row">店名</th>
+                            <td>幸せのパンケーキ 大宮店</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">地図</th>
+                            <td><a href="{% url 'stores:customer_map' %}" style="color: #06c; text-decoration: none;">地図を見る</a></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">ジャンル</th>
+                            <td>カフェ、パンケーキ、ケーキ</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">住所</th>
+                            <td>埼玉県さいたま市大宮区桜木町2-1-1 アルシェ 3F</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">営業時間</th>
+                            <td>
+                                [月～金] 10:30～19:30 (L.O.18:45)<br>
+                                [土・日・祝] 10:00～20:30 (L.O.19:40)
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">支払い方法</th>
+                            <td>カード可 / QRコード決済可 (PayPay)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="footer-links">
+                    <a href="{% url 'stores:store_basic_edit' %}">店舗基本情報編集</a>
+                    <a href="{% url 'reviews:customer_report_input' %}">店舗の誤りなどを報告する</a>
+                </div>
+            </section>
+        </main>
+
+        <aside class="right-sidebar">
+            <div class="side-box">
+                <p style="text-align: center; color: #666; font-size: 11px; margin: 0;">お問い合わせ専用番号</p>
+                <p style="text-align: center; font-size: 22px; font-weight: bold; margin: 5px 0;">048-644-5281</p>
+                <a href="#" class="btn-reserve">空席確認・予約する</a>
+            </div>
+
+            <div class="side-box">
+                <p style="font-size: 14px; font-weight: bold;">メニュー・コース</p>
+                <p style="font-size: 12px; margin-top: 10px;">
+                    <a href="{% url 'stores:customer_menu_course' %}" style="color: #06c; text-decoration: none;">メニュー・コースを見る</a>
+                </p>
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}
+
 <h2>店舗基本情報画面</h2>
 
 <a href="{% url 'stores:customer_store_new_register' %}">戻る</a>
-<a href="{% url 'stores:map' %}">地図を見る</a>
-<a href="{% url 'stores:menu_course' %}">メニュー・コースを見る</a>
+<a href="{% url 'stores:customer_map' %}">地図を見る</a>
+<a href="{% url 'stores:customer_menu_course' %}">メニュー・コースを見る</a>
 <a href="{% url 'stores:store_basic_edit' %}">店舗基本情報編集</a>
 <a href="{% url 'reviews:customer_report_input' %}">店舗の誤りなどを報告する</a><!--顧客共通報告入力画面に遷移-->
 <a href="{% url 'reviews:customer_review_list' %}">口コミ</a>
-
-{% endblock %}

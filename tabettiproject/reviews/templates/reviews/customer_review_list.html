@@ -1,8 +1,169 @@
+
 口コミ一覧(顧客画面)
+
 {% extends "customer_base.html" %}
+
 {% block content %}
-<a href="{% url 'stores:company_store_info' %}">トップ</a>
-<a href="{% url 'stores:customer_menu_course' %}">メニューコース</a>
-<a href="{% url 'reviews:customer_review_list' %}">口コミ一覧</a>
-<a href="{% url 'stores:customer_map' %}">マップ</a>
+<style>
+    /* 1. レイアウト全体の設計 */
+    .shop-container {
+        max-width: 980px;      /* 食べログ等のPC版に近い最大幅 */
+        margin: 0 auto;       /* 中央寄せ */
+        font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+        color: #333;
+    }
+
+    /* 2. 店舗基本情報セクション（上部） */
+    .shop-header {
+        padding: 20px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    /* 店舗名のデザイン */
+    .shop-name {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 10px 0;
+    }
+
+    /* 3. 動的な星評価のスタイル */
+    .rating-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    /* 評価（星）を表示するための外枠コンテナ 
+    */
+    .star-rating {
+        position: relative;
+        display: inline-block;
+        font-size: 20px;
+        line-height: 1;
+    }
+
+    /* 土台となるグレーの星 
+    */
+    .star-rating-back {
+        color: #ccc;
+    }
+
+    .star-rating-front {
+        position: absolute;
+        top: 0;
+        left: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        color: #ffc107;
+        /* CSS変数から幅を取得。デフォルト値は 0% としています */
+        width: var(--rating-width, 0%);
+    }
+
+    .rating-num {
+        font-size: 22px;
+        font-weight: bold;
+        color: #e60012;        /* 評価数値を強調 */
+    }
+
+    /* 4. 口コミセクション（下部） */
+    .review-section {
+        margin-top: 30px;
+    }
+
+    /* セクション見出し（h2） 
+        h3(口コミタイトル)の前に配置して階層エラーを回避
+    */
+    .section-title {
+        font-size: 18px;
+        border-left: 4px solid #333;
+        padding-left: 10px;
+        margin-bottom: 20px;
+    }
+
+    /* 各口コミカード */
+    .review-card {
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        background: #fff;
+    }
+
+    /* ユーザーアイコン（HTML属性のwidth/heightを補完） */
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        vertical-align: middle;
+    }
+
+    /* 口コミタイトル（h3相当） */
+    .review-title {
+        display: block;
+        font-size: 16px;
+        font-weight: bold;
+        margin-top: 15px;
+        color: #06c;
+    }
+
+    /* 読み込み中（スピナー）のスタイル */
+    .loading-area {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+    }
+</style>
+
+<article class="shop-container">
+    
+    <header class="shop-header">
+        <p class="catchphrase">{{ shop.catchphrase }}</p>
+        <h1 class="shop-name">{{ shop.name }}</h1>
+
+        <div class="rating-box">
+            <div class="star-rating" style="--rating-width: {% widthratio shop.rating 5 100 %}%;">
+                <div class="star-rating-front">
+                    ★★★★★
+                </div>
+                
+                <div class="star-rating-back">
+                    ★★★★★
+                </div>
+            </div>
+            <span class="rating-num">{{ shop.rating }}</span>
+        </div>
+
+    </header>
+
+    <section class="review-section">
+        <h2 class="section-title">口コミ</h2>
+
+        <div id="review-container">
+            {% for review in reviews %}
+            <article class="review-card">
+                <div class="user-info">
+                    <img src="{{ review.user_icon_url }}" 
+                        alt="{{ review.user_name }}" 
+                        width="40" 
+                        height="40" 
+                        class="user-avatar">
+                    <span class="user-name">{{ review.user_name }}</span>
+                </div>
+
+                <div role="heading" aria-level="3" class="review-title">
+                    {{ review.title }}
+                </div>
+                
+                <p class="review-text">{{ review.text_excerpt }}</p>
+            </article>
+            {% endfor %}
+        </div>
+
+        <div id="loading-spinner" class="loading-area" style="display: none;">
+            <p>読み込み中...</p>
+        </div>
+    </section>
+</article>
 {% endblock %}

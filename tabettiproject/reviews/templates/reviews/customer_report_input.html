@@ -1,7 +1,218 @@
 顧客共通報告入力画面
 
-{% block content %}
+{% extends "customer_base.html" %}
 
+{% block content %}
+<style>
+    /* 全体のフォントとカラー設定 */
+    .report-container {
+        max-width: 950px;
+        margin: 20px auto;
+        font-family: sans-serif;
+        color: #333;
+    }
+
+    /* ページタイトル：食べログ特有の金色の下線 */
+    .report-title {
+        font-size: 18px;
+        font-weight: bold;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #b3a379; /* 食べログのアクセントカラー */
+    }
+
+    /* 上部説明テキスト */
+    .report-intro {
+        font-size: 13px;
+        line-height: 1.5;
+        margin-bottom: 20px;
+    }
+
+    /* フォームテーブルの構造：食べログの入力画面標準 */
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+        border-top: 1px solid #e7e7e7;
+        margin-bottom: 20px;
+    }
+
+    /* ラベル列：薄いグレー背景 */
+    .report-table th {
+        width: 180px;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border-bottom: 1px solid #e7e7e7;
+        text-align: left;
+        font-size: 13px;
+        vertical-align: top;
+    }
+
+    /* 入力エリア列 */
+    .report-table td {
+        padding: 15px;
+        border-bottom: 1px solid #e7e7e7;
+        font-size: 13px;
+    }
+
+    /* 必須バッジ：赤背景に白抜き文字 */
+    .badge-required {
+        display: inline-block;
+        background: #e00;
+        color: #fff;
+        padding: 2px 4px;
+        font-size: 10px;
+        font-weight: bold;
+        border-radius: 2px;
+        margin-left: 8px;
+        vertical-align: middle;
+    }
+
+    /* テキストエリアの装飾 */
+    .input-textarea {
+        width: 100%;
+        border: 1px solid #ccc;
+        padding: 8px;
+        font-size: 14px;
+        line-height: 1.6;
+        border-radius: 2px;
+        box-sizing: border-box;
+    }
+
+    /* 文字数カウント */
+    .counter {
+        text-align: right;
+        font-size: 11px;
+        color: #666;
+        margin-top: 4px;
+    }
+
+    /* 写真アップロードの指示テキスト */
+    .photo-info {
+        color: #8c8c00; /* 食べログでよく使われる案内用カラー */
+        font-size: 12px;
+        margin-bottom: 10px;
+    }
+
+    /* 写真選択エリアのグレー枠 */
+    .photo-upload-area {
+        background-color: #f3f3f3;
+        padding: 20px;
+        border: 1px solid #ddd;
+        margin-bottom: 10px;
+    }
+
+    /* 「写真を追加する」ボタン */
+    .btn-secondary {
+        background: #fff;
+        border: 1px solid #ccc;
+        padding: 6px 12px;
+        font-size: 12px;
+        cursor: pointer;
+        box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+    }
+
+    /* 同意事項セクション：小さめの文字サイズ */
+    .agreement-section {
+        margin-top: 30px;
+        font-size: 11px;
+    }
+    .agreement-section h3 {
+        font-size: 13px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    .agreement-list {
+        padding-left: 1.5em;
+        margin-bottom: 20px;
+    }
+    .agreement-list li {
+        margin-bottom: 4px;
+    }
+    .agreement-list a {
+        color: #06c;
+        text-decoration: none;
+    }
+
+    /* 下部アクションエリア：ライトグレー背景 */
+    .action-box {
+        background-color: #f9f9f9;
+        padding: 30px;
+        text-align: center;
+        border-top: 1px solid #e7e7e7;
+    }
+
+    /* 送信（確認）ボタン：非活性時のグレーアウトスタイル */
+    .btn-submit {
+        background-color: #e6e6e6;
+        color: #999;
+        border: 1px solid #ccc;
+        padding: 12px 30px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: not-allowed;
+        border-radius: 4px;
+    }
+</style>
+
+<div class="report-container">
+    <h2 class="report-title">店舗情報に関する報告</h2>
+
+    <div class="report-intro">
+        <p>店舗情報について何かお気づきの点がございましたら、下記コメントよりご報告ください。<br>
+        <span style="color: #666;">※ご返信は基本的に行っておりませんので、ご了承ください。</span></p>
+    </div>
+
+    <form action="{% url 'stores:customer_map' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <table class="report-table">
+            <caption>店舗情報報告用入力項目</caption>
+            <tbody>
+                <tr>
+                    <th scope="row">
+                        <label for="comment">コメント</label>
+                        <span class="badge-required">必須</span>
+                    </th>
+                    <td>
+                        <textarea id="comment" name="comment" class="input-textarea" rows="12" 
+                                    placeholder="[レストラン名]&#10;&#10;[レストランページURL、または、レストランを特定できる情報]&#10;&#10;[ご報告内容]&#10;&#10;[ご報告内容について確認できる情報（公式HP・SNSのURL等）]"></textarea>
+                        <div class="counter">99 / 1000</div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th scope="row">
+                        <label>写真</label>
+                    </th>
+                    <td>
+                        <p class="photo-info">張り紙や外観などで確認した場合、確認出来る写真があれば、添付してください（最大5枚まで写真を登録できます）。</p>
+                        <div class="photo-upload-area">
+                            <input type="file" name="files[]">
+                        </div>
+                        <button type="button" class="btn-secondary">写真を追加する</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="agreement-section">
+            <h3>ご記入いただく個人情報の取得に際しての同意事項</h3>
+            <ol class="agreement-list">
+                <li>事業者の名称、個人情報保護管理者等の職名、連絡先については、<a href="#">個人情報保護方針</a>をご覧ください。</li>
+                <li>当社はお問い合わせフォームで取得した個人情報を返信目的にのみ利用いたします。</li>
+                <li>なお返信目的に必要な限度において、当該個人情報について<a href="#">食べログ正規代理店</a>へ提供する場合があります。または、返信目的に必要な限度において、当該個人情報の取扱いを当社業務委託先へ委託する場合があります。</li>
+                <li>個人情報の利用目的の通知、開示、訂正、追加、削除等をお求めの場合は、<a href="#">「個人情報の取扱いについて」</a>をご覧ください。</li>
+                <li>すべての項目にご記入いただけなかった場合、お問い合わせ内容に対する返信などにおいて、適切な対応ができなくなる場合がありますのでご了承ください。</li>
+            </ol>
+        </div>
+
+        <div class="action-box">
+            <button type="submit" class="btn-submit" disabled>
+                上記の同意事項に同意の上、記入内容を確認する
+            </button>
+        </div>
+    </form>
+</div>
 
 <a href="{% url 'stores:customer_map' %}">確認画面へ</a>
 {% endblock %}

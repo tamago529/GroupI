@@ -2,10 +2,190 @@
 
 {% block title %}店舗新規登録確認画面{% endblock %}
 
+{% block css %}
+<style>
+    /* --- レイアウト全体設定 --- */
+    .confirmation-container {
+        max-width: 980px;
+        margin: 20px auto;
+        background-color: #fff;
+        padding: 0 10px;
+    }
+
+    /* --- ヘッダー・タイトル部分の装飾 --- */
+    .registration-title {
+        font-size: 20px;
+        font-weight: bold;
+        border-bottom: 2px solid #e2e2e2;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+        color: #333;
+    }
+
+    .registration-guide {
+        font-size: 14px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 30px;
+    }
+
+    /* --- セクション見出し（食べログ特有のオレンジ装飾） --- */
+    .form-section-header {
+        background-color: #f2f0eb;
+        padding: 10px 15px;
+        font-weight: bold;
+        border-left: 4px solid #ed6103;
+        margin: 35px 0 0 0;
+        font-size: 15px;
+    }
+
+    /* --- 確認用テーブルのスタイル --- */
+    .confirm-table {
+        width: 100%;
+        border-collapse: collapse;
+        border-top: 1px solid #e2e2e2;
+        margin-bottom: 10px;
+    }
+
+    /* アクセシビリティ：caption非表示設定（スクリーンリーダーには認識される） */
+    .confirm-table caption {
+        clip: rect(1px, 1px, 1px, 1px);
+        height: 1px;
+        overflow: hidden;
+        position: absolute;
+        width: 1px;
+    }
+
+    .confirm-table th, .confirm-table td {
+        padding: 15px;
+        border-bottom: 1px solid #e2e2e2;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    /* ラベル側（左カラム） */
+    .confirm-table th {
+        width: 220px;
+        background-color: #f9f9f9;
+        font-weight: bold;
+        font-size: 13px;
+    }
+
+    /* 値側（右カラム） */
+    .confirm-table td {
+        font-size: 14px;
+        color: #333;
+    }
+
+    /* --- 下部アクションエリア（リンクボタン） --- */
+    .action-container {
+        background-color: #f6f6f6;
+        padding: 30px;
+        text-align: center;
+        margin-top: 50px;
+        border-top: 1px solid #e2e2e2;
+    }
+
+    /* 戻るリンクをボタン風に装飾（白背景） */
+    .btn-back {
+        display: inline-block;
+        background-color: #fff;
+        border: 1px solid #bbb;
+        padding: 12px 35px;
+        font-size: 14px;
+        color: #333;
+        text-decoration: none;
+        margin-right: 15px;
+        border-radius: 3px;
+        vertical-align: middle;
+    }
+
+    /* 登録リンクをボタン風に装飾（緑背景） */
+    .btn-submit {
+        display: inline-block;
+        background-color: #93b92c;
+        color: #fff;
+        border: none;
+        padding: 12px 50px;
+        font-weight: bold;
+        font-size: 15px;
+        text-decoration: none;
+        border-radius: 3px;
+        vertical-align: middle;
+    }
+
+    .btn-submit:hover {
+        opacity: 0.8;
+        color: #fff;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
+<div class="confirmation-container">
+    <h1 class="registration-title">レストラン新規登録（内容確認）</h1>
+    <p class="registration-guide">
+        入力内容をご確認ください。よろしければ「登録」ボタンを押してください。
+    </p>
+
+    <div class="form-section-header">基本情報</div>
+    <table class="confirm-table">
+        <caption>入力された基本情報の確認用テーブル</caption>
+        <tr>
+            <th scope="row">店名</th>
+            <td>{{ request.POST.shop_name|default:"（未入力）" }}</td>
+        </tr>
+        <tr>
+            <th scope="row">支店名</th>
+            <td>{{ request.POST.branch_name|default:"（なし）" }}</td>
+        </tr>
+        <tr>
+            <th scope="row">フリガナ</th>
+            <td>{{ request.POST.kana_name|default:"（未入力）" }}</td>
+        </tr>
+    </table>
+
+    <div class="form-section-header">電話番号・所在地情報</div>
+    <table class="confirm-table">
+        <caption>入力された所在地情報の確認用テーブル</caption>
+        <tr>
+            <th scope="row">電話番号</th>
+            <td>
+                {% if request.POST.has_tel == "1" %}
+                    {{ request.POST.tel }}
+                {% else %}
+                    無（不明または非公開）
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">都道府県</th>
+            <td>{{ request.POST.prefecture|default:"（未選択）" }}</td>
+        </tr>
+        <tr>
+            <th scope="row">市区町村・番地</th>
+            <td>{{ request.POST.address|default:"（未入力）" }}</td>
+        </tr>
+    </table>
+
+    <div class="form-section-header">備考</div>
+    <table class="confirm-table">
+        <caption>入力された備考の確認用テーブル</caption>
+        <tr>
+            <th scope="row">備考</th>
+            <td>{{ request.POST.remarks|linebreaksbr|default:"（なし）" }}</td>
+        </tr>
+    </table>
+
+    <div class="action-container">
+        <a href="{% url 'stores:customer_store_new_register' %}" class="btn-back">戻る</a>
+        
+        <a href="#" class="btn-submit">登録</a>
+    </div>
+</div>
+{% endblock %}
+
 <h2>店舗新規登録確認画面</h2>
 
 <a href="{% url 'stores:customer_store_new_register' %}">戻る</a>
 <a href="{% url 'common:customer_common_complete' %}">登録</a>
-
-{% endblock %}

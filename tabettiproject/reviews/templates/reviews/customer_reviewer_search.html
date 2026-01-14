@@ -1,4 +1,371 @@
-レビュアー検索画面
+{% extends 'customer_base.html' %}
+
+{% block title %}レビュアー検索画面{% endblock %}
+
+{% block css %}
+<style>
+    /* ============================================================
+       全体のレイアウト・背景
+       ============================================================ */
+    body {
+        background-color: #fbfbf8;
+        color: #333;
+        font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+    .ranking-container {
+        max-width: 980px;
+        margin: 0 auto;
+        padding-bottom: 50px;
+    }
+    
+    /* パンくずリスト */
+    .breadcrumb {
+        font-size: 11px;
+        margin: 10px 0;
+        color: #06c;
+    }
+    .breadcrumb a { color: #06c; text-decoration: none; }
+
+    /* メインとサイドバーの横並び */
+    .ranking-wrapper {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    /* ============================================================
+       メインコンテンツ（左側）
+       ============================================================ */
+    .ranking-main {
+        flex: 1;
+        background-color: #fff;
+        border: 1px solid #e6e6e2;
+        padding: 20px;
+    }
+
+    /* 検索バーセクション（実機に合わせ背景色と枠線を調整） */
+    .search-section {
+        background-color: #f2f2ee;
+        padding: 15px;
+        border: 1px solid #e6e6e2;
+        margin-bottom: 25px;
+        display: flex;
+    }
+    .search-section input {
+        flex: 1;
+        border: 1px solid #ccc;
+        padding: 8px;
+        font-size: 14px;
+        outline: none;
+    }
+    .search-section button {
+        background-color: #83a700;
+        color: #fff;
+        border: none;
+        padding: 0 20px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    /* ランク概要（月間・年間の分割ボックス） */
+    .summary-box {
+        border: 1px solid #e6e6e2;
+        display: flex;
+        margin-bottom: 10px;
+        border-radius: 4px;
+    }
+    .summary-item {
+        flex: 1;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .summary-item:first-child {
+        border-right: 1px solid #e6e6e2;
+    }
+    .summary-date {
+        font-size: 18px;
+        font-weight: bold;
+        margin-right: 20px;
+        min-width: 80px;
+    }
+    .summary-details {
+        flex: 1;
+        text-align: center;
+        background-color: #fcfcfc;
+        border: 1px solid #f0f0ed;
+        padding: 10px;
+    }
+    .summary-rank-text { font-size: 10px; color: #999; }
+    .summary-rank-val { font-size: 20px; font-weight: bold; margin: 2px 0; }
+    .summary-hint { font-size: 11px; color: #83a700; margin-top: 5px; }
+
+    /* セクション見出し（オレンジの縦線） */
+    .section-headline {
+        border-left: 4px solid #f60;
+        padding-left: 10px;
+        font-weight: bold;
+        font-size: 15px;
+        margin: 30px 0 15px;
+        display: flex;
+        align-items: center;
+    }
+
+    /* レビュアーグリッド（5列） */
+    .reviewer-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 20px 10px;
+        margin-bottom: 15px;
+    }
+    .reviewer-item {
+        text-align: center;
+        position: relative;
+    }
+    .reviewer-img {
+        border: 1px solid #e6e6e2;
+        object-fit: cover;
+        /* エラー対策：HTML属性で指定するがCSSでも定義 */
+        width: 90px;
+        height: 90px;
+    }
+    .rank-badge {
+        position: absolute;
+        top: -4px;
+        left: 5px;
+        background-color: #bfa541; /* 金色 */
+        color: #fff;
+        font-size: 10px;
+        font-weight: bold;
+        padding: 1px 5px;
+    }
+    .rank-badge.silver { background-color: #a8a8a8; }
+    .reviewer-name {
+        color: #06c;
+        font-weight: bold;
+        font-size: 11px;
+        display: block;
+        margin-top: 5px;
+        text-decoration: none;
+    }
+    .count-val { font-weight: bold; font-size: 13px; }
+
+    /* 地域・ジャンルリンク集（テーブル） */
+    .link-section {
+        margin-top: 40px;
+    }
+    .link-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        border-top: 1px solid #e6e6e2;
+    }
+    /* エラー対策：アクセシブルな名前の提供 */
+    .link-table caption {
+        clip: rect(1px, 1px, 1px, 1px);
+        height: 1px;
+        overflow: hidden;
+        position: absolute;
+        width: 1px;
+    }
+    .link-table th {
+        width: 130px;
+        text-align: left;
+        padding: 12px 10px;
+        background-color: #fff;
+        color: #666;
+        vertical-align: top;
+        border-bottom: 1px dotted #ccc;
+    }
+    .link-table td {
+        padding: 12px 10px;
+        border-bottom: 1px dotted #ccc;
+        line-height: 1.8;
+    }
+    .link-table a {
+        color: #06c;
+        margin-right: 12px;
+        text-decoration: none;
+    }
+    .link-table a:hover { text-decoration: underline; }
+
+    /* ============================================================
+       サイドバー（右側）
+       ============================================================ */
+    .ranking-sidebar {
+        width: 240px;
+    }
+    .sidebar-box {
+        background-color: #fff;
+        border: 1px solid #e6e6e2;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    .user-profile {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    .profile-img-placeholder {
+        width: 40px;
+        height: 40px;
+        background-color: #eee;
+        border: 1px solid #ccc;
+        margin-right: 10px;
+    }
+    .sidebar-nav-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .sidebar-nav-list li {
+        border-bottom: 1px dotted #ccc;
+        padding: 10px 0;
+        display: flex;
+        justify-content: space-between;
+    }
+    .sidebar-nav-list a {
+        color: #06c;
+        text-decoration: none;
+        font-size: 13px;
+    }
+    .premium-card {
+        background-color: #fffce6;
+        border: 1px solid #f2e699;
+        padding: 10px;
+        margin-top: 15px;
+        text-align: center;
+    }
+    .premium-btn {
+        background-color: #b50044;
+        color: #fff;
+        border: none;
+        width: 100%;
+        padding: 10px;
+        font-weight: bold;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ranking-container">
+    <nav class="breadcrumb">
+        <a href="#">🏠 食べログ</a> &gt; レビュアーランキング
+    </nav>
+
+    <div class="ranking-wrapper">
+        <main class="ranking-main">
+            <section class="search-section">
+                <input type="text" placeholder="全国のレビュアーから探す [例:食べログ太郎]">
+                <button type="button">検索</button>
+            </section>
+
+            <h2 style="font-size: 16px; font-weight: bold; margin-bottom: 15px;">noconecoさんのランキング</h2>
+
+            <div class="summary-box">
+                <div class="summary-item">
+                    <div class="summary-date">2026年1月</div>
+                    <div class="summary-details">
+                        <div class="summary-rank-text">TOP100位</div>
+                        <div class="summary-rank-val">圏外</div>
+                        <div style="font-size: 11px;">口コミ数 0件</div>
+                        <div class="summary-hint">あと2件口コミ投稿したらランクインします！</div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-date">年間</div>
+                    <div class="summary-details">
+                        <div class="summary-rank-text">TOP100位</div>
+                        <div class="summary-rank-val">圏外</div>
+                        <div style="font-size: 11px;">口コミ数 5件</div>
+                        <div class="summary-hint">あと30件口コミ投稿したらランクインします！</div>
+                    </div>
+                </div>
+            </div>
+            <p style="font-size: 10px; color: #999; margin-bottom: 30px;">※上記ランキングは著者ランキングと比較し、更新に時間を要する場合がございます。</p>
+
+            <h2 style="font-size: 18px; font-weight: bold;">noconecoさんの地域ランキング</h2>
+
+            <div class="section-headline">大宮・与野周辺の口コミ数（2026年1月）ランキング</div>
+            <div class="reviewer-grid">
+                <div class="reviewer-item">
+                    <span class="rank-badge">1</span>
+                    <img src="https://via.placeholder.com/90" alt="udaik" class="reviewer-img" width="90" height="90">
+                    <a href="#" class="reviewer-name">udaik</a>
+                    <div class="count-val">16件</div>
+                </div>
+                <div class="reviewer-item">
+                    <span class="rank-badge silver">2</span>
+                    <img src="https://via.placeholder.com/90" alt="chikaaa220" class="reviewer-img" width="90" height="90">
+                    <a href="#" class="reviewer-name">chikaaa220</a>
+                    <div class="count-val">12件</div>
+                </div>
+                <div class="reviewer-item">
+                    <span class="rank-badge silver">2</span>
+                    <img src="https://via.placeholder.com/90" alt="jing666" class="reviewer-img" width="90" height="90">
+                    <a href="#" class="reviewer-name">jing666</a>
+                    <div class="count-val">12件</div>
+                </div>
+            </div>
+            <div style="text-align: right;"><a href="#" style="color: #06c; font-size: 11px;">▶ 大宮・与野周辺のランキングをもっと見る</a></div>
+
+            <section class="link-section">
+                <h3 id="region-list-title" style="font-size: 16px; margin-bottom: 10px;">地域ランキング</h3>
+                <table class="link-table" aria-labelledby="region-list-title">
+                    <caption>都道府県別のレビュアーランキングリンク一覧</caption>
+                    <tr>
+                        <th>北海道・東北</th>
+                        <td><a href="#">北海道</a> <a href="#">青森</a> <a href="#">秋田</a> <a href="#">山形</a> <a href="#">岩手</a> <a href="#">宮城</a> <a href="#">福島</a></td>
+                    </tr>
+                    <tr>
+                        <th>関東</th>
+                        <td><a href="#">東京</a> <a href="#">神奈川</a> <a href="#">埼玉</a> <a href="#">千葉</a> <a href="#">栃木</a> <a href="#">茨城</a> <a href="#">群馬</a></td>
+                    </tr>
+                </table>
+            </section>
+        </main>
+
+        <aside class="ranking-sidebar">
+            <div class="sidebar-box">
+                <div class="user-profile">
+                    <div class="profile-img-placeholder"></div>
+                    <div style="font-weight: bold;">noconeco <span>さん</span></div>
+                </div>
+
+                <div style="background-color: #fffce6; border: 1px solid #f2e699; padding: 8px; font-size: 11px; margin-bottom: 15px; text-align: center;">
+                    <a href="#" style="color:#06c; text-decoration:none;">携帯電話番号認証にご協力ください</a>
+                </div>
+
+                <ul class="sidebar-nav-list">
+                    <li><a href="#">マイページ</a></li>
+                    <li><a href="#">行ったお店</a> <span style="color:#999; font-size:11px;">10</span></li>
+                    <li><a href="#">公開中口コミ一覧</a> <span style="color:#999; font-size:11px;">7</span></li>
+                    <li><a href="#">フォロー中</a> <span style="color:#999; font-size:11px;">3</span></li>
+                    <li><a href="#">保存リスト</a> <span style="color:#999; font-size:11px;">10</span></li>
+                </ul>
+
+                <div style="margin-top: 15px; font-size: 11px; color: #666;">
+                    ランキング設定地域 <span style="float: right; color:#999; cursor:pointer;">⚙</span><br>
+                    <span style="color: #333; font-weight: bold; font-size: 12px;">大宮・与野周辺</span>
+                </div>
+
+                <div class="premium-card">
+                    <p style="font-size: 10px; color: #666; margin-bottom: 5px;">クレジットカードで初月無料</p>
+                    <button class="premium-btn">食べログプレミアムについて</button>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}
+
 <a href="{% url 'reviews:customer_reviewer_detail'%}">マイページ</a>
 <a href="{% url 'reviews:customer_reviewer_review_list' %}">レビュアー口コミ一覧</a>
 <a href="{% url 'follows:customer_follow_list' %}">フォロー中一覧</a>

@@ -1,4 +1,420 @@
-レビュアー口コミ一覧画面
+{% extends 'customer_base.html' %}
+
+{% block title %}ニックネーム16191さんの口コミ投稿したお店 [食べログ]{% endblock %}
+
+{% block css %}
+<style>
+    /* -----------------------------------------------------------
+       1. 全体背景と基本レイアウト
+    ----------------------------------------------------------- */
+    body {
+        background-color: #f4f4f2 !important;
+        margin: 0;
+        color: #333;
+        font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+    }
+
+    .tabelog-container {
+        max-width: 980px;
+        margin: 0 auto;
+        padding-top: 15px;
+    }
+
+    .columns-flex {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    /* -----------------------------------------------------------
+       2. プロフィールヘッダー
+    ----------------------------------------------------------- */
+    .user-header-unit {
+        background: #fff;
+        border: 1px solid #e6e6e2;
+        margin-bottom: 15px;
+        position: relative;
+    }
+
+    .cover-wallpaper {
+        height: 145px;
+        background: #ccc url('https://placehold.jp/980x145.png?text=User%20Cover%20Image') no-repeat center;
+        background-size: cover;
+        position: relative;
+    }
+
+    .sub-id-in-cover {
+        position: absolute;
+        left: 145px;
+        bottom: 15px;
+        color: #fff;
+        font-size: 15px;
+        font-weight: bold;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .user-actions-in-cover {
+        position: absolute;
+        right: 20px;
+        bottom: 15px;
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-action {
+        background: #fff;
+        border: 1px solid #ccc;
+        padding: 5px 15px;
+        font-size: 12px;
+        font-weight: bold;
+        border-radius: 2px;
+        cursor: pointer;
+    }
+
+    .user-icon-box {
+        position: absolute;
+        left: 20px;
+        bottom: 15px; 
+        width: 110px;
+        height: 110px;
+        background: #fff;
+        border: 1px solid #e6e6e2;
+        padding: 4px;
+        border-radius: 4px;
+        z-index: 10;
+    }
+
+    .profile-info-nav-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-left: 145px;
+        padding-right: 15px;
+        min-height: 60px;
+    }
+
+    .main-nick { font-size: 20px; font-weight: bold; margin: 0; }
+
+    .mypage-tabs { display: flex; list-style: none; padding: 0; margin: 0; }
+    .mypage-tabs li a {
+        display: block;
+        padding: 20px 15px;
+        font-size: 13px;
+        font-weight: bold;
+        color: #06c;
+        text-decoration: none;
+        border-bottom: 3px solid transparent;
+    }
+    .mypage-tabs li a.active { color: #333 !important; border-bottom: 3px solid #66635c; }
+
+    /* -----------------------------------------------------------
+       3. サイドバー（エリア・ジャンル・詳細検索）
+    ----------------------------------------------------------- */
+    .side-col { width: 210px; flex-shrink: 0; }
+
+    /* 選択ボックス共通 */
+    .selection-box {
+        background: #fff;
+        border: 1px solid #e6e6e2;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        font-size: 13px;
+    }
+
+    .selection-box-head {
+        padding: 10px;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #eee;
+        background: #f9f9f7;
+    }
+
+    .selection-item-active {
+        background: #fff9e6;
+        border-left: 3px solid #ffa500;
+        padding: 8px 10px;
+        display: flex;
+        justify-content: space-between;
+        text-decoration: none;
+        color: #333;
+        font-weight: bold;
+    }
+
+    .map-view-link {
+        display: block;
+        padding: 8px 10px;
+        color: #06c;
+        font-size: 11px;
+        text-decoration: none;
+        border-top: 1px dotted #e6e6e2;
+    }
+
+    /* 絞り込み枠 */
+    .filter-box {
+        background: #fff;
+        border: 1px solid #e6e6e2;
+        border-radius: 4px;
+        font-size: 12px;
+        overflow: hidden;
+    }
+
+    .filter-section-label {
+        background: #f9f9f7;
+        padding: 5px 10px;
+        font-weight: bold;
+        border-bottom: 1px solid #e6e6e2;
+        border-top: 1px solid #e6e6e2;
+    }
+    .filter-section-label:first-child { border-top: none; }
+
+    .filter-group { padding: 10px; }
+    .filter-group label { display: block; margin-bottom: 5px; cursor: pointer; }
+
+    .btn-submit-green {
+        width: 100%;
+        background: #82c00e;
+        color: #fff;
+        border: none;
+        padding: 8px;
+        font-weight: bold;
+        border-radius: 3px;
+        cursor: pointer;
+        box-shadow: 0 2px 0 #6a9c0b;
+        margin-bottom: 10px;
+    }
+
+    /* 詳細絞り込みボタンの修正 */
+    .btn-detailed-search {
+        display: flex;                      /* Flexboxを有効化 */
+        align-items: center;                /* 垂直方向の中央揃え */
+        justify-content: center;             /* 水平方向の中央揃え */
+        gap: 5px;                           /* アイコンとテキストの間隔 */
+        width: 100%;
+        background: linear-gradient(#ffffff, #f2f2f2); /* 食べログ風の微かなグラデーション */
+        border: 1px solid #ccc;
+        padding: 6px 0;                     /* 上下の余白を均等に */
+        font-size: 11px;
+        font-weight: bold;
+        color: #333;
+        border-radius: 3px;
+        text-decoration: none;
+        box-sizing: border-box;             /* 枠線を含めたサイズ計算 */
+        box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+    }
+
+    .btn-detailed-search:hover {
+        background: #f9f9f9;
+        border-color: #bbb;
+    }
+
+    /* アイコンのスタイル調整 */
+    .icon-paper {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        background: #fff;
+        border: 1px solid #bbb;
+        position: relative;
+        flex-shrink: 0;                     /* アイコンが潰れないように固定 */
+    }
+    
+    /* アイコンの中の線（より詳細な再現） */
+    .icon-paper::after {
+        content: "";
+        position: absolute;
+        top: 3px; left: 2px;
+        width: 8px; height: 1px;
+        background: #ccc;
+        box-shadow: 0 3px 0 #ccc, 0 6px 0 #ccc;
+    }
+
+    /* -----------------------------------------------------------
+       4. メインコンテンツ（並び替え・注意書き）
+    ----------------------------------------------------------- */
+    .main-col { flex-grow: 1; }
+
+    .main-content-card {
+        background: #fff;
+        border: 1px solid #e6e6e2;
+        padding: 20px;
+    }
+
+    .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    /* 並び替えバーのレイアウト */
+    .sort-nav {
+        border-bottom: 1px solid #e6e6e2;
+        padding: 8px 0;
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+    }
+
+    .sort-list { display: flex; gap: 10px; list-style: none; padding: 0; margin: 0; }
+    .sort-list a { color: #06c; text-decoration: none; }
+    .sort-list .active { color: #333; font-weight: bold; text-decoration: none; }
+
+    .disclaimer-box {
+        background: #f9f9f7;
+        border: 1px solid #e6e6e2;
+        padding: 12px;
+        font-size: 11px;
+        line-height: 1.6;
+        color: #666;
+        margin-bottom: 20px;
+    }
+
+    .icon-inline { vertical-align: middle; }
+    .select-sm { width: 75px; padding: 2px; border: 1px solid #ccc; font-size: 12px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="tabelog-container">
+
+    <header class="user-header-unit">
+        <div class="cover-wallpaper">
+            <div class="sub-id-in-cover">2eeb92のレストランガイド</div>
+            <div class="user-actions-in-cover">
+                <button class="btn-action">フォロー中</button>
+                <button class="btn-action" style="color:#999;" disabled>メッセージを送る</button>
+            </div>
+        </div>
+        <div class="user-icon-box">
+            <img src="https://placehold.jp/110x110.png?text=User" alt="ユーザーアイコン" width="110" height="110">
+        </div>
+        <div class="profile-info-nav-bar">
+            <div class="name-set"><h1 class="main-nick">ニックネーム16191</h1></div>
+            <nav>
+                <ul class="mypage-tabs">
+                    <li><a href="#">トップ</a></li>
+                    <li><a href="#">行ったお店</a></li>
+                    <li><a href="#" class="active">口コミ</a></li>
+                    <li><a href="#">まとめ</a></li>
+                    <li><a href="#">フォロー中</a></li>
+                    <li><a href="#">フォロワー</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="columns-flex">
+        
+        <aside class="side-col">
+            <section class="selection-box">
+                <div class="selection-box-head">エリア<span>📍</span></div>
+                <a href="#" class="selection-item-active">
+                    <span>すべて</span> <span>&gt;</span>
+                </a>
+                <a href="#" class="map-view-link">📍 このエリアを地図で見る</a>
+            </section>
+
+            <section class="selection-box">
+                <div class="selection-box-head">ジャンル<span>🍴</span></div>
+                <a href="#" class="selection-item-active">
+                    <span>すべて</span> <span>&gt;</span>
+                </a>
+            </section>
+
+            <div class="filter-box">
+                <form action="" method="get">
+                    <div class="filter-section-label">口コミ対象</div>
+                    <div class="filter-group">
+                        <label><input type="radio" name="target" checked> すべて</label>
+                        <label><input type="radio" name="target"> 夜の口コミ</label>
+                        <label><input type="radio" name="target"> 昼の口コミ</label>
+                    </div>
+
+                    <div class="filter-section-label">予算</div>
+                    <div class="filter-group">
+                        <div style="display:flex; gap:10px; margin-bottom:8px;">
+                            <label><input type="radio" name="b_type" checked> 🌙</label>
+                            <label><input type="radio" name="b_type"> ☀️</label>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:3px;">
+                            <select name="min" class="select-sm" aria-label="予算の下限">
+                                <option>下限なし</option>
+                            </select>
+                            <span>〜</span>
+                            <select name="max" class="select-sm" aria-label="予算の上限">
+                                <option>上限なし</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <button type="submit" class="btn-submit-green">絞り込む</button>
+                        <a href="#" class="btn-detailed-search">
+                            <span class="icon-paper" aria-hidden="true"></span>
+                                もっと詳しい条件で検索
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </aside>
+
+        <main class="main-col">
+            <div class="main-content-card">
+                <div class="content-header">
+                    <h2 style="font-size: 18px; margin: 0;">口コミ投稿したお店</h2>
+                    <a href="#" style="font-size: 12px; color: #06c; text-decoration: none;">
+                        検索条件を変更 <img src="https://placehold.jp/12x12.png" alt="" width="12" height="12" class="icon-inline" aria-hidden="true">
+                    </a>
+                </div>
+
+                <div style="font-size: 12px; color: #999; margin-bottom: 10px;">
+                    🔍 検索条件が指定されていません。
+                </div>
+
+                <nav class="sort-nav">
+                    <ul class="sort-list">
+                        <li><a href="#" class="active">更新日順</a></li>
+                        <li style="color:#ccc;">|</li>
+                        <li><a href="#">訪問月順</a></li>
+                        <li style="color:#ccc;">|</li>
+                        <li><a href="#">評価順</a></li>
+                        <li style="color:#ccc;">|</li>
+                        <li><a href="#">行った回数順</a></li>
+                        <li style="color:#ccc;">|</li>
+                        <li><a href="#">食べログ総合ランキング</a></li>
+                    </ul>
+                    <a href="#" style="color:#06c; text-decoration:none; font-weight:bold;">地図表示</a>
+                </nav>
+
+                <div class="disclaimer-box">
+                    これらの口コミは、訪問した当時の主観的なご意見・ご感想です。<br>
+                    最新の情報とは異なる可能性がありますので、お店の方にご確認ください。
+                    <a href="#" style="color:#06c;">&gt; 詳しくはこちら</a>
+                </div>
+
+                <div style="font-size: 13px; margin-bottom: 10px;">
+                    <strong>1〜11</strong> 件を表示 ／ 全 <strong>11</strong> 件
+                </div>
+
+                <article style="border-top:1px dotted #ccc; padding: 20px 0;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <div>
+                            <a href="#" style="font-size: 16px; font-weight: bold; color: #06c; text-decoration:none;">バタービールバー</a>
+                            <p style="font-size: 12px; color: #666; margin: 5px 0;">（豊島園、練馬春日町 / カフェ、バー）</p>
+                        </div>
+                        <span style="border:1px solid #e6e6e2; padding:2px 8px; font-size:11px; background:#fafafa; align-self: flex-start;">1回</span>
+                    </div>
+                </article>
+            </div>    
+        </main>
+    </div>
+</div>
+{% endblock %}
+
 <a href="{% url 'reviews:customer_reviewer_detail'%}">トップ</a>
 <a href="{% url 'reviews:customer_reviewer_review_list' %}">レビュアー口コミ一覧</a>
 <a href="{% url 'follows:customer_follow_list' %}">フォロー中一覧</a>

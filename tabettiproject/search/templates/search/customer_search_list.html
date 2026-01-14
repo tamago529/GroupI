@@ -1,7 +1,253 @@
 検索結果一覧画面
 {% extends "customer_base.html" %}
+
+{% block title %}検索結果一覧 - 食べログ{% endblock %}
+
+{% block css %}
+<style>
+    /* --- 全体レイアウト構成 --- */
+    .search-result-container {
+        font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+        color: #333;
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 10px 0 20px 0;
+        display: grid;
+        grid-template-columns: 200px 1fr; /* 左：絞り込み、右：結果 */
+        gap: 20px;
+        background-color: #fff;
+    }
+
+    /* --- 追加ナビゲーションリンク（画面遷移用） --- */
+    .page-nav {
+        grid-column: 1 / -1; /* 横いっぱいに表示 */
+        padding: 10px;
+        margin-bottom: 10px;
+        background-color: #f7f7f7;
+        border-radius: 4px;
+        font-size: 13px;
+    }
+
+    .nav-item {
+        color: #06c;
+        text-decoration: none;
+        margin-right: 15px;
+    }
+
+    .nav-item:hover {
+        text-decoration: underline;
+    }
+
+    /* --- 左サイドバー：絞り込みフィルタ --- */
+    .filter-box {
+        border: 1px solid #e5e5e5;
+        padding: 15px;
+        margin-bottom: 20px;
+        font-size: 13px;
+    }
+
+    .filter-title {
+        font-weight: bold;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 8px;
+        margin-bottom: 10px;
+    }
+
+    /* --- メインコンテンツ：店舗リスト --- */
+    .result-count-bar {
+        border-bottom: 2px solid #333;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
+    .count-text {
+        font-size: 18px;
+        font-weight: bold;
+        margin: 0;
+    }
+
+    /* 店舗カード本体 */
+    .shop-card {
+        border: 1px solid #e5e5e5;
+        margin-bottom: 20px;
+        display: flex;
+        padding: 20px;
+    }
+
+    .shop-photo {
+        width: 200px;
+        margin-right: 20px;
+    }
+
+    .shop-name {
+        font-size: 20px;
+        font-weight: bold;
+        color: #06c;
+        margin: 0 0 5px 0;
+    }
+
+    /* 評価・スコア */
+    .rating-section {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .rating-num {
+        color: #e60012;
+        font-weight: bold;
+        font-size: 22px;
+    }
+
+    /* 予算情報 */
+    .budget-info {
+        display: flex;
+        gap: 15px;
+        font-size: 13px;
+        margin-bottom: 15px;
+    }
+
+    /* 予約アクションエリア */
+    .reservation-bar {
+        background-color: #fdfaf2;
+        border: 1px solid #f5e6c1;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .btn-reserve {
+        background-color: #fa0;
+        color: #fff;
+        padding: 8px 20px;
+        border-radius: 4px;
+        font-weight: bold;
+        text-decoration: none;
+        font-size: 14px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
+<div class="search-result-container">
+    
+    <nav class="page-nav" aria-label="画面遷移用リンク">
+        <a href="{% url 'search:customer_top.html' %}" class="nav-item">トップ画面へ移動</a>
+        <a href="{% url 'search:customer_search_list.html' %}" class="nav-item">検索結果一覧へ移動</a>
+        <a href="{% url 'search:customer_genre_list.html' %}" class="nav-item">ジャンル一覧へ移動</a>
+    </nav>
+
+    <aside class="side-filter">
+        <div class="filter-box">
+            <div class="filter-title">現在の検索条件</div>
+            <p style="color:#e60012; font-weight:bold; margin:0;">新宿駅周辺 × 居酒屋</p>
+        </div>
+        
+        <div class="filter-box">
+            <div class="filter-title">予算</div>
+            <select aria-label="夜の予算を選択" style="width:100%; margin-bottom:5px;">
+                <option>夜の予算</option>
+            </select>
+            <select aria-label="昼の予算を選択" style="width:100%;">
+                <option>昼の予算</option>
+            </select>
+        </div>
+
+        <div class="filter-box">
+            <div class="filter-title">席タイプ</div>
+            <label><input type="checkbox"> 個室あり</label><br>
+            <label><input type="checkbox"> カウンター席</label>
+        </div>
+    </aside>
+
+    <main class="result-main">
+        <div class="result-count-bar">
+            <h1 class="count-text">新宿駅周辺の居酒屋</h1>
+            <span style="font-size: 13px; color: #666;">全1,234件</span>
+        </div>
+
+        <article class="shop-card">
+            <div class="shop-photo">
+                <img src="https://via.placeholder.com/200x150?text=Shop+A" 
+                    alt="和風居酒屋の外観" 
+                    width="200" 
+                    height="150">
+            </div>
+            <div class="shop-info">
+                <h2 class="shop-name">1. 創作ダイニング 食べログ新宿店</h2>
+                <p style="font-size: 12px; color: #666; margin-bottom: 5px;">新宿駅 徒歩5分 / 居酒屋、串焼き</p>
+                
+                <div class="rating-section">
+                    <span style="color:#fa0;" aria-hidden="true">★★★☆☆</span>
+                    <span class="rating-num">3.52</span>
+                    <span style="font-size: 12px; color: #06c;">[ 120件 ]</span>
+                </div>
+
+                <div class="budget-info">
+                    <span><span role="img" aria-label="夜の予算">🌙</span> ￥4,000〜</span>
+                    <span><span role="img" aria-label="昼の予算">☀️</span> 〜￥999</span>
+                </div>
+
+                <p style="font-size: 13px; color: #444; margin-bottom: 15px;">
+                    都会の喧騒を忘れる落ち着いた個室空間。旬の食材を活かした創作料理をご堪能ください。
+                </p>
+
+                <div class="reservation-bar">
+                    <span style="font-size: 12px; font-weight: bold; color: #72b300;">本日 空席あり</span>
+                    <a href="#" class="btn-reserve">空席確認・予約</a>
+                </div>
+            </div>
+        </article>
+
+        <article class="shop-card">
+            <div class="shop-photo">
+                <img src="https://via.placeholder.com/200x150?text=Shop+B" 
+                    alt="洋風バルの店内" 
+                    width="200" 
+                    height="150">
+            </div>
+            <div class="shop-info">
+                <h2 class="shop-name">2. 肉×ワイン 新宿テラス</h2>
+                <p style="font-size: 12px; color: #666; margin-bottom: 5px;">新宿三丁目駅 徒歩2分 / イタリアン、バル</p>
+                
+                <div class="rating-section">
+                    <span style="color:#fa0;" aria-hidden="true">★★★☆☆</span>
+                    <span class="rating-num">3.40</span>
+                    <span style="font-size: 12px; color: #06c;">[ 85件 ]</span>
+                </div>
+
+                <div class="budget-info">
+                    <span><span role="img" aria-label="夜の予算">🌙</span> ￥5,000〜</span>
+                    <span><span role="img" aria-label="昼の予算">☀️</span> ￥1,000〜</span>
+                </div>
+
+                <p style="font-size: 13px; color: #444; margin-bottom: 15px;">
+                    厳選した黒毛和牛と世界各国のワイン。開放的なテラス席で特別なひとときを。
+                </p>
+
+                <div class="reservation-bar">
+                    <span style="font-size: 12px; font-weight: bold; color: #666;">お電話でご確認ください</span>
+                    <a href="#" class="btn-reserve" style="background-color: #888;">詳細を見る</a>
+                </div>
+            </div>
+        </article>
+
+    </main>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    // ナビゲーションとアクセシビリティの正常動作を確認
+    console.log("遷移リンク付き検索結果一覧画面が読み込まれました。");
+</script>
+{% endblock %}
+
 <a href = "{% url 'search:customer_top' %}">トップ画面へ移動</a><br>
 <a href = "{% url 'search:customer_search_list' %}">検索結果一覧へ移動</a><br>
 <a href = "{% url 'search:customer_genre_list' %}">ジャンル一覧へ移動</a><br>
-{% endblock %}

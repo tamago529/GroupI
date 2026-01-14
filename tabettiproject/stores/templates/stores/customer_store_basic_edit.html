@@ -1,6 +1,245 @@
-店舗基本情報変更（顧客）画面
 {% extends "customer_base.html" %}
+
+{% block title %}店舗基本情報変更（顧客）画面{% endblock %}
+
+{% block css %}
+<style>
+    /* --- レイアウト全体設定 --- */
+    .tabelog-edit-wrapper {
+        max-width: 980px;
+        margin: 20px auto;
+        font-family: sans-serif;
+    }
+
+    /* --- 店舗名・公式バッジエリア --- */
+    .shop-header-area {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .badge-official {
+        background-color: #6aab32;
+        color: #fff;
+        font-size: 11px;
+        font-weight: bold;
+        padding: 2px 4px;
+        border-radius: 2px;
+        margin-right: 10px;
+    }
+
+    .shop-name-display {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    /* --- オレンジ色の案内バナー --- */
+    .edit-main-banner {
+        background-color: #f2f0eb;
+        border: 1px solid #e2e2e2;
+        padding: 10px 15px;
+        font-weight: bold;
+        font-size: 14px;
+        color: #ed6103;
+        margin-bottom: 25px;
+    }
+
+    /* --- 各項目の見出し --- */
+    .info-section-heading {
+        background-color: #f2f0eb;
+        padding: 8px 12px;
+        font-weight: bold;
+        border-left: 4px solid #ed6103;
+        margin: 30px 0 0 0;
+        font-size: 15px;
+    }
+
+    /* --- 食べログ風入力テーブル --- */
+    .tabelog-info-table {
+        width: 100%;
+        border-collapse: collapse;
+        border-top: 1px solid #e2e2e2;
+        margin-bottom: 15px;
+    }
+
+    /* アクセシビリティ：画面には映さないが読上げソフトには伝える設定 */
+    .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+    }
+
+    .tabelog-info-table th, .tabelog-info-table td {
+        padding: 15px;
+        border-bottom: 1px solid #e2e2e2;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .tabelog-info-table th {
+        width: 220px;
+        background-color: #f9f9f9;
+        font-weight: bold;
+        font-size: 13px;
+    }
+
+    /* --- フォーム入力部品 --- */
+    .input-text-full {
+        width: 100%;
+        max-width: 600px;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+    }
+
+    .input-small-box {
+        width: 80px;
+        padding: 8px;
+        border: 1px solid #ccc;
+        text-align: right;
+    }
+
+    .input-note {
+        font-size: 11px;
+        color: #999;
+        margin-top: 5px;
+    }
+
+    /* --- アクションボタン（戻る・確認） --- */
+    .form-footer-actions {
+        background-color: #f6f6f6;
+        padding: 30px;
+        text-align: center;
+        margin-top: 40px;
+        border-top: 1px solid #e2e2e2;
+    }
+
+    .btn-link-back {
+        display: inline-block;
+        background-color: #fff;
+        border: 1px solid #bbb;
+        padding: 12px 35px;
+        font-size: 14px;
+        color: #333;
+        text-decoration: none;
+        margin-right: 15px;
+        border-radius: 3px;
+    }
+
+    .btn-tabelog-confirm {
+        display: inline-block;
+        background-color: #ed6103;
+        color: #fff;
+        border: none;
+        padding: 12px 50px;
+        font-weight: bold;
+        font-size: 15px;
+        cursor: pointer;
+        border-radius: 3px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
+<div class="tabelog-edit-wrapper">
+    <div class="shop-header-area">
+        <span class="badge-official">公式</span>
+        <h1 class="shop-name-display">
+            {{ store.name|default:"店舗名未設定" }} {{ store.branch_name|default:"" }}
+        </h1>
+    </div>
+
+    <div class="edit-main-banner">
+        レストラン情報編集 － 1.レストラン情報入力
+    </div>
+
+    <form action="#" method="post">
+        {% csrf_token %}
+
+        <div id="basic-info-hdr" class="info-section-heading" role="heading" aria-level="2">
+            店舗基本情報
+        </div>
+
+        <table class="tabelog-info-table" aria-labelledby="basic-info-hdr">
+            <caption class="visually-hidden">店名や支店名を編集する表</caption>
+            <tbody>
+                <tr>
+                    <th scope="row"><label for="shop_name">店名</label></th>
+                    <td>
+                        <input type="text" id="shop_name" name="shop_name" value="{{ store.name }}" class="input-text-full">
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="branch_name">支店名</label></th>
+                    <td>
+                        <input type="text" id="branch_name" name="branch_name" value="{{ store.branch_name }}" class="input-text-full">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div id="facility-info-hdr" class="info-section-heading" role="heading" aria-level="2">
+            席・設備
+        </div>
+
+        <table class="tabelog-info-table" aria-labelledby="facility-info-hdr">
+            <caption class="visually-hidden">席数や個室の有無を選択する表</caption>
+            <tbody>
+                <tr>
+                    <th scope="row"><label for="capacity">席数</label></th>
+                    <td>
+                        <input type="text" id="capacity" name="capacity" value="{{ store.capacity }}" class="input-small-box" aria-label="総席数"> 席
+                        <p class="input-note">例：カウンター10席、テーブル20席</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">個室</th>
+                    <td>
+                        {% if store.has_private_room %}
+                            <label><input type="radio" name="room" value="1" checked> 有</label>
+                            <label style="margin-left: 15px;"><input type="radio" name="room" value="0"> 無</label>
+                        {% else %}
+                            <label><input type="radio" name="room" value="1"> 有</label>
+                            <label style="margin-left: 15px;"><input type="radio" name="room" value="0" checked> 無</label>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">禁煙・喫煙</th>
+                    <td>
+                        {% if store.smoking_policy == 1 %}
+                            <label><input type="radio" name="smoke" value="1" checked> 全席禁煙</label>
+                        {% else %}
+                            <label><input type="radio" name="smoke" value="1"> 全席禁煙</label>
+                        {% endif %}
+                        <p class="input-note">※飲食可能なスペース以外に喫煙専用室がある場合は、備考欄に入力してください。</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <input type="hidden" name="store_id" value="{{ store.id }}">
+
+        <div class="form-footer-actions">
+            <a href="#" class="btn-link-back">戻る</a>
+            <button type="submit" class="btn-tabelog-confirm">記入内容を確認する</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    /* フォーム初期化ログ */
+    console.log("Restaurant edit form loaded for Store ID: {{ store.id }}");
+</script>
+{% endblock %}
+
 <a href = "{% url 'stores:store_top' %}">店舗トップ画面へ移動</a>
 <a href = "{% url 'common:store_common_complete.html' %}">店舗共通完了画面へ移動</a>
-{% endblock %}

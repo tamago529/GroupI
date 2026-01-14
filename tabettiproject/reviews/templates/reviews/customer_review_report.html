@@ -1,2 +1,122 @@
 口コミ通報（顧客）画面
+
+{% extends "customer_base.html" %}
+
+{% block content %}
+<style>
+    /* （中略：前回のスタイルを維持） */
+    .contact-container {
+        font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+        max-width: 900px;
+        margin: 20px auto;
+        color: #333;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+    }
+    .form-table {
+        width: 100%;
+        border-collapse: collapse;
+        border-top: 1px solid #ddd;
+    }
+    .form-table th, .form-table td {
+        padding: 15px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+    }
+    .form-table th {
+        background-color: #f9f9f9;
+        width: 200px;
+        vertical-align: top;
+    }
+    .required-tag {
+        background-color: #e54;
+        color: #fff;
+        font-size: 11px;
+        padding: 2px 4px;
+        border-radius: 2px;
+        margin-left: 5px;
+    }
+    .textarea-input {
+        width: 100%;
+        height: 200px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        padding: 8px;
+        box-sizing: border-box;
+    }
+    .submit-container {
+        background-color: #eee9d9;
+        padding: 20px;
+        text-align: center;
+        margin-top: 20px;
+    }
+    .submit-btn-link {
+        display: inline-block;
+        background-color: #93b51d;
+        color: #fff !important;
+        text-decoration: none;
+        padding: 12px 40px;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 4px;
+        box-shadow: 0 2px 0 #708a16;
+    }
+</style>
+
+<div class="contact-container">
+    <h2 class="form-title">お問い合わせフォーム（入力画面）</h2>
+    
+    <table class="form-table">
+        <caption class="sr-only">お問い合わせ内容の入力フォーム項目一覧</caption>
+        
+        <tr>
+            <th scope="row">タイトル</th>
+            <td style="color: #666;">問題のある口コミの報告</td>
+        </tr>
+
+        <tr>
+            <th scope="row">
+                <label for="contact-body">お問い合わせ内容</label>
+                <span class="required-tag">必須</span>
+            </th>
+            <td>
+                <textarea 
+                    id="contact-body" 
+                    class="textarea-input" 
+                    name="content" 
+                    placeholder="具体的な内容をご記入ください"
+                    required
+                ></textarea>
+            </td>
+        </tr>
+
+        <tr>
+            <th scope="row">ニックネーム</th>
+            <td style="color: #666;">noconeco</td>
+        </tr>
+
+        <tr>
+            <th scope="row">メールアドレス</th>
+            <td style="color: #666;">n.s20060322@gmail.com</td>
+        </tr>
+    </table>
+
+    <div class="submit-container">
+        <a href="{% url 'stores:customer_map' %}" class="submit-btn-link">
+            上記の同意事項に同意の上、記入した内容を確認する
+        </a>
+    </div>
+</div>
+{% endblock %}
+
 <a href="{% url 'stores:customer_map' %}">確認画面へ</a>

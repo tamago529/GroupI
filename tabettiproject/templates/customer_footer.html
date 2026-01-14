@@ -1,4 +1,262 @@
-<footer class="customer-footer">
-    <div class="inner">
-        <p>&copy; 2025 顧客向けサイト</p>
-    </div></footer>
+<style>
+    /* -----------------------------------------
+        共通設定
+    ----------------------------------------- */
+    .tabelog-footer {
+        width: 100%;
+        min-width: 1280px;
+        font-family: "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ ProN W3", Meiryo, sans-serif;
+        color: #333;
+        border-top: 1px solid #e8e8e8;
+        box-sizing: border-box;
+    }
+
+    .tabelog-footer a {
+        color: #0066CC;
+        text-decoration: none;
+    }
+
+    .link-navigation li a {
+        font-size: 10.32px;
+        margin: 0 2px;
+    }
+
+    .tabelog-footer a:hover {
+        text-decoration: underline;
+    }
+
+    .footer-inner {
+        width: 1280px;
+        margin: 0 auto;
+    }
+
+    /* -----------------------------------------
+        [赤枠] red-zone: 主要4サービス
+        背景を真っ白に設定し、アイコンとタイトルを強調
+    ----------------------------------------- */
+    .footer-red-zone {
+        background-color: #ffffff;
+        padding: 30px 0 20px 0;
+    }
+
+    .major-services {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        border-bottom: 1px dashed #dcdcdc; /* 下部の点線 */
+        padding-bottom: 25px;
+    }
+
+    .major-services li {
+        flex: 1;
+        text-align: center;
+        border-right: 1px dashed #dcdcdc; /* 項目間の点線 */
+    }
+
+    .major-services li:last-child {
+        border-right: none;
+    }
+
+    .major-services a {
+        display: block;
+        color: #333 !important;
+        font-size: 16px;
+        font-weight: bold;
+        letter-spacing: -0.5px;
+    }
+
+    .major-services a strong {
+        display: block;
+        font-size: 10px;
+        color: #999;
+        font-weight: normal;
+        margin-top: 5px;
+    }
+
+    /* -----------------------------------------
+        [黄枠] yellow-zone: リンク・企業情報
+        背景を本家特有の極薄グレー(#f7f7f7)に設定
+    ----------------------------------------- */
+    .footer-yellow-zone {
+        background-color: #f7f7f7;
+        padding: 25px 0 20px 0;
+    }
+
+    /* リンク集の密集レイアウト */
+    .link-navigation {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .link-navigation ul {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 5px 0;
+    }
+
+    .link-navigation li {
+        display: inline;
+        font-size: 11px;
+        color: #ccc; /* セパレーターの色 */
+    }
+
+    /* 言語設定エリア */
+    .language-settings {
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 11px;
+        color: #666;
+    }
+
+    .language-settings span {
+        color: #ccc;
+        margin: 0 5px;
+    }
+
+    /* 企業情報エリア（区切り線あり） */
+    .corporate-info {
+        border-top: 1px solid #e8e8e8;
+        padding-top: 15px;
+        margin-bottom: 15px;
+    }
+
+    .kakaku-logo {
+        font-size: 13px;
+        font-weight: bold;
+    }
+
+    .kakaku-logo span {
+        font-family: Arial, sans-serif;
+        font-size: 18px;
+        color: #003399; /* 本家の深い青 */
+        margin-right: 5px;
+    }
+
+    /* コピーライトとロゴの底辺揃え */
+    .footer-bottom-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
+    .tabelog-20th-logo {
+        font-size: 20px;
+        font-weight: 900;
+        color: #333;
+        letter-spacing: -1px;
+    }
+
+    .tabelog-20th-logo em {
+        color: #ff9900; /* 20thのオレンジ */
+        font-style: italic;
+        font-family: Arial, sans-serif;
+        margin-left: 4px;
+    }
+
+    .copyright-text {
+        font-size: 10px;
+        color: #999;
+    }
+
+    /* トップへ戻るボタン */
+    .btn-top {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        width: 44px;
+        height: 44px;
+        background-color: #b2b2b2;
+        border-radius: 50%;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        font-size: 18px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+</style>
+
+<footer class="tabelog-footer">
+
+    <div class="footer-red-zone">
+        <div class="footer-inner">
+            <ul class="major-services">
+                <li>
+                    <a href="#">タベッチログまとめ
+                        <strong>グルメキュレーションサイト</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">タベッチログ
+                        <strong>毎日のお外食が楽しくなるグルメ検索</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">レビューアランキング
+                        <strong>全国で活躍するレビュアー</strong>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">タベッチ 求人
+                        <strong>飲食店採用担当の求人サイト</strong>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer-yellow-zone">
+        <div class="footer-inner">
+            
+            <nav class="link-navigation">
+                <ul>
+                    <li><a href="#">ヘルプ・お問い合わせ</a> <span>|</span></li>
+                    <li><a href="#">タベッチについて</a> <span>|</span></li>
+                    <li><a href="#">口コミ・ランキングに対する取り組み</a> <span>|</span></li>
+                    <li><a href="#">飲食店・飲食企業様向けサービス</a> <span>|</span></li>
+                    <li><a href="#">タベッチ店舗会員について</a> <span>|</span></li>
+                    <li><a href="#">広告（メーカー・団体等様向け）について</a></li>
+                </ul>
+                <ul>
+                    <li><a href="#">機能改善要望</a> <span>|</span></li>
+                    <li><a href="#">口コミガイドライン</a> <span>|</span></li>
+                    <li><a href="#">タベッチプレミアム</a> <span>|</span></li>
+                    <li><a href="#">タベッチプレミアムクーポン</a> <span>|</span></li>
+                    <li><a href="#">ネット予約（リクエスト予約）</a> <span>|</span></li>
+                    <li><a href="#">利用規約</a> <span>|</span></li>
+                    <li><a href="#">外部送信（オプトアウト）</a> <span>|</span></li>
+                    <li><a href="#">個人情報保護方針</a> <span>|</span></li>
+                    <li><a href="#">採用情報</a> <span>|</span></li>
+                    <li><a href="#">企業情報</a></li>
+                </ul>
+                <ul>
+                    <li><a href="#">サイトマップ</a> <span>|</span></li>
+                    <li><a href="#">キーワード一覧</a></li>
+                </ul>
+            </nav>
+
+            <div class="language-settings">
+                言語 : <a href="#">English</a> <span>|</span> <a href="#">簡体中文</a> <span>|</span> <a href="#">繁體中文</a> <span>|</span> <a href="#">한국어</a> <span>|</span> 日本語
+            </div>
+
+            <div class="corporate-info">
+                <div class="kakaku-logo">
+                    <span>hakaku.com</span> タベッチは ハカクコム グループです。
+                </div>
+            </div>
+
+            <div class="footer-bottom-row">
+                <div class="tabelog-20th-logo">
+                    タベッチ<em>20th</em>
+                </div>
+                <div class="copyright-text">
+                    Copyright (c) Hakaku.com, Inc. All Rights Reserved. 無断転載禁止
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <button class="btn-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">▲</button>
+
+</footer>
