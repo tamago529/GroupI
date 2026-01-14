@@ -6,4 +6,293 @@
 <a href = "{% url 'reservations_management:store_customer_ledger' %}">ネット予約管理画面（顧客台帳）へ移動</a><br>
 <a href = "{% url 'reservations_management:store_reservation_settings' %}">ネット予約管理画面（ネット予約受付設定）へ移動</a><br>
 <a href = "{% url 'reservations_management:store_seat_settings' %}">ネット予約管理画面（席設定）へ移動</a><br>
+
+<style>
+/* =====================
+   Theme（あなたが貼ったものを踏襲）
+===================== */
+:root{
+  --bg:#f3f4f6;
+  --card:#ffffff;
+  --line:#d9dde3;
+  --text:#222;
+  --muted:#6b7280;
+  --brand:#ff8a00;
+  --nav:#2f343a;
+  --link:#1a73e8;
+  --ok:#2e7d32;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN",system-ui,sans-serif;
+}
+a{color:var(--link);text-decoration:none}
+
+/* =====================
+   Layout
+===================== */
+.cust-wrap{
+  max-width:1200px;
+  margin:0 auto;
+  padding:12px;
+}
+
+/* タイトル帯 */
+.cust-title{
+  background:var(--nav);
+  color:#fff;
+  padding:10px 12px;
+  font-weight:900;
+  border-radius:6px;
+}
+
+/* 説明文 */
+.cust-lead{
+  font-size:12px;
+  color:var(--muted);
+  margin:6px 0 10px;
+}
+
+/* カード */
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:6px;
+  margin-top:10px;
+}
+.card-head{
+  padding:10px 12px;
+  font-weight:900;
+  background:#f7f7f7;
+  border-bottom:1px solid var(--line);
+}
+.card-body{padding:12px}
+
+/* =====================
+   検索エリア
+===================== */
+.search-box{
+  background:#eaf3f8;
+  border:1px solid #cfe3ee;
+  border-radius:6px;
+  padding:12px;
+}
+.search-grid{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:8px;
+}
+.search-field label{
+  font-size:11px;
+  font-weight:900;
+}
+.search-field input,
+.search-field select{
+  width:100%;
+  padding:7px 8px;
+  font-size:12px;
+  border:1px solid #cbd5e1;
+  border-radius:4px;
+}
+.search-action{
+  margin-top:10px;
+  text-align:center;
+}
+.search-btn{
+  width:300px;
+  padding:10px;
+  border:none;
+  border-radius:6px;
+  font-weight:900;
+  background:#1fa3bf;
+  color:#fff;
+  cursor:pointer;
+}
+
+/* =====================
+   一覧テーブル
+===================== */
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+th,td{
+  padding:10px 8px;
+  border-top:1px solid #eee;
+}
+th{
+  background:#fafafa;
+  font-weight:900;
+}
+.num{text-align:right}
+.detail-btn{
+  padding:6px 10px;
+  font-size:11px;
+  border:1px solid #cbd5e1;
+  border-radius:6px;
+  background:#fff;
+  font-weight:900;
+}
+.selected{
+  background:#fff7cc;
+}
+
+/* =====================
+   詳細テーブル
+===================== */
+.info-table th{
+  width:180px;
+}
+.actions{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin:10px 0;
+}
+.btn-gray{
+  background:#6b7280;
+  color:#fff;
+  border:none;
+  padding:10px 14px;
+  border-radius:6px;
+  font-weight:900;
+}
+.btn-green{
+  background:#8db239;
+  color:#fff;
+  border:none;
+  padding:10px 14px;
+  border-radius:6px;
+  font-weight:900;
+}
+
+/* =====================
+   予約情報
+===================== */
+.reserve-box{
+  border:1px solid #e5e7eb;
+  border-radius:6px;
+  margin-top:10px;
+  overflow:hidden;
+}
+.reserve-title{
+  padding:10px 12px;
+  background:linear-gradient(180deg,#fff,#f3f4f6);
+  font-weight:900;
+}
+.reserve-table th{
+  width:180px;
+}
+
+.back-area{
+  margin-top:12px;
+  text-align:center;
+}
+.back-btn{
+  padding:10px 20px;
+  border:none;
+  border-radius:6px;
+  background:#e5e7eb;
+  font-weight:900;
+}
+</style>
+
+<div class="cust-wrap">
+
+  <!-- 顧客一覧 -->
+  <div class="cust-title">顧客一覧</div>
+  <p class="cust-lead">顧客情報の検索、追加登録 / 削除を行えます。</p>
+
+  <div class="card">
+    <div class="card-head">顧客情報の検索</div>
+    <div class="card-body">
+      <form class="search-box">
+        <div class="search-grid">
+          <div class="search-field"><label>姓</label><input></div>
+          <div class="search-field"><label>名</label><input></div>
+          <div class="search-field"><label>メール</label><input></div>
+          <div class="search-field"><label>電話番号</label><input></div>
+          <div class="search-field">
+            <label>来店回数</label>
+            <select><option>指定なし</option></select>
+          </div>
+          <div class="search-field">
+            <label>広告メール</label>
+            <input type="checkbox"> OK
+          </div>
+        </div>
+        <div class="search-action">
+          <button class="search-btn">検索</button>
+        </div>
+      </form>
+
+      <table>
+        <thead>
+          <tr>
+            <th>お名前 / 電話番号</th>
+            <th>メール</th>
+            <th>お名前（漢字）</th>
+            <th class="num">来店回数</th>
+            <th>記念日</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="selected">
+            <td><b>たべるく たろう</b><br><span class="muted">09012345678</span></td>
+            <td>info@tabett.com (OK)</td>
+            <td>タベッチ 太郎</td>
+            <td class="num">1回</td>
+            <td>-</td>
+            <td><button class="detail-btn">詳細をみる</button></td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <!-- 顧客情報詳細 -->
+  <div class="cust-title" style="margin-top:14px;">顧客情報詳細</div>
+
+  <div class="card">
+    <div class="card-head">顧客情報</div>
+    <table class="info-table">
+      <tr><th>名前</th><td>タベッチ 太郎</td></tr>
+      <tr><th>来店回数</th><td>1回</td></tr>
+      <tr><th>電話番号</th><td>09012345678</td></tr>
+    </table>
+
+    <div class="actions">
+      <button class="btn-gray">広告メール送付NGにする</button>
+      <button class="btn-green">このお客様にメールを送付</button>
+    </div>
+  </div>
+
+  <!-- 予約情報 -->
+  <div class="card">
+    <div class="card-head">予約情報</div>
+    <p class="cust-lead">予約情報を編集する場合は「予約情報詳細」をクリックしてください。</p>
+
+    <div class="reserve-box">
+      <div class="reserve-title">2021年04月01日 19:00 / タベッチ 太郎 様 2名</div>
+      <table class="reserve-table">
+        <tr><th>予約状況</th><td>ご来店</td></tr>
+        <tr><th>コース名</th><td>シェフのおすすめコース</td></tr>
+        <tr><th>備考</th><td>-</td></tr>
+      </table>
+    </div>
+
+    <div class="back-area">
+      <button class="back-btn">戻る</button>
+    </div>
+  </div>
+
+</div>
+
 {% endblock %}

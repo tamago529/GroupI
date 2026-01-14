@@ -6,5 +6,201 @@
 <a href="{% url 'accounts:store_account_staff_input' %}">店舗アカウント作成担当者情報入力画面へ</a>    
 <a href="{% url 'accounts:store_account_mail_sent' %}">店舗アカウント作成メール送信完了画面へ</a>    
 
+<style>
+.page{max-width:960px;margin:0 auto;padding:18px 0 50px;color:#333;}
+.header-bar{background:#22395a;color:#fff;padding:12px 18px;border-radius:4px;font-weight:700;}
 
+.step-bar{display:flex;margin:18px 0 18px;font-size:12px;}
+.step{flex:1;text-align:center;padding:8px 6px;background:#e6e6e6;color:#999;}
+.step.active{background:#22395a;color:#fff;font-weight:700;}
+
+.section-title{
+  margin-top:18px;
+  font-weight:700;
+  border-left:4px solid #22395a;
+  padding-left:10px;
+}
+
+.table-wrap{
+  margin-top:12px;
+  border:1px solid #d8d8d8;
+  background:#fff;
+}
+
+.form-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+
+.form-table th, .form-table td{
+  border-top:1px solid #e6e6e6;
+  padding:10px 12px;
+  vertical-align:top;
+}
+
+.form-table th{
+  width:230px;
+  background:#f7f7f7;
+  font-weight:700;
+}
+
+.value-box{
+  padding:6px 8px;
+  background:#fafafa;
+  border:1px solid #e0e0e0;
+  border-radius:3px;
+  display:inline-block;
+  min-width:240px;
+  max-width:100%;
+  word-break:break-word;
+}
+
+.value-wide{min-width:420px;}
+
+.note{
+  margin-top:6px;
+  font-size:11px;
+  color:#666;
+  line-height:1.6;
+}
+
+.btn-area{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin:18px 0 10px;
+}
+
+.btn-back{
+  width:200px;
+  padding:10px 0;
+  background:#f7f7f7;
+  border:1px solid #bfbfbf;
+  border-radius:3px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.btn-send{
+  width:260px;
+  padding:10px 0;
+  background:#8db239; /* 緑 */
+  color:#fff;
+  border:none;
+  border-radius:3px;
+  font-weight:700;
+  cursor:pointer;
+}
+.btn-send:hover{opacity:.92;}
+.btn-back:hover{background:#efefef;}
+</style>
+
+<div class="page">
+  <div class="header-bar">店舗会員（無料）登録をご希望の飲食店様へ</div>
+
+  <div class="step-bar">
+    <div class="step">個人情報の取り扱い同意</div>
+    <div class="step">担当者情報入力</div>
+    <div class="step active">担当者情報確認</div>
+    <div class="step">送信完了</div>
+  </div>
+
+  <div class="section-title">担当者情報確認</div>
+  <p style="font-size:12px;color:#666;margin:8px 0 0;">
+    入力内容をご確認ください。修正がある場合は「戻る」を押してください。
+  </p>
+
+  <div class="table-wrap">
+    <form method="post" action="">
+      {% csrf_token %}
+
+      <table class="form-table">
+        <tr>
+          <th>店舗ID</th>
+          <td><span class="value-box">{{ store.id|default:"-" }}</span></td>
+        </tr>
+        <tr>
+          <th>店名</th>
+          <td>
+            <span class="value-box value-wide">
+              {{ store.store_name|default:"-" }} {{ store.branch_name|default:"" }}
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <th>店舗電話番号</th>
+          <td><span class="value-box">{{ store.phone_number|default:"-" }}</span></td>
+        </tr>
+        <tr>
+          <th>店舗住所</th>
+          <td><span class="value-box value-wide">{{ store.address|default:"-" }}</span></td>
+        </tr>
+
+        <tr>
+          <th>お名前</th>
+          <td><span class="value-box">{{ staff_name|default:"-" }}</span></td>
+        </tr>
+        <tr>
+          <th>お名前（カナ）</th>
+          <td><span class="value-box">{{ staff_name_kana|default:"-" }}</span></td>
+        </tr>
+
+        <tr>
+          <th>役職</th>
+          <td><span class="value-box">{{ position|default:"-" }}</span></td>
+        </tr>
+
+        <tr>
+          <th>ご連絡用電話番号</th>
+          <td>
+            <span class="value-box">
+              {{ contact_tel|default:"-" }}
+            </span>
+
+            <div class="note">
+              つながりやすい時間帯：{{ call_time_text|default:"未選択" }}
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <th>メールアドレス</th>
+          <td><span class="value-box value-wide">{{ email|default:"-" }}</span></td>
+        </tr>
+
+        <tr>
+          <th>店舗の予約受付について</th>
+          <td>
+            <span class="value-box">
+              {% if reservable == "1" %}予約を受け付けている{% elif reservable == "0" %}予約を受け付けていない{% else %}-{% endif %}
+            </span>
+          </td>
+        </tr>
+      </table>
+
+      {# 次へ渡すため hidden（確認→送信完了で使う想定） #}
+      <input type="hidden" name="staff_name" value="{{ staff_name|default:'' }}">
+      <input type="hidden" name="staff_name_kana" value="{{ staff_name_kana|default:'' }}">
+      <input type="hidden" name="position" value="{{ position|default:'' }}">
+      <input type="hidden" name="contact_tel1" value="{{ contact_tel1|default:'' }}">
+      <input type="hidden" name="contact_tel2" value="{{ contact_tel2|default:'' }}">
+      <input type="hidden" name="contact_tel3" value="{{ contact_tel3|default:'' }}">
+      {% for t in call_time_list %}
+        <input type="hidden" name="call_time" value="{{ t }}">
+      {% endfor %}
+      <input type="hidden" name="email" value="{{ email|default:'' }}">
+      <input type="hidden" name="reservable" value="{{ reservable|default:'' }}">
+
+      <div class="btn-area">
+        <button class="btn-back" type="button" onclick="history.back()">戻る</button>
+        <button class="btn-send" type="submit">送信する</button>
+      </div>
+
+      <p style="font-size:11px;color:#666;text-align:center;margin:0 0 14px;">
+        ※この時点ではまだ本登録ではありません。送信後、タベッチよりご連絡します。
+      </p>
+    </form>
+  </div>
+</div>
 {% endblock %}
