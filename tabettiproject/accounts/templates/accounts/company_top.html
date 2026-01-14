@@ -1,29 +1,41 @@
 {% extends 'company_base.html' %}
-{% block content %}
-運用トップ画面
 
-<<<<<<< HEAD
+{% block content %}
+<!-- デザイン用のスタイルを直接記述 -->
+<style>
+    .company-top-wrapper {
+        max-width: 1000px;
+        margin: 40px auto;
+        padding: 0 20px;
+        font-family: sans-serif;
+    }
+
     /* ⑦ 運用トップ タイトル */
     .admin-title {
         font-size: 24px;
         font-weight: bold;
         margin-bottom: 30px;
         color: #333;
-        border-left: 5px solid #ff9600; 
+        border-left: 5px solid #ff9600; /* 食べログっぽいアクセントカラー */
         padding-left: 15px;
     }
-=======
-<a href="{% url 'accounts:stores_review_list_store' %}">口コミ一覧（店舗）画面へ</a>
-<a href="{% url 'accounts:company_account_management' %}">アカウント管理運用画面へ</a>
-<a href="{% url 'accounts:company_store_review' %}">店舗アカウント審査運用画面へ</a>    
-<a href="{% url 'accounts:report' %}">報告管理へ</a>    
-<a href="{% url 'accounts:company_store_management' %}">店舗管理へ</a>  
-<a href="{% url 'accounts:company_logout' %}">ログアウトへ</a>    
->>>>>>> 691eb8b38a2fa77e11a583443b4321c9242fb9c7
 
+    /* 1〜6を並べるグリッド */
+    .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); /* 横3列 */
+        gap: 20px;
+    }
 
+    /* ボタン（カード）の共通設定 */
+    .menu-item {
+        background: #ffffff;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+        text-align: center;
+    }
 
-<<<<<<< HEAD
     /* マウスを乗せた時の動き */
     .menu-item:hover {
         border-color: #ff9600;
@@ -65,7 +77,7 @@
     <div class="menu-grid">
         <!-- ① 口コミの閲覧 -->
         <div class="menu-item">
-            <a href="{% url 'reviews:company_review_list' %}" class="menu-link">
+            <a href="#" class="menu-link">
                 口コミの閲覧
             </a>
         </div>
@@ -86,14 +98,14 @@
 
         <!-- ④ 報告管理 -->
         <div class="menu-item">
-            <a href="{% url 'reviews:report' %}" class="menu-link">
+            <a href="#" class="menu-link">
                 報告管理
             </a>
         </div>
 
         <!-- ⑤ 店舗管理 -->
         <div class="menu-item">
-            <a href="{% url 'stores:company_store_management' %}" class="menu-link">
+            <a href="#" class="menu-link">
                 店舗管理
             </a>
         </div>
@@ -106,6 +118,4 @@
         </div>
     </div>
 </div>
-=======
->>>>>>> 691eb8b38a2fa77e11a583443b4321c9242fb9c7
 {% endblock %}

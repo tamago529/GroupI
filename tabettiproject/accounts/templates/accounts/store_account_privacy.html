@@ -3,6 +3,163 @@
 店舗アカウント作成個人情報取り扱い画面
 
 
+<style>
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 20px 0 50px;
+  color: #333;
+}
+
+/* タイトル帯 */
+.title-bar {
+  background: #22395a;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+/* ステップバー */
+.step-bar {
+  display: flex;
+  margin: 18px 0 24px;
+  font-size: 12px;
+}
+.step {
+  flex: 1;
+  padding: 8px 6px;
+  text-align: center;
+  background: #e6e6e6;
+  color: #999;
+}
+.step.active {
+  background: #22395a;
+  color: #fff;
+  font-weight: 700;
+}
+
+/* セクション */
+.section {
+  margin-top: 20px;
+}
+.section-title {
+  font-weight: 700;
+  border-left: 4px solid #22395a;
+  padding-left: 10px;
+  margin-bottom: 10px;
+}
+
+/* 注意枠 */
+.notice-box {
+  border: 1px solid #ccc;
+  padding: 16px;
+  font-size: 12px;
+  line-height: 1.8;
+  background: #fafafa;
+}
+
+/* チェック */
+.agree-area {
+  text-align: center;
+  margin: 20px 0;
+  font-size: 13px;
+}
+
+/* ボタン */
+.btn-next {
+  display: block;
+  width: 260px;
+  margin: 0 auto;
+  padding: 10px 0;
+  background: #cfd8c3;
+  color: #fff;
+  text-align: center;
+  border-radius: 4px;
+  font-weight: 700;
+  cursor: not-allowed;
+}
+
+.btn-next.active {
+  background: #8db239;
+  cursor: pointer;
+}
+</style>
+
+<div class="page">
+
+  <div class="title-bar">
+    店舗会員（無料）登録をご希望の飲食店様へ
+  </div>
+
+  <!-- ステップ -->
+  <div class="step-bar">
+    <div class="step active">個人情報の取り扱い同意</div>
+    <div class="step">担当者情報入力</div>
+    <div class="step">担当者情報確認</div>
+    <div class="step">送信完了</div>
+  </div>
+
+  <!-- 説明 -->
+  <p style="font-size:13px;">
+    以下の「個人情報の取り扱いについて」をご確認の上、<br>
+    「同意する」にチェックいただき、次へお進みください。
+  </p>
+
+  <!-- 個人情報説明 -->
+  <div class="section">
+    <div class="section-title">個人情報の取り扱いについて</div>
+
+    <div class="notice-box">
+      <ol style="padding-left:18px;">
+        <li>当社はお問い合わせフォームで取得した個人情報を返信目的にのみ利用します。</li>
+        <li>
+          利用目的に必要な範囲内において、
+          当社関連会社または業務委託先に提供する場合があります。
+        </li>
+        <li>
+          個人情報の開示、訂正、利用停止等をご希望の場合は、
+          個人情報の取り扱いについてのページをご確認ください。
+        </li>
+        <li>
+          必要事項をご記入いただけない場合、
+          お問い合わせへの対応ができない場合があります。
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- 同意 -->
+  <div class="agree-area">
+    <label>
+      <input type="checkbox" id="agreeChk">
+      同意する
+    </label>
+  </div>
+
+  <!-- 次へ（JSなしの見た目だけ） -->
+  <div id="nextBtn" class="btn-next">
+    担当者情報入力画面へ進む
+  </div>
+
+</div>
+
+<script>
+const chk = document.getElementById("agreeChk");
+const btn = document.getElementById("nextBtn");
+
+chk.addEventListener("change", function () {
+  if (this.checked) {
+    btn.classList.add("active");
+    btn.style.cursor = "pointer";
+  } else {
+    btn.classList.remove("active");
+    btn.style.cursor = "not-allowed";
+  }
+});
+</script>
+
+
 <a href="{% url 'search:customer_top' %}">顧客トップ画面へ</a>
 <a href="{% url 'accounts:store_account_staff_input' %}">担当者情報入力画面へ</a>
 
