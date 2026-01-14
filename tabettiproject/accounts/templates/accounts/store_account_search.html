@@ -4,8 +4,88 @@
 
 <a href="{% url 'search:customer_top' %}">顧客トップ画面へ</a>   
 
-<!--「検索」を押下すると、JSが該当店舗を表示-->
 
+<style>
+.page{max-width:960px;margin:0 auto;padding:20px;}
+.title-bar{background:#22395a;color:#fff;padding:12px;border-radius:4px;font-weight:700;}
 
+.search-box{background:#fff7cc;border:1px solid #f0e3a5;padding:20px;margin-top:16px;}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:12px;margin-bottom:4px;}
+.field input, select{padding:8px;width:100%;max-width:400px;}
+
+.btn{padding:10px 20px;background:#2a69a8;color:#fff;border:none;border-radius:4px;font-weight:700;}
+
+.tools{display:flex;justify-content:space-between;margin-top:14px;font-size:12px;}
+
+.results{margin-top:10px;border-top:1px solid #ccc;}
+.row{padding:10px 0;border-bottom:1px dotted #ccc;display:flex;justify-content:space-between;}
+.store-name{color:#1e73c9;font-weight:700;}
+.store-meta{font-size:12px;color:#666;}
+</style>
+
+<div class="page">
+  <div class="title-bar">店舗会員（無料）のお申し込みの前に</div>
+
+  <div class="search-box">
+    <form method="get" action="{% url 'owner_info:entry_flow' %}">
+      <div class="field">
+        <label>店舗名</label>
+        <input name="rst_name" value="{{ q_rst_name }}" placeholder="例）マクドナルド">
+      </div>
+      <div class="field">
+        <label>電話番号</label>
+        <input name="tel_number" value="{{ q_tel }}" placeholder="例）03-1234-5678">
+      </div>
+      <button class="btn" type="submit">検索</button>
+    </form>
+
+    <div class="tools">
+      <div>
+        絞り込み：
+        <form method="get" style="display:inline;">
+          <input type="hidden" name="rst_name" value="{{ q_rst_name }}">
+          <input type="hidden" name="tel_number" value="{{ q_tel }}">
+          <select name="area" onchange="this.form.submit()">
+            <option value="">エリア</option>
+            {% for a in areas %}
+              <option value="{{ a.id }}" {% if q_area|stringformat:"s" == a.id|stringformat:"s" %}selected{% endif %}>
+                {{ a.area_name }}
+              </option>
+            {% endfor %}
+          </select>
+        </form>
+      </div>
+
+      <div>
+        {% if stores %}
+          {{ stores.start_index }}〜{{ stores.end_index }}件 / 全{{ total_count }}件
+        {% else %}
+          0件
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="results">
+      {% for s in stores %}
+        <div class="row">
+          <div>
+            <div class="store-name">
+              {{ s.store_name }}{% if s.branch_name %} {{ s.branch_name }}{% endif %}
+            </div>
+            <div class="store-meta">
+              {{ s.address }} / {{ s.phone_number }}
+            </div>
+          </div>
+          <div>
+            <span style="font-size:12px;color:#999;">申込は後で</span>
+          </div>
+        </div>
+      {% empty %}
+        <p>該当する店舗がありません。</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
 
 {% endblock %}
