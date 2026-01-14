@@ -1,9 +1,72 @@
-{% extends 'customer_base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>無料会員登録 / ログイン</title>
+  <link rel="stylesheet" href="{% static 'css/customer_login.css' %}">
+</head>
+<body>
 
-{% block content %}
+<!-- ヘッダー -->
+{% include 'customer_header.html' %}
 
-<a href="{% url 'accounts:customer_top' %}">顧客トップへ</a>    
+<div class="auth-wrapper">
 
-顧客ログイン画面
+  <div class="auth-container">
 
-{% endblock %}
+    <!-- ===== 左：無料会員登録 ===== -->
+    <div class="auth-box">
+      <h2>無料会員登録</h2>
+
+      <div class="step-box">
+        <p class="step-title">3 STEPでカンタン登録！</p>
+        <div class="steps">
+          <span>1<br>メールアドレス登録</span>
+          <span>2<br>パスワード登録</span>
+          <span>3<br>登録完了</span>
+        </div>
+      </div>
+
+      <p class="auth-text">
+        まだ会員でない方は、<br>
+        以下より会員登録をお願いいたします。
+      </p>
+
+      <a href="#" class="btn-register">無料会員登録はこちら</a>
+    </div>
+
+<!-- ===== 右：ログイン（作り直し） ===== -->
+    <div class="auth-box">
+      <h2>ログイン</h2>
+
+      <p class="auth-text">
+        登録済みの方はこちらからログインしてください。
+      </p>
+
+      <form class="login-form" method="post">
+        {% csrf_token %}
+
+        <label>
+          メールアドレス
+          <input type="email" name="email" required>
+        </label>
+
+        <label>
+          パスワード
+          <input type="password" name="password" required>
+        </label>
+
+        <button type="submit" class="btn-login">ログイン</button>
+      </form>
+
+      <div class="login-links">
+        <a href="#">パスワードを忘れた方</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

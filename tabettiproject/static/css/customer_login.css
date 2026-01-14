@@ -1,0 +1,155 @@
+body {
+  margin: 0;
+  font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+  background: #faf8f4;
+}
+
+.auth-wrapper {
+  max-width: 1100px;
+  margin: 30px auto;
+  padding: 0 20px;
+}
+
+.notice {
+  background: #fff8d8;
+  border: 1px solid #f0e1a0;
+  padding: 10px;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.notice a {
+  color: #0073cc;
+}
+
+.auth-container {
+  display: flex;
+  gap: 30px;
+}
+
+.auth-box {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 30px;
+  width: 50%;
+}
+
+.auth-box h2 {
+  text-align: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+/* ===== 登録側 ===== */
+.step-box {
+  background: #f7f7f7;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.step-title {
+  font-weight: bold;
+  text-align: center;
+}
+
+.steps {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.steps span {
+  background: #fff;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  text-align: center;
+  padding-top: 20px;
+  font-size: 12px;
+  border: 2px solid #f0b400;
+}
+
+.auth-text {
+  text-align: center;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.btn-register {
+  display: block;
+  background: #7dbb2c;
+  color: #fff;
+  text-align: center;
+  padding: 12px;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+/* ===== ログイン側 ===== */
+.login-form label {
+  display: block;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.login-form input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.btn-login {
+  width: 100%;
+  background: #f39800;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  font-size: 15px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.login-links {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.login-links a {
+  font-size: 13px;
+  color: #0073cc;
+}
+/* ===== ログアウト画面 ===== */
+.logout-wrapper {
+  max-width: 600px;
+  margin: 60px auto;
+  padding: 0 20px;
+}
+
+.logout-box {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 40px;
+  text-align: center;
+}
+
+.logout-box h2 {
+  margin-bottom: 20px;
+}
+
+.logout-message {
+  font-size: 14px;
+  margin-bottom: 30px;
+  color: #555;
+}
+
+.btn-top {
+  display: inline-block;
+  background: #f39800;
+  color: #fff;
+  padding: 12px 30px;
+  text-decoration: none;
+  border-radius: 4px;
+}

@@ -1,11 +1,52 @@
-<header class="customer-header">
-    <div class="inner">
-        <h1 class="logo">サイト名</h1>
-        <nav>
-            <ul>
-                <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
-                <li><a href="{% url 'accounts:customer_settings' %}">設定</a></li>
-                <li><a href="{% url 'accounts:customer_logout' %}">ログアウト</a></li>
-            </ul>
-        </nav>
-    </div></header>
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Header Sample{% endblock %}</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<header class="header">
+
+  <!-- 上段：メニュー -->
+  <div class="header-top">
+    <nav class="header-nav">
+      <a href="#">メッセージ</a>
+      <a href="#">お知らせ</a>
+      <a href="#">予約確認</a>
+      <a href="#">行ったお店</a>
+      <a href="#">保存リスト</a>
+      <a href="#">マイページ</a>
+    </nav>
+  </div>
+
+  <!-- 下段：ロゴ＋検索バー -->
+  <div class="header-bottom">
+    <div class="logo">
+      <img src="{% static 'images/Tabecchi.png' %}" alt="Tabecchi Logo">
+    </div>
+
+    <form class="search-bar">
+      <input type="text" placeholder="エリア・駅（例：銀座、渋谷）">
+      <input type="text" placeholder="キーワード（例：焼肉、個室）">
+      <input type="date">
+      <input type="time" value="19:00">
+      <select>
+        <option>1名</option>
+        <option>2名</option>
+        <option>3名</option>
+        <option>4名</option>
+      </select>
+      <button type="submit" class="search-btn">🔍</button>
+    </form>
+  </div>
+</header>
+
+{% block content %}{% endblock %}
+
+</body>
+</html>

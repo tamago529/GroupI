@@ -1,0 +1,254 @@
+/* =========================
+   共通リセット
+========================= */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Helvetica", "Arial", sans-serif;
+  color: #333;
+  background-color: #f7f7f7;
+}
+
+/* =========================
+   ヘッダー全体
+========================= */
+.header {
+  border-bottom: 2px solid rgba(254, 172, 41, 1);
+  background: #fff;
+}
+
+/* ===== 上段メニュー ===== */
+.header-top {
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px 16px;
+  font-size: 13px;
+}
+
+.header-nav {
+  display: flex;
+  gap: 14px;
+}
+
+.header-nav a {
+  text-decoration: none;
+  color: #333;
+}
+
+.header-nav a:hover {
+  text-decoration: underline;
+}
+
+/* ===== 下段（ロゴ＋検索） ===== */
+.header-bottom {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+}
+
+/* ===== ロゴ ===== */
+.logo img {
+  height: 40px;
+  width: auto;
+  display: block;
+}
+
+/* ===== 検索バー ===== */
+.search-bar {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.search-bar input,
+.search-bar select {
+  height: 100%;
+  padding: 0 10px;
+  border: none;
+  border-right: 1px solid #ddd;
+  font-size: 14px;
+  min-width: 0;
+}
+
+.search-bar input:nth-of-type(1) {
+  flex: 2;
+}
+
+.search-bar input:nth-of-type(2) {
+  flex: 1.5;
+}
+
+.search-bar input[type="date"],
+.search-bar input[type="time"],
+.search-bar select {
+  width: 130px;
+}
+
+.search-btn {
+  height: 44px;
+  padding: 0 18px;
+  border: none;
+  background: rgba(255, 173, 22, 1);
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.search-bar input:focus,
+.search-bar select:focus {
+  outline: none;
+}
+
+/* =========================
+   ログイン・登録・共通BOX
+========================= */
+.auth-wrapper,
+.password-reset-wrapper {
+  min-height: calc(100vh - 120px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-box,
+.password-reset-box {
+  width: 420px;
+  background-color: #ffffff;
+  padding: 32px 28px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+/* ===== 見出し ===== */
+.auth-box h2,
+.password-reset-box h2 {
+  font-size: 22px;
+  margin-bottom: 16px;
+  font-weight: bold;
+}
+
+/* ===== 説明文 ===== */
+.reset-description {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+/* =========================
+   フォーム
+========================= */
+.form-group {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #ff8a00;
+}
+
+/* =========================
+   ボタン
+========================= */
+.btn-submit {
+  width: 100%;
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #ff8a00;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-submit:hover {
+  opacity: 0.85;
+}
+
+/* =========================
+   下部リンク
+========================= */
+.back-links {
+  margin-top: 20px;
+  font-size: 13px;
+}
+
+.back-links a {
+  color: #ff8a00;
+  text-decoration: none;
+}
+
+.back-links a:hover {
+  text-decoration: underline;
+}
+
+/* =========================
+   ログアウト画面
+========================= */
+.logout-wrapper {
+  min-height: calc(100vh - 120px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logout-box {
+  width: 420px;
+  background-color: #ffffff;
+  padding: 32px 28px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.logout-box h2 {
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+
+.logout-message {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 24px;
+}
+
+.btn-top {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: #ff8a00;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.btn-top:hover {
+  opacity: 0.85;
+}

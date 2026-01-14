@@ -1,7 +1,29 @@
-{% extends 'customer_base.html' %}
-{% block content %}
-顧客ログアウト画面
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ログアウト完了</title>
+  <link rel="stylesheet" href="{% static 'css/customer_login.css' %}">
+</head>
+<body>
 
-<a href="{% url 'accounts:customer_login' %}">顧客ログイン画面へ</a>    
+{% include 'customer_header.html' %}
 
-{% endblock %}
+<div class="logout-wrapper">
+  <div class="logout-box">
+    <h2>ログアウトが完了しました</h2>
+
+    <p class="logout-message">
+      ご利用ありがとうございました。<br>
+      またのご利用をお待ちしております。
+    </p>
+
+    <a href="{% url 'accounts:customer_top' %}" class="btn-top">
+      トップ画面に戻る
+    </a>
+  </div>
+</div>
+
+</body>
+</html>

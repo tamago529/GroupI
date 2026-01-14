@@ -1,3 +1,66 @@
-顧客共通完了画面
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>完了画面</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+            background-color: #ffffff;
+        }
 
-<a href="{% url 'search:customer_top' %}">顧客トップ画面へ</a>
+        .container {
+            width: 100%;
+            height: 100vh;
+            box-sizing: border-box;
+            padding: 40px;
+            position: relative;
+        }
+
+        .message-box {
+            border: 2px solid #ccc;
+            border-radius: 16px;
+            padding: 40px;
+            font-size: 20px;
+        }
+
+        .top-button {
+            position: absolute;
+            right: 40px;
+            bottom: 40px;
+        }
+
+        .top-button a {
+            display: inline-block;
+            padding: 16px 32px;
+            border: 2px solid #333;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .top-button a:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <!-- 完了メッセージ -->
+        <div class="message-box">
+                が完了しました
+        </div>
+
+        <!-- 顧客トップへ -->
+        <div class="top-button">
+            <a href="{% url 'search:customer_top' %}">
+                TOPへ
+            </a>
+        </div>
+
+    </div>
+</body>
+</html>

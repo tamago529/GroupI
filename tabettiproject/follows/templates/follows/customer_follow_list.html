@@ -1,12 +1,80 @@
-{% extends "customer_base.html" %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>フォロー中</title>
+  <link rel="stylesheet" href="{% static 'css/follow_list.css' %}">
+</head>
+<body>
 
-{% block title %}フォロー一覧画面{% endblock %}
+{% include "customer_header.html" %}
+<!-- ===== ヘッダー ===== -->
+<div class="profile-header">
+  <div class="profile-cover">
+    <div class="profile-icon"></div>
+    <div class="profile-title">僕のレストランガイド</div>
+    <a href="#" class="profile-setting">マイページ設定</a>
+  </div>
 
-{% block content %}
-<h2>フォロー一覧画面</h2>
+  <div class="profile-name">noconeco</div>
 
-<a href="{% url 'reviews:customer_reviewer_detail'}">レビュアー詳細画面</a>
-<a href="{% url 'reviews:customer_reviewer_review_list' %}">レビュアー口コミ一覧</a>
-<a href="{% url 'follows:customer_follower_list' %}">フォロワー一覧</a>
+  <nav class="profile-nav">
+    <a href="#">トップ</a>
+    <a href="#">行ったお店</a>
+    <a href="#">口コミ</a>
+    <a href="#">まとめ</a>
+    <a href="#" class="active">フォロー中</a>
+    <a href="#">フォロワー</a>
+  </nav>
+</div>
 
-{% endblock %}
+<!-- ===== メイン ===== -->
+<div class="container">
+
+  <h2 class="follow-title">フォロー中 <span>4人</span></h2>
+
+  <div class="card-list">
+
+    <!-- カード -->
+    <div class="user-card">
+      <div class="card-image"></div>
+      <div class="card-body">
+        <div class="card-name">レオ41919</div>
+        <button class="follow-btn">フォロー中</button>
+        <div class="card-info">
+          <div>10ログ</div>
+          <div>フォロワー数：4人</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="user-card">
+      <div class="card-image"></div>
+      <div class="card-body">
+        <div class="card-name">75adf5</div>
+        <button class="follow-btn">フォロー中</button>
+        <div class="card-info">
+          <div>1ログ</div>
+          <div>フォロワー数：3人</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="user-card">
+      <div class="card-image"></div>
+      <div class="card-body">
+        <div class="card-name">ニックネーム16191</div>
+        <button class="follow-btn">フォロー中</button>
+        <div class="card-info">
+          <div>11ログ</div>
+          <div>フォロワー数：4人</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

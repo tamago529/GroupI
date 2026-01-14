@@ -1,3 +1,92 @@
-顧客共通確認画面
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>確認画面</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+            background-color: #ffffff;
+        }
 
-<a href="{% url 'commons:customer_common_complete' %}">顧客共通完了画面へ</a>
+        .page {
+            width: 100%;
+            height: 100vh;
+            box-sizing: border-box;
+            padding: 40px;
+            position: relative;
+        }
+
+        /* 枠 */
+        .confirm-box {
+            width: 100%;
+            height: 70%;
+            border: 3px solid #000;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .confirm-text {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 32px;
+        }
+
+        /* ボタン（枠外） */
+        .button-area {
+            position: absolute;
+            right: 40px;
+            bottom: 40px;
+        }
+
+        .button-area a,
+        .button-area button {
+            display: inline-block;
+            min-width: 120px;
+            padding: 14px 0;
+            margin-left: 16px;
+            border: 2px solid #333;
+            border-radius: 12px;
+            background-color: #fff;
+            text-align: center;
+            text-decoration: none;
+            color: #000;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .button-area a:hover,
+        .button-area button:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+
+        <!-- 枠内 -->
+        <div class="confirm-box">
+            <div class="confirm-text">
+                （確認内容）
+            </div>
+        </div>
+
+        <!-- 枠外ボタン -->
+        <div class="button-area">
+            <a href="javascript:history.back();">
+                キャンセル
+            </a>
+
+            <form action="" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit">OK</button>
+            </form>
+        </div>
+
+    </div>
+</body>
+</html>
