@@ -34,7 +34,7 @@ urlpatterns = [
 
     path('reviews/', include('reviews.urls'), name='reviews'),
 
-    path('stores/', include(('stores.urls', 'stores'), namespace='stores')),
+    path('stores/', include('stores.urls'), name='stores'),
 
     path('search/', include('search.urls'), name='search'),
 

@@ -2,13 +2,110 @@
 {% block content %}
 運用トップ画面
 
+<<<<<<< HEAD
+    /* ⑦ 運用トップ タイトル */
+    .admin-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        color: #333;
+        border-left: 5px solid #ff9600; 
+        padding-left: 15px;
+    }
+=======
 <a href="{% url 'accounts:stores_review_list_store' %}">口コミ一覧（店舗）画面へ</a>
 <a href="{% url 'accounts:company_account_management' %}">アカウント管理運用画面へ</a>
 <a href="{% url 'accounts:company_store_review' %}">店舗アカウント審査運用画面へ</a>    
 <a href="{% url 'accounts:report' %}">報告管理へ</a>    
 <a href="{% url 'accounts:company_store_management' %}">店舗管理へ</a>  
 <a href="{% url 'accounts:company_logout' %}">ログアウトへ</a>    
+>>>>>>> 691eb8b38a2fa77e11a583443b4321c9242fb9c7
 
 
 
+<<<<<<< HEAD
+    /* マウスを乗せた時の動き */
+    .menu-item:hover {
+        border-color: #ff9600;
+        background-color: #fffaf0;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    /* リンクをカード全体に広げる */
+    .menu-link {
+        display: block;
+        padding: 40px 20px;
+        text-decoration: none;
+        color: #333;
+        font-weight: bold;
+        font-size: 18px;
+        height: 100%;
+    }
+
+    /* ⑥ ログアウトだけ少し色味を変える（任意） */
+    .logout-item {
+        background-color: #f9f9f9;
+    }
+
+    /* レスポンシブ対応：画面が狭いときは2列、さらに狭いときは1列にする */
+    @media (max-width: 768px) {
+        .menu-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+        .menu-grid { grid-template-columns: 1fr; }
+    }
+</style>
+
+<div class="company-top-wrapper">
+    <!-- ⑦ タイトル -->
+    <h1 class="admin-title">運用トップ</h1>
+
+    <!-- ボタン配置エリア -->
+    <div class="menu-grid">
+        <!-- ① 口コミの閲覧 -->
+        <div class="menu-item">
+            <a href="{% url 'reviews:company_review_list' %}" class="menu-link">
+                口コミの閲覧
+            </a>
+        </div>
+
+        <!-- ② アカウント管理 -->
+        <div class="menu-item">
+            <a href="{% url 'accounts:company_account_management' %}" class="menu-link">
+                アカウント管理
+            </a>
+        </div>
+
+        <!-- ③ 店舗アカウント審査 -->
+        <div class="menu-item">
+            <a href="{% url 'accounts:company_store_review' %}" class="menu-link">
+                店舗アカウント審査
+            </a>
+        </div>
+
+        <!-- ④ 報告管理 -->
+        <div class="menu-item">
+            <a href="{% url 'reviews:report' %}" class="menu-link">
+                報告管理
+            </a>
+        </div>
+
+        <!-- ⑤ 店舗管理 -->
+        <div class="menu-item">
+            <a href="{% url 'stores:company_store_management' %}" class="menu-link">
+                店舗管理
+            </a>
+        </div>
+
+        <!-- ⑥ ログアウト -->
+        <div class="menu-item logout-item">
+            <a href="{% url 'accounts:company_logout' %}" class="menu-link">
+                ログアウト
+            </a>
+        </div>
+    </div>
+</div>
+=======
+>>>>>>> 691eb8b38a2fa77e11a583443b4321c9242fb9c7
 {% endblock %}

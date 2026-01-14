@@ -11,5 +11,4 @@ urlpatterns = [
   path("store_common_confirm/", store_common_confirmView.as_view(), name='store_common_confirm'),
   path("company_common_complete/", company_common_completeView.as_view(), name='company_common_complete'),
   path("company_common_confirm/", company_common_confirmView.as_view(), name='company_common_confirm'),
-
 ]

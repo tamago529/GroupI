@@ -40,21 +40,3 @@ class store_topView(TemplateView):
 
 class company_store_managementView(TemplateView):
     template_name = "stores/company_store_management.html"
-
-class store_info_listView(TemplateView):
-    template_name = "stores/store_info_list.html"
-
-class store_account_editView(TemplateView):
-    template_name = "stores/store_account_edit.html"
-
-class store_logoutView(TemplateView):
-    template_name = "stores/store_logout.html"    
-
-class reservation_calendarView(TemplateView):
-    template_name = "stores/reservation_calendar.html"
-
-class reservation_ledgerView(TemplateView):
-    template_name = "stores/reservation_ledger.html"
-
-class store_review_listView(TemplateView):
-    template_name = "stores/store_review_list.html"

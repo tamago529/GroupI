@@ -5,6 +5,182 @@
 # 「検索」を押下すると、JSで一覧が変わる
 # 「詳細」を押下すると、JSでポップが表示
 
+<<<<<<< HEAD
+    .search-input {
+        flex: 1;
+        padding: 12px 20px;
+        border: 2px solid #333;
+        border-radius: 15px; 
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .btn-search {
+        padding: 10px 30px;
+        background-color: #fff;
+        border: 2px solid #333;
+        border-radius: 15px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    /* ③④⑤ アカウントリスト */
+    .account-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .account-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 25px;
+        border: 2px solid #333;
+        border-radius: 15px; 
+        background-color: #fff;
+    }
+
+    .account-name {
+        font-size: 22px;
+        color: #333;
+    }
+
+    .item-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    /* ボタン共通（詳細・削除） */
+    .btn-item {
+        padding: 8px 25px;
+        border: 2px solid #333;
+        border-radius: 12px;
+        background-color: #fff;
+        font-size: 18px;
+        font-weight: bold;
+        text-decoration: none;
+        color: #000;
+        cursor: pointer;
+    }
+
+    /* ⑥ ポップアップ（モーダル） */
+    .modal-overlay {
+        display: none; 
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.2);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-box {
+        background: #fff;
+        border: 2px solid #333;
+        border-radius: 30px; 
+        width: 450px;
+        padding: 40px;
+        position: relative;
+    }
+
+    .modal-text {
+        font-size: 18px;
+        margin-bottom: 30px;
+        color: #333;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .btn-ok {
+        padding: 8px 30px;
+        border: 2px solid #333;
+        border-radius: 12px;
+        background-color: #fff;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    /* 下部ナビゲーション */
+    .footer-nav {
+        margin-top: 40px;
+        border-top: 1px solid #eee;
+        padding-top: 20px;
+    }
+</style>
+
+<div class="account-admin-wrapper">
+    <!-- ①② 検索セクション -->
+    <div class="search-row">
+        <input type="text" id="searchInput" class="search-input" placeholder="検索条件">
+        <button class="btn-search" onclick="handleSearch()">検索</button>
+    </div>
+
+    <!-- ③④⑤ 一覧セクション -->
+    <div class="account-list" id="accountList">
+        <!-- サンプル1 -->
+        <div class="account-item">
+            <div class="account-name">アカウント名</div>
+            <div class="item-actions">
+                <button class="btn-item" onclick="alert('詳細ポップを表示')">詳細</button>
+                <a href="{% url 'commons:company_common_confirm.html' %}" class="btn-item">削除</a>
+            </div>
+        </div>
+        <!-- サンプル2 -->
+        <div class="account-item">
+            <div class="account-name">アカウント名</div>
+            <div class="item-actions">
+                <button class="btn-item">詳細</button>
+                <a href="{% url 'commons:company_common_confirm.html' %}" class="btn-item">削除</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 運用トップへのリンク -->
+    <div class="footer-nav">
+        <a href="{% url 'accounts:company_top' %}">運用トップへ戻る</a>
+    </div>
+</div>
+
+<!-- ⑥ 未入力・不一致時のポップアップ -->
+<div class="modal-overlay" id="errorModal">
+    <div class="modal-box">
+        <p class="modal-text">該当するユーザーは存在しません</p>
+        <div class="modal-footer">
+            <button class="btn-ok" onclick="closeModal()">OK</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ② 検索ボタンを押した時の処理
+    function handleSearch() {
+        const input = document.getElementById('searchInput').value;
+        const modal = document.getElementById('errorModal');
+        
+        // 未入力、または特定の条件（ここでは仮に "error" と入力された場合）でポップアップを出す
+        if (input.trim() === "" || input === "存在しない名前") {
+            modal.style.display = "flex";
+        } else {
+            alert(input + " で検索しました（一覧を更新する処理をここに書く）");
+        }
+    }
+
+    // ⑥ OKボタンでポップアップを閉じる
+    function closeModal() {
+        document.getElementById('errorModal').style.display = "none";
+    }
+</script>
+
+{% endblock %}
+=======
 <a href="{% url 'commons:company_common_confirm' %}">削除するとここに遷移</a>
 
 <a href="{% url 'accounts:company_top' %}">運用トップ</a>
+>>>>>>> 691eb8b38a2fa77e11a583443b4321c9242fb9c7
