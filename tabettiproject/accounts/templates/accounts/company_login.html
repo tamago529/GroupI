@@ -1,3 +1,181 @@
-企業ログイン
+{% extends 'company_base.html' %}
 
-<a href="{% url 'accounts:customer_password_reset' %}">ログインID・パスワードを忘れた方はこちら</a>
+{% block content %}
+<style>
+    /* 画面全体の背景（もしベース側で設定されていなければ） */
+    body {
+        background-color: #f8f9fa;
+    }
+
+    /* ログインカードのコンテナ */
+    .login-container {
+        max-width: 450px;
+        margin: 60px auto;
+        padding: 40px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        font-family: sans-serif;
+    }
+
+    /* ① 画面タイトル */
+    .login-container h2 {
+        text-align: center;
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        color: #333;
+    }
+
+    /* エラーメッセージエリア */
+    .error-messages {
+        background-color: #fff2f2;
+        border: 1px solid #d9534f;
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+    .error-text, .field-error {
+        color: #d9534f;
+        font-size: 14px;
+        margin: 5px 0;
+        list-style: none;
+    }
+
+    /* フォームグループ */
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 8px;
+        font-size: 14px;
+        color: #555;
+    }
+
+    /* 入力フィールド */
+    .form-group input[type="text"],
+    .form-group input[type="password"] {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 16px;
+        transition: border-color 0.2s;
+    }
+    .form-group input:focus {
+        border-color: #ff9600; 
+        outline: none;
+        box-shadow: 0 0 5px rgba(255, 150, 0, 0.2);
+    }
+
+    /* チェックボックス */
+    .form-check {
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+    }
+    .form-check input {
+        margin-right: 10px;
+        cursor: pointer;
+    }
+    .form-check label {
+        font-size: 14px;
+        color: #666;
+        cursor: pointer;
+    }
+
+    /* ④ ログインボタン */
+    .submit-area input[type="submit"] {
+        width: 100%;
+        background-color: #ff9600;
+        color: #fff;
+        border: none;
+        padding: 14px;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .submit-area input[type="submit"]:hover {
+        background-color: #e68700;
+    }
+
+    /* ⑤ パスワード忘れリンク */
+    .login-footer-links {
+        margin-top: 20px;
+        text-align: center;
+    }
+    .login-footer-links a {
+        font-size: 13px;
+        color: #007bff;
+        text-decoration: none;
+    }
+    .login-footer-links a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="login-container">
+    <!-- ① 画面タイトル -->
+    <h2>タべっち 運用管理画面ログイン</h2>
+
+    <!-- エラーメッセージ表示エリア -->
+    {% if form.errors or messages %}
+    <div class="error-messages">
+        {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+                <p class="error-text">{{ error }}</p>
+            {% endfor %}
+        {% endif %}
+        
+        {% for message in messages %}
+            <p class="error-text">{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- ② ログインID -->
+        <div class="form-group">
+            <label for="id">ログインID</label>
+            <input type="text" name="id" id="id" placeholder="6～12桁の半角英数">
+            {% if form.id.errors %}
+                <p class="field-error">{{ form.id.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <!-- ③ パスワード -->
+        <div class="form-group">
+            <label for="password">パスワード</label>
+            <input type="password" name="password" id="password" placeholder="8～20桁の半角英数（英大文字・小文字含む）">
+            {% if form.password.errors %}
+                <p class="field-error">{{ form.password.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <!-- 次回から自動的にログインする -->
+        <div class="form-check">
+            <input type="checkbox" name="remember" id="remember">
+            <label for="remember">次回から自動的にログインする</label>
+        </div>
+
+        <!-- ④ ログインボタン -->
+        <div class="submit-area">
+            <input type="submit" name="login" value="ログインする">
+        </div>
+    </form>
+
+    <!-- ⑤ リンク -->
+    <div class="login-footer-links">
+        <a href="{% url 'accounts:customer_password_reset' %}">ログインID・パスワードを忘れた方はこちら</a>
+    </div>
+
+</div>
+{% endblock %}

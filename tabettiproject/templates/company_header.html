@@ -1,3 +1,79 @@
+<style>
+    /* ヘッダー全体のスタイル */
+    .company-header {
+        background-color: #ffffff;
+        border-bottom: 2px solid #ff9600; /* 食べログオレンジのアクセントライン */
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 0;
+        font-family: sans-serif;
+    }
+
+    /* ヘッダー内部のコンテンツ幅制限 */
+    .company-header .inner {
+        max-width: 1000px; /* 他の画面のコンテナ幅と合わせる */
+        margin: 0 auto;
+        padding: 0 20px;
+        height: 70px; /* ヘッダーの高さ */
+        display: flex;
+        justify-content: space-between; /* ロゴとナビを両端に */
+        align-items: center;
+    }
+
+    /* 左側：運用管理ロゴ */
+    .company-header .logo {
+        font-size: 20px;
+        font-weight: bold;
+        color: #333;
+        margin: 0;
+    }
+
+    /* 右側：ナビゲーション */
+    .company-header nav ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        gap: 20px; /* メニュー間の隙間 */
+    }
+
+    /* ナビゲーションのリンク */
+    .company-header nav a {
+        text-decoration: none;
+        color: #666;
+        font-size: 14px;
+        font-weight: bold;
+        transition: color 0.2s, border-bottom 0.2s;
+        padding: 5px 0;
+    }
+
+    /* ホバー時の演出 */
+    .company-header nav a:hover {
+        color: #ff9600;
+        border-bottom: 2px solid #ff9600;
+    }
+
+    /* ログアウトだけ色を変える（任意） */
+    .company-header nav a[href*="logout"]:hover {
+        color: #d9534f;
+        border-bottom-color: #d9534f;
+    }
+
+    /* スマホ対応（画面が狭いときに文字が重ならないように） */
+    @media (max-width: 768px) {
+        .company-header .inner {
+            flex-direction: column;
+            height: auto;
+            padding: 10px;
+        }
+        .company-header nav ul {
+            margin-top: 10px;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    }
+</style>
+
 <header class="company-header">
     <div class="inner">
         <h1 class="logo">運用管理</h1>
@@ -9,4 +85,5 @@
                 <li><a href="{% url 'accounts:company_logout' %}">ログアウト</a></li>
             </ul>
         </nav>
-    </div></header>
+    </div>
+</header>

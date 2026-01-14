@@ -1,10 +1,88 @@
-店舗管理運用画面
-{% extends "customer_base.html" %}
-{% block content %}
-<a href = "{% url 'stores:store_top' %}">店舗トップ画面へ移動</a>
-<a href = "{% url 'accounts:company_top' %}">運用トップ画面へ移動</a>
-{% endblock %}
+{% extends "company_base.html" %}
 
-<!-- 検索機能 -->
-<!-- 店舗一覧表示 -->
-<!-- 削除機能 -->
+{% block content %}
+<style>
+    /* 全体の余白 */
+    .store-admin-wrapper {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 20px;
+        font-family: sans-serif;
+    }
+
+    /* 画面タイトル */
+    .page-title {
+        font-size: 22px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    /* 店舗を並べるエリア */
+    .store-list-area {
+        display: flex;
+        flex-direction: column;
+        gap: 15px; /* 枠と枠の間の隙間 */
+        margin-bottom: 30px;
+    }
+
+    /* 店舗の「枠（フレーム）」 */
+    .store-frame {
+        border: 1px solid #ccc; /* 枠線 */
+        padding: 20px;
+        border-radius: 5px;
+        background-color: #fff;
+        /* 中身がなくても形を維持するための高さ */
+        min-height: 60px; 
+        display: flex;
+        align-items: center;
+    }
+
+    /* 枠の中の文字（店舗名など） */
+    .store-text {
+        font-size: 16px;
+        color: #333;
+    }
+
+    /* 下部のナビゲーションリンク */
+    .nav-links {
+        margin-top: 40px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+    }
+
+    .nav-links a {
+        margin-right: 20px;
+        color: #007bff;
+        text-decoration: none;
+    }
+</style>
+
+<div class="store-admin-wrapper">
+    <h1 class="page-title">店舗管理運用画面</h1>
+
+    <!-- 枠の並びイメージ -->
+    <div class="store-list-area">
+        <!-- 枠1 -->
+        <div class="store-frame">
+            <span class="store-text">店舗名：店舗A</span>
+        </div>
+
+        <!-- 枠2 -->
+        <div class="store-frame">
+            <span class="store-text">店舗名：店舗B</span>
+        </div>
+
+        <!-- 枠3（中身が送られてこなくても枠だけ見える） -->
+        <div class="store-frame">
+            <span class="store-text">店舗名：</span>
+        </div>
+    </div>
+
+    <!-- 既存のリンク -->
+    <div class="nav-links">
+        <a href="{% url 'stores:store_top' %}">店舗トップ画面へ移動</a>
+        <a href="{% url 'accounts:company_top' %}">運用トップ画面へ移動</a>
+    </div>
+</div>
+{% endblock %}

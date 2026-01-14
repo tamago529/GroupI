@@ -1,3 +1,69 @@
-店舗共通完了画面
 
-<a href="{% url 'stores:store_top %}">店舗トップ画面へ</a>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>店舗共通完了画面</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+            background-color: #ffffff;
+        }
+
+        .container {
+            width: 100%;
+            min-height: 100vh;
+            padding: 40px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .message-box {
+            width: 100%;
+            border: 2px solid #ccc;
+            border-radius: 20px;
+            padding: 40px 20px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .top-button {
+            position: absolute;
+            right: 40px;
+            bottom: 40px;
+        }
+
+        .top-button a {
+            display: inline-block;
+            padding: 20px 40px;
+            border: 2px solid #000;
+            border-radius: 20px;
+            text-decoration: none;
+            color: #000;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .top-button a:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="message-box">
+        <!-- ここに任意のテキストを表示 -->
+        ～～～が完了しました
+    </div>
+
+    <div class="top-button">
+       <a href="{% url 'stores:store_top' %}">店舗トップ画面へ</a>
+    </div>
+</div>
+
+</body>
+</html>
+

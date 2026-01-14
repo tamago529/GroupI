@@ -1,5 +1,177 @@
-報告画面
-{% extends "company_base.html" %}
+{% extends 'company_base.html' %}
+
 {% block content %}
-<a href="{% url 'accounts:company_top' %}">戻る</a>
+<style>
+    /* 1. 全体のレイアウト */
+    .report-wrapper {
+        max-width: 1000px;
+        margin: 40px auto;
+        padding: 0 20px;
+        font-family: sans-serif;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        color: #333;
+        border-left: 5px solid #ff9600; 
+        padding-left: 15px;
+    }
+
+    /* ② 報告カードのグリッド配置（横2列） */
+    .report-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr; 
+        gap: 25px; 
+        margin-bottom: 50px;
+    }
+
+    /* 各報告カードの枠 */
+    .report-card {
+        border: 2px solid #333;
+        background-color: #fff;
+        padding: 20px;
+        min-height: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        cursor: pointer; 
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .report-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border-color: #ff9600;
+    }
+
+    /* カード内のテキスト配置 */
+    .user-name {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .report-summary {
+        text-align: right; /* 設計図通り右側に寄せる */
+        font-size: 16px;
+        color: #666;
+        margin-top: 10px;
+    }
+
+    /* ① 戻るボタンエリア */
+    .footer-actions {
+        display: flex;
+        justify-content: flex-start; /* 左寄せ */
+    }
+
+    .btn-back {
+        padding: 10px 40px;
+        border: 2px solid #333;
+        background-color: #fff;
+        color: #000;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .btn-back:hover {
+        background-color: #f0f0f0;
+    }
+
+    /* --- JS用ポップアップ（モーダル） --- */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: #fff;
+        padding: 30px;
+        border: 2px solid #333;
+        border-radius: 15px;
+        width: 500px;
+        max-width: 90%;
+    }
+
+    .modal-header {
+        font-weight: bold;
+        font-size: 20px;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+</style>
+
+<div class="report-wrapper">
+    <h1 class="page-title">報告管理</h1>
+
+    <!-- ② 報告リスト（グリッド） -->
+    <div class="report-grid">
+        <!-- サンプル1 -->
+        <div class="report-card" onclick="openReport('ユーザーA', '不適切な口コミが投稿されています。至急確認をお願いします。')">
+            <div class="user-name">ユーザーA</div>
+            <div class="report-summary">報告内容...</div>
+        </div>
+
+        <!-- サンプル2 -->
+        <div class="report-card" onclick="openReport('ユーザーB', '店舗情報が間違っています。営業時間が異なります。')">
+            <div class="user-name">ユーザーB</div>
+            <div class="report-summary">報告内容...</div>
+        </div>
+
+        <!-- サンプル3 -->
+        <div class="report-card" onclick="openReport('ユーザーC', '重複した店舗が登録されています。')">
+            <div class="user-name">ユーザーC</div>
+            <div class="report-summary">報告内容...</div>
+        </div>
+
+        <!-- サンプル4 -->
+        <div class="report-card" onclick="openReport('ユーザーD', '画像が食べ物ではありません。')">
+            <div class="user-name">ユーザーD</div>
+            <div class="report-summary">報告内容...</div>
+        </div>
+    </div>
+
+    <!-- ① 戻るボタン -->
+    <div class="footer-actions">
+        <a href="{% url 'accounts:company_top' %}" class="btn-back">戻る</a>
+    </div>
+</div>
+
+<!-- 詳細ポップアップ -->
+<div class="modal-overlay" id="reportModal">
+    <div class="modal-content">
+        <div class="modal-header" id="modalUserName">ユーザー名</div>
+        <p id="modalFullContent">報告内容の詳細がここに表示されます。</p>
+        <div style="margin-top: 25px; text-align: right;">
+            <button onclick="closeReport()" style="padding: 8px 25px; cursor: pointer; font-weight: bold;">閉じる</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // JSの解説：
+    // 引数として「名前」と「内容」を受け取って、ポップアップの中身を書き換えて表示します。
+    function openReport(name, content) {
+        // 1. モーダル内の名前を書き換える
+        document.getElementById('modalUserName').innerText = name + " からの報告";
+        // 2. モーダル内の詳細文を書き換える
+        document.getElementById('modalFullContent').innerText = content;
+        // 3. モーダル全体を見えるようにする
+        document.getElementById('reportModal').style.display = 'flex';
+    }
+
+    function closeReport() {
+        // モーダルを隠す
+        document.getElementById('reportModal').style.display = 'none';
+    }
+</script>
 {% endblock %}

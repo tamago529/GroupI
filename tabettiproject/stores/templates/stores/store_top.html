@@ -1,16 +1,544 @@
 {% extends "store_base.html" %}
 
-{% block title %}フォロワー一覧画面{% endblock %}
+{% block title %}店舗トップ画面{% endblock %}
 
 {% block content %}
-<h2>フォロワー一覧画面</h2>
+<h2>店舗トップ画面</h2>
 
-<a href="{% url 'accounts:store_logout' %}">ログアウト</a>
-<a href="{% url 'accounts:store_account_edit' %}">店舗アカウント情報変更</a>
+{% comment %}<a href="{% url 'accounts:store_logout' %}">ログアウト</a>
+<a href="{% url 'stores:store_account_edit' %}">店舗アカウント情報変更</a>
 <a href="{% url 'stores:store_basic_edit' %}">店舗基本情報変更</a>
 <a href="{% url 'stores:reservation_calendar' %}">予約カレンダー</a>
 <a href="{% url 'stores:reservation_ledger' %}">予約内容を見る</a><!-- 予約台帳画面に飛ぶ-->
-<a href="{% url 'stores:store_review_list' %}">店舗口コミ一覧</a>
+{% endcomment %}
 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>店舗管理画面</title>
+  <style>
+    :root{
+      --bg:#f3f4f6;
+      --card:#ffffff;
+      --line:#d9dde3;
+      --text:#222;
+      --muted:#6b7280;
+      --brand:#ff8a00;
+      --nav:#2f343a;
+      --nav2:#3a4047;
+      --link:#1a73e8;
+      --ok:#2e7d32;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN",system-ui,-apple-system,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    a{color:var(--link); text-decoration:none;}
+    .wrap{max-width:1200px; margin:0 auto; padding:10px 12px 24px;}
+
+    /* top header */
+    .topbar{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:6px;
+      overflow:hidden;
+    }
+    .topbar .row1{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:10px 12px;
+      border-bottom:1px solid var(--line);
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .brand-badge{
+      display:inline-block;
+      background:var(--brand);
+      color:#fff;
+      font-weight:900;
+      border-radius:4px;
+      padding:2px 8px;
+      font-size:12px;
+    }
+    .toplinks{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    /* main layout */
+    .layout{
+      margin-top:10px;
+      padding:0 12px 12px; /* topbar内の余白 */
+      display:grid;
+      grid-template-columns: 230px 1fr 260px;
+      gap:10px;
+      align-items:start;
+    }
+    @media (max-width: 1100px){
+      .layout{grid-template-columns: 230px 1fr;}
+      .right{display:none;}
+    }
+    @media (max-width: 780px){
+      .layout{grid-template-columns:1fr;}
+      .sidebar{order:2;}
+      .right{display:block;}
+    }
+
+    /* sidebar */
+    .sidebar{
+      background:var(--nav);
+      color:#fff;
+      border-radius:6px;
+      overflow:hidden;
+      border:1px solid #1f2327;
+    }
+    .side-head{
+      padding:12px 12px;
+      font-weight:900;
+      background:#1f2327;
+      border-bottom:1px solid #1b1f23;
+    }
+    .menu{
+      list-style:none;
+      margin:0;
+      padding:6px 0;
+    }
+    .menu li a{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:10px 12px;
+      color:#fff;
+      font-size:13px;
+      border-left:4px solid transparent;
+    }
+    .menu li a:hover{background:var(--nav2);}
+    .menu li.active a{
+      background:var(--nav2);
+      border-left-color:var(--brand);
+      font-weight:900;
+    }
+    .side-note{
+      background:#fff;
+      border-radius:6px;
+      border:1px solid var(--line);
+      margin-top:10px;
+      padding:12px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.6;
+    }
+
+    /* cards */
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:6px;
+      overflow:hidden;
+    }
+    .card + .card{margin-top:10px;}
+    .card-h{
+      padding:10px 12px;
+      font-weight:900;
+      border-bottom:1px solid var(--line);
+      background:#f7f7f7;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .card-h small{font-weight:700; color:var(--muted);}
+    .card-b{padding:12px;}
+    .notice-list{
+      list-style:none;
+      margin:0;
+      padding:0;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      font-size:13px;
+    }
+    .notice-item{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding:8px 10px;
+      border:1px solid #eee;
+      border-radius:6px;
+      background:#fff;
+    }
+    .tag-new{
+      font-size:11px;
+      background:#ffefc7;
+      border:1px solid #ffd27a;
+      color:#9a5a00;
+      font-weight:900;
+      padding:2px 6px;
+      border-radius:4px;
+    }
+    .date{font-size:12px;color:var(--muted); min-width:88px;}
+    .chart{
+      height:210px;
+      border:1px solid #e5e7eb;
+      border-radius:6px;
+      background:linear-gradient(180deg,#ffffff,#f9fafb);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--muted);
+      font-weight:900;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+    }
+    th,td{
+      border-top:1px solid #eee;
+      padding:10px 8px;
+      text-align:left;
+    }
+    th{background:#fafafa; font-weight:900;}
+    td.num{text-align:right; font-variant-numeric: tabular-nums;}
+    .progress{
+      display:grid;
+      grid-template-columns: 120px 1fr;
+      gap:12px;
+      align-items:center;
+    }
+    .donut{
+      width:96px;height:96px;border-radius:50%;
+      border:10px solid #e5e7eb;
+      border-top-color:var(--ok);
+      border-right-color:var(--ok);
+      position:relative;
+      margin:auto;
+    }
+    .donut span{
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:900; color:#111;
+      font-size:13px;
+    }
+    .checkgrid{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:8px;
+      font-size:12px;
+    }
+    .chip{
+      border:1px solid #e5e7eb;
+      background:#fff;
+      border-radius:6px;
+      padding:8px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+    }
+    .chip .ok{color:var(--ok); font-weight:900;}
+    .chip .ng{color:#c62828; font-weight:900;}
+
+    /* right column */
+    .right .card-b{padding:10px 12px;}
+    .status{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:10px;
+    }
+    .dot{
+      width:10px;height:10px;border-radius:50%;
+      background:var(--ok);
+      box-shadow:0 0 0 4px rgba(46,125,50,.15);
+    }
+    .btn{
+      width:100%;
+      border:none;
+      border-radius:6px;
+      padding:10px 12px;
+      font-weight:900;
+      cursor:pointer;
+      background:#2563eb;
+      color:#fff;
+      margin-bottom:10px;
+    }
+    .btn.gray{background:#6b7280;}
+    .mini-list{
+      list-style:none;
+      margin:0;
+      padding:0;
+      font-size:12px;
+      color:#333;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .mini-list li{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      padding:8px 10px;
+      border:1px solid #eee;
+      border-radius:6px;
+      background:#fff;
+    }
+    .muted{color:var(--muted);}
+
+    /* ===== footer：topbarの中で一体化 ===== */
+    .store-footer{
+      border-top:1px solid var(--line);
+      background:#fafafa;
+      padding:14px 12px 16px;
+      text-align:center;
+    }
+    .footer-links{
+      font-size:12px;
+      margin-bottom:8px;
+    }
+    .footer-links a{
+      color:var(--link);
+      text-decoration:none;
+      margin:0 6px;
+    }
+    .footer-links a:hover{text-decoration:underline;}
+    .footer-links span{color:#aaa; margin:0 4px;}
+    .copyright{
+      font-size:11px;
+      color:#999;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="topbar">
+
+      <div class="row1">
+        <div class="brand">
+          <span class="brand-badge"></span>
+          <span>店舗管理画面</span>
+        </div>
+        <div class="toplinks">
+          <a href="#">ネット予約管理</a>
+          <a href="#">店舗ページ表示</a>
+          <a href="#">電話・メールでのお問い合わせ</a>
+          <a href="#">ヘルプ</a>
+        </div>
+      </div>
+
+      <div class="layout">
+        <!-- left sidebar -->
+        <aside class="sidebar">
+          <div class="side-head">メニュー</div>
+          <ul class="menu">
+            <li class="active"><a href="#"><span>トップ</span><span>›</span></a></li>
+            <li><a href="#"><span>お知らせ</span><span>›</span></a></li>
+            <li><a href="#"><span>店舗情報の設定</span><span>›</span></a></li>
+            <li><a href="#"><span>広告・ページ管理</span><span>›</span></a></li>
+            <li><a href="#"><span>ネット予約管理</span><span>›</span></a></li>
+            <li><a href="#"><span>レポート</span><span>›</span></a></li>
+            <li><a href="#"><span>口コミ</span><span>›</span></a></li>
+            <li><a href="#"><span>求人管理</span><span>›</span></a></li>
+            <li><a href="#"><span>店舗管理者情報</span><span>›</span></a></li>
+            <li><a href="#"><span>プラン・契約</span><span>›</span></a></li>
+            <li><a href="#"><span>各種サービス</span><span>›</span></a></li>
+          </ul>
+
+          <div class="side-note">
+            <strong>メモ</strong><br/>
+            ここは元画像の左下にある補助領域の代替枠です。<br/>
+            （QRコード領域は出力していません）
+          </div>
+        </aside>
+
+        <!-- center content -->
+        <main>
+          <section class="card">
+            <div class="card-h">
+              <div>食べログからのお知らせ</div>
+              <a href="#"><small>一覧を見る</small></a>
+            </div>
+            <div class="card-b">
+              <ul class="notice-list">
+                <li class="notice-item">
+                  <div class="date">2023/05/29</div>
+                  <div class="tag-new">NEW</div>
+                  <div><a href="#">運営や社会に関する取り組み、運用の重要なお知らせ</a></div>
+                </li>
+                <li class="notice-item">
+                  <div class="date">2023/05/24</div>
+                  <div class="tag-new">NEW</div>
+                  <div><a href="#">店舗の管理、運用 改善についてのお知らせ</a></div>
+                </li>
+                <li class="notice-item">
+                  <div class="date">2023/04/17</div>
+                  <div style="width:42px;"></div>
+                  <div><a href="#">ゴールデンウィーク休業のお知らせ</a></div>
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-h">
+              <div>直近1ヶ月のアクセス数（PV）</div>
+              <a href="#"><small>詳細データを見る</small></a>
+            </div>
+            <div class="card-b">
+              <div class="chart">グラフ表示エリア</div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-h">
+              <div>来店情報</div>
+              <a href="#"><small>詳細データを見る</small></a>
+            </div>
+            <div class="card-b">
+              <table>
+                <thead>
+                  <tr>
+                    <th>項目</th>
+                    <th class="num">3月</th>
+                    <th class="num">4月</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>アクセス数（PV）</td>
+                    <td class="num">388</td>
+                    <td class="num">252</td>
+                  </tr>
+                  <tr>
+                    <td>食べログ予約の利用者数</td>
+                    <td class="num">-</td>
+                    <td class="num">-</td>
+                  </tr>
+                  <tr>
+                    <td>インターネット予約数</td>
+                    <td class="num">8</td>
+                    <td class="num">17</td>
+                  </tr>
+                  <tr>
+                    <td>（モバイル・PC）店舗ページへのアクセス数（PV）</td>
+                    <td class="num">0</td>
+                    <td class="num">0</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-h">
+              <div>情報充実度</div>
+              <a href="#"><small>充実度とは？</small></a>
+            </div>
+            <div class="card-b">
+              <div class="progress">
+                <div class="donut"><span>5/8</span></div>
+                <div class="checkgrid">
+                  <div class="chip"><span>PR文</span><span class="ok">○</span></div>
+                  <div class="chip"><span>メニュー</span><span class="ok">○</span></div>
+                  <div class="chip"><span>基本情報</span><span class="ok">○</span></div>
+                  <div class="chip"><span>メイン写真</span><span class="ok">○</span></div>
+                  <div class="chip"><span>料理写真</span><span class="ok">○</span></div>
+                  <div class="chip"><span>店内写真</span><span class="ok">○</span></div>
+                  <div class="chip"><span>こだわり情報</span><span class="ng">×</span></div>
+                  <div class="chip"><span>コース</span><span class="ng">×</span></div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        <!-- right widgets -->
+        <aside class="right">
+          <section class="card">
+            <div class="card-h">ネット予約</div>
+            <div class="card-b">
+              <div class="status"><span class="dot"></span><span>受付中です</span></div>
+              <button class="btn" type="button">ネット予約管理画面へ</button>
+              <button class="btn gray" type="button">予約状況を見る</button>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-h">本日のご予約</div>
+            <div class="card-b">
+              <ul class="mini-list">
+                <li><span>13:30〜</span><span class="muted">2名</span></li>
+                <li><span>19:00〜</span><span class="muted">2名</span></li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-h">新着予約情報</div>
+            <div class="card-b">
+              <ul class="mini-list">
+                <li><span>新規予約</span><span class="muted">7件</span></li>
+                <li><span>予約内容変更</span><span class="muted">0件</span></li>
+                <li><span>予約キャンセル</span><span class="muted">2件</span></li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-h">求人管理</div>
+            <div class="card-b">
+              <ul class="mini-list">
+                <li><span>掲載中</span><span class="muted">5</span></li>
+                <li><span>応募</span><span class="muted">3</span></li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-h">公式YouTube</div>
+            <div class="card-b">
+              <div class="muted" style="font-size:12px;line-height:1.6;">
+                タベッチャンネル<br/>
+                2023/02/02：動画更新のお知らせ
+              </div>
+            </div>
+          </section>
+        </aside>
+      </div><!-- /.layout -->
+
+      <!-- ✅ footer を topbar の中へ（分断しない） -->
+      <footer class="store-footer">
+        <nav class="footer-links">
+          <a href="#">お問合せ</a><span>|</span>
+          <a href="#">利用規約</a><span>|</span>
+          <a href="#">個人情報保護方針</a><span>|</span>
+          <a href="#">企業情報</a>
+        </nav>
+        <div class="copyright">
+          Copyright (c) Kakaku.com, Inc. All Rights Reserved.
+        </div>
+      </footer>
+
+    </div><!-- /.topbar -->
+  </div><!-- /.wrap -->
+</body>
+</html>
 
 {% endblock %}

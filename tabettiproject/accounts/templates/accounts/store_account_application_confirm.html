@@ -1,10 +1,119 @@
-{% extends 'store_base.html' %}
-{% block content %}
-
 店舗アカウント作成本申請確認画面
 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>店舗アカウント作成本申請確認画面</title>
+</head>
+<body>
+
+<!-- 1 見出し -->
+<h2>本申請入力内容確認</h2>
+
+<!-- 2 営業許可証（画像プレビュー） -->
+<div>
+    <p>営業許可証</p>
+    <img src="{{ license_image_url }}" alt="営業許可証" width="300">
+</div>
+<br>
+
+<!-- 3 店舗名 -->
+<div>
+    <strong>店舗名：</strong>
+    <span>{{ shop_name }}</span>
+</div>
+<br>
+
+<!-- 4 電話番号 -->
+<div>
+    <strong>電話番号：</strong>
+    <span>{{ phone }}</span>
+</div>
+<br>
+
+<!-- 5 住所 -->
+<div>
+    <strong>住所：</strong>
+    <span>{{ address }}</span>
+</div>
+<br>
+
+<!-- 6 申請者名 -->
+<div>
+    <strong>申請者名：</strong>
+    <span>{{ applicant_name }}</span>
+</div>
+<br>
+
+<!-- 7 店舗との関係 -->
+<div>
+    <strong>店舗との関係：</strong>
+    <span>{{ relation }}</span>
+</div>
+<br>
+
+<!-- 8 メールアドレス -->
+<div>
+    <strong>メールアドレス：</strong>
+    <span>{{ email }}</span>
+</div>
+<br>
+
+<!-- 9 次へボタン -->
+<div>
+    <a href="{% url 'accounts:store_account_application_message' %}">
+        <button type="button">次へ</button>
+    </a>
+</div>
+
+</body>
+</html>
+<style>
+body {
+   font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+   background-color: #f5f5f5;
+   margin: 0;
+   padding: 40px 0;
+}
+h2 {
+   background-color: #2c4f7c;
+   color: #fff;
+   padding: 12px 20px;
+   width: 700px;
+   margin: 0 auto 20px;
+   font-size: 18px;
+}
+body > div {
+   width: 700px;
+   margin: 0 auto 12px;
+   background-color: #fff;
+   padding: 12px 20px;
+   border-bottom: 1px solid #ddd;
+}
+img {
+   border: 1px solid #ccc;
+   padding: 4px;
+   background-color: #fff;
+}
+strong {
+   display: inline-block;
+   width: 160px;
+}
+button {
+   background-color: #2c6db2;
+   color: #fff;
+   border: none;
+   padding: 10px 30px;
+   font-size: 14px;
+   cursor: pointer;
+   border-radius: 4px;
+}
+button:hover {
+   background-color: #1f5a98;
+}
+a {
+   text-decoration: none;
+}
+</style>
 <a href="{% url 'accounts:store_account_application_message' %}">店舗アカウント作成本申請メッセージへ</a>    
-
-
-{% endblock %}
-

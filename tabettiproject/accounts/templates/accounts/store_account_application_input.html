@@ -1,5 +1,177 @@
 店舗アカウント作成本申請入力画面
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>店舗アカウント作成本申請入力画面</title>
+
+</head>
+<body>
+
+<h2>本申請入力フォーム</h2>
+
+<!-- 画像アップロード -->
+<div>
+    <label>画像アップロード：</label><br>
+    <input type="file">
+</div>
+<br>
+
+<!-- 店舗名 -->
+<div>
+    <label>店舗名：</label><br>
+    <input type="text">
+</div>
+<br>
+
+<!-- 電話番号 -->
+<div>
+    <label>電話番号：</label><br>
+    <input type="tel">
+</div>
+<br>
+
+<!-- 住所 -->
+<div>
+    <label>住所：</label><br>
+    <input type="text">
+</div>
+<br>
+
+<!-- 申込者名 -->
+<div>
+    <label>申込者名：</label><br>
+    <input type="text">
+</div>
+<br>
+
+<!-- 店舗との関係 -->
+<div>
+    <label>店舗との関係：</label><br>
+    <input type="text">
+</div>
+<br>
+
+<!-- メールアドレス -->
+<div>
+    <label>メールアドレス：</label><br>
+    <input type="email">
+</div>
+<br>
+
+
+<!-- 進むボタン（次画面へ） -->
+<div>
+    <a href="{% url 'accounts:store_account_application_confirm' %}">
+        <button>進む</button>
+    </a>
+</div>
+
+</body>
+</html>
 
 <a href="{% url 'accounts:store_account_application_confirm' %}">店舗アカウント作成本申請確認画面へ</a>    
 
+<style>
+
+body {
+
+    font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+
+    background-color: #f5f5f5;
+
+    margin: 0;
+
+    padding: 40px 0;
+
+}
+
+h2 {
+
+    background-color: #2c4f7c;
+
+    color: #fff;
+
+    padding: 12px 20px;
+
+    width: 700px;
+
+    margin: 0 auto 20px;
+
+    font-size: 18px;
+
+}
+
+form, body > div {
+
+    width: 700px;
+
+    margin: 0 auto;
+
+}
+
+body > div {
+
+    background-color: #fff9d6;
+
+    border: 1px solid #e5dca8;
+
+    padding: 20px;
+
+}
+
+label {
+
+    font-weight: bold;
+
+}
+
+input[type="text"],
+
+input[type="tel"],
+
+input[type="email"],
+
+input[type="file"] {
+
+    width: 100%;
+
+    padding: 8px;
+
+    margin-top: 6px;
+
+    box-sizing: border-box;
+
+}
+
+button {
+
+    background-color: #2c6db2;
+
+    color: #fff;
+
+    border: none;
+
+    padding: 10px 30px;
+
+    font-size: 14px;
+
+    cursor: pointer;
+
+    border-radius: 4px;
+
+}
+
+button:hover {
+
+    background-color: #1f5a98;
+
+}
+
+a {
+
+    text-decoration: none;
+
+}
+</style>
 
