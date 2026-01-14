@@ -2,7 +2,7 @@
     /* ヘッダー全体のスタイル */
     .company-header {
         background-color: #ffffff;
-        border-bottom: 2px solid #ff9600; /* 食べログオレンジのアクセントライン */
+        border-bottom: 2px solid #ff9600; 
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         padding: 0;
         font-family: sans-serif;
@@ -10,12 +10,12 @@
 
     /* ヘッダー内部のコンテンツ幅制限 */
     .company-header .inner {
-        max-width: 1000px; /* 他の画面のコンテナ幅と合わせる */
+        max-width: 1000px; 
         margin: 0 auto;
         padding: 0 20px;
         height: 70px; /* ヘッダーの高さ */
         display: flex;
-        justify-content: space-between; /* ロゴとナビを両端に */
+        justify-content: space-between; 
         align-items: center;
     }
 
@@ -76,7 +76,7 @@
 
 <header class="company-header">
     <div class="inner">
-        <h1 class="logo">運用管理</h1>
+        <h1 class="logo">タべっち運用管理</h1>
         <nav>
             <ul>
                 <li><a href="{% url 'accounts:company_top' %}">TOP</a></li>
