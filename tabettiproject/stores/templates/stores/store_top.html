@@ -5,19 +5,19 @@
 {% block content %}
 <h2>店舗トップ画面</h2>
 
-<a href="{% url 'stores:store_logout' %}">ログアウト</a>
+{% comment %}<a href="{% url 'accounts:store_logout' %}">ログアウト</a>
 <a href="{% url 'stores:store_account_edit' %}">店舗アカウント情報変更</a>
 <a href="{% url 'stores:store_basic_edit' %}">店舗基本情報変更</a>
 <a href="{% url 'stores:reservation_calendar' %}">予約カレンダー</a>
 <a href="{% url 'stores:reservation_ledger' %}">予約内容を見る</a><!-- 予約台帳画面に飛ぶ-->
-
+{% endcomment %}
 
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>店舗管理画面（モック）</title>
+  <title>店舗管理画面</title>
   <style>
     :root{
       --bg:#f3f4f6;
