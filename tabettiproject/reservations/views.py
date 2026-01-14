@@ -21,3 +21,6 @@ class store_reservation_cancelView(TemplateView):
 
 class store_reservation_historyView(TemplateView):
     template_name = "reservations/store_reservation_history.html"
+
+class store_topView(TemplateView):
+    template_name = "reservations/store_top.html"    

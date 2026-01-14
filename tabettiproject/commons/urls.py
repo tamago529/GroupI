@@ -4,12 +4,12 @@ from .views import *
 app_name = "commons"
 
 urlpatterns = [
-  path("commons/customer_common_complete/", customer_common_completeView.as_view(), name="customer_common_complete"),
-  path("commons/customer_common_confirm/", customer_common_confirmView.as_view(), name="customer_common_confirm"),
-  path("commons/error/", errorView.as_view(), name="error"),
-  path("commons/store_common_complete/", store_common_completeView.as_view(), name='store_common_complete'),
-  path("commons/store_common_confirm/", store_common_confirmView.as_view(), name='store_common_confirm'),
-  path("commons/company_common_complete/", company_common_completeView.as_view(), name='company_common_complete'),
-  path("commons/company_common_confirm/", company_common_confirmView.as_view(), name='company_common_confirm'),
+  path("customer_common_complete/", customer_common_completeView.as_view(), name="customer_common_complete"),
+  path("customer_common_confirm/", customer_common_confirmView.as_view(), name="customer_common_confirm"),
+  path("error/", errorView.as_view(), name="error"),
+  path("store_common_complete/", store_common_completeView.as_view(), name='store_common_complete'),
+  path("store_common_confirm/", store_common_confirmView.as_view(), name='store_common_confirm'),
+  path("company_common_complete/", company_common_completeView.as_view(), name='company_common_complete'),
+  path("company_common_confirm/", company_common_confirmView.as_view(), name='company_common_confirm'),
 
 ]
