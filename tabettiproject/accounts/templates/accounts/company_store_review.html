@@ -1,20 +1,121 @@
-{% extends "company_base.html"  %}
+{% extends "company_base.html" %}
+
 {% block content %}
-店舗アカウント審査運用画面
+<style>
+    /* 全体のコンテナ（一覧画面なので少し広めに） */
+    .review-wrapper {
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 0 20px;
+        font-family: sans-serif;
+    }
 
-<a href="{% url 'accounts:company_store_review_detail' %}">店舗アカウント審査詳細画面へ</a>
+    /* タイトル部分 */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #eee;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+    }
 
-<<<<<<< HEAD
     .page-header h1 {
         font-size: 24px;
         color: #333;
         margin: 0;
-        border-left: 5px solid #ff9600; 
+        border-left: 5px solid #ff9600; /* 食べログオレンジ */
         padding-left: 15px;
     }
-=======
-<a href="{% url 'accounts:company_top' %}">運用トップへ</a>
->>>>>>> 691eb8b38a2fa77e11a583443b4321c9242fb9c7
 
+    /* コンテンツエリア（今後テーブルなどが入る場所） */
+    .content-card {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 30px;
+        min-height: 200px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        margin-bottom: 30px;
+    }
 
+    /* 案内テキスト */
+    .info-text {
+        color: #666;
+        margin-bottom: 20px;
+        font-size: 15px;
+    }
+
+    /* ボタンの共通スタイル */
+    .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.2s;
+        font-size: 14px;
+    }
+
+    /* 詳細画面へ（メインアクション） */
+    .btn-detail {
+        background-color: #ff9600;
+        color: #fff;
+        border: 1px solid #ff9600;
+    }
+
+    .btn-detail:hover {
+        background-color: #e68700;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    /* 運用トップへ（サブアクション） */
+    .btn-back {
+        background-color: #fff;
+        color: #666;
+        border: 1px solid #ccc;
+        margin-right: 10px;
+    }
+
+    .btn-back:hover {
+        background-color: #f8f9fa;
+        border-color: #999;
+    }
+
+    /* 下部ナビゲーションエリア */
+    .action-area {
+        margin-top: 20px;
+        text-align: left;
+    }
+</style>
+
+<div class="review-wrapper">
+    <!-- タイトルエリア -->
+    <header class="page-header">
+        <h1>店舗アカウント審査 運用</h1>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <div class="content-card">
+        <p class="info-text">
+            店舗からのアカウント申請の一覧です。内容を確認し、承認または却下の操作を行ってください。
+        </p>
+
+        <!-- 将来的にここに <table> などで申請一覧を表示する想定 -->
+        
+        <div class="action-area">
+            <!-- リンクをボタン形式に調整 -->
+            <a href="{% url 'accounts:company_store_review_detail' %}" class="btn btn-detail">
+                店舗アカウント審査詳細画面へ
+            </a>
+        </div>
+    </div>
+
+    <!-- 戻るボタン -->
+    <div class="footer-nav">
+        <a href="{% url 'accounts:company_top' %}" class="btn btn-back">
+            ← 運用トップへ戻る
+        </a>
+    </div>
+</div>
 {% endblock %}
