@@ -1,29 +1,37 @@
 <!-- base_customer.html -->
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>{% block title %}顧客サイト{% endblock %}</title>
 
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/customer.css' %}">
+    <!-- 共通CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <!-- ページ専用CSS -->
     {% block css %}{% endblock %}
 </head>
 
 <body class="customer">
 
+    <!-- ヘッダー -->
     {% include 'customer_header.html' %}
 
+    <!-- メインコンテンツ -->
     <main class="content">
         {% block content %}{% endblock %}
     </main>
 
+    <!-- フッター -->
     {% include 'customer_footer.html' %}
 
+    <!-- 共通JS -->
     <script src="{% static 'js/customer.js' %}"></script>
+
+    <!-- ページ専用JS -->
     {% block js %}{% endblock %}
 </body>
-
 </html>

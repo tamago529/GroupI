@@ -1,10 +1,220 @@
-{% extends "accounts/customer_base.html" %}
+{% extends 'customer_base.html' %}
+{% load static %}
 
-{% block title %}
-ジャンル一覧画面
+{% block title %}食べログ - グルメ・レストランレビュー{% endblock %}
+
+{% block css %}
+<style>
+/* =========================
+   ヒーロー
+========================= */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 420px;
+  overflow: hidden;
+}
+
+.hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff;
+  background: rgba(0,0,0,0.25);
+}
+
+.hero-overlay h1 {
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.hero-overlay p {
+  font-size: 18px;
+}
+
+/* =========================
+   メイン
+========================= */
+.main-container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+.section {
+  margin-bottom: 48px;
+}
+
+.section-title {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  padding-left: 8px;
+  border-left: 6px solid #ff8a00;
+}
+
+/* ===== カード ===== */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 18px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.card-body {
+  padding: 12px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.card-sub {
+  font-size: 14px;
+  color: #666;
+}
+
+/* ===== ジャンル ===== */
+.genres {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.genre-card {
+  width: 120px;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  text-align: center;
+  padding: 12px 6px;
+}
+
+.genre-card img {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.genre-card span {
+  font-size: 14px;
+  font-weight: bold;
+}
+</style>
 {% endblock %}
 
 {% block content %}
-<a href="{% url 'search:customer_top' %}">トップ画面へ移動</a><br>
-<a href="{% url 'search:customer_search_list' %}">検索結果一覧へ移動</a><br>
+
+<!-- ===== ヒーロー ===== -->
+<div class="hero">
+  <img src="{% static 'images/hero.png' %}" alt="">
+  <div class="hero-overlay">
+    <h1>行きたいお店が、きっと見つかる</h1>
+    <p>日本最大級のグルメレビューサイト</p>
+  </div>
+</div>
+
+<div class="main-container">
+
+  <!-- 特集 -->
+  <section class="section">
+    <div class="section-title">特集・注目コンテンツ</div>
+    <div class="cards">
+      <div class="card">
+        <img src="{% static 'img/award2025.jpg' %}">
+        <div class="card-body">
+          <div class="card-title">The Tabelog Award 2025</div>
+          <div class="card-sub">ユーザー評価の高い受賞店</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="{% static 'img/hot_restaurants.jpg' %}">
+        <div class="card-body">
+          <div class="card-title">ホットレストラン</div>
+          <div class="card-sub">今注目の人気店</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="{% static 'img/genre_feature.jpg' %}">
+        <div class="card-body">
+          <div class="card-title">ジャンル特集</div>
+          <div class="card-sub">料理ジャンル別に探す</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ジャンル -->
+  <section class="section">
+    <div class="section-title">料理ジャンルから探す</div>
+    <div class="genres">
+      <div class="genre-card"><img src="{% static 'img/sushi.jpg' %}"><span>寿司</span></div>
+      <div class="genre-card"><img src="{% static 'img/ramen.jpg' %}"><span>ラーメン</span></div>
+      <div class="genre-card"><img src="{% static 'img/yakiniku.jpg' %}"><span>焼肉</span></div>
+      <div class="genre-card"><img src="{% static 'img/cafe.jpg' %}"><span>カフェ</span></div>
+      <div class="genre-card"><img src="{% static 'img/izakaya.jpg' %}"><span>居酒屋</span></div>
+    </div>
+  </section>
+
+  <!-- ランキング -->
+  <section class="section">
+    <div class="section-title">人気ランキング</div>
+    <div class="cards">
+      <div class="card">
+        <img src="{% static 'img/top_rest1.jpg' %}">
+        <div class="card-body">
+          <div class="card-title">人気店 1</div>
+          <div class="card-sub">★4.7 東京</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="{% static 'img/top_rest2.jpg' %}">
+        <div class="card-body">
+          <div class="card-title">人気店 2</div>
+          <div class="card-sub">★4.6 大阪</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="{% static 'img/top_rest3.jpg' %}">
+        <div class="card-body">
+          <div class="card-title">人気店 3</div>
+          <div class="card-sub">★4.5 福岡</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
 {% endblock %}
