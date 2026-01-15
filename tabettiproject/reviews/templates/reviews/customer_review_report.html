@@ -1,122 +1,187 @@
-口コミ通報（顧客）画面
-
 {% extends "customer_base.html" %}
 
-{% block content %}
+{% block title %}口コミ通報（顧客）画面{% endblock %}
+
+{% block css %}
 <style>
-    /* （中略：前回のスタイルを維持） */
-    .contact-container {
-        font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
-        max-width: 900px;
+    /* 全体のコンテナ */
+    .form-wrapper {
+        max-width: 950px;
         margin: 20px auto;
+        font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
         color: #333;
-        font-size: 14px;
         line-height: 1.6;
     }
-    .sr-only {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        border: 0;
+
+    /* ページメインタイトル：中央寄せ */
+    .page-title {
+        font-size: 26px;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 40px;    /* 上の空間 */
+        margin-bottom: 60px; /* 下の空間 */
     }
-    .form-table {
-        width: 100%;
-        border-collapse: collapse;
-        border-top: 1px solid #ddd;
+
+    /* セクション見出し（お問い合わせ） */
+    .section-headline {
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 30px;
     }
-    .form-table th, .form-table td {
-        padding: 15px;
-        border-bottom: 1px solid #ddd;
-        text-align: left;
+
+    /* 案内テキストエリア：画像の内容を再現 */
+    .info-message-box {
+        margin-bottom: 30px;
+        font-size: 15px;
     }
-    .form-table th {
-        background-color: #f9f9f9;
-        width: 200px;
-        vertical-align: top;
+    .info-message-box p {
+        margin-bottom: 10px;
     }
-    .required-tag {
-        background-color: #e54;
+    .link-blue {
+        color: #06c;
+        text-decoration: none;
+    }
+    .link-blue:hover {
+        text-decoration: underline;
+    }
+    .text-note {
+        color: #666;
+        font-size: 13px;
+    }
+
+    /* 飲食店向けリンク：右寄せ */
+    .align-right {
+        text-align: right;
+        margin-top: 10px;
+    }
+
+    /* 入力項目のスタイル：ラベルを上に配置 */
+    .form-item {
+        margin-bottom: 30px;
+    }
+    .form-label {
+        display: block;
+        font-weight: bold;
+        font-size: 15px;
+        margin-bottom: 10px;
+    }
+    .badge-must {
+        background-color: #e60000;
         color: #fff;
-        font-size: 11px;
+        font-size: 10px;
         padding: 2px 4px;
         border-radius: 2px;
-        margin-left: 5px;
+        margin-left: 6px;
+        vertical-align: middle;
     }
-    .textarea-input {
+
+    /* 入力フィールド */
+    .input-textarea {
         width: 100%;
-        height: 200px;
         border: 1px solid #ccc;
-        border-radius: 3px;
-        padding: 8px;
+        border-radius: 4px;
+        padding: 12px;
+        font-size: 15px;
         box-sizing: border-box;
     }
-    .submit-container {
-        background-color: #eee9d9;
-        padding: 20px;
-        text-align: center;
-        margin-top: 20px;
+
+    /* ラジオボタンのレイアウト */
+    .radio-group {
+        display: flex;
+        gap: 25px;
+        padding: 5px 0;
     }
-    .submit-btn-link {
-        display: inline-block;
-        background-color: #93b51d;
-        color: #fff !important;
-        text-decoration: none;
-        padding: 12px 40px;
-        font-size: 16px;
+    .radio-item {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        font-size: 15px;
+    }
+    .radio-item input {
+        margin-right: 8px;
+    }
+
+    /* 送信ボタンエリア */
+    .action-container {
+        margin-top: 50px;
+        padding: 40px;
+        background-color: #f6f5f0;
+        text-align: center;
+    }
+    .btn-submit-green {
+        background-color: #9dbd25;
+        color: #fff;
+        border: none;
+        padding: 18px 0;
+        font-size: 18px;
         font-weight: bold;
         border-radius: 4px;
-        box-shadow: 0 2px 0 #708a16;
+        cursor: pointer;
+        width: 100%;
+        max-width: 600px;
+        box-shadow: 0 3px 0 #7a941a;
     }
 </style>
+{% endblock %}
 
-<div class="contact-container">
-    <h2 class="form-title">お問い合わせフォーム（入力画面）</h2>
-    
-    <table class="form-table">
-        <caption class="sr-only">お問い合わせ内容の入力フォーム項目一覧</caption>
-        
-        <tr>
-            <th scope="row">タイトル</th>
-            <td style="color: #666;">問題のある口コミの報告</td>
-        </tr>
+{% block content %}
+<div class="form-wrapper">
+    <p class="page-title">お問い合わせ</p>
 
-        <tr>
-            <th scope="row">
-                <label for="contact-body">お問い合わせ内容</label>
-                <span class="required-tag">必須</span>
-            </th>
-            <td>
-                <textarea 
-                    id="contact-body" 
-                    class="textarea-input" 
-                    name="content" 
-                    placeholder="具体的な内容をご記入ください"
-                    required
-                ></textarea>
-            </td>
-        </tr>
+    <section class="info-message-box">
+        <p>
+            「<a href="#" class="link-blue">よくある質問</a>」をご確認のうえ、解決しない場合は、以下のフォームよりお問い合わせください。
+        </p>
+        <p class="text-note">
+            ※ 内容によっては、ご返信までお時間をいただく場合がございます。
+        </p>
+        <p>
+            なお、店舗への要望・相談については、直接店舗へお問い合わせください。
+        </p>
+        <div class="align-right">
+            <a href="#" class="link-blue">飲食店の方のお申し込みに関するお問い合わせはこちら</a>
+        </div>
+    </section>
 
-        <tr>
-            <th scope="row">ニックネーム</th>
-            <td style="color: #666;">noconeco</td>
-        </tr>
+    <form action="{% url 'stores:customer_map' %}" method="post">
+        {% csrf_token %}
 
-        <tr>
-            <th scope="row">メールアドレス</th>
-            <td style="color: #666;">n.s20060322@gmail.com</td>
-        </tr>
-    </table>
+        <div class="form-item">
+            <label for="message" class="form-label">
+                お問い合わせ内容 <span class="badge-must">必須</span>
+            </label>
+            <textarea id="message" name="message" class="input-textarea" rows="10" placeholder="お問い合わせ内容をご記入ください"></textarea>
+        </div>
 
-    <div class="submit-container">
-        <a href="{% url 'stores:customer_map' %}" class="submit-btn-link">
-            上記の同意事項に同意の上、記入した内容を確認する
-        </a>
-    </div>
+        <div class="form-item">
+            <span class="form-label">
+                ご入力者を選択してください <span class="badge-must">必須</span>
+            </span>
+            <div class="radio-group">
+                <label class="radio-item"><input type="radio" name="user_type" value="1"> 一般ユーザー</label>
+                <label class="radio-item"><input type="radio" name="user_type" value="2"> 飲食店関係者</label>
+                <label class="radio-item"><input type="radio" name="user_type" value="3"> その他</label>
+            </div>
+        </div>
+
+        <div class="form-item">
+            <span class="form-label">ニックネーム</span>
+            <div style="padding-left: 5px;">noconeco</div>
+        </div>
+
+        <div class="form-item">
+            <span class="form-label">メールアドレス</span>
+            <div style="padding-left: 5px;">n.s20060322@gmail.com</div>
+        </div>
+
+        <div class="action-container">
+            <button type="submit" class="btn-submit-green">
+                上記の同意事項に同意の上、記入した内容を確認する
+            </button>
+        </div>
+    </form>
 </div>
 {% endblock %}
 
-<a href="{% url 'stores:customer_map' %}">確認画面へ</a>
+<a href="#">確認画面へ</a>
