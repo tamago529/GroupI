@@ -142,5 +142,3 @@ MEDIA_ROOT = BASE_DIR / 'media'  # メディアファイルの保存先ディレ
 STATICFILES_DIRS = [
    os.path.join(BASE_DIR ,'static'),  # 
 ]
-
-AUTH_USER_MODEL = 'commons.Account'
