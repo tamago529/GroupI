@@ -1,11 +1,114 @@
 {% load static %}
+{% include 'customer_header.html' %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>ログアウト完了</title>
-  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <title>パスワード再設定</title>
+
+  <style>
+    /* ===== 共通 ===== */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Helvetica, Arial, sans-serif;
+      background-color: #faf8f4;
+      color: #333;
+    }
+
+/* ===== レイアウト ===== */
+.password-reset-wrapper {
+  margin: 40px 0;   /* ← 上下余白を指定（ここで調整） */
+  display: flex;
+  justify-content: center;
+}
+
+.password-reset-box {
+  width: 420px;
+  background: #fff;
+  padding: 28px 28px; /* ← 少しだけ縦を詰める */
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  text-align: center;
+}
+
+    /* ===== 見出し ===== */
+    h2 {
+      font-size: 22px;
+      margin-bottom: 16px;
+      font-weight: bold;
+    }
+
+    /* ===== 説明 ===== */
+    .reset-description {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    /* ===== フォーム ===== */
+    .form-group {
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #ff8a00;
+    }
+
+    /* ===== ボタン ===== */
+    .btn-submit {
+      width: 100%;
+      padding: 12px 0;
+      font-size: 15px;
+      font-weight: bold;
+      color: #fff;
+      background: #ff8a00;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn-submit:hover {
+      opacity: 0.85;
+    }
+
+    /* ===== リンク ===== */
+    .back-links {
+      margin-top: 20px;
+      font-size: 13px;
+    }
+
+    .back-links a {
+      color: #ff8a00;
+      text-decoration: none;
+    }
+
+    .back-links a:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
+
 <body>
 
 <div class="password-reset-wrapper">
@@ -20,7 +123,6 @@
 
     <form method="post">
       {% csrf_token %}
-
       <div class="form-group">
         <label for="email">メールアドレス</label>
         <input
@@ -32,9 +134,7 @@
         >
       </div>
 
-      <button type="submit" class="btn-submit">
-        送信
-      </button>
+      <button type="submit" class="btn-submit">送信</button>
     </form>
 
     <div class="back-links">
@@ -45,5 +145,7 @@
 
   </div>
 </div>
+
 </body>
 </html>
+{% include 'customer_footer.html' %}

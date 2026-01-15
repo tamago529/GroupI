@@ -33,7 +33,7 @@
         以下より会員登録をお願いいたします。
       </p>
 
-      <a href="#" class="btn-register">無料会員登録はこちら</a>
+      <a href="{% url 'accounts:customer_register' %}" class="btn-register">無料会員登録はこちら</a>
     </div>
 
 <!-- ===== 右：ログイン（作り直し） ===== -->
@@ -61,7 +61,7 @@
       </form>
 
       <div class="login-links">
-        <a href="#">パスワードを忘れた方</a>
+        <a href="{% url 'accounts:customer_password_reset' %}">パスワードを忘れた方</a>
       </div>
     </div>
 
@@ -69,4 +69,5 @@
 </div>
 
 </body>
+{% include 'customer_footer.html' %}
 </html>
