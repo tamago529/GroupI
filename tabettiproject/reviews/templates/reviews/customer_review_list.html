@@ -1,169 +1,136 @@
-
-口コミ一覧(顧客画面)
-
 {% extends "customer_base.html" %}
 
-{% block content %}
+{% block title %}口コミ一覧 - Tabetti{% endblock %}
+
+{% block css %}
 <style>
-    /* 1. レイアウト全体の設計 */
     .shop-container {
-        max-width: 980px;      /* 食べログ等のPC版に近い最大幅 */
-        margin: 0 auto;       /* 中央寄せ */
-        font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
-        color: #333;
+        max-width: 800px;
+        margin: 20px auto;
+        font-family: sans-serif;
     }
 
-    /* 2. 店舗基本情報セクション（上部） */
+    /* 店舗基本情報のスタイル */
     .shop-header {
-        padding: 20px 0;
-        border-bottom: 1px solid #eee;
+        margin-bottom: 30px;
     }
 
-    /* 店舗名のデザイン */
     .shop-name {
         font-size: 24px;
         font-weight: bold;
         margin: 10px 0;
     }
 
-    /* 3. 動的な星評価のスタイル */
+    /* 星評価のレイアウト */
     .rating-box {
         display: flex;
         align-items: center;
         gap: 10px;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
     }
 
-    /* 評価（星）を表示するための外枠コンテナ 
-    */
     .star-rating {
         position: relative;
         display: inline-block;
-        font-size: 20px;
+        font-size: 24px;
         line-height: 1;
     }
 
-    /* 土台となるグレーの星 
-    */
-    .star-rating-back {
-        color: #ccc;
-    }
-
+    .star-rating-back { color: #ccc; } /* 土台：グレー */
     .star-rating-front {
         position: absolute;
-        top: 0;
-        left: 0;
+        top: 0; left: 0;
         overflow: hidden;
         white-space: nowrap;
-        color: #ffc107;
-        /* CSS変数から幅を取得。デフォルト値は 0% としています */
-        width: var(--rating-width, 0%);
+        color: #ffc107; /* 塗りつぶし：黄色 */
+        width: var(--rating-width, 0%); /* CSS変数で動的に制御 */
     }
 
     .rating-num {
-        font-size: 22px;
+        font-size: 24px;
         font-weight: bold;
-        color: #e60012;        /* 評価数値を強調 */
+        color: #e60012;
     }
 
-    /* 4. 口コミセクション（下部） */
-    .review-section {
-        margin-top: 30px;
-    }
-
-    /* セクション見出し（h2） 
-        h3(口コミタイトル)の前に配置して階層エラーを回避
-    */
-    .section-title {
-        font-size: 18px;
-        border-left: 4px solid #333;
-        padding-left: 10px;
-        margin-bottom: 20px;
-    }
-
-    /* 各口コミカード */
+    /* 口コミカードのスタイル */
     .review-card {
-        padding: 20px;
         border: 1px solid #ddd;
-        border-radius: 4px;
-        margin-bottom: 20px;
-        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        background-color: #fdfdfd;
     }
 
-    /* ユーザーアイコン（HTML属性のwidth/heightを補完） */
+    .review-user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
     .user-avatar {
-        width: 40px;
-        height: 40px;
         border-radius: 50%;
         object-fit: cover;
-        vertical-align: middle;
     }
 
-    /* 口コミタイトル（h3相当） */
     .review-title {
-        display: block;
-        font-size: 16px;
         font-weight: bold;
-        margin-top: 15px;
-        color: #06c;
-    }
-
-    /* 読み込み中（スピナー）のスタイル */
-    .loading-area {
-        text-align: center;
-        padding: 20px;
-        color: #666;
+        font-size: 18px;
+        margin: 10px 0;
+        color: #333;
     }
 </style>
+{% endblock %}
 
+{% block content %}
 <article class="shop-container">
-    
+
     <header class="shop-header">
-        <p class="catchphrase">{{ shop.catchphrase }}</p>
-        <h1 class="shop-name">{{ shop.name }}</h1>
+        <p style="color: #666; font-size: 12px;">池袋西口にて創業20余年自慢のしゃぶ</p>
+        <h1 class="shop-name">牛たん焼きしゃぶ 元祖たこしゃぶ 紅れや 池袋西口店</h1>
 
-        <div class="rating-box">
-            <div class="star-rating" style="--rating-width: {% widthratio shop.rating 5 100 %}%;">
-                <div class="star-rating-front">
-                    ★★★★★
-                </div>
+        <div class="rating-box" style="display: flex; align-items: center; gap: 10px;">
+            <div class="star-rating" 
+                style="--rating-width: {% widthratio 3.45 5 100 %}%;">
                 
-                <div class="star-rating-back">
-                    ★★★★★
-                </div>
+                <div class="star-rating-front">★★★★★</div>
+                <div class="star-rating-back">★★★★★</div>
             </div>
-            <span class="rating-num">{{ shop.rating }}</span>
+            
+            <span class="rating-num">3.45</span>
+            <span style="color: #666;">（303人）</span>
         </div>
-
+        
+        <p style="font-size: 14px;">最寄り駅：池袋駅 | ジャンル：しゃぶしゃぶ、牛タン</p>
     </header>
 
+    <hr>
+
     <section class="review-section">
-        <h2 class="section-title">口コミ</h2>
+        <h2 style="border-left: 4px solid #333; padding-left: 10px; font-size: 18px;">口コミ</h2>
 
         <div id="review-container">
-            {% for review in reviews %}
             <article class="review-card">
-                <div class="user-info">
-                    <img src="{{ review.user_icon_url }}" 
-                        alt="{{ review.user_name }}" 
-                        width="40" 
-                        height="40" 
-                        class="user-avatar">
-                    <span class="user-name">{{ review.user_name }}</span>
+                <div class="review-user-info">
+                    <img src="https://via.placeholder.com/40" alt="ユーザー" width="40" height="40" class="user-avatar">
+                    <div>
+                        <div style="font-weight: bold;">大学生の贅沢</div>
+                        <div style="font-size: 12px; color: #666;">口コミ363件 | フォロワー3485人</div>
+                    </div>
                 </div>
 
+                <div style="color: #ffc107;">★★★☆☆ <span style="color: #e60012; font-weight: bold;">3.5</span></div>
                 <div role="heading" aria-level="3" class="review-title">
-                    {{ review.title }}
+                    「舞踊る牛タン ～出汁が奏でる一期一会のシンフォニー～」
                 </div>
-                
-                <p class="review-text">{{ review.text_excerpt }}</p>
-            </article>
-            {% endfor %}
-        </div>
 
-        <div id="loading-spinner" class="loading-area" style="display: none;">
-            <p>読み込み中...</p>
+                <p style="font-size: 14px; line-height: 1.6;">
+                    牛タンしゃぶとの初対面。真空パックの薄切り肉とは明らかに違う、職人の手仕事による透明感のある薄さに、思わず見とれてしまう。目の前で優雅に湯気を立てる上質な出汁。その周りを取り囲むように並べられた牛...
+                </p>
+                
+                <a href="#" style="color: #06c; text-decoration: none; font-size: 14px;">もっと見る ∨</a>
+            </article>
         </div>
     </section>
+
 </article>
 {% endblock %}
