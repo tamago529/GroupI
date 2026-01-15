@@ -16,7 +16,7 @@
         font-weight: bold;
         margin-bottom: 25px;
         color: #333;
-        border-left: 5px solid #ff9600; /* 食べログオレンジ */
+        border-left: 5px solid #ff9600; 
         padding-left: 15px;
     }
 
@@ -153,37 +153,32 @@
 
     <!-- 口コミ一覧 -->
     <div class="review-list">
-        <!-- サンプル1（通報済み）サンプルは後で消します。 -->
-        <div class="review-card is-reported">
-            <div class="review-header">
-                <div class="user-info">
-                    <span class="user-name">食べ太郎 さん</span>
-                    <span class="review-date">2023/10/25 12:30</span>
-                </div>
-                <div class="rating-stars">★ 4.0</div>
+        {% for review in reviews %}
+    <!-- 
+        JSの絞り込み機能のために、通報されている場合は 'is-reported' クラスを付与します 
+    -->
+    <div class="review-card {% if review.id in reported_review_ids %}is-reported{% endif %}">
+        <div class="review-header">
+            <div class="user-info">
+                <span class="user-name">{{ review.reviewer.nickname }} さん</span>
+                <span class="review-date">{{ review.posted_at|date:"Y/m/d H:i" }}</span>
             </div>
-            <div class="review-body">
-                料理はとても美味しかったのですが、店員さんの態度が少し気になりました。
-                再訪するかは検討中です。
-            </div>
-            <span class="reported-badge">🚩 通報済み</span>
+            <div class="rating-stars">★ {{ review.score }}</div>
         </div>
-
-        <!-- サンプル2 -->
-        <div class="review-card">
-            <div class="review-header">
-                <div class="user-info">
-                    <span class="user-name">ランチ巡り子 さん</span>
-                    <span class="review-date">2023/10/24 18:00</span>
-                </div>
-                <div class="rating-stars">★ 5.0</div>
-            </div>
-            <div class="review-body">
-                最高のお店でした！特にお肉の焼き加減が絶妙で、ワインの種類も豊富です。
-                また絶対に来ます！
-            </div>
+        <div class="review-body">
+            {{ review.review_text|linebreaksbr }}
         </div>
+        <div style="font-size: 0.8em; color: #666;">対象店舗：{{ review.store.store_name }}</div>
+        
+        <!-- 通報バッジを表示するか判定 -->
+        {% if review.id in reported_review_ids %}
+            <span class="reported-badge">🚩 通報あり</span>
+        {% endif %}
     </div>
+    {% empty %}
+        <p>口コミはまだありません。</p>
+    {% endfor %}
+</div>
 
     <!-- 戻るボタン -->
     <div class="footer-nav">

@@ -115,31 +115,23 @@
 
     <!-- ② 報告リスト（グリッド） -->
     <div class="report-grid">
-        <!-- サンプル1 -->
-        <div class="report-card" onclick="openReport('ユーザーA', '不適切な口コミが投稿されています。至急確認をお願いします。')">
-            <div class="user-name">ユーザーA</div>
-            <div class="report-summary">報告内容...</div>
-        </div>
-
-        <!-- サンプル2 -->
-        <div class="report-card" onclick="openReport('ユーザーB', '店舗情報が間違っています。営業時間が異なります。')">
-            <div class="user-name">ユーザーB</div>
-            <div class="report-summary">報告内容...</div>
-        </div>
-
-        <!-- サンプル3 -->
-        <div class="report-card" onclick="openReport('ユーザーC', '重複した店舗が登録されています。')">
-            <div class="user-name">ユーザーC</div>
-            <div class="report-summary">報告内容...</div>
-        </div>
-
-        <!-- サンプル4 -->
-        <div class="report-card" onclick="openReport('ユーザーD', '画像が食べ物ではありません。')">
-            <div class="user-name">ユーザーD</div>
-            <div class="report-summary">報告内容...</div>
+            {% for report in reports %}
+    <!-- 
+        JSの関数 openReport に、本物のデータを引数として渡します。
+        文字の中に改行や引用符があるとJSが壊れるので '|escapejs' を使う
+    -->
+    <div class="report-card" 
+         onclick="openReport('{{ report.reporter.username }}', '{{ report.report_text|escapejs }}')">
+        <div class="user-name">通報者：{{ report.reporter.username }}</div>
+        <div class="report-summary">
+            対象口コミID: {{ report.review.id }}<br>
+            内容：{{ report.report_text|truncatechars:30 }}
         </div>
     </div>
-
+    {% empty %}
+        <p>報告はありません。</p>
+    {% endfor %}
+</div>
     <!-- ① 戻るボタン -->
     <div class="footer-actions">
         <a href="{% url 'accounts:company_top' %}" class="btn-back">戻る</a>
