@@ -1,132 +1,336 @@
 {% extends "customer_base.html" %}
 
-{% block title %}口コミ一覧 - Tabetti{% endblock %}
+{% block title %}口コミ一覧 - {{ shop.name }}{% endblock %}
 
 {% block css %}
 <style>
+    /* --- 1. 全体レイアウト --- */
     .shop-container {
-        max-width: 800px;
+        max-width: 980px;
         margin: 20px auto;
-        font-family: sans-serif;
+        font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+        color: #333;
+        line-height: 1.6;
     }
 
-    /* 店舗基本情報のスタイル */
-    .shop-header {
-        margin-bottom: 30px;
+    /* --- 2. ヘッダー：公式バッジ・アクションボタン --- */
+    .header-upper-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
     }
 
-    .shop-name {
-        font-size: 24px;
+    .official-label {
+        background-color: #bfa67b;
+        color: #fff;
+        padding: 2px 8px;
+        font-size: 12px;
+        border-radius: 2px;
         font-weight: bold;
-        margin: 10px 0;
     }
 
-    /* 星評価のレイアウト */
-    .rating-box {
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-action {
+        border: 1px solid #ccc;
+        background: #fff;
+        padding: 6px 14px;
+        font-size: 13px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-post {
+        background-color: #93c02d;
+        color: #fff;
+        border: none;
+        font-weight: bold;
+    }
+
+    /* --- 3. 店舗メイン情報（店名・評価） --- */
+    .shop-main-info {
+        margin-bottom: 20px;
+    }
+
+    .catchphrase {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 5px;
+    }
+
+    .shop-title {
+        font-size: 26px;
+        font-weight: bold;
+        margin: 0 0 10px 0;
+    }
+
+    .rating-flex {
         display: flex;
         align-items: center;
         gap: 10px;
-        margin-bottom: 10px;
     }
 
     .star-rating {
         position: relative;
         display: inline-block;
-        font-size: 24px;
+        font-size: 22px;
         line-height: 1;
     }
 
-    .star-rating-back { color: #ccc; } /* 土台：グレー */
+    .star-rating-back { color: #ccc; }
     .star-rating-front {
         position: absolute;
         top: 0; left: 0;
         overflow: hidden;
         white-space: nowrap;
-        color: #ffc107; /* 塗りつぶし：黄色 */
-        width: var(--rating-width, 0%); /* CSS変数で動的に制御 */
+        color: #ff9800;
+        width: var(--rating-percent, 0%);
     }
 
-    .rating-num {
-        font-size: 24px;
+    .score-red {
+        font-size: 28px;
         font-weight: bold;
         color: #e60012;
     }
 
-    /* 口コミカードのスタイル */
+    /* --- 4. スペック情報（赤い境界線） --- */
+
+    .spec-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
+    .spec-item { margin-bottom: 5px; }
+    .spec-label { color: #666; width: 80px; display: inline-block; }
+
+    .detail-link {
+        color: #06c;
+        text-decoration: none;
+        font-size: 11px;
+    }
+
+    /* --- 5. タブメニュー --- */
+    .shop-tabs {
+        display: flex;
+        border: 1px solid #ddd;
+        background-color: #fff;
+        margin-bottom: 20px;
+    }
+
+    .tab-item {
+        flex: 1;
+        text-align: center;
+        padding: 15px 0;
+        border-right: 1px solid #ddd;
+        font-size: 15px;
+        font-weight: bold;
+        text-decoration: none;
+        color: #333;
+    }
+
+    .tab-item:last-child { border-right: none; }
+    .tab-item.active {
+        background-color: #8c8366;
+        color: #fff;
+    }
+
+    /* --- 6. 口コミ検索・フィルタエリア --- */
+    .review-filter-section {
+        background-color: #f9f9f7;
+        padding: 20px;
+        border: 1px solid #ddd;
+        margin-bottom: 20px;
+    }
+
+    .search-box-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #fff;
+        padding: 15px;
+        border: 1px solid #ccc;
+        margin-bottom: 20px;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 8px;
+        border: 1px solid #ccc;
+    }
+
+    .search-button {
+        background-color: #93c02d;
+        color: #fff;
+        border: none;
+        padding: 8px 25px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .filter-tabs {
+        display: flex;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 15px;
+    }
+
+    .filter-tab-item {
+        flex: 1;
+        text-align: center;
+        padding: 12px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-bottom: none;
+        font-size: 14px;
+        text-decoration: none;
+        color: #333;
+    }
+
+    .filter-tab-item.active {
+        border-top: 2px solid #ff9800;
+        color: #ff9800;
+        font-weight: bold;
+    }
+
+    /* --- 7. 並び替え・件数表示 --- */
+    .list-header-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        color: #666;
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    /* --- 8. 口コミカード --- */
     .review-card {
         border: 1px solid #ddd;
-        padding: 15px;
+        padding: 20px;
         border-radius: 8px;
-        background-color: #fdfdfd;
+        background-color: #fff;
+        margin-bottom: 20px;
     }
 
     .review-user-info {
         display: flex;
         align-items: center;
-        gap: 10px;
-        margin-bottom: 10px;
+        gap: 12px;
+        margin-bottom: 15px;
     }
 
-    .user-avatar {
-        border-radius: 50%;
-        object-fit: cover;
-    }
-
-    .review-title {
-        font-weight: bold;
-        font-size: 18px;
-        margin: 10px 0;
-        color: #333;
-    }
+    .user-avatar { border-radius: 50%; object-fit: cover; }
+    .review-title { font-weight: bold; font-size: 17px; margin: 12px 0; }
 </style>
 {% endblock %}
 
 {% block content %}
 <article class="shop-container">
 
-    <header class="shop-header">
-        <p style="color: #666; font-size: 12px;">池袋西口にて創業20余年自慢のしゃぶ</p>
-        <h1 class="shop-name">牛たん焼きしゃぶ 元祖たこしゃぶ 紅れや 池袋西口店</h1>
+    <div class="header-upper-row">
+        <div><span class="official-label">公式</span></div>
+        <div class="action-buttons">
+            <button class="btn-action">行った</button>
+            <button class="btn-action">保存</button>
+            <button class="btn-action btn-post">投稿</button>
+        </div>
+    </div>
 
-        <div class="rating-box" style="display: flex; align-items: center; gap: 10px;">
-            <div class="star-rating" 
-                style="--rating-width: {% widthratio 3.45 5 100 %}%;">
-                
+    <div class="shop-main-info">
+        <p class="catchphrase">{{ shop.catchphrase|default:"焼肉と多国籍料理を満喫！焼酎カクテルも◎" }}</p>
+        <h1 class="shop-title">{{ shop.name|default:"焼肉ショップまんちい2 学芸大学" }}</h1>
+
+        <div class="rating-flex">
+            <div class="star-rating" style="--rating-percent: {% widthratio shop.rating|default:3.07 5 100 %}%">
                 <div class="star-rating-front">★★★★★</div>
                 <div class="star-rating-back">★★★★★</div>
             </div>
-            
-            <span class="rating-num">3.45</span>
-            <span style="color: #666;">（303人）</span>
+            <span class="score-red">{{ shop.rating|default:3.07 }}</span>
+            <span style="color: #06c; font-size: 13px;">{{ shop.review_count|default:13 }}人</span>
+            <span style="color: #666; font-size: 13px;">{{ shop.save_count|default:903 }}人</span>
         </div>
-        
-        <p style="font-size: 14px;">最寄り駅：池袋駅 | ジャンル：しゃぶしゃぶ、牛タン</p>
-    </header>
+    </div>
 
-    <hr>
+    <div class="shop-specs">
+        <div class="spec-item">
+            <span class="spec-label">最寄り駅：</span>
+            <span>{{ shop.station|default:"学芸大学駅" }} [{{ shop.area|default:"東京" }}]</span>
+        </div>
+        <div class="spec-item">
+            <span class="spec-label">ジャンル：</span>
+            <span>{{ shop.genres|join:"、"|default:"焼肉、ホルモン、冷麺" }}</span>
+        </div>
+        <div class="spec-row">
+            <div>
+                <span class="spec-label">予算：</span>
+                <span>夜：{{ shop.budget_night|default:"￥5,000～￥5,999" }} / 昼：{{ shop.budget_day|default:"-" }}</span>
+            </div>
+            <a href="#" class="detail-link">店舗情報（詳細）</a>
+        </div>
+    </div>
+
+    <nav class="shop-tabs">
+        <a href="#" class="tab-item">トップ</a>
+        <a href="#" class="tab-item">座席</a>
+        <a href="#" class="tab-item">メニュー・コース</a>
+        <a href="#" class="tab-item">写真 <span class="count-badge">87</span></a>
+        <a href="#" class="tab-item active">口コミ <span class="count-badge">13</span></a>
+        <a href="#" class="tab-item" style="color: #e60012;">クーポン・地図</a>
+    </nav>
+
+    <section class="review-filter-section">
+        <div class="search-box-container">
+            <label for="review-search" class="search-label">口コミ検索</label>
+            <input type="text" id="review-search" class="search-input" placeholder="キーワード">
+            <button class="search-button">検索</button>
+        </div>
+
+        <div class="filter-tabs">
+            <a href="#" class="filter-tab-item active">💬 すべての口コミ</a>
+            <a href="#" class="filter-tab-item">🌙 夜の口コミ</a>
+            <a href="#" class="filter-tab-item">☀️ 昼の口コミ</a>
+        </div>
+
+        <div class="sort-bar">
+            <div class="sort-links">
+                <span class="current-sort">標準</span>
+                <a href="#" style="color: #06c; text-decoration: none; margin-left:10px;">訪問月順</a>
+                <a href="#" style="color: #06c; text-decoration: none; margin-left:10px;">いいね！順</a>
+            </div>
+            
+            <div class="list-header-info">
+                <div><strong>1～20</strong> 件を表示 ／ 全 <strong>{{ shop.review_count|default:306 }}</strong> 件</div>
+                <div>
+                    <label for="display-count" style="font-size: 12px;">表示件数：</label>
+                    <select id="display-count" name="per_page" style="font-size: 12px;">
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select> 件
+                </div>
+            </div>
+        </div>
+    </section>
 
     <section class="review-section">
-        <h2 style="border-left: 4px solid #333; padding-left: 10px; font-size: 18px;">口コミ</h2>
-
         <div id="review-container">
             <article class="review-card">
                 <div class="review-user-info">
                     <img src="https://via.placeholder.com/40" alt="ユーザー" width="40" height="40" class="user-avatar">
                     <div>
-                        <div style="font-weight: bold;">大学生の贅沢</div>
+                        <div style="font-weight: bold;">{{ review.user_name|default:"大学生の贅沢" }}</div>
                         <div style="font-size: 12px; color: #666;">口コミ363件 | フォロワー3485人</div>
                     </div>
                 </div>
-
-                <div style="color: #ffc107;">★★★☆☆ <span style="color: #e60012; font-weight: bold;">3.5</span></div>
-                <div role="heading" aria-level="3" class="review-title">
-                    「舞踊る牛タン ～出汁が奏でる一期一会のシンフォニー～」
+                <div style="color: #ffc107;">
+                    ★★★★★ <span style="color: #e60012; font-weight: bold;">{{ review.rating|default:"3.5" }}</span>
                 </div>
-
-                <p style="font-size: 14px; line-height: 1.6;">
-                    牛タンしゃぶとの初対面。真空パックの薄切り肉とは明らかに違う、職人の手仕事による透明感のある薄さに、思わず見とれてしまう。目の前で優雅に湯気を立てる上質な出汁。その周りを取り囲むように並べられた牛...
-                </p>
-                
+                <p class="review-title">{{ review.title|default:"「舞踊る牛タン ～出汁が奏でる一期一会のシンフォニー～」" }}</p>
+                <p style="font-size: 14px; line-height: 1.6;">{{ review.content|default:"職人の手仕事による透明感のある薄さに、思わず見とれてしまう。..." }}</p>
                 <a href="#" style="color: #06c; text-decoration: none; font-size: 14px;">もっと見る ∨</a>
             </article>
         </div>
