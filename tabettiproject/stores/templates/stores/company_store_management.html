@@ -2,87 +2,149 @@
 
 {% block content %}
 <style>
-    /* 全体の余白 */
+    /* 全体のレイアウト */
     .store-admin-wrapper {
-        max-width: 800px;
+        max-width: 900px;
         margin: 40px auto;
         padding: 0 20px;
         font-family: sans-serif;
     }
-
-    /* 画面タイトル */
     .page-title {
         font-size: 22px;
         font-weight: bold;
-        margin-bottom: 20px;
+        margin-bottom: 25px;
         color: #333;
     }
 
-    /* 店舗を並べるエリア */
+    /* ①② 検索エリア */
+    .search-area {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+    }
+    .search-input {
+        flex: 1;
+        padding: 12px 20px;
+        border: 1px solid #ccc;
+        border-radius: 25px; /* 設計図通りの丸み */
+        font-size: 16px;
+        outline: none;
+    }
+    .btn-search {
+        padding: 10px 30px;
+        border: 1px solid #333;
+        border-radius: 20px;
+        background-color: #fff;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .btn-search:hover {
+        background-color: #f0f0f0;
+    }
+
+    /* ③ 一覧エリア */
     .store-list-area {
         display: flex;
         flex-direction: column;
-        gap: 15px; /* 枠と枠の間の隙間 */
+        gap: 15px;
         margin-bottom: 30px;
     }
-
-    /* 店舗の「枠（フレーム）」 */
     .store-frame {
-        border: 1px solid #ccc; /* 枠線 */
-        padding: 20px;
-        border-radius: 5px;
+        border: 1px solid #ccc;
+        padding: 15px 25px;
+        border-radius: 15px; /* 枠の角も少し丸く */
         background-color: #fff;
-        /* 中身がなくても形を維持するための高さ */
-        min-height: 60px; 
+        min-height: 70px; 
         display: flex;
         align-items: center;
+        justify-content: space-between; /* 店舗名と削除ボタンを両端に */
     }
-
-    /* 枠の中の文字（店舗名など） */
     .store-text {
-        font-size: 16px;
+        font-size: 18px;
         color: #333;
+        text-decoration: none; /* リンクにする場合のため */
+    }
+    
+    /* ④ 削除ボタン */
+    .btn-delete {
+        padding: 8px 25px;
+        border: 1px solid #333;
+        border-radius: 12px;
+        background-color: #fff;
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none;
+        color: #333;
+        cursor: pointer;
+    }
+    .btn-delete:hover {
+        background-color: #fee;
+        border-color: #d9534f;
+        color: #d9534f;
     }
 
-    /* 下部のナビゲーションリンク */
+    /* ⑤ 下部ナビゲーション（戻るボタンなど） */
     .nav-links {
         margin-top: 40px;
         padding-top: 15px;
         border-top: 1px solid #eee;
+        display: flex;
+        justify-content: flex-end; /* 戻るを右側に寄せる（設計図重視） */
+        gap: 20px;
     }
-
     .nav-links a {
-        margin-right: 20px;
         color: #007bff;
         text-decoration: none;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        padding: 8px 20px;
+        border-radius: 15px;
+        background: #fff;
+        color: #333;
+        font-weight: bold;
+    }
+    .nav-links a:hover {
+        background-color: #f0f0f0;
     }
 </style>
 
 <div class="store-admin-wrapper">
     <h1 class="page-title">店舗管理運用画面</h1>
 
-    <!-- 枠の並びイメージ -->
+    <!-- ①② 検索エリア -->
+    <!-- method="get" にすることで、入力した文字がURLに載ってViewに送信されます -->
+    <form method="get" action="." class="search-area">
+        <input type="text" name="q" class="search-input" placeholder="検索条件（店舗名）" value="{{ query }}">
+        <button type="submit" class="btn-search">検索</button>
+    </form>
+
+    <!-- ③④ 一覧エリア -->
     <div class="store-list-area">
-        <!-- 枠1 -->
-        <div class="store-frame">
-            <span class="store-text">店舗名：店舗A</span>
-        </div>
+        {% for store in stores %}
+            <!-- 各店舗の枠 -->
+            <div class="store-frame">
+                <!-- ③ 店舗名：クリックすると詳細画面（company_store_info）へ移動 -->
+                <a href="{% url 'stores:company_store_info' store.pk %}" class="store-text">
+                    「 {{ store.store_name }} {% if store.branch_name %}({{ store.branch_name }}){% endif %} 」
+                </a>
 
-        <!-- 枠2 -->
-        <div class="store-frame">
-            <span class="store-text">店舗名：店舗B</span>
-        </div>
-
-        <!-- 枠3（中身が送られてこなくても枠だけ見える） -->
-        <div class="store-frame">
-            <span class="store-text">店舗名：</span>
-        </div>
+                <!-- ④ 削除ボタン：共通確認画面へ移動 -->
+                <!-- next_url に、実際に削除を実行するURL（store_delete_execute）をセットしています -->
+                <a href="{% url 'commons:company_common_confirm' %}?message=店舗「{{ store.store_name }}」を削除しますか？&next_url={% url 'stores:store_delete_execute' store.pk %}" class="btn-delete">
+                    削除
+                </a>
+            </div>
+        {% empty %}
+            <!-- データが1件もない場合、または検索結果が0件の場合 -->
+            <div class="store-frame">
+                <span class="store-text" style="color: #999;">該当する店舗データが見つかりません。</span>
+            </div>
+        {% endfor %}
     </div>
 
-    <!-- 既存のリンク -->
+    <!-- ⑤ 下部のナビゲーションリンク -->
     <div class="nav-links">
-        <a href="{% url 'stores:store_top' %}">店舗トップ画面へ移動</a>
-        <a href="{% url 'accounts:company_top' %}">運用トップ画面へ移動</a>
+        <a href="{% url 'accounts:company_top' %}">運用トップへ戻る</a>
     </div>
 </div>
 {% endblock %}
