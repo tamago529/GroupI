@@ -185,23 +185,22 @@
         margin-bottom: 10px;
     }
 
-    /* 詳細絞り込みボタンの修正 */
+    /* 変更箇所：詳細検索ボタンのスタイル */
     .btn-detailed-search {
-        display: flex;                      /* Flexboxを有効化 */
-        align-items: center;                /* 垂直方向の中央揃え */
-        justify-content: center;             /* 水平方向の中央揃え */
-        gap: 5px;                           /* アイコンとテキストの間隔 */
+        display: flex;
+        align-items: center;      /* 垂直方向の中央 */
+        justify-content: center;   /* 水平方向の中央（偏りの解消） */
+        gap: 5px;                 /* アイコンと文字の間の隙間 */
         width: 100%;
-        background: linear-gradient(#ffffff, #f2f2f2); /* 食べログ風の微かなグラデーション */
+        background: linear-gradient(#ffffff, #f2f2f2); /* 微かなグラデーション */
         border: 1px solid #ccc;
-        padding: 6px 0;                     /* 上下の余白を均等に */
+        padding: 6px 0;
         font-size: 11px;
         font-weight: bold;
         color: #333;
         border-radius: 3px;
         text-decoration: none;
-        box-sizing: border-box;             /* 枠線を含めたサイズ計算 */
-        box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+        box-sizing: border-box;   /* パディングを含めた幅計算 */
     }
 
     .btn-detailed-search:hover {
@@ -209,15 +208,15 @@
         border-color: #bbb;
     }
 
-    /* アイコンのスタイル調整 */
+    /* 変更箇所：アイコンの自作（画像ズレの防止） */
     .icon-paper {
         display: inline-block;
-        width: 14px;
-        height: 14px;
+        width: 12px;
+        height: 12px;
         background: #fff;
         border: 1px solid #bbb;
         position: relative;
-        flex-shrink: 0;                     /* アイコンが潰れないように固定 */
+        flex-shrink: 0;           /* アイコンが潰れないように固定 */
     }
     
     /* アイコンの中の線（より詳細な再現） */
@@ -297,9 +296,7 @@
             <nav>
                 <ul class="mypage-tabs">
                     <li><a href="#">トップ</a></li>
-                    <li><a href="#">行ったお店</a></li>
                     <li><a href="#" class="active">口コミ</a></li>
-                    <li><a href="#">まとめ</a></li>
                     <li><a href="#">フォロー中</a></li>
                     <li><a href="#">フォロワー</a></li>
                 </ul>
@@ -367,7 +364,7 @@
                 <div class="content-header">
                     <h2 style="font-size: 18px; margin: 0;">口コミ投稿したお店</h2>
                     <a href="#" style="font-size: 12px; color: #06c; text-decoration: none;">
-                        検索条件を変更 <img src="https://placehold.jp/12x12.png" alt="" width="12" height="12" class="icon-inline" aria-hidden="true">
+                        検索条件を変更 <img src="..." alt="..." width="12" height="12" class="icon-inline">
                     </a>
                 </div>
 

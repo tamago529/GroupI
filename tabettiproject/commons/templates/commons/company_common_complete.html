@@ -1,3 +1,71 @@
-運用共通完了画面
+<!--運用共通完了画面-->
+{% extends 'company_base.html' %}
 
-<a href="{% url 'accounts:company_top' %}">運用トップ画面へ</a>
+{% block content %}
+<style>
+    .complete-wrapper {
+        max-width: 850px;
+        margin: 100px auto;
+        padding: 0 20px;
+        font-family: sans-serif;
+    }
+
+    /* ② 完了メッセージを囲む角丸のボックス */
+    .complete-box {
+        border: 2px solid #ccc;
+        border-radius: 40px;       /* 設計図の大きな角丸 */
+        background-color: #fff;
+        padding: 80px 40px;
+        text-align: center;
+        margin-bottom: 25px;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .complete-text {
+        font-size: 24px;
+        color: #333;
+        margin: 0;
+    }
+
+    /* ボタン配置エリア（右寄せ） */
+    .complete-button-row {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    /* ① TOPへボタン */
+    .btn-top {
+        display: inline-block;
+        border: 2px solid #333;
+        border-radius: 15px;
+        padding: 12px 45px;
+        font-size: 18px;
+        font-weight: bold;
+        text-decoration: none;
+        color: #000;
+        background-color: #fff;
+        transition: 0.2s;
+    }
+
+    .btn-top:hover {
+        background-color: #f0f0f0;
+        border-color: #ff9600;
+        color: #ff9600;
+    }
+</style>
+
+<div class="complete-wrapper">
+    <!-- ② 完了メッセージ項目 -->
+    <div class="complete-box">
+        <p class="complete-text">{{ display_message|default:"～～～～～～" }}が完了しました</p>
+    </div>
+
+    <!-- ① TOPへボタン -->
+    <div class="complete-button-row">
+        <a href="{% url 'accounts:company_top' %}" class="btn-top">TOPへ</a>
+    </div>
+</div>
+{% endblock %}

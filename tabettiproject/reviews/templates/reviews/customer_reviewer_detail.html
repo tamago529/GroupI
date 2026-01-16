@@ -1,113 +1,20 @@
-レビュアー詳細画面
-
-{% extends "customer_base.html" %}
+{% extends 'customer_base.html' %}
 
 {% block title %}{{ user_name }}さんのマイページ [食べログ]{% endblock %}
 
 {% block css %}
 <style>
     /* ==========================================
-        1. 基本設定と定数 (食べログ公式の配色・フォント)
+       1. 基本設定とアクセシビリティ用スタイル
        ========================================== */
     :root {
-        --tb-orange: #f60;           /* 食べログブランドカラー：オレンジ */
-        --tb-blue: #06c;             /* リンク用：ブルー */
-        --tb-border: #ddd;           /* 境界線：グレー */
-        --tb-bg-gray: #f7f7f7;       /* 背景：薄グレー */
-        --tb-text-main: #333;        /* メイン文字色 */
-        --tb-text-sub: #666;         /* サブ文字色 */
+        --tb-orange: #f60;           /* 食べログオレンジ */
+        --tb-blue: #06c;             /* リンク用ブルー */
+        --tb-border: #ddd;           /* 境界線グレー */
+        --tb-text-sub: #666;         /* 補助テキスト */
     }
 
-    /* マイページ全体のコンテナ（幅980px固定） */
-    .mp-container {
-        width: 980px;
-        margin: 0 auto;
-        background-color: #fff;
-        border: 1px solid var(--tb-border);
-        font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
-        color: var(--tb-text-main);
-    }
-
-    /* ==========================================
-        2. カバー写真エリア (赤枠箇所：可変画像)
-       ========================================== */
-    .mp-cover {
-        position: relative;
-        height: 250px;
-        background: url('{{ cover_image_url }}') center/cover no-repeat;
-        background-color: #e9e9e9; /* 画像未設定時のバックアップカラー */
-        border-bottom: 1px solid #ccc;
-    }
-
-    /* 「カバー写真を変更」ボタンの装飾 */
-    .mp-cover-edit {
-        position: absolute;
-        bottom: 15px;
-        right: 15px;
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid #999;
-        padding: 5px 12px;
-        border-radius: 2px;
-        font-size: 11px;
-        font-weight: bold;
-        cursor: pointer;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    }
-
-    /* ==========================================
-        3. プロフィール情報エリア
-       ========================================== */
-    /* アイコン、名前、統計テーブルを横並びにするヘッダー */
-    .mp-header {
-        display: flex;
-        padding: 0 20px 15px 20px;
-        align-items: flex-end; /* 下揃えで配置 */
-        margin-top: -50px;     /* アイコンをカバー写真に被せる */
-    }
-
-    /* ユーザーアイコン（赤枠箇所：白枠と影を再現） */
-    .mp-user-avatar {
-        width: 120px;
-        height: 120px;
-        background-color: #fff;
-        border: 4px solid #fff; /* アイコン周りの白い縁取り */
-        border-radius: 4px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-        overflow: hidden;
-        z-index: 10;
-    }
-    /* 画像の歪みを防ぐ設定 */
-    .mp-user-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    /* ユーザー名・キャッチコピーのボックス */
-    .mp-user-info {
-        margin-left: 20px;
-        flex-grow: 1;
-        padding-bottom: 5px;
-    }
-    .mp-tagline { font-size: 12px; color: var(--tb-text-sub); margin-bottom: 2px; }
-    .mp-user-name { font-size: 22px; font-weight: bold; margin-bottom: 8px; line-height: 1.2; }
-    .mp-detail-link { font-size: 11px; color: var(--tb-blue); text-decoration: none; }
-
-    /* エリアバッジ（東京 1、埼玉 1 など） */
-    .mp-area-list { display: flex; gap: 5px; margin-top: 10px; }
-    .mp-area-badge {
-        border: 1px solid var(--tb-border);
-        border-radius: 15px;
-        padding: 1px 10px;
-        font-size: 11px;
-        color: var(--tb-text-sub);
-        background-color: #fff;
-    }
-
-    /* ==========================================
-        4. 統計データテーブル (赤枠箇所)
-       ========================================== */
-    /* スクリーンリーダー専用の非表示設定（アクセシビリティ用） */
+    /* [エラー対策] 視覚的に隠すための設定（スクリーンリーダーには読み上げさせます） */
     .visually-hidden {
         position: absolute;
         width: 1px;
@@ -119,29 +26,92 @@
         white-space: nowrap;
         border: 0;
     }
+
+    /* 全体のコンテナ設定 */
+    .mp-container {
+        width: 980px;
+        margin: 0 auto;
+        background-color: #fff;
+        border: 1px solid var(--tb-border);
+        font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+    }
+
+    /* ==========================================
+       2. カバー写真セクション
+       ========================================== */
+    .mp-cover {
+        position: relative;
+        height: 250px;
+        background: url('{{ cover_image_url }}') center/cover no-repeat;
+        background-color: #eee;
+        border-bottom: 1px solid #ccc;
+    }
+
+    /* ==========================================
+       3. プロフィールヘッダー (アイコン・名前・統計)
+       ========================================== */
+    .mp-header {
+        display: flex;         /* 横並びにする */
+        padding: 0 20px 15px;
+        align-items: flex-end; /* 下端で揃える */
+    }
+
+    /* ユーザーアイコン：突き出しの設定 */
+    .mp-user-avatar {
+        width: 120px;
+        height: 120px;
+        flex-shrink: 0;        /* 横幅を固定 */
+        background-color: #fff;
+        border: 4px solid #fff;
+        border-radius: 4px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        margin-top: -55px;     /* 上に突き出させてカバーに被せる */
+        position: relative;
+        z-index: 10;           /* 他の要素より上に表示 */
+        overflow: hidden;
+    }
+    .mp-user-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* テキスト情報エリア：アイコンの右側に配置 */
+    .mp-user-info {
+        margin-left: 20px;     /* アイコンとの間に隙間を作る（これで重なりを解消） */
+        flex-grow: 1;          /* 残りの幅を埋める */
+        padding-bottom: 5px;
+    }
     
+    .mp-tagline { font-size: 12px; color: #666; margin-bottom: 5px; }
+    .mp-user-name { font-size: 22px; font-weight: bold; margin-bottom: 8px; line-height: 1.2; }
+    .mp-detail-link { font-size: 11px; color: #06c; text-decoration: none; }
+
+    /* ==========================================
+       4. 統計データテーブル（右端）
+       ========================================== */
+    /* [アクセシビリティ対応済] 統計テーブル */
     .mp-stats-table {
         min-width: 180px;
         border-collapse: collapse;
-        margin-bottom: 5px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        flex-shrink: 0;
     }
-    .mp-stats-table tr { border-bottom: 1px solid #eee; }
-    .mp-stats-table td { padding: 4px 5px; font-size: 11px; }
-    /* 数値部分の強調（フォントをArialにして本物に近づける） */
+    .mp-stats-table td { padding: 4px 5px; font-size: 11px; border-bottom: 1px solid #eee; }
     .mp-stats-table .val {
         text-align: right;
         font-weight: bold;
         font-size: 16px;
         font-family: Arial, sans-serif;
     }
-    .mp-stats-table .unit { color: var(--tb-text-sub); width: 25px; }
 
     /* ==========================================
-        5. ナビゲーションタブ (赤枠箇所：各件数)
+       5. ナビゲーションタブ
        ========================================== */
     .mp-nav {
         display: flex;
-        border-bottom: 2px solid var(--tb-orange); /* 食べログ特有のオレンジ線 */
+        border-bottom: 2px solid #f60;
         background-color: #fff;
     }
     .mp-nav-item {
@@ -149,43 +119,14 @@
         text-align: center;
         padding: 12px 0 8px;
         border-right: 1px solid #eee;
-        color: var(--tb-text-main);
+        color: #333;
         text-decoration: none;
     }
-    /* アクティブなタブ（トップ）の装飾 */
+    /* アクティブなタブの強調表示 */
     .mp-nav-item.active {
-        background-color: #fff;
-        border-bottom: 4px solid var(--tb-orange);
-        margin-bottom: -2px; /* 境界線と重ねる */
+        border-bottom: 4px solid #f60;
+        margin-bottom: -2px;
         font-weight: bold;
-    }
-    /* タブ内の件数表示 */
-    .mp-nav-count {
-        display: block;
-        font-size: 20px;
-        font-weight: bold;
-        font-family: Arial, sans-serif;
-        line-height: 1;
-        margin-bottom: 3px;
-    }
-    .mp-nav-label { font-size: 11px; color: var(--tb-text-sub); }
-
-    /* ==========================================
-        6. コンテンツレイアウト (2カラム構成)
-       ========================================== */
-    .mp-main { display: flex; padding: 20px; gap: 20px; }
-    /* 左側：メイン（口コミなど） */
-    .mp-content-left { width: 640px; }
-    /* 右側：サイドバー */
-    .mp-content-right { width: 300px; }
-
-    /* セクションタイトル（王冠のアイコンなどが入る場所） */
-    .mp-section-title {
-        font-size: 15px;
-        font-weight: bold;
-        border-bottom: 2px solid var(--tb-border);
-        padding-bottom: 8px;
-        margin-bottom: 15px;
     }
 </style>
 {% endblock %}
@@ -193,7 +134,7 @@
 {% block content %}
 <div class="mp-container">
 
-    <section class="mp-cover" aria-label="カバー写真">
+    <section class="mp-cover" aria-label="マイページカバー写真">
         <div style="position:absolute; bottom:15px; right:15px; background:rgba(255,255,255,0.9); border:1px solid #999; padding:5px 10px; font-size:11px;">📷 カバー写真を変更</div>
     </section>
 
@@ -208,8 +149,8 @@
             <a href="#" style="font-size: 11px; color:var(--tb-blue);">▶ 詳細を見る</a>
         </div>
 
-        <table class="mp-stats-table" aria-label="ユーザー統計情報">
-            <caption class="visually-hidden">ユーザーアクティビティ統計</caption>
+        <table class="mp-stats-table" aria-label="ユーザーアクティビティ統計">
+            <caption class="visually-hidden">ユーザー統計データ一覧</caption>
             <tbody>
                 <tr><td>口コミ数</td><td class="val">{{ stats_reviews }}</td><td style="width:25px; color:#666;">件</td></tr>
                 <tr><td>写真</td><td class="val">{{ stats_photos }}</td><td style="color:#666;">枚</td></tr>
@@ -219,24 +160,14 @@
         </table>
     </section>
 
-    <nav class="mp-nav" aria-label="マイページメニュー">
+    <nav class="mp-nav" aria-label="マイページメニュータブ">
         <a href="{% url 'reviews:customer_reviewer_detail' %}" class="mp-nav-item active" style="padding-top: 28px;">
             トップ
         </a>
-        
+
         <a href="{% url 'reviews:customer_reviewer_review_list' %}" class="mp-nav-item">
             <span class="mp-nav-count">{{ count_reviews }}</span>
             <span class="mp-nav-label">口コミ</span>
-        </a>
-
-        <a href="#" class="mp-nav-item">
-            <span class="mp-nav-count">{{ count_visited }}</span>
-            <span class="mp-nav-label">行ったお店</span>
-        </a>
-
-        <a href="#" class="mp-nav-item">
-            <span class="mp-nav-count">0</span>
-            <span class="mp-nav-label">まとめ</span>
         </a>
 
         <a href="{% url 'follows:customer_follow_list' %}" class="mp-nav-item">
@@ -253,13 +184,8 @@
     <div style="display: flex; padding: 20px; gap: 20px;">
         <div style="width: 640px;">
             <h2 style="font-size:15px; border-bottom:2px solid #ddd; padding-bottom:8px;">👑 おすすめレストラン</h2>
-            <div style="text-align:center; padding:50px; color:#ccc;">コンテンツはここに表示されます</div>
+            <div style="text-align:center; padding:50px; color:#ccc;">読み込み中...</div>
         </div>
     </div>
 </div>
 {% endblock %}
-
-<a href="{% url 'reviews:customer_reviewer_detail'%}">トップ</a>
-<a href="{% url 'reviews:customer_reviewer_review_list' %}">レビュアー口コミ一覧</a>
-<a href="{% url 'follows:customer_follow_list' %}">フォロー中一覧</a>
-<a href="{% url 'follows:customer_follower_list' %}">フォロワー一覧</a>

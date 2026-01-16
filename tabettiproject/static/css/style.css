@@ -16,7 +16,7 @@ body {
    ヘッダー全体
 ========================= */
 .header {
-  border-bottom: 2px solid rgba(254, 172, 41, 1);
+  border-bottom: 3px solid rgba(254, 172, 41, 1);
   background: #fff;
 }
 
@@ -24,13 +24,13 @@ body {
 .header-top {
   display: flex;
   justify-content: flex-end;
-  padding: 6px 16px;
-  font-size: 13px;
+  padding: 10px 24px;
+  font-size: 15px;
 }
 
 .header-nav {
   display: flex;
-  gap: 14px;
+  gap: 20px;
 }
 
 .header-nav a {
@@ -46,13 +46,13 @@ body {
 .header-bottom {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 8px 16px;
+  gap: 24px;
+  padding: 14px 24px;
 }
 
 /* ===== ロゴ ===== */
 .logo img {
-  height: 40px;
+  height: 52px;   /* ← 大きく */
   width: auto;
   display: block;
 }
@@ -61,45 +61,51 @@ body {
 .search-bar {
   display: flex;
   align-items: center;
-  height: 44px;
+  height: 56px;   /* ← 高さアップ */
   flex: 1;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 6px;
   overflow: hidden;
 }
 
 .search-bar input,
 .search-bar select {
   height: 100%;
-  padding: 0 10px;
+  padding: 0 14px;
   border: none;
   border-right: 1px solid #ddd;
-  font-size: 14px;
+  font-size: 16px;  /* ← フォントアップ */
   min-width: 0;
 }
 
 .search-bar input:nth-of-type(1) {
-  flex: 2;
+  flex: 2.2;
 }
 
 .search-bar input:nth-of-type(2) {
-  flex: 1.5;
+  flex: 1.6;
 }
 
 .search-bar input[type="date"],
 .search-bar input[type="time"],
 .search-bar select {
-  width: 130px;
+  width: 150px;
 }
 
+/* ===== 検索ボタン ===== */
 .search-btn {
-  height: 44px;
-  padding: 0 18px;
+  height: 56px;
+  padding: 0 26px;
   border: none;
   background: rgba(255, 173, 22, 1);
   color: #fff;
-  font-size: 18px;
+  font-size: 20px;   /* ← 目立たせる */
+  font-weight: bold;
   cursor: pointer;
+}
+
+.search-btn:hover {
+  opacity: 0.9;
 }
 
 .search-bar input:focus,

@@ -5,34 +5,25 @@
 {% block css %}
 <style>
     /* =========================================
-        レイアウト設定：食べログの幅を再現
+       1. 全体背景とコンテナ設定
        ========================================= */
-    .tabelog-container {
+    body {
+        /* 背景色を食べログ特有のベージュ系に変更 */
+        background-color: #f3f2ed; 
+        margin: 0;
+        color: #333;
+        font-family: "Hiragino Kaku Gothic ProN", "メイリオ", sans-serif;
+    }
+
+    .tabelog-wrapper {
         width: 980px;
         margin: 0 auto;
         background-color: #fff;
-        color: #333;
-        font-size: 13px;
+        padding-bottom: 50px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.05);
     }
 
-    /* メインとサイドバーの2カラム構成 */
-    .tabelog-main-wrapper {
-        display: flex;
-        padding: 20px 0;
-    }
-
-    .tabelog-content-left {
-        width: 660px;
-    }
-
-    .tabelog-sidebar-right {
-        width: 300px;
-        margin-left: 20px;
-    }
-
-    /* =========================================
-        アクセシビリティ用：視覚的に隠すスタイル
-       ========================================= */
+    /* アクセシビリティ用：視覚的に隠す設定 */
     .visually-hidden {
         position: absolute;
         width: 1px;
@@ -46,171 +37,261 @@
     }
 
     /* =========================================
-        上部タブメニュー
+       2. 店舗ヘッダー
        ========================================= */
-    .tabelog-tabs {
+    .shop-header {
+        padding: 20px 20px 10px;
+    }
+
+    .label-official {
+        background-color: #bfa676;
+        color: #fff;
+        font-size: 10px;
+        padding: 2px 5px;
+        border-radius: 2px;
+        display: inline-block;
+        margin-bottom: 5px;
+    }
+
+    .shop-name-title {
+        font-size: 26px;
+        font-weight: bold;
+        margin: 5px 0 10px 0;
+    }
+
+    .header-top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .action-group {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-action-white {
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 6px 14px;
+        font-size: 13px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .btn-action-white span { color: #ff66a0; }
+
+    .btn-action-green {
+        background-color: #8fb134;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 6px 18px;
+        font-size: 13px;
+        font-weight: bold;
+    }
+
+    .rating-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 5px 0;
+    }
+    .stars { color: #ffa500; font-size: 18px; }
+    .score-value { color: #e60000; font-size: 26px; font-weight: bold; }
+    .review-count { color: #06c; font-size: 13px; text-decoration: none; }
+
+    .meta-info-text {
+        font-size: 13px;
+        color: #666;
+        margin-top: 10px;
+    }
+
+    /* =========================================
+       3. タブメニュー（メイン ＆ サブ）
+       ========================================= */
+    .main-navigation {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        margin: 20px 0 0;
+        border-bottom: 1px solid #e2e2e2;
+    }
+    .main-navigation li {
+        flex: 1;
+        text-align: center;
+        border: 1px solid #e2e2e2;
+        margin-right: -1px;
+        background: #fdfaf5;
+    }
+    .main-navigation li.active {
+        background-color: #7a6e54;
+        border-color: #7a6e54;
+    }
+    .main-navigation li.active a { color: #fff; }
+    .main-navigation a { display: block; padding: 14px 0; text-decoration: none; color: #333; font-weight: bold; }
+
+    /* 【修正】サブナビゲーション：親要素いっぱいに均等配置 */
+    .sub-navigation {
         display: flex;
         list-style: none;
         padding: 0;
         margin: 0;
-        border-bottom: 1px solid #e2e2e2;
+        background-color: #f9f9f9;
+        border-bottom: 2px solid #7a6e54;
+        width: 100%; /* 全幅に広げる */
     }
-
-    .tabelog-tabs li {
-        flex: 1;
-        text-align: center;
-        border: 1px solid #e2e2e2;
-        border-bottom: none;
-        margin-right: -1px;
-    }
-
-    .tabelog-tabs li a {
-        display: block;
+    .sub-navigation li {
+        flex: 1; /* 各要素を均等な幅にする */
+        text-align: center; /* テキストを中央寄せ */
         padding: 12px 0;
-        text-decoration: none;
+        font-size: 12px;
+        color: #666;
+        border-right: 1px solid #eee;
+        cursor: pointer;
+    }
+    .sub-navigation li:last-child {
+        border-right: none;
+    }
+    .sub-navigation li.active {
+        background-color: #fff;
         color: #333;
         font-weight: bold;
-    }
-
-    .tabelog-tabs li.active {
-        background-color: #7a6e54;
-    }
-
-    .tabelog-tabs li.active a {
-        color: #fff;
+        border-bottom: 2px solid #ff9900;
+        margin-bottom: -2px; /* 下線をメインの線と重ねる */
     }
 
     /* =========================================
-        セクションタイトル
+       4. コンテンツ配置（2カラム）
        ========================================= */
-    .section-headline {
+    .content-layout {
+        display: flex;
+        padding: 20px;
+    }
+    .left-column { width: 660px; }
+    .right-column { width: 260px; margin-left: 40px; }
+
+    .section-head {
         border-left: 4px solid #f90;
         padding-left: 10px;
         font-size: 18px;
-        margin: 30px 0 15px 0;
+        margin: 20px 0;
         font-weight: bold;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 5px;
     }
 
-    /* =========================================
-        メニューアイテム：画像表示の最適化
-       ========================================= */
-    .menu-list-item {
+    /* 料理リストアイテム */
+    .menu-item-box {
         display: flex;
-        border-bottom: 1px dotted #ccc;
+        justify-content: space-between;
         padding: 20px 0;
+        border-bottom: 1px dotted #ccc;
     }
-
-    .item-photo-frame {
-        width: 120px; /* CSSでの表示幅 */
-        height: 120px; /* CSSでの表示高さ */
-        background-color: #f0f0f0;
-        margin-right: 15px;
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #aaa;
-        overflow: hidden;
+    .menu-item-left { display: flex; gap: 15px; }
+    .menu-photo-frame { width: 120px; height: 120px; background: #f0f0f0; flex-shrink: 0; }
+    
+    /* 【改善】画像属性を補完するスタイル */
+    .menu-photo-frame img { 
+        width: 100%; 
+        height: 100%; 
+        object-fit: cover; 
     }
+    
+    .menu-name-link { color: #06c; font-weight: bold; font-size: 15px; margin: 0; }
+    .menu-item-price { color: #e60000; font-weight: bold; font-size: 16px; }
 
-    .item-photo-frame img {
-        /* 親要素の枠に合わせて画像を調整 */
-        width: 100%;
-        height: auto;
-        object-fit: cover;
-    }
-
-    /* =========================================
-        店舗詳細テーブル
-       ========================================= */
-    .info-detail-table {
+    /* 基本情報テーブル */
+    .info-table-tabelog {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 10px;
-    }
-
-    .info-detail-table th {
-        width: 25%;
-        background-color: #fafafa;
         border: 1px solid #e2e2e2;
-        padding: 12px;
-        text-align: left;
-        font-weight: bold;
+        font-size: 13px;
     }
+    .info-table-tabelog th { background: #fafafa; border: 1px solid #e2e2e2; padding: 12px; text-align: left; width: 120px; }
+    .info-table-tabelog td { border: 1px solid #e2e2e2; padding: 12px; }
 
-    .info-detail-table td {
-        border: 1px solid #e2e2e2;
-        padding: 12px;
-    }
-
-    /* =========================================
-        サイドバー・予約ボタン
-       ========================================= */
-    .sidebar-reserve-box {
-        padding: 15px;
-        border: 1px solid #e2e2e2;
-        background-color: #fff;
-        margin-bottom: 20px;
-        text-align: center;
-    }
-
-    .btn-reserve {
+    /* サイドバー予約 */
+    .sidebar-reserve-card { border: 1px solid #e2e2e2; padding: 20px; background: #fff; text-align: center; }
+    .btn-reserve-orange {
         display: block;
-        padding: 12px 0;
         background-color: #ff6600;
         color: #fff;
+        padding: 14px;
         text-decoration: none;
         font-weight: bold;
         border-radius: 4px;
-        font-size: 15px;
+        margin-top: 10px;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="tabelog-container">
-    <ul class="tabelog-tabs">
+<div class="tabelog-wrapper">
+    <header class="shop-header">
+        <span class="label-official">公式</span>
+        <div class="header-top-row">
+            <h1 class="shop-name-title">{{ store.name }}</h1>
+            <div class="action-group">
+                <button class="btn-action-white"><span>📍</span>行った</button>
+                <button class="btn-action-white"><span>🔖</span>保存</button>
+                <button class="btn-action-green">投稿 ▼</button>
+            </div>
+        </div>
+
+        <div class="rating-container">
+            <span class="stars">★★★☆☆</span>
+            <span class="score-value">3.09</span>
+            <a href="#" class="review-count">92人</a>
+        </div>
+
+        <div class="meta-info-text">
+            大宮駅 161m ／ ジャンル：カフェ、パンケーキ、ケーキ<br>
+            予算： 🌙 ￥1,000～￥1,999 ／ ☀️ ￥1,000～￥1,999
+        </div>
+    </header>
+
+    <ul class="main-navigation">
         <li><a href="#">トップ</a></li>
         <li class="active"><a href="#">メニュー・コース</a></li>
         <li><a href="#">写真</a></li>
         <li><a href="#">口コミ</a></li>
-        <li><a href="{% url 'stores:customer_map' %}">地図</a></li>
+        <li><a href="#">地図</a></li>
     </ul>
 
-    <div class="tabelog-main-wrapper">
-        <div class="tabelog-content-left">
-            <div class="shop-header">
-                <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 10px;">{{ store.name }}</h1>
-            </div>
+    <ul class="sub-navigation">
+        <li>コース (0)</li>
+        <li class="active">料理 (13)</li>
+        <li>ドリンク (14)</li>
+        <li>ランチ (0)</li>
+        <li>写真 (10)</li>
+    </ul>
 
-            <h2 class="section-headline">料理メニュー</h2>
+    <div class="content-layout">
+        <main class="left-column">
+            <h2 class="section-head">料理メニュー</h2>
             
             {% for item in menu_items %}
-            <div class="menu-list-item">
-                <div class="item-photo-frame">
-                    {% if item.image %}
-                        <img src="{{ item.image.url }}" alt="{{ item.name }}" width="120" height="120">
-                    {% else %}
-                        <span>NO PHOTO</span>
-                    {% endif %}
+            <article class="menu-item-box">
+                <div class="menu-item-left">
+                    <div class="menu-photo-frame">
+                        {% if item.image %}
+                            <img src="{{ item.image.url }}" alt="{{ item.name }}" width="120" height="120">
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h3 class="menu-name-link">{{ item.name }}</h3>
+                        <p style="font-size: 12px; color: #666; margin-top: 8px;">{{ item.description }}</p>
+                    </div>
                 </div>
-                <div style="flex-grow: 1;">
-                    <div style="font-weight: bold; color: #06c; font-size: 15px;">{{ item.name }}</div>
-                    <p style="color: #666; font-size: 12px;">{{ item.description }}</p>
-                </div>
-                <div style="font-weight: bold; color: #b00; font-size: 16px; width: 100px; text-align: right;">
-                    {{ item.price }}円
-                </div>
-            </div>
-            {% empty %}
-                <p>現在、表示できるメニューはありません。</p>
+                <div class="menu-item-price">{{ item.price }}円</div>
+            </article>
             {% endfor %}
 
-            <h2 class="section-headline">店舗基本情報</h2>
-            <table class="info-detail-table">
-                <caption class="visually-hidden">{{ store.name }}の詳細データ一覧</caption>
+            <h2 class="section-head">店舗基本情報</h2>
+            <table class="info-table-tabelog">
+                <caption class="visually-hidden">{{ store.name }} の詳細情報テーブル</caption>
                 <tbody>
                     <tr>
                         <th scope="row">店名</th>
@@ -218,37 +299,19 @@
                     </tr>
                     <tr>
                         <th scope="row">住所</th>
-                        <td>
-                            {{ store.address }}<br>
-                            <a href="{% url 'stores:customer_map' %}" style="color: #06c; font-size: 11px;">
-                                大きな地図を見る（店舗情報画面へ）
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">営業時間</th>
-                        <td>{{ store.opening_hours|linebreaksbr }}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">定休日</th>
-                        <td>{{ store.regular_holiday }}</td>
+                        <td>{{ store.address }}</td>
                     </tr>
                 </tbody>
             </table>
-        </div>
+        </main>
 
-        <div class="tabelog-sidebar-right">
-            <div class="sidebar-reserve-box">
-                <p style="font-weight: bold; margin-bottom: 10px;">空席確認・ネット予約</p>
-                <a href="{% url 'reservations:store_reservation_register' %}" class="btn-reserve">
-                    ネット予約登録画面へ移動
-                </a>
+        <aside class="right-column">
+            <div style="font-size: 20px; font-weight: bold; margin-bottom: 20px;">☎ {{ store.phone_number }}</div>
+            <div class="sidebar-reserve-card">
+                <p style="font-size: 13px; font-weight: bold; margin: 0;">空席確認・ネット予約</p>
+                <a href="#" class="btn-reserve-orange">ネット予約登録画面へ移動</a>
             </div>
-
-            <div style="font-size: 22px; font-weight: bold;">
-                ☎ {{ store.phone_number }}
-            </div>
-        </div>
+        </aside>
     </div>
 </div>
 {% endblock %}

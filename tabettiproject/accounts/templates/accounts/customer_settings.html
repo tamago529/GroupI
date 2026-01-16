@@ -1,13 +1,299 @@
-{% extends 'customer_base.html' %}
-{% block content %}
+{% load static %}
+{% include 'customer_header.html' %}
 
-顧客設定画面
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>会員設定</title>
 
-<!--マイページ設定、ネット予約連絡先はJSで遷移させる-->
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-<a href="{% url 'follows:customer_follower_list' %}">フォロワー一覧画面へ</a>
-<a href="{% url 'follows:customer_following_list' %}">フォロー中一覧画面へ</a>    
+    body {
+      margin: 0;
+      font-family: Helvetica, Arial, sans-serif;
+      background-color: #f7f7f7;
+      color: #333;
+    }
 
+    .settings-wrapper {
+      max-width: 900px;
+      margin: 40px auto 80px;
+      background: #fff;
+      padding: 32px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
 
+    h2 {
+      font-size: 22px;
+      margin-bottom: 32px;
+      border-bottom: 2px solid #ff8a00;
+      padding-bottom: 8px;
+    }
 
-{% endblock %}
+    /* ===== セクション見出し ===== */
+    .section {
+      margin-bottom: 48px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 24px;
+      padding: 10px 12px;
+      background: #f5f5f5;
+      border-left: 5px solid #ff8a00;
+    }
+
+    /* ===== フォーム ===== */
+    .form-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      flex: 1;
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #ff8a00;
+    }
+
+    /* ===== 性別 ===== */
+    .gender-group {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .gender-group label {
+      display: inline-flex;
+      align-items: center;
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .gender-group input {
+      width: auto;
+      margin-right: 6px;
+    }
+
+    /* ===== 評価 ===== */
+    .rating-select {
+      width: 160px;
+    }
+
+    /* ===== URL ===== */
+    .url-box {
+      background: #fafafa;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      word-break: break-all;
+    }
+
+    .note {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    /* ===== ボタン ===== */
+    .btn-area {
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    .btn-submit {
+      padding: 14px 48px;
+      font-size: 15px;
+      font-weight: bold;
+      color: #fff;
+      background: #ff8a00;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn-submit:hover {
+      opacity: 0.85;
+    }
+
+    .back-top {
+      margin-top: 16px;
+      font-size: 13px;
+    }
+
+    .back-top a {
+      color: #0066cc;
+      text-decoration: none;
+    }
+
+    .back-top a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="settings-wrapper">
+
+  <h2>会員設定</h2>
+
+  <!-- ===== 基本設定 ===== -->
+  <div class="section">
+    <div class="section-title">基本設定</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>姓</label>
+        <input type="text">
+      </div>
+      <div class="form-group">
+        <label>名</label>
+        <input type="text">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>せい</label>
+        <input type="text">
+      </div>
+      <div class="form-group">
+        <label>めい</label>
+        <input type="text">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>性別</label>
+      <div class="gender-group">
+        <label><input type="radio" name="gender"> 男性</label>
+        <label><input type="radio" name="gender"> 女性</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>携帯電話番号</label>
+      <input type="tel">
+    </div>
+
+    <div class="form-group">
+      <label>メールアドレス</label>
+      <input type="email">
+    </div>
+  </div>
+
+  <!-- ===== プロフィール ===== -->
+  <div class="section">
+    <div class="section-title">プロフィール</div>
+
+    <div class="form-group">
+      <label>ニックネーム</label>
+      <input type="text">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>職業</label>
+        <input type="text">
+      </div>
+      <div class="form-group">
+        <label>使っているカメラ</label>
+        <input type="text">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>標準点</label>
+      <select class="rating-select">
+        <option>★★★★★ 5</option>
+        <option>★★★★☆ 4</option>
+        <option selected>★★★☆☆ 3</option>
+        <option>★★☆☆☆ 2</option>
+        <option>★☆☆☆☆ 1</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>自己紹介</label>
+      <textarea></textarea>
+    </div>
+  </div>
+
+  <!-- ===== レビュアーページ設定 ===== -->
+  <div class="section">
+    <div class="section-title">レビュアーページ設定</div>
+
+    <div class="form-group">
+      <label>レビュアーページURL</label>
+      <div class="url-box">
+        https://tabelog.com/reviewer/0123456789
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>ページタイトル</label>
+      <input type="text">
+    </div>
+
+    <div class="form-group">
+      <label>サブタイトル</label>
+      <input type="text">
+    </div>
+
+    <div class="form-group">
+      <label>得意ジャンル・こだわり</label>
+      <textarea></textarea>
+    </div>
+  </div>
+
+  <div class="btn-area">
+    <button class="btn-submit">登録・変更する</button>
+
+    <div class="back-top">
+      <a href="{% url 'accounts:customer_top' %}">
+        トップページに戻る
+      </a>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
+
+{% include 'customer_footer.html' %}
