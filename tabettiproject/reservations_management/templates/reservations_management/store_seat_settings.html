@@ -1,9 +1,174 @@
-ネット予約管理画面（席設定）
-{% extends "company_base.html" %}
+{% extends "store_base.html" %}
 {% block content %}
-<a href = "{% url 'reservations_management:store_reservation_calendar' %}">ネット予約管理画面（予約カレンダー）へ移動</a><br>
-<a href = "{% url 'reservations_management:store_reservation_ledger' %}">ネット予約管理画面（予約台帳）へ移動</a><br>
-<a href = "{% url 'reservations_management:store_customer_ledger' %}">ネット予約管理画面（顧客台帳）へ移動</a><br>
-<a href = "{% url 'reservations_management:store_reservation_settings' %}">ネット予約管理画面（ネット予約受付設定）へ移動</a><br>
-<a href = "{% url 'reservations_management:store_seat_settings' %}">ネット予約管理画面（席設定）へ移動</a><br>
+
+<style>
+:root{
+  --bg:#f3f4f6;
+  --card:#ffffff;
+  --line:#d9dde3;
+  --text:#222;
+  --muted:#6b7280;
+  --nav:#2f343a;
+  --link:#1a73e8;
+  --chip:#eef2f7;
+}
+
+*{box-sizing:border-box}
+a{color:var(--link);text-decoration:none}
+a:hover{text-decoration:underline}
+
+.wrap{max-width:1000px;margin:0 auto;padding:12px;color:var(--text)}
+
+.top-links{margin:8px 0 12px;font-size:12px}
+.top-links a{margin-right:6px}
+
+.hd{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:12px;
+}
+.title{font-size:16px;font-weight:900}
+.sub{font-size:12px;color:var(--muted);font-weight:700}
+
+.card{
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#fff;
+}
+.card-body{padding:14px}
+
+.notice{
+  border:1px solid #f3b6b0;
+  background:#ffe9e7;
+  color:#b42318;
+  padding:10px 12px;
+  border-radius:6px;
+  font-size:12px;
+  font-weight:800;
+  margin-bottom:12px;
+}
+
+.table{
+  width:100%;
+  border-collapse:collapse;
+}
+.table th,.table td{
+  padding:10px 8px;
+  border-top:1px solid #eef0f3;
+  font-size:12px;
+}
+.table th{
+  background:#fafafa;
+  text-align:left;
+  font-weight:900;
+}
+.badge{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:800;
+  background:var(--chip);
+}
+.actions{
+  margin-top:12px;
+  display:flex;
+  gap:8px;
+}
+.btn{
+  border:1px solid var(--line);
+  background:#fff;
+  padding:7px 10px;
+  border-radius:6px;
+  font-size:12px;
+  font-weight:900;
+  cursor:pointer;
+}
+.btn.primary{
+  background:var(--nav);
+  color:#fff;
+  border-color:var(--nav);
+}
+.btn.disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+</style>
+
+<div class="wrap">
+
+  <div class="top-links">
+    <a href="{% url 'reservations_management:store_reservation_calendar' %}">予約カレンダー</a> /
+    <a href="{% url 'reservations_management:store_reservation_ledger' %}">予約台帳</a> /
+    <a href="{% url 'reservations_management:store_customer_ledger' %}">顧客台帳</a> /
+    <a href="{% url 'reservations_management:store_reservation_settings' %}">ネット予約受付設定</a> /
+    <strong>席設定</strong>
+  </div>
+
+  <div class="hd">
+    <div>
+      <div class="title">席設定</div>
+      <div class="sub">席レーン・席構成の管理</div>
+    </div>
+  </div>
+
+  <div class="notice">
+    現在この画面は <strong>UIのみ（モデル未連携）</strong> です。<br>
+    席レーン数や名称は将来ここで設定され、予約台帳の表示に反映されます。
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width:120px;">レーンID</th>
+            <th>表示名</th>
+            <th style="width:160px;">状態</th>
+            <th style="width:120px;">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <tr>
+            <td>lane_1</td>
+            <td>席レーン1</td>
+            <td><span class="badge">使用中</span></td>
+            <td>
+              <button class="btn disabled">編集</button>
+            </td>
+          </tr>
+
+          <tr>
+            <td>lane_2</td>
+            <td>席レーン2</td>
+            <td><span class="badge">使用中</span></td>
+            <td>
+              <button class="btn disabled">編集</button>
+            </td>
+          </tr>
+
+          <tr>
+            <td>lane_3</td>
+            <td>席レーン3</td>
+            <td><span class="badge">使用中</span></td>
+            <td>
+              <button class="btn disabled">編集</button>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+
+      <div class="actions">
+        <button class="btn primary disabled">レーンを追加（未実装）</button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
 {% endblock %}

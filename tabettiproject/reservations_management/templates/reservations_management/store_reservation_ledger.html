@@ -1,9 +1,437 @@
-ネット予約管理画面（予約台帳）
-{% extends "company_base.html" %}
+{% extends "store_base.html" %}
 {% block content %}
-<a href = "{% url 'reservations_management:store_reservation_calendar' %}">ネット予約管理画面（予約カレンダー）へ移動</a><br>
-<a href = "{% url 'reservations_management:store_reservation_ledger' %}">ネット予約管理画面（予約台帳）へ移動</a><br>
-<a href = "{% url 'reservations_management:store_customer_ledger' %}">ネット予約管理画面（顧客台帳）へ移動</a><br>
-<a href = "{% url 'reservations_management:store_reservation_settings' %}">ネット予約管理画面（ネット予約受付設定）へ移動</a><br>
-<a href = "{% url 'reservations_management:store_seat_settings' %}">ネット予約管理画面（席設定）へ移動</a><br>
+
+<style>
+:root{
+  --bg:#f3f4f6;
+  --card:#ffffff;
+  --line:#d9dde3;
+  --text:#222;
+  --muted:#6b7280;
+  --nav:#2f343a;
+  --link:#1a73e8;
+
+  --chip:#eef2f7;
+  --bar:#ff9800;
+  --bar2:#ffb74d;
+
+  --danger-bg:#ffe9e7;
+  --danger-line:#f3b6b0;
+  --danger-text:#b42318;
+}
+
+*{box-sizing:border-box}
+a{color:var(--link);text-decoration:none}
+a:hover{text-decoration:underline}
+
+.wrap{max-width:1200px;margin:0 auto;padding:10px 12px 24px;color:var(--text);}
+
+.top-links{margin:8px 0 12px; font-size:12px;}
+.top-links a{margin-right:6px}
+
+.hd{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.hd-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.title{font-size:16px;font-weight:900;}
+.sub{font-size:12px;color:var(--muted);font-weight:700;}
+.btns{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.btn{
+  border:1px solid var(--line);
+  background:#fff;
+  padding:7px 10px;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:900;
+  font-size:12px;
+  color:#333;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+.btn:hover{background:#f3f4f6}
+.btn.primary{background:var(--nav);color:#fff;border-color:var(--nav);}
+.btn.primary:hover{opacity:.9}
+.btn.small{padding:6px 9px;font-size:12px}
+
+.card{
+  margin-top:10px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#fff;
+  overflow:hidden;
+}
+.card-body{padding:12px;}
+
+.notice{
+  border:1px solid var(--danger-line);
+  background:var(--danger-bg);
+  color:var(--danger-text);
+  padding:10px 12px;
+  border-radius:6px;
+  font-size:12px;
+  font-weight:800;
+  margin:10px 0;
+}
+
+.day-nav{
+  display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  margin-top:8px;
+}
+.day-nav .date-chip{
+  border:1px solid #e5e7eb;
+  background:var(--chip);
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:12px;
+  font-weight:900;
+}
+
+/* ---- timeline ---- */
+.timeline{
+  margin-top:12px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  overflow:hidden;
+}
+.timeline-head{
+  display:grid;
+  grid-template-columns:repeat({{ time_segments }}, 1fr);
+  gap:0;
+  background:#f7f7f7;
+  border-bottom:1px solid var(--line);
+}
+.timeline-head div{
+  padding:8px 6px;
+  font-size:11px;
+  font-weight:900;
+  color:#333;
+  text-align:center;
+  border-right:1px solid var(--line);
+}
+.timeline-head div:last-child{border-right:none}
+
+.lane-row{
+  display:block;
+  border-top:1px solid #eef0f3;
+}
+.lane-row:first-child{border-top:none;}
+
+.lane{
+  position:relative;
+  background:
+  repeating-linear-gradient(
+    to right,
+    #ffffff 0,
+    #ffffff calc(100% / {{ time_segments }} - 1px),
+    #eef0f3 calc(100% / {{ time_segments }} - 1px),
+    #eef0f3 calc(100% / {{ time_segments }})
+  );
+}
+
+.bar{
+  position:absolute;
+  height:38px;
+  border-radius:10px;
+  background:linear-gradient(90deg, var(--bar), var(--bar2));
+  color:#111;
+  font-weight:900;
+  font-size:12px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:0 10px;
+
+  white-space:nowrap;
+  overflow:hidden;
+
+  box-shadow:0 6px 14px rgba(0,0,0,.12);
+  border:1px solid rgba(0,0,0,.08);
+}
+.bar .left{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  flex:1 1 auto;
+}
+.bar .name{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  flex:1 1 auto;
+}
+.badge{
+  font-size:11px;
+  background:#fff;
+  border:1px solid rgba(0,0,0,.15);
+  padding:3px 8px;
+  border-radius:999px;
+  flex:0 0 auto;
+}
+
+.table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:12px;
+}
+.table th,.table td{
+  border-top:1px solid #eef0f3;
+  padding:10px 8px;
+  font-size:12px;
+}
+.table th{
+  text-align:left;
+  color:#333;
+  background:#fafafa;
+  font-weight:900;
+  border-top:none;
+}
+.table td{color:#333}
+.table .muted{color:var(--muted);font-weight:700}
+
+.kv{
+  display:grid;
+  grid-template-columns:140px 1fr;
+  gap:8px 12px;
+  margin-top:8px;
+}
+.kv .k{color:var(--muted);font-size:12px;font-weight:800;}
+.kv .v{font-size:12px;font-weight:900;color:#111;}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+
+input[type="date"], input[type="time"], input[type="number"]{
+  width: 240px;
+  max-width: 100%;
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:8px 10px;
+  font-size:12px;
+  font-weight:800;
+  color:#111;
+  background:#fff;
+}
+</style>
+
+<div class="wrap">
+
+  <div class="top-links">
+    <a href="{% url 'reservations_management:store_reservation_calendar' %}">予約カレンダー</a> /
+    <a href="{% url 'reservations_management:store_reservation_ledger' %}">予約台帳</a> /
+    <a href="{% url 'reservations_management:store_customer_ledger' %}">顧客台帳</a> /
+    <a href="{% url 'reservations_management:store_reservation_settings' %}">ネット予約受付設定</a> /
+    <a href="{% url 'reservations_management:store_seat_settings' %}">席設定</a>
+  </div>
+
+  {% if mode == "day" %}
+
+    <div class="hd">
+      <div class="hd-left">
+        <div class="title">予約台帳</div>
+        <div class="sub">日別（予約内容を見る）</div>
+      </div>
+
+      <div class="btns">
+        {% if is_debug %}
+          <a class="btn"
+             href="{% url 'reservations_management:store_reservation_ledger_day_debug' %}?store_id={{ store_id }}&date={{ target_date|date:'Y-m-d' }}">更新</a>
+        {% else %}
+          <a class="btn"
+             href="{% url 'reservations_management:store_reservation_ledger_day' %}?date={{ target_date|date:'Y-m-d' }}">更新</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+
+        <div class="day-nav">
+          <span class="date-chip">対象日：{{ target_date|date:'Y年n月j日' }}</span>
+
+          {% if is_debug %}
+            <a class="btn small"
+               href="{% url 'reservations_management:store_reservation_ledger_day_debug' %}?store_id={{ store_id }}&date={{ prev_date|date:'Y-m-d' }}">‹ 前日</a>
+            <a class="btn small"
+               href="{% url 'reservations_management:store_reservation_ledger_day_debug' %}?store_id={{ store_id }}&date={{ next_date|date:'Y-m-d' }}">翌日 ›</a>
+          {% else %}
+            <a class="btn small"
+               href="{% url 'reservations_management:store_reservation_ledger_day' %}?date={{ prev_date|date:'Y-m-d' }}">‹ 前日</a>
+            <a class="btn small"
+               href="{% url 'reservations_management:store_reservation_ledger_day' %}?date={{ next_date|date:'Y-m-d' }}">翌日 ›</a>
+          {% endif %}
+        </div>
+
+        <div class="timeline">
+          <div class="timeline-head">
+            {% for t in time_labels %}
+              <div>{{ t }}</div>
+            {% endfor %}
+          </div>
+
+          {% if lanes %}
+            {% for lane in lanes %}
+              <div class="lane-row">
+                <div class="lane" style="height:{{ lane.height }}px;">
+                  {% for b in lane.bars %}
+                    {% if is_debug %}
+                      <a class="bar"
+                         href="{% url 'reservations_management:store_reservation_detail_debug' b.reservation_id %}?store_id={{ store_id }}"
+                         style="top:{{ b.top_px }}px; left:{{ b.left_pct }}%; width:{{ b.width_pct }}%;">
+                        <span class="left">
+                          <span class="badge">{{ b.start|time:'H:i' }}</span>
+                          <span class="name">{{ b.title }}</span>
+                        </span>
+                        <span class="badge">{{ b.visit_count }}名</span>
+                      </a>
+                    {% else %}
+                      <a class="bar"
+                         href="{% url 'reservations_management:store_reservation_detail' b.reservation_id %}"
+                         style="top:{{ b.top_px }}px; left:{{ b.left_pct }}%; width:{{ b.width_pct }}%;">
+                        <span class="left">
+                          <span class="badge">{{ b.start|time:'H:i' }}</span>
+                          <span class="name">{{ b.title }}</span>
+                        </span>
+                        <span class="badge">{{ b.visit_count }}名</span>
+                      </a>
+                    {% endif %}
+                  {% empty %}
+                    <div style="padding:14px; font-size:12px; color:var(--muted); font-weight:900;">
+                      予約がありません
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div style="padding:14px; font-size:12px; color:var(--muted); font-weight:900;">
+              lanes がありません（views.py で lanes を渡してください）
+            </div>
+          {% endif %}
+        </div>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width:90px;">時刻</th>
+              <th>予約者</th>
+              <th style="width:90px;">人数</th>
+              <th style="width:120px;">ステータス</th>
+              <th style="width:110px;">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if bars %}
+              {% for b in bars %}
+                <tr>
+                  <td>{{ b.start|time:'H:i' }}</td>
+                  <td>{{ b.title }}</td>
+                  <td>{{ b.visit_count }}名</td>
+                  <td class="muted">{{ b.status_label }}</td>
+                  <td>
+                    {% if is_debug %}
+                      <a class="btn small"
+                         href="{% url 'reservations_management:store_reservation_detail_debug' b.reservation_id %}?store_id={{ store_id }}">見る</a>
+                    {% else %}
+                      <a class="btn small"
+                         href="{% url 'reservations_management:store_reservation_detail' b.reservation_id %}">見る</a>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr><td colspan="5" class="muted">予約データがありません</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+
+  {% elif mode == "detail" %}
+
+    <div class="hd">
+      <div class="hd-left">
+        <div class="title">予約詳細</div>
+        <div class="sub">予約内容を見る</div>
+      </div>
+      <div class="btns">
+        {% if is_debug %}
+          <a class="btn"
+             href="{% url 'reservations_management:store_reservation_ledger_day_debug' %}?store_id={{ store_id }}&date={{ reservation.visit_date|date:'Y-m-d' }}">一覧へ戻る</a>
+        {% else %}
+          <a class="btn"
+             href="{% url 'reservations_management:store_reservation_ledger_day' %}?date={{ reservation.visit_date|date:'Y-m-d' }}">一覧へ戻る</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="kv">
+            <div class="k">予約ID</div><div class="v">{{ reservation.id }}</div>
+            <div class="k">来店日時</div><div class="v">{{ reservation.visit_date|date:'Y/m/d' }} {{ reservation.visit_time|time:'H:i' }}</div>
+            <div class="k">人数</div><div class="v">{{ reservation.visit_count }}名</div>
+            <div class="k">ステータス</div><div class="v">{{ reservation.booking_status }}</div>
+            <div class="k">予約者</div><div class="v">{{ reservation.booking_user.full_name }}</div>
+            <div class="k">メール</div><div class="v">{{ reservation.booking_user.email }}</div>
+            <div class="k">電話番号</div><div class="v">{{ reservation.booking_user.phone_number }}</div>
+        </div>
+
+        <div class="actions">
+          {% if is_debug %}
+            <a class="btn" href="{% url 'reservations_management:store_reservation_edit_debug' reservation.id %}?store_id={{ store_id }}">編集</a>
+          {% else %}
+            <a class="btn" href="{% url 'reservations_management:store_reservation_edit' reservation.id %}">編集</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  {% elif mode == "edit" %}
+
+    <div class="hd">
+      <div class="hd-left">
+        <div class="title">予約編集</div>
+        <div class="sub">来店日時・人数を変更</div>
+      </div>
+      <div class="btns">
+        {% if is_debug %}
+          <a class="btn" href="{% url 'reservations_management:store_reservation_detail_debug' reservation.id %}?store_id={{ store_id }}">詳細へ戻る</a>
+        {% else %}
+          <a class="btn" href="{% url 'reservations_management:store_reservation_detail' reservation.id %}">詳細へ戻る</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <form method="post"
+              action="{% if is_debug %}{% url 'reservations_management:store_reservation_edit_debug' reservation.id %}?store_id={{ store_id }}{% else %}{% url 'reservations_management:store_reservation_edit' reservation.id %}{% endif %}">
+          {% csrf_token %}
+          <div class="kv">
+            <div class="k">来店日</div>
+            <div class="v"><input type="date" name="visit_date" value="{{ reservation.visit_date|date:'Y-m-d' }}" required></div>
+
+            <div class="k">来店時刻</div>
+            <div class="v"><input type="time" name="visit_time" value="{{ reservation.visit_time|time:'H:i' }}" required></div>
+
+            <div class="k">人数</div>
+            <div class="v"><input type="number" name="visit_count" value="{{ reservation.visit_count }}" min="1" required></div>
+          </div>
+
+          <div class="actions">
+            <button class="btn primary" type="submit">保存</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  {% else %}
+    <div class="notice">
+      mode が不正です。views.py で mode を day / detail / edit のいずれかで渡してください。
+    </div>
+  {% endif %}
+
+</div>
 {% endblock %}

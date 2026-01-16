@@ -1,9 +1,393 @@
-ネット予約管理画面（ネット予約受付設定）
-{% extends "company_base.html" %}
+{% extends "store_base.html" %}
+{% load dict_extras %}
+
 {% block content %}
-<a href = "{% url 'reservations_management:store_reservation_calendar' %}">ネット予約管理画面（予約カレンダー）へ移動</a><br>
-<a href = "{% url 'reservations_management:store_reservation_ledger' %}">ネット予約管理画面（予約台帳）へ移動</a><br>
-<a href = "{% url 'reservations_management:store_customer_ledger' %}">ネット予約管理画面（顧客台帳）へ移動</a><br>
-<a href = "{% url 'reservations_management:store_reservation_settings' %}">ネット予約管理画面（ネット予約受付設定）へ移動</a><br>
-<a href = "{% url 'reservations_management:store_seat_settings' %}">ネット予約管理画面（席設定）へ移動</a><br>
+
+<style>
+:root{
+  --bg:#f3f4f6;
+  --card:#ffffff;
+  --line:#d9dde3;
+  --text:#222;
+  --muted:#6b7280;
+  --brand:#ff8a00;
+  --nav:#2f343a;
+  --link:#1a73e8;
+
+  --cal-head:#f7f7f7;
+  --cal-sat:#1a73e8;
+  --cal-sun:#d14343;
+  --cal-today:#fff7cc;
+  --cal-closed:#fdecec;
+
+  --ok:#2e7d32;
+  --ng:#c62828;
+}
+*{box-sizing:border-box}
+a{color:var(--link);text-decoration:none}
+a:hover{text-decoration:underline}
+
+.wrap{max-width:1200px;margin:0 auto;padding:10px 12px 24px;color:var(--text);}
+
+.head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:8px;}
+.month{font-size:16px;font-weight:900;}
+.nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.btn{
+  border:1px solid var(--line); background:#fff; padding:7px 10px; border-radius:6px;
+  cursor:pointer; font-weight:900; font-size:12px; color:#333;
+}
+.btn:hover{background:#f3f4f6}
+
+.card{margin-top:10px; border:1px solid var(--line); border-radius:6px; overflow:hidden; background:#fff;}
+.weekdays{display:grid;grid-template-columns:repeat(7,1fr);background:var(--cal-head);border-bottom:1px solid var(--line);}
+.weekdays div{padding:10px 8px;font-size:12px;font-weight:900;text-align:center;color:#333;}
+.weekdays .sat{color:var(--cal-sat)}
+.weekdays .sun{color:var(--cal-sun)}
+
+.grid{display:grid;grid-template-columns:repeat(7,1fr);}
+.cell{
+  min-height:110px; border-right:1px solid var(--line); border-bottom:1px solid var(--line);
+  padding:8px 8px 10px; background:#fff; position:relative;
+}
+.cell:nth-child(7n){border-right:none}
+
+.cell.other{background:#f3f4f6;color:#9aa0a6;}
+.cell.other .day{color:#9aa0a6}
+.cell.today{background:var(--cal-today);}
+.cell.closed{background:var(--cal-closed);}
+
+.day{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:900;margin-bottom:6px;}
+.day .num{font-variant-numeric:tabular-nums;}
+.badge{
+  font-size:10px;font-weight:900;padding:2px 6px;border-radius:999px;border:1px solid #e5e7eb;
+  background:#fff;color:#333;
+}
+
+.pills{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:10px;color:var(--muted);font-weight:800;}
+.pill{
+  display:inline-flex;align-items:center;gap:6px;border:1px solid #e5e7eb;background:#fff;
+  padding:3px 8px;border-radius:999px;
+}
+.dot{width:8px;height:8px;border-radius:50%;background:#9ca3af;}
+.dot.ok{background:var(--ok);}
+.dot.ng{background:var(--ng);}
+
+.setbtn{
+  margin-top:8px;
+  width:100%;
+  border:1px solid var(--line);
+  background:#fff;
+  padding:8px 10px;
+  border-radius:6px;
+  font-weight:900;
+  font-size:12px;
+  cursor:pointer;
+}
+.setbtn:hover{background:#f3f4f6}
+.setbtn:disabled{opacity:.45;cursor:not-allowed}
+
+.msg{margin:10px 0 0;}
+.msg .item{
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:6px;
+  padding:10px 12px;
+  font-size:12px;
+  font-weight:800;
+  margin-top:8px;
+}
+.msg .item.success{border-color:rgba(46,125,50,.35)}
+.msg .item.error{border-color:rgba(198,40,40,.35)}
+
+.modal-backdrop{
+  position:fixed; inset:0; background:rgba(0,0,0,.35);
+  display:none; align-items:center; justify-content:center;
+  padding:16px;
+  z-index:9999;
+}
+.modal{
+  width:min(560px, 100%);
+  background:#fff;
+  border-radius:10px;
+  border:1px solid var(--line);
+  overflow:hidden;
+}
+.modal-h{
+  background:#f7f7f7;
+  border-bottom:1px solid var(--line);
+  padding:10px 12px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.modal-h b{font-size:13px}
+.modal-b{padding:12px}
+.modal-f{padding:10px 12px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;background:#fafafa;}
+
+.frow{display:grid;grid-template-columns:140px 1fr;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed #eee;}
+.frow:last-child{border-bottom:none}
+.label{font-size:12px;font-weight:900;color:#333;}
+.input, .select{
+  width:100%; border:1px solid var(--line); border-radius:6px; padding:8px 10px;
+  font-size:12px;
+}
+.help{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
+.inline{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:12px;font-weight:800;}
+.small{font-size:11px;color:var(--muted);font-weight:800}
+
+@media (max-width: 680px){
+  .cell{min-height:100px}
+  .frow{grid-template-columns:1fr}
+}
+</style>
+
+<div class="wrap">
+
+  {% if messages %}
+    <div class="msg">
+      {% for message in messages %}
+        <div class="item {% if message.tags %}{{ message.tags }}{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="head">
+    <div class="month">{{ month_label }}（ネット予約受付設定）</div>
+
+    <div class="nav">
+      {% if request.resolver_match.url_name == 'store_reservation_settings_debug' %}
+        <a class="btn" href="{% url 'reservations_management:store_reservation_settings_debug' %}?store_id={{ store.id }}&year={{ today.year }}&month={{ today.month }}">今月</a>
+        <a class="btn" href="{% url 'reservations_management:store_reservation_settings_debug' %}?store_id={{ store.id }}&year={{ prev_year }}&month={{ prev_month }}">‹</a>
+        <a class="btn" href="{% url 'reservations_management:store_reservation_settings_debug' %}?store_id={{ store.id }}&year={{ next_year }}&month={{ next_month }}">›</a>
+      {% else %}
+        <a class="btn" href="{% url 'reservations_management:store_reservation_settings' %}?year={{ today.year }}&month={{ today.month }}">今月</a>
+        <a class="btn" href="{% url 'reservations_management:store_reservation_settings' %}?year={{ prev_year }}&month={{ prev_month }}">‹</a>
+        <a class="btn" href="{% url 'reservations_management:store_reservation_settings' %}?year={{ next_year }}&month={{ next_month }}">›</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <section class="card">
+    <div class="weekdays">
+      <div>月 (Mon)</div>
+      <div>火 (Tue)</div>
+      <div>水 (Wed)</div>
+      <div>木 (Thu)</div>
+      <div>金 (Fri)</div>
+      <div class="sat">土 (Sat)</div>
+      <div class="sun">日 (Sun)</div>
+    </div>
+
+    <div class="grid">
+      {% for week in weeks %}
+        {% for d in week %}
+          {% with o=online|get_item:d %}
+            <div class="cell
+                        {% if d.month != month %}other{% endif %}
+                        {% if d == today %}today{% endif %}">
+
+              <div class="day">
+                <span class="num">{{ d.day }}</span>
+                {% if d.month != month %}
+                  <span class="badge">月外</span>
+                {% endif %}
+              </div>
+
+              <div class="pills">
+                {% if o %}
+                  {% if o.is_open %}
+                    <span class="pill"><span class="dot ok"></span>受付中</span>
+                  {% else %}
+                    <span class="pill"><span class="dot ng"></span>停止中</span>
+                  {% endif %}
+                  <span class="pill">空き：{{ o.available_seats }}席</span>
+                {% else %}
+                  <span class="pill"><span class="dot"></span>未設定</span>
+                {% endif %}
+              </div>
+
+              <button
+                class="setbtn"
+                type="button"
+                {% if d.month != month %}disabled{% endif %}
+                data-date="{{ d|date:'Y-m-d' }}"
+                data-is-open="{% if o and o.is_open %}1{% else %}0{% endif %}"
+                data-seats="{% if o %}{{ o.available_seats }}{% else %}{% endif %}"
+              >
+                設定する
+              </button>
+
+            </div>
+          {% endwith %}
+        {% endfor %}
+      {% endfor %}
+    </div>
+  </section>
+
+  <div class="help">
+    {メモ}
+    <ul style="margin:6px 0 0; padding-left:18px;">
+      <li>「休業日」は現在、DB上は <b>booking_status=False / available_seats=0</b> として保存します。</li>
+      <li>ユースケースの「営業時間」「予約不可」は、現モデルに列が無いので <b>まだ保存しません</b>（UIのみ置いてあります）。</li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-h">
+      <b id="modalTitle">受付設定</b>
+      <button type="button" class="btn" id="modalCloseBtn">×</button>
+    </div>
+
+    <form method="post" id="settingsForm">
+      {% csrf_token %}
+      <div class="modal-b">
+
+        <input type="hidden" name="date" id="fDate" value="">
+
+        <div class="frow">
+          <div class="label">対象日</div>
+          <div>
+            <div id="dateLabel" style="font-size:13px; font-weight:900;"></div>
+            <div class="small">※この日付のネット予約受付設定を登録します</div>
+          </div>
+        </div>
+
+        <div class="frow">
+          <div class="label">営業/休業</div>
+          <div class="inline">
+            <label><input type="radio" name="day_type" value="open" checked> 営業日に設定</label>
+            <label><input type="radio" name="day_type" value="closed"> 休業日に設定</label>
+            <div class="help">
+              {メモ} 休業日は「反映」押下で <b>受付停止＋空き0</b> として保存します。
+            </div>
+          </div>
+        </div>
+
+        <div class="frow" id="openFields">
+          <div class="label">受付状況</div>
+          <div class="inline">
+            <label><input type="radio" name="booking_status" value="1" checked> 受付中</label>
+            <label><input type="radio" name="booking_status" value="0"> 停止中</label>
+          </div>
+        </div>
+
+        <div class="frow" id="seatsRow">
+          <div class="label">空き席数（必須）</div>
+          <div>
+            <input class="input" type="number" name="available_seats" id="fSeats" min="0" placeholder="例：9">
+            <div class="help">
+              {メモ} StoreOnlineReservation.available_seats に保存します。
+            </div>
+          </div>
+        </div>
+
+        <div class="frow">
+          <div class="label">営業時間</div>
+          <div>
+            <div class="inline">
+              <input class="input" type="time" disabled>
+              <span>〜</span>
+              <input class="input" type="time" disabled>
+            </div>
+            <div class="help">
+              {メモ} ユースケース必須だが、今のモデルに列が無いので未保存（将来、日別営業時間モデル/列を追加）。
+            </div>
+          </div>
+        </div>
+
+        <div class="frow">
+          <div class="label">予約不可</div>
+          <div class="inline">
+            <label><input type="checkbox" disabled> 予約不可にする</label>
+            <div class="help">
+              {メモ} これもモデルに列が無いので未保存。将来の拡張ポイント。
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-f">
+        <button type="button" class="btn" id="cancelBtn">キャンセル</button>
+        <button type="submit" class="btn" style="background:#2563eb;color:#fff;border-color:#2563eb;">反映する</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function(){
+  const backdrop = document.getElementById("modalBackdrop");
+  const closeBtn = document.getElementById("modalCloseBtn");
+  const cancelBtn = document.getElementById("cancelBtn");
+
+  const fDate = document.getElementById("fDate");
+  const dateLabel = document.getElementById("dateLabel");
+  const fSeats = document.getElementById("fSeats");
+
+  const openFields = document.getElementById("openFields");
+  const seatsRow = document.getElementById("seatsRow");
+
+  function openModal(btn){
+    const d = btn.dataset.date;
+    const isOpen = btn.dataset.isOpen; // "1" / "0"
+    const seats = btn.dataset.seats;
+
+    fDate.value = d;
+    dateLabel.textContent = d;
+
+    // 初期値（未設定なら空欄）
+    fSeats.value = seats || "";
+
+    // 受付中/停止中の初期
+    const radios = document.querySelectorAll("input[name='booking_status']");
+    radios.forEach(r => { r.checked = (r.value === (isOpen === "1" ? "1" : "0")); });
+
+    // day_type 初期は営業日（閉めたいならユーザーが切替）
+    const dayTypeRadios = document.querySelectorAll("input[name='day_type']");
+    dayTypeRadios.forEach(r => { r.checked = (r.value === "open"); });
+
+    // 表示制御
+    setDayTypeUI("open");
+
+    backdrop.style.display = "flex";
+    backdrop.setAttribute("aria-hidden", "false");
+  }
+
+  function closeModal(){
+    backdrop.style.display = "none";
+    backdrop.setAttribute("aria-hidden", "true");
+  }
+
+  function setDayTypeUI(type){
+    if(type === "closed"){
+      openFields.style.display = "none";
+      seatsRow.style.display = "none";
+    }else{
+      openFields.style.display = "";
+      seatsRow.style.display = "";
+    }
+  }
+
+  document.querySelectorAll(".setbtn").forEach(btn => {
+    btn.addEventListener("click", () => openModal(btn));
+  });
+
+  closeBtn.addEventListener("click", closeModal);
+  cancelBtn.addEventListener("click", closeModal);
+
+  backdrop.addEventListener("click", (e) => {
+    if(e.target === backdrop) closeModal();
+  });
+
+  document.querySelectorAll("input[name='day_type']").forEach(r => {
+    r.addEventListener("change", () => setDayTypeUI(r.value));
+  });
+})();
+</script>
+
 {% endblock %}

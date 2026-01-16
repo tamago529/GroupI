@@ -1,12 +1,7 @@
-ネット予約管理画面（予約カレンダー）
-{% extends "company_base.html" %}
-{% block content %}
-<a href = "{% url 'reservations_management:store_reservation_calendar' %}">ネット予約管理画面（予約カレンダー）へ移動</a><br>
-<a href = "{% url 'reservations_management:store_reservation_ledger' %}">ネット予約管理画面（予約台帳）へ移動</a><br>
-<a href = "{% url 'reservations_management:store_customer_ledger' %}">ネット予約管理画面（顧客台帳）へ移動</a><br>
-<a href = "{% url 'reservations_management:store_reservation_settings' %}">ネット予約管理画面（ネット予約受付設定）へ移動</a><br>
-<a href = "{% url 'reservations_management:store_seat_settings' %}">ネット予約管理画面（席設定）へ移動</a><br>
+{% extends "store_base.html" %}
+{% load dict_extras %}
 
+{% block content %}
 
 <style>
 :root{
@@ -35,21 +30,6 @@ a{color:var(--link);text-decoration:none}
 a:hover{text-decoration:underline}
 
 .cal-wrap{max-width:1200px;margin:0 auto;padding:10px 12px 24px;color:var(--text);}
-
-.cal-tabs{
-  display:flex; border:1px solid var(--line); border-radius:6px; overflow:hidden; background:#fff;
-}
-.cal-tab{
-  flex:1; padding:10px 8px; text-align:center; font-size:12px; font-weight:900;
-  color:#333; background:#fff; border-right:1px solid var(--line); white-space:nowrap;
-}
-.cal-tab:last-child{border-right:none}
-.cal-tab.active{background:var(--nav); color:#fff;}
-
-.cal-notice{
-  margin-top:10px; border:1px solid var(--danger-line); background:var(--danger-bg);
-  color:var(--danger-text); padding:10px 12px; border-radius:6px; font-size:12px; font-weight:700;
-}
 
 .cal-head{margin-top:12px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;}
 .cal-month{font-size:16px; font-weight:900;}
@@ -82,20 +62,45 @@ a:hover{text-decoration:underline}
 
 .cal-cell.sat .cal-day{color:var(--cal-sat)}
 .cal-cell.sun .cal-day{color:var(--cal-sun)}
-
 .cal-cell.other{background:#f3f4f6;color:#9aa0a6;}
 .cal-cell.other .cal-day{color:#9aa0a6}
-
 .cal-cell.closed{background:var(--cal-closed);}
 .cal-cell.closed .cal-badge{border-color:var(--danger-line); color:var(--danger-text);}
-
 .cal-cell.today{background:var(--cal-today);}
 
 .cal-chip{
   border-radius:6px; padding:6px 8px; font-size:11px; font-weight:900;
   background:#eef2f7; border:1px solid #e5e7eb; color:#333;
 }
-.cal-sub{margin-top:4px; font-size:10px; color:var(--muted); font-weight:700;}
+.cal-chip.zero{opacity:.55}
+
+.cal-sub{
+  margin-top:6px;
+  display:flex;
+  gap:6px;
+  align-items:center;
+  flex-wrap:wrap;
+  font-size:10px;
+  color:var(--muted);
+  font-weight:800;
+}
+
+.cal-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  border:1px solid #e5e7eb;
+  background:#fff;
+  padding:3px 8px;
+  border-radius:999px;
+}
+
+.cal-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:#9ca3af;
+}
+.cal-dot.ok{background:#2e7d32;}
+.cal-dot.ng{background:#c62828;}
 
 @media (max-width: 680px){
   .cal-cell{min-height:78px;padding:7px 6px}
@@ -103,27 +108,51 @@ a:hover{text-decoration:underline}
 }
 </style>
 
+<!-- （このリンク群はデバッグ用なら残してOK。不要なら消してOK） -->
+<div style="margin:8px 0 12px; font-size:12px;">
+  <a href="{% url 'reservations_management:store_reservation_calendar' %}">予約カレンダー</a> /
+  <a href="{% url 'reservations_management:store_reservation_ledger' %}">予約台帳</a> /
+  <a href="{% url 'reservations_management:store_customer_ledger' %}">顧客台帳</a> /
+  <a href="{% url 'reservations_management:store_reservation_settings' %}">ネット予約受付設定</a> /
+  <a href="{% url 'reservations_management:store_seat_settings' %}">席設定</a>
+</div>
+
 <div class="cal-wrap">
 
-
-  <!-- Notice（固定文言ならこれでOK。変えるなら ctx で渡す） -->
-  <div class="cal-notice">
-    来店日6日後23:59に予約を確定。ただし、毎月2日に前月の全実績が確定されますのでご了承ください。
-  </div>
-
-  <!-- Month header -->
   <div class="cal-head">
     <div class="cal-month">{{ month_label }}</div>
 
     <div class="cal-nav">
-      <!-- メモ: store_id は URL で渡す設計（ログインから取れるなら不要） -->
-      <a class="cal-btn" href="{% url 'owner_calendar:calendar' %}?store_id={{ store.id }}&year={{ today.year }}&month={{ today.month }}">今月</a>
-      <a class="cal-btn" href="{% url 'owner_calendar:calendar' %}?store_id={{ store.id }}&year={{ prev_year }}&month={{ prev_month }}">‹</a>
-      <a class="cal-btn" href="{% url 'owner_calendar:calendar' %}?store_id={{ store.id }}&year={{ next_year }}&month={{ next_month }}">›</a>
+      {% if request.resolver_match.url_name == 'store_reservation_calendar_debug' %}
+        <a class="cal-btn"
+           href="{% url 'reservations_management:store_reservation_calendar_debug' %}?store_id={{ store.id }}&year={{ today.year }}&month={{ today.month }}">
+          今月
+        </a>
+        <a class="cal-btn"
+           href="{% url 'reservations_management:store_reservation_calendar_debug' %}?store_id={{ store.id }}&year={{ prev_year }}&month={{ prev_month }}">
+          ‹
+        </a>
+        <a class="cal-btn"
+           href="{% url 'reservations_management:store_reservation_calendar_debug' %}?store_id={{ store.id }}&year={{ next_year }}&month={{ next_month }}">
+          ›
+        </a>
+      {% else %}
+        <a class="cal-btn"
+           href="{% url 'reservations_management:store_reservation_calendar' %}?year={{ today.year }}&month={{ today.month }}">
+          今月
+        </a>
+        <a class="cal-btn"
+           href="{% url 'reservations_management:store_reservation_calendar' %}?year={{ prev_year }}&month={{ prev_month }}">
+          ‹
+        </a>
+        <a class="cal-btn"
+           href="{% url 'reservations_management:store_reservation_calendar' %}?year={{ next_year }}&month={{ next_month }}">
+          ›
+        </a>
+      {% endif %}
     </div>
   </div>
 
-  <!-- Calendar -->
   <section class="cal-card">
     <div class="cal-weekdays">
       <div>月 (Mon)</div>
@@ -138,63 +167,52 @@ a:hover{text-decoration:underline}
     <div class="cal-grid">
       {% for week in weeks %}
         {% for d in week %}
-          {# 判定用 #}
-          {% with is_other=d.month != month %}
-          {% with is_today=d == today %}
-          {% with is_closed=d in closed_days %}
+          {% with info=daily|get_item:d %}
+          {% with o=online|get_item:d %}
+
             <div class="cal-cell
                         {% if forloop.counter0 == 5 %}sat{% endif %}
                         {% if forloop.counter0 == 6 %}sun{% endif %}
-                        {% if is_other %}other{% endif %}
-                        {% if is_today %}today{% endif %}
-                        {% if is_closed %}closed{% endif %}">
+                        {% if d.month != month %}other{% endif %}
+                        {% if d == today %}today{% endif %}
+                        {% if d in closed_days %}closed{% endif %}">
+
               <div class="cal-day">
                 <span class="num">{{ d.day }}</span>
-                {% if is_closed %}
+                {% if d in closed_days %}
                   <span class="cal-badge">休業日</span>
                 {% endif %}
               </div>
 
-              {% if daily.d %}
-                {# NOTE: これは間違い（Djangoテンプレは daily[d] 直接ができない） #}
+              {% if info %}
+                <div class="cal-chip">予約：{{ info.groups }}組（{{ info.people }}名）</div>
+              {% else %}
+                <div class="cal-chip zero">予約：0組（0名）</div>
               {% endif %}
 
-              {# ---- ここが “使えるカレンダー” の中核 ----
-                 Djangoテンプレでは dict を dateキーで直接引けないので、
-                 View側で weeks を「表示用オブジェクト」に変換するか、
-                 custom template filter を使うのが綺麗です。
-
-                 ただ、まずは簡単にするため “daily_items” を作る案を採用します。
-                 ↓↓↓
-              #}
-
-              {# メモ: ここは後述の「簡単フィルタ」を使う #}
-              {% with info=daily|get_item:d %}
-                {% if info %}
-                  <div class="cal-chip">
-                    予約：{{ info.groups }}組（{{ info.people }}名）
-                  </div>
-                {% else %}
-                  <div class="cal-chip" style="opacity:.55;">
-                    予約：0組（0名）
-                  </div>
-                {% endif %}
-              {% endwith %}
-
-              {# メモ:
-                 受付中：9卓 みたいな在庫/席情報を出したい場合は
-                 ctx に daily_capacity[d] を渡す
-                 例）daily_capacity: {date: 9}
-              #}
               <div class="cal-sub">
-                <!-- {{ daily_capacity[date] }} を入れる（例: 受付中：9卓） -->
+                {% if o %}
+                  {% if o.is_open %}
+                    <span class="cal-pill"><span class="cal-dot ok"></span>受付中</span>
+                  {% else %}
+                    <span class="cal-pill"><span class="cal-dot ng"></span>停止中</span>
+                  {% endif %}
+                  <span class="cal-pill">空き：{{ o.available_seats }}席</span>
+                {% else %}
+                  <span class="cal-pill"><span class="cal-dot"></span>未設定</span>
+                {% endif %}
               </div>
+
             </div>
-          {% endwith %}{% endwith %}{% endwith %}{% endwith %}
+
+          {% endwith %}
+          {% endwith %}
         {% endfor %}
       {% endfor %}
     </div>
+
   </section>
 
 </div>
+
 {% endblock %}
