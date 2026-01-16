@@ -14,6 +14,7 @@ urlpatterns = [
     path("customer_store_new_register/", customer_store_new_registerView.as_view(), name="customer_store_new_register"),
     path("customer_store_new_register_confirm/", customer_store_new_register_confirmView.as_view(), name="customer_store_new_register_confirm"),
     path("store_top/", store_topView.as_view(), name="store_top"),  
+    path("store_logout/", store_logoutView.as_view(), name="store_logout"),
     path("company_store_management/", company_store_managementView.as_view(), name="company_store_management",
     ),
 

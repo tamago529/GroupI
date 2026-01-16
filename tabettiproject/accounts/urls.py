@@ -6,6 +6,9 @@ from django.conf.urls.static import static
 app_name = "accounts"
 
 urlpatterns = [
+
+    path("", customer_loginView.as_view(), name="customer_login"),
+
     path("company_account_management/", company_account_managementView.as_view(), name="company_account_management"),
     path("company_login/", company_loginView.as_view(), name="company_login"),
     path("company_logout/", company_logoutView.as_view(), name="company_logout"),

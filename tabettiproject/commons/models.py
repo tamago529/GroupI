@@ -1,13 +1,53 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.auth.models import AbstractUser, Group, Permission, BaseUserManager
+
 
 #----------------
 # アカウント
 #----------------
+class AccountManager(BaseUserManager):
+    use_in_migrations = True
+
+    def _get_default_account_type(self):
+        """
+        createsuperuser / create_user 時に使うデフォルト種別
+        なければ自動作成
+        """
+        return AccountType.objects.get_or_create(
+            account_type="管理者"
+        )[0]
+
+    def _create_user(self, username, email, password, **extra_fields):
+        if not username:
+            raise ValueError("username は必須です")
+
+        # ★本丸：account_type を必ず入れる
+        if extra_fields.get("account_type") is None:
+            extra_fields["account_type"] = self._get_default_account_type()
+
+        email = self.normalize_email(email)
+        user = self.model(username=username, email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_user(self, username, email=None, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", False)
+        extra_fields.setdefault("is_superuser", False)
+        return self._create_user(username, email, password, **extra_fields)
+
+    def create_superuser(self, username, email=None, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        return self._create_user(username, email, password, **extra_fields)
+
+
 class Account(AbstractUser):
     account_type = models.ForeignKey("AccountType", on_delete=models.PROTECT, verbose_name="種類")
     groups = models.ManyToManyField(Group, related_name="account_set", blank=True, verbose_name="グループ", help_text="The groups this user belongs to.")
     user_permissions = models.ManyToManyField(Permission, related_name="account_set", blank=True, verbose_name="ユーザー権限", help_text="Specific permissions for this user.")
+    objects = AccountManager() 
     class Meta:
         db_table = "account"; verbose_name = "アカウント"; verbose_name_plural = "アカウント"
     def __str__(self):
@@ -64,7 +104,7 @@ class Store(models.Model):
     scene = models.ForeignKey("Scene", on_delete=models.PROTECT, verbose_name="利用シーン")
     reservable = models.BooleanField(verbose_name="予約可否", default=True)
     editable = models.BooleanField(verbose_name="編集可能", default=True)
-    creator = models.ForeignKey("CustomerAccount", on_delete=models.DO_NOTHING, verbose_name="作成者")
+    creator = models.ForeignKey("CustomerAccount", on_delete=models.DO_NOTHING, null=True, blank=True, verbose_name="作成者")
     class Meta:
         db_table = "stores"; verbose_name = "店舗基本情報"; verbose_name_plural = "店舗基本情報"
     def __str__(self):
