@@ -1,222 +1,166 @@
-トップ画面
 {% extends "customer_base.html" %}
 
-{% block title %}食べログ - ランキングと口コミで探せるグルメサイト{% endblock %}
+{% load static %}
+
+{% block title %}ジャンルから探す - {{ shop.name }}{% endblock %}
 
 {% block css %}
 <style>
-    /* --- 全体レイアウトと共通設定 --- */
-    .tabelog-container {
-        font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
-        color: #333;
+    /* --- 1. ページ全体の背景設定セクション --- */
+    /* htmlとbodyの両方に背景色を指定し、左右の余白を完全に白にします */
+    html, body {
+        background-color: #ffffff !important; 
+        margin: 0;
+        padding: 0;
+    }
+
+    /* --- 2. パンくずリスト：背景を白に固定 --- */
+    .breadcrumb-wrapper {
+        background-color: #ffffff;
+        border-bottom: 1px solid #f0f0f0;
+        width: 100%;
+    }
+    .breadcrumb-content {
         max-width: 980px;
         margin: 0 auto;
-        padding: 20px;
-        background-color: #fff;
+        padding: 12px 15px;
+        font-size: 11px;
     }
 
-    /* --- 検索セクションのスタイル --- */
-    .search-wrapper {
-        background-color: #fff;
-        padding: 10px 0 10px 0;
+    /* --- 3. メインコンテンツ：背景を白にし、影や枠線を排除 --- */
+    .genre-main-wrapper {
         display: flex;
-        justify-content: center;
-        gap: 2px;
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 20px 15px;
+        background-color: #ffffff; /* コンテナ内も白 */
     }
 
-    .search-field {
-        padding: 8px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        font-size: 14px;
+    /* 左側コンテンツ */
+    .genre-content-left {
+        flex: 1;
+        margin-right: 30px;
+        background-color: #ffffff;
     }
 
-    .btn-orange-search {
-        background-color: #fa0;
-        color: #fff;
-        border: none;
-        padding: 8px 30px;
-        border-radius: 4px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-
-    .btn-orange-search:hover {
-        background-color: #f90;
-    }
-
-    /* --- 追加された遷移用リンクのナビゲーション --- */
-    .navigation-links {
-        text-align: center;
-        padding: 10px 0 20px 0;
-        border-bottom: 1px solid #eee;
-        margin-bottom: 20px;
-        font-size: 14px;
-    }
-
-    .nav-link-item {
-        margin: 0 10px;
-        color: #06c;
-        text-decoration: none;
-    }
-
-    .nav-link-item:hover {
-        text-decoration: underline;
-    }
-
-    /* --- セクション見出し --- */
-    .section-headline {
+    /* 見出し */
+    .genre-header-title {
         font-size: 20px;
         font-weight: bold;
-        border-left: 4px solid #fa0;
-        padding-left: 10px;
-        margin: 30px 0 15px 0;
+        color: #111;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 15px;
+        margin: 10px 0 25px 0;
     }
 
-    /* --- 利用シーン別グリッドレイアウト --- */
-    .scene-grid {
-        display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        gap: 10px;
-        margin-bottom: 30px;
+    /* カテゴリ行 */
+    .genre-row {
+        display: flex;
+        border-top: 1px solid #f8f8f8;
+        background-color: #ffffff;
     }
 
-    .scene-card {
-        position: relative;
-        height: 120px;
-        border-radius: 4px;
-        overflow: hidden;
+    .main-category-label {
+        width: 140px;
+        padding: 15px 0;
+        font-weight: bold;
+        font-size: 14px;
+        color: #444;
     }
 
-    .scene-card img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+    /* ジャンルアイテム */
+    .genre-item-link {
+        display: flex;
+        text-decoration: none;
+        color: #0055aa;
     }
 
-    .scene-overlay {
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-        background: rgba(0, 0, 0, 0.6);
-        color: #fff;
-        font-size: 11px;
-        text-align: center;
-        padding: 5px 0;
-        line-height: 1.4;
+    .genre-img-box {
+        width: 60px;
+        height: 60px;
+        margin-right: 12px;
+        border: 1px solid #eeeeee;
+        background-color: #ffffff; /* 画像枠の中も白 */
+        flex-shrink: 0;
     }
 
-    /* --- 特集記事カード --- */
-    .article-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
+    /* --- 4. サイドバー：背景を白に統一 --- */
+    .genre-sidebar-right {
+        width: 280px;
+        background-color: #ffffff;
     }
 
-    .article-item {
-        border: 1px solid #e5e5e5;
-        border-radius: 5px;
-        overflow: hidden;
-    }
-
-    .article-thumb {
-        width: 100%;
-        height: auto;
-        display: block;
-        background-color: #f0f0f0;
-    }
-
-    .article-body {
+    .sidebar-info-box {
+        border: 1px solid #eeeeee;
         padding: 15px;
+        background-color: #ffffff; /* サイドバーの箱も白 */
+        margin-bottom: 15px;
+        border-radius: 4px;
+    }
+
+    /* アプリ誘導バナーのみアクセントカラー */
+    .sidebar-banner {
+        background-color: #ff9d00;
+        color: #ffffff;
+        padding: 20px;
+        border-radius: 4px;
+        text-align: center;
+        margin-bottom: 20px;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="tabelog-container">
+<div class="breadcrumb-wrapper">
+    <div class="breadcrumb-content">
+        <a onclick="history.back()" style="color: #06c; text-decoration: none; cursor: pointer;">🏠 ホーム</a>
+        <span style="margin: 0 8px; color: #ccc;">&gt;</span>
+        <span style="color: #666;">全国料理ジャンル一覧</span>
+    </div>
+</div>
 
-    <form class="search-wrapper" action="#" method="GET">
-        <input type="text" class="search-field" placeholder="エリア・駅" aria-label="エリア・駅" style="width: 200px;">
-        <input type="text" class="search-field" placeholder="キーワード" aria-label="キーワード" style="width: 200px;">
-        <input type="text" class="search-field" value="2026/1/12(月)" aria-label="予約日" style="width: 110px;">
-        
-        <select class="search-field" aria-label="予約時間">
-            <option value="19:00">19:00</option>
-            <option value="20:00">20:00</option>
-        </select>
-        
-        <select class="search-field" aria-label="予約人数">
-            <option value="1">1名</option>
-            <option value="2" selected>2名</option>
-            <option value="3">3名</option>
-        </select>
-        
-        <button type="submit" class="btn-orange-search">検索</button>
-    </form>
+<div class="genre-main-wrapper">
+    
+    <div class="genre-content-left">
+        <h1 class="genre-header-title">全国のお店、レストランを料理ジャンルから探す</h1>
 
-    <nav class="navigation-links" aria-label="サイト内リンク">
-        <a href="{% url 'search:customer_genre_list.html' %}" class="nav-link-item">ジャンル一覧へ移動</a>
-        <span style="color:#ccc;">|</span>
-        <a href="{% url 'search:customer_search_list.html' %}" class="nav-link-item">検索結果一覧へ移動</a>
-    </nav>
+        {% for main in main_categories %}
+        <div class="genre-row">
+            <div class="main-category-label">
+                {{ main.name }}
+            </div>
 
-    <h2 class="section-headline">利用シーンから探す</h2>
-    <div class="scene-grid">
-        <div class="scene-card">
-            <img src="https://via.placeholder.com/150x120?text=Single" alt="お一人様" width="150" height="120">
-            <div class="scene-overlay">お一人様<br>130,955件</div>
+            <div style="flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 15px 0;">
+                {% for sub in main.children %}
+                <a href="#" class="genre-item-link">
+                    <div class="genre-img-box">
+                        {% if sub.image_url %}
+                            <img src="{% static sub.image_url %}" width="50" height="50" alt="">
+                        {% else %}
+                            <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:9px; color:#ddd;">No Image</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <span style="font-weight: bold; font-size: 14px;">{{ sub.name }}</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
         </div>
-        <div class="scene-card">
-            <img src="https://via.placeholder.com/150x120?text=Family" alt="家族" width="150" height="120">
-            <div class="scene-overlay">家族・子供と<br>207,169件</div>
-        </div>
-        <div class="scene-card">
-            <img src="https://via.placeholder.com/150x120?text=Business" alt="接待" width="150" height="120">
-            <div class="scene-overlay">接待<br>10,756件</div>
-        </div>
-        <div class="scene-card">
-            <img src="https://via.placeholder.com/150x120?text=Date" alt="デート" width="150" height="120">
-            <div class="scene-overlay">デート<br>15,230件</div>
-        </div>
-        <div class="scene-card">
-            <img src="https://via.placeholder.com/150x120?text=Girls" alt="女子会" width="150" height="120">
-            <div class="scene-overlay">女子会<br>2,752件</div>
-        </div>
-        <div class="scene-card">
-            <img src="https://via.placeholder.com/150x120?text=Party" alt="合コン" width="150" height="120">
-            <div class="scene-overlay">合コン<br>235件</div>
-        </div>
+        {% endfor %}
     </div>
 
-    <h2 class="section-headline">注目のグルメ記事</h2>
-    <div class="article-row">
-        <article class="article-item">
-            <img src="https://via.placeholder.com/400x200?text=Gourmet+News" 
-                class="article-thumb" 
-                alt="餃子の特集画像" 
-                width="400" 
-                height="200">
-            <div class="article-body">
-                <h3 style="font-size: 15px; margin: 0 0 8px 0; color: #06c;">2026年のブレイク店を予想！「餃子の肉太郎」</h3>
-                <p style="font-size: 12px; color: #666; margin: 0;">食通たちが、2026年にブレイクしそうな飲食店を紹介します。</p>
-            </div>
-        </article>
-        <article class="article-item">
-            <img src="https://via.placeholder.com/400x200?text=Special+Feature" 
-                class="article-thumb" 
-                alt="古民家レストランの画像" 
-                width="400" 
-                height="200">
-            <div class="article-body">
-                <h3 style="font-size: 15px; margin: 0 0 8px 0; color: #06c;">京都・玄琢にある築150年の古民家を改装した一軒</h3>
-                <p style="font-size: 12px; color: #666; margin: 0;">関西を代表するコラムニストが推薦する珠玉の日本料理店。</p>
-            </div>
-        </article>
+    <div class="genre-sidebar-right">
+        <div class="sidebar-banner">
+            <p style="font-size:12px; margin:0;">外出先でも！</p>
+            <p style="font-weight:bold; margin:5px 0;">タベッチアプリで<br>快適にお店探し</p>
+        </div>
+        
+        <div class="sidebar-info-box">
+            <p style="font-weight:bold; font-size:14px; margin-bottom:10px;">店舗運営者の方へ</p>
+            <p style="font-size:12px; color:#666; line-height: 1.6;">無料でお店のPRができます！</p>
+            <a href="#" style="font-size:12px; color:#06c; text-decoration: none;">詳しくはこちら</a>
+        </div>
     </div>
-
 </div>
 {% endblock %}
-
-<a href = "{% url 'search:customer_genre_list.html' %}">ジャンル一覧へ移動</a><br>
-<a href = "{% url 'search:customer_search_list.html' %}">検索結果一覧へ移動</a><br>
