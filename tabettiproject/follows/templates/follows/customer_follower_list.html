@@ -192,16 +192,16 @@ a {
   <div class="profile-cover">
     <div class="profile-icon"></div>
     <div class="profile-title">僕のレストランガイド</div>
-    <a href="#" class="profile-setting">マイページ設定</a>
+    <a href="{% url 'accounts:customer_settings' %}" class="profile-setting">マイページ設定</a>
   </div>
 
   <div class="profile-name">noconeco</div>
 
   <nav class="profile-nav">
-    <a href="#">トップ</a>
-    <a href="#">口コミ</a>
-    <a href="#">フォロー中</a>
-    <a href="#" class="active">フォロワー</a>
+    <a href="{% url 'reviews:customer_reviewer_detail' %}">トップ</a>
+    <a href="{% url 'reviews:customer_reviewer_review_list' %}">口コミ</a>
+    <a href="{% url 'follows:customer_follow_list' %}">フォロー中</a>
+    <a href="{% url 'follows:customer_follower_list' %}" class="active">フォロワー</a>
   </nav>
 </div>
 
