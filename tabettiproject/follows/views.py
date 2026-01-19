@@ -34,26 +34,32 @@ class Customer_follow_listView(TemplateView):
         return context
 
 
-# ===== フォロワー一覧ビュー =====
+# follows/views.py の該当部分
+
 class Customer_follower_listView(TemplateView):
     """
-    データベースを使わず、変数だけでフォロワー一覧を再現する
+    フォロワー一覧を表示するビュー（ダミーデータ版）
     """
     template_name = "follows/customer_follower_list.html"
 
     def get_context_data(self, **kwargs):
+        # 親クラスのコンテキストを取得
         context = super().get_context_data(**kwargs)
-        
-        # タイトルの作成
-        context['profile_title'] = f"{self.request.user.username}のレストランガイド"
 
-        # ダミーのフォロワーデータ
-        follower_data = [
-            {'user': {'username': 'フォロワーA'}, 'review_count': 5, 'follower_count': 2},
-            {'user': {'username': 'フォロワーB'}, 'review_count': 0, 'follower_count': 1},
+        # プロフィールタイトルの設定
+        if self.request.user.is_authenticated:
+            context['profile_title'] = f"{self.request.user.username}のレストランガイド"
+        else:
+            context['profile_title'] = "ゲストさんのレストランガイド"
+
+        # フォロワー用のダミーデータ（フォロー中とは別のリストとして作成）
+        context['followers'] = [
+            {'user': {'username': 'グルメ好き123'}, 'review_count': 5, 'follower_count': 12},
+            {'user': {'username': '食べ歩きマスター'}, 'review_count': 42, 'follower_count': 150},
+            {'user': {'username': 'ランチ巡り隊'}, 'review_count': 18, 'follower_count': 25},
         ]
-
-        context['follows'] = follower_data
-        context['follow_count'] = len(follower_data)
+        
+        # フォロワー数をカウント
+        context['follower_count'] = len(context['followers'])
 
         return context

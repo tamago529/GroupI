@@ -1,256 +1,255 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>フォロワー</title>
-</head>
+{% extends "customer_base.html" %}
+
+{% block title %}フォロワー{% endblock %}
+
+{% block css %}
 <style>
-body {
-  margin: 0;
-  font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
-  background: #f7f5f2;
-  color: #333;
-}
-
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-/* =========================
-   プロフィールヘッダー
-========================= */
-.profile-cover {
-  height: 120px;
-  background: url("../images/header_bg.jpg") center / cover no-repeat;
-  position: relative;
-}
-
-.profile-icon {
-  width: 60px;
-  height: 60px;
-  background: #ccc;
-  border-radius: 6px;
-  position: absolute;
-  bottom: -30px;
-  left: 20px;
-  border: 3px solid #fff;
-}
-
-.profile-title {
-  position: absolute;
-  left: 100px;
-  bottom: 20px;
-  color: #fff;
-  font-weight: bold;
-  font-size: 14px;
-}
-
-.profile-setting {
-  position: absolute;
-  right: 20px;
-  bottom: 20px;
-  background: #fff;
-  padding: 6px 12px;
-  font-size: 12px;
-  border-radius: 4px;
-  color: #333;
-}
-
-.profile-name {
-  margin: 40px 20px 10px;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-/* =========================
-   ナビゲーション
-========================= */
-.profile-nav {
-  display: flex;
-  gap: 20px;
-  padding: 0 20px;
-  border-bottom: 1px solid #ddd;
-}
-
-.profile-nav a {
-  padding: 12px 0;
-  font-size: 14px;
-  color: #666;
-}
-
-.profile-nav a.active {
-  color: #000;
-  border-bottom: 2px solid #000;
-  font-weight: bold;
-}
-
-/* =========================
-   メイン
-========================= */
-.container {
-  padding: 20px;
-}
-
-.follow-title {
-  font-size: 16px;
-  margin-bottom: 20px;
-}
-
-.follow-title span {
-  font-weight: normal;
-  color: #666;
-  margin-left: 4px;
-}
-
-/* =========================
-   カード一覧
-========================= */
-.card-list {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-
-/* =========================
-   ユーザーカード
-========================= */
-.user-card {
-  background: #fff;
-  border-radius: 6px;
-  overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-}
-
-.card-image {
-  height: 120px;
-  background: #ddd;
-}
-
-.card-body {
-  padding: 12px;
-}
-
-.card-name {
-  font-weight: bold;
-  margin-bottom: 8px;
-  font-size: 14px;
-}
-
-/* =========================
-   フォローボタン
-========================= */
-.follow-btn {
-  background: #eee;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-  margin-bottom: 8px;
-}
-
-.follow-btn:hover {
-  background: #ddd;
-}
-
-/* =========================
-   補足情報
-========================= */
-.card-info {
-  font-size: 12px;
-  color: #666;
-  line-height: 1.6;
-}
-
-/* =========================
-   レスポンシブ
-========================= */
-@media (max-width: 900px) {
-  .card-list {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 600px) {
-  .card-list {
-    grid-template-columns: 1fr;
+  /* --- 1. ベース設定 --- */
+  body {
+      background-color: #f6f5f0; /* 本家ベージュ系背景 */
+      color: #333;
+      font-size: 13px;
+      line-height: 1.5;
+      margin: 0;
   }
 
+  /* 共通のコンテンツ幅（980px） */
+  .inner-container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 10px;
+    position: relative;
+    box-sizing: border-box;
+  }
+
+  /* --- 2. プロフィールヘッダー（背景100%） --- */
+  .profile-header {
+    background-color: #fff;
+    border-bottom: 1px solid #e7e7e1;
+    width: 100%;
+  }
+
+  /* ベージュの帯（画面端まで広がる） */
+  .profile-cover {
+    width: 100%;
+    height: 140px;
+    background: #e2dfd4; 
+    border-bottom: 3px solid #595950;
+    overflow: visible;
+  }
+
+  .profile-cover .inner-container {
+    height: 100%;
+  }
+
+  /* プロフィールアイコン */
+  .profile-icon {
+      position: absolute;
+      bottom: -15px;
+      left: 10px;
+      width: 90px;
+      height: 90px;
+      background: #fff;
+      border: 1px solid #c2c2b8;
+      border-radius: 4px;
+      z-index: 10;
+  }
+
+  /* タイトル */
   .profile-title {
-    display: none;
+      position: absolute;
+      top: 65px;
+      left: 120px; 
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+  } 
+
+  /* マイページ設定：右側に配置 */
+  .profile-setting-wrapper {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
   }
-}
+
+  .profile-setting {
+    display: inline-block;
+    padding: 4px 12px;
+    background-color: #fff;
+    border: 1px solid #c2c2b8;
+    border-radius: 2px;
+    font-size: 11px;
+    color: #333;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  /* --- 3. サブナビゲーション --- */
+  .profile-sub-nav {
+    background-color: #fff;
+    width: 100%;
+  }
+
+  .profile-sub-nav .inner-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .profile-name {
+    margin-left: 110px;
+    padding: 10px 0;
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .profile-nav {
+    display: flex;
+  }
+
+  .profile-nav a {
+    padding: 12px 15px;
+    text-decoration: none;
+    color: #06c;
+    font-size: 12px;
+  }
+
+  .profile-nav a.active {
+      color: #333;
+      font-weight: bold;
+      border-bottom: 3px solid #595950;
+  }
+
+  /* --- 4. メインコンテンツ（フォロワーカード） --- */
+  .container {
+    padding-top: 25px;
+  }
+
+  .follow-title {
+      font-size: 16px;
+      font-weight: bold;
+      border-bottom: 1px solid #e7e7e1;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+  }
+
+  .follow-title span {
+      font-weight: normal;
+      color: #666;
+  }
+
+  .card-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+  }
+
+  .user-card {
+      width: calc(33.333% - 8px);
+      background: #fff;
+      border: 1px solid #e7e7e1;
+      border-radius: 2px;
+      position: relative;
+  }
+
+  .card-image {
+      height: 90px;
+      background-color: #eee;
+      border-bottom: 1px solid #e7e7e1;
+  }
+
+  .card-user-icon {
+      position: absolute;
+      top: 65px;
+      left: 10px;
+      width: 45px;
+      height: 45px;
+      background: #fff;
+      border: 1px solid #c2c2b8;
+      border-radius: 2px;
+  }
+
+  .card-body {
+      padding: 30px 10px 10px 10px;
+  }
+
+  .card-name {
+      font-weight: bold;
+      color: #06c;
+      text-decoration: none;
+      font-size: 13px;
+  }
+
+  /* フォロワー画面では、自分がフォローしていない場合は「フォローする」ボタンになります */
+  .follow-btn {
+      float: right;
+      padding: 2px 10px;
+      background: #fff;
+      border: 1px solid #c2c2b8;
+      font-size: 11px;
+      color: #333;
+      border-radius: 2px;
+  }
+
+  .card-info {
+      clear: both;
+      margin-top: 8px;
+      font-size: 11px;
+      color: #666;
+  }
 </style>
-<body>
+{% endblock %}
 
-{% include "customer_header.html" %}
-
-<!-- ===== プロフィールヘッダー ===== -->
+{% block content %}
 <div class="profile-header">
   <div class="profile-cover">
-    <div class="profile-icon"></div>
-    <div class="profile-title">僕のレストランガイド</div>
-    <a href="{% url 'accounts:customer_settings' %}" class="profile-setting">マイページ設定</a>
+    <div class="inner-container">
+        <div class="profile-icon"></div>
+        <div class="profile-title">{{ profile_title }}</div>
+        <div class="profile-setting-wrapper">
+          <a href="{% url 'accounts:customer_settings' %}" class="profile-setting">マイページ設定</a>
+        </div>
+    </div>
   </div>
-
-  <div class="profile-name">noconeco</div>
-
-  <nav class="profile-nav">
-    <a href="{% url 'reviews:customer_reviewer_detail' %}">トップ</a>
-    <a href="{% url 'reviews:customer_reviewer_review_list' %}">口コミ</a>
-    <a href="{% url 'follows:customer_follow_list' %}">フォロー中</a>
-    <a href="{% url 'follows:customer_follower_list' %}" class="active">フォロワー</a>
-  </nav>
+  
+  <div class="profile-sub-nav">
+    <div class="inner-container">
+      <div class="profile-name">
+        {% if user.is_authenticated %}{{ user.username }}{% else %}ゲスト{% endif %}
+      </div>
+      <nav class="profile-nav">
+        <a href="{% url 'reviews:customer_reviewer_detail' %}">トップ</a>
+        <a href="{% url 'reviews:customer_reviewer_review_list' %}">口コミ</a>
+        <a href="{% url 'follows:customer_follow_list' %}">フォロー中</a>
+        <a href="{% url 'follows:customer_follower_list' %}" class="active">フォロワー</a>
+      </nav>
+    </div>
+  </div>
 </div>
 
-<!-- ===== メイン ===== -->
-<div class="container">
-
-  <h2 class="follow-title">フォロワー <span>3人</span></h2>
+<div class="container inner-container">
+  <h2 class="follow-title">フォロワー <span>{{ follower_count }}人</span></h2>
 
   <div class="card-list">
-
-    <!-- フォロワーカード -->
+    {% for item in followers %}
     <div class="user-card">
       <div class="card-image"></div>
+      <div class="card-user-icon"></div>
+      
       <div class="card-body">
-        <div class="card-name">food_love23</div>
-        <button class="follow-btn">フォローする</button>
+        <button class="follow-btn">+ フォロー</button>
+        <a href="#" class="card-name">{{ item.user.username }}</a>
+        
         <div class="card-info">
-          <div>口コミ数：8件</div>
-          <div>フォロワー数：12人</div>
+          <div>{{ item.review_count }}ログ</div>
+          <div>フォロワー数：{{ item.follower_count }}人</div>
         </div>
       </div>
     </div>
-
-    <div class="user-card">
-      <div class="card-image"></div>
-      <div class="card-body">
-        <div class="card-name">ramen_tarou</div>
-        <button class="follow-btn">フォロー中</button>
-        <div class="card-info">
-          <div>口コミ数：21件</div>
-          <div>フォロワー数：30人</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="user-card">
-      <div class="card-image"></div>
-      <div class="card-body">
-        <div class="card-name">gourmet_88</div>
-        <button class="follow-btn">フォローする</button>
-        <div class="card-info">
-          <div>口コミ数：3件</div>
-          <div>フォロワー数：5人</div>
-        </div>
-      </div>
-    </div>
-
+    {% empty %}
+    <p>フォロワーはいません。</p>
+    {% endfor %}
   </div>
 </div>
-
-</body>
-</html>
+{% endblock %}
