@@ -15,10 +15,11 @@ urlpatterns = [
         name="customer_reviewer_review_list",
     ),
     path(
-        "customer_reviewer_detail/",
-        customer_reviewer_detailView.as_view(),
-        name="customer_reviewer_detail",
-    ),
+    "customer_reviewer_detail/",
+    customer_reviewer_detailView.as_view(),
+    name="customer_reviewer_detail",
+),
+
     path(
         "customer_reviewer_search/",
         customer_reviewer_searchView.as_view(),
