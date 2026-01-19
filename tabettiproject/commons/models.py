@@ -288,7 +288,7 @@ class Gender(models.Model):
         return self.gender
 
 class AccountType(models.Model):
-    account_type = models.CharField(max_length=50, verbose_name="アカウント種類")
+    account_type = models.CharField(max_length=50,unique=True,verbose_name="アカウント種類")
     class Meta:
         db_table = "account_type"; verbose_name = "アカウント種類マスタ"; verbose_name_plural = "アカウント種類マスタ"
     def __str__(self):

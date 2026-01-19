@@ -5,7 +5,7 @@ from django.forms.models import BaseInlineFormSet
 from django.utils.translation import gettext_lazy as _
 
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserChangeForm
 from django.contrib import admin, messages
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -53,8 +53,16 @@ from django.contrib.auth.password_validation import validate_password
 from .models import AccountType
 
 def get_store_type():
-    # DB作り直し直後でも落ちないようにする
-    return AccountType.objects.get_or_create(account_type="店舗")[0]
+    return AccountType.objects.get(account_type="店舗")
+
+STORE_TYPE_NAME = "店舗"
+
+def is_store_type(account) -> bool:
+    return bool(
+        getattr(account, "account_type", None)
+        and account.account_type.account_type == STORE_TYPE_NAME
+    )
+
 
 
 
@@ -62,9 +70,18 @@ class AccountCreationForm(forms.ModelForm):
     password1 = forms.CharField(label="Password", widget=forms.PasswordInput)
     password2 = forms.CharField(label="Password confirmation", widget=forms.PasswordInput)
 
+    # ★追加：店舗用入力欄
+    store = forms.ModelChoiceField(queryset=Store.objects.all(), required=False, label="店舗（店舗アカウント用）")
+    admin_email = forms.EmailField(required=False, label="管理者メール（店舗アカウント用）")
+    permission_flag = forms.BooleanField(required=False, label="権限フラグ（店舗アカウント用）")
+
     class Meta:
         model = Account
         fields = ("username", "email", "account_type")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["account_type"].required = True
 
     def clean_account_type(self):
         v = self.cleaned_data.get("account_type")
@@ -74,6 +91,8 @@ class AccountCreationForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
+
+        # パスワードチェック
         p1 = cleaned.get("password1")
         p2 = cleaned.get("password2")
 
@@ -83,22 +102,86 @@ class AccountCreationForm(forms.ModelForm):
         if p1:
             validate_password(p1)
 
+        # ★店舗なら store 必須
+        account_type = cleaned.get("account_type")
+        store = cleaned.get("store")
+
+        if account_type and account_type.account_type == "店舗":
+         if store is None:
+            self.add_error("store", "店舗アカウントの場合、店舗（store）は必須です。")
+
         return cleaned
 
     def save(self, commit=True):
         user = super().save(commit=False)
 
-        # ★本丸：UserAdminの追加フローで落ちるのを防ぐ（必ず反映）
+        # ★本丸：UserAdmin追加フローで落ちるのを防ぐ（必ず反映）
         user.account_type = self.cleaned_data.get("account_type")
 
+        # パスワード保存
         user.set_password(self.cleaned_data["password1"])
+
         if commit:
             user.save()
+
+            # ★店舗なら StoreAccount を自動作成
+            store_type = AccountType.objects.filter(account_type="店舗").first()
+            if store_type and user.account_type_id == store_type.id:
+                store = self.cleaned_data.get("store")
+                admin_email = self.cleaned_data.get("admin_email") or user.email
+                permission_flag = bool(self.cleaned_data.get("permission_flag"))
+
+                # store は clean() で必須にしてるが保険
+                if store is None:
+                    raise ValidationError("店舗アカウントの場合、店舗（store）は必須です。")
+
+                StoreAccount.objects.update_or_create(
+                    account_ptr=user,
+                    defaults={
+                        "store": store,
+                        "admin_email": admin_email,
+                        "permission_flag": permission_flag,
+                    }
+                )
+
         return user
     
+
+class AccountChangeForm(UserChangeForm):
+    # ★編集画面でも店舗情報を入力できるようにする
+    store = forms.ModelChoiceField(queryset=Store.objects.all(), required=False, label="店舗（店舗アカウント用）")
+    admin_email = forms.EmailField(required=False, label="管理者メール（店舗アカウント用）")
+    permission_flag = forms.BooleanField(required=False, label="権限フラグ（店舗アカウント用）")
+
+    class Meta:
+        model = Account
+        fields = "__all__"
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["account_type"].required = True
+
+        # 既に StoreAccount があるなら初期値を入れる
+        obj = self.instance
+        if obj and obj.pk and hasattr(obj, "storeaccount"):
+            sa = obj.storeaccount
+            self.fields["store"].initial = sa.store_id
+            self.fields["admin_email"].initial = sa.admin_email
+            self.fields["permission_flag"].initial = sa.permission_flag
+
+    def clean(self):
+        cleaned = super().clean()
+
+        # ★店舗なら store 必須（編集でも強制）
+        account_type = cleaned.get("account_type")
+        store = cleaned.get("store")
+
+        store_type = AccountType.objects.filter(account_type="店舗").first()
+        if store_type and account_type and account_type.id == store_type.id:
+            if store is None:
+                self.add_error("store", "店舗アカウントの場合、店舗（store）は必須です。")
+
+        return cleaned
+
 
 # ==========================================================
 # StoreAccount Inline（Account 追加/編集画面に表示）
@@ -106,41 +189,27 @@ class AccountCreationForm(forms.ModelForm):
 class StoreAccountInlineFormSet(BaseInlineFormSet):
     def clean(self):
         super().clean()
-
-        try:
-            store_type = get_store_type()
-        except AccountType.DoesNotExist:
-            return
-
-        if getattr(self.instance, "account_type_id", None) != store_type.id:
-            return
-
-        has_valid = False
-        for f in self.forms:
-            if not hasattr(f, "cleaned_data"):
-                continue
-            if f.cleaned_data.get("DELETE"):
-                continue
-            if f.cleaned_data.get("store"):
-                has_valid = True
-                break
-
-        if not has_valid:
-            raise ValidationError("アカウント種別が「店舗」の場合、店舗情報（StoreAccount）を入力してください。")
+        return
 
 
 class StoreAccountInline(admin.StackedInline):
     model = StoreAccount
     fk_name = "account_ptr"  # 多テーブル継承の親リンク（通常これ）
-    formset = StoreAccountInlineFormSet
+    #formset = StoreAccountInlineFormSet
 
-    extra = 0
+    extra = 1
     max_num = 1
     can_delete = True
 
     fields = ("store", "admin_email", "permission_flag")
-    autocomplete_fields = ("store",)
+    readonly_fields = ("store", "admin_email", "permission_flag")
 
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    # ★Inlineで編集させない（念のため）
+    def has_change_permission(self, request, obj=None):
+        return True  # 表示自体は許可（これをFalseにするとinlineごと消えることがある）
 
 # ==========================================================
 # AccountAdmin（親）
@@ -151,54 +220,63 @@ class AccountAdmin(UserAdmin):
     model = Account
     inlines = [StoreAccountInline]
 
-    # ★ここが重要：追加フォームを差し替え
     add_form = AccountCreationForm
+    form = AccountChangeForm
 
     list_display = ("id", "username", "email", "account_type", "is_staff", "is_active")
     search_fields = ("username", "email")
     ordering = ("id",)
 
-    # 追加（作成）画面：Account のフィールドだけ
     add_fieldsets = (
         (None, {
             "classes": ("wide",),
-            "fields": ("username", "email", "account_type", "password1", "password2", "is_staff", "is_active"),
+            "fields": (
+                "username", "email", "account_type",
+                "store", "admin_email", "permission_flag",
+                "password1", "password2", "is_staff", "is_active"
+            ),
         }),
     )
 
-    # 変更（編集）画面
     fieldsets = UserAdmin.fieldsets + (
         (_("追加情報"), {"fields": ("account_type",)}),
+        (_("店舗情報（店舗アカウント用）"), {"fields": ("store", "admin_email", "permission_flag")}),
     )
 
-    def add_view(self, request, form_url="", extra_context=None):
-        if request.method != "POST":
-            return super().add_view(request, form_url, extra_context)
-
-        FormClass = self.get_form(request, obj=None, change=False)
-        form = FormClass(request.POST, request.FILES)
-
-        # Inline 側のバリデーションが必要ならここで formsets を作る（今回はまず account_type を直すのが目的）
-        if not form.is_valid():
-            # ふつうにエラー表示させる
-            return super().add_view(request, form_url, extra_context)
-
-        # ★必ずフォームの save を通す（account_type を確実にセット）
+    def save_form(self, request, form, change):
         obj = form.save(commit=False)
 
-        # ここでも保険（万一フォームが壊れてても DB へ行かせない）
-        if obj.account_type_id is None:
-            form.add_error("account_type", "アカウント種別（account_type）は必須です。")
-            return super().add_view(request, form_url, extra_context)
+        # form.cleaned_data から必ず拾ってセット（空ならこの時点でNoneのまま）
+        at = form.cleaned_data.get("account_type")
+        if at is not None:
+            obj.account_type = at
 
-        # UserAdmin で必要な属性処理を反映
-        self.save_model(request, obj, form, change=False)
+        return obj
 
-        messages.success(request, "アカウントを作成しました。")
-        # 追加後は変更画面に飛ばす（好みで一覧でもOK）
-        return redirect(reverse("admin:commons_account_change", args=[obj.pk]))
+    def save_model(self, request, obj, form, change):
+        # まず親(Account)を保存
+        super().save_model(request, obj, form, change)
 
-    
+        if is_store_type(obj):
+         store = form.cleaned_data.get("store")
+         admin_email = form.cleaned_data.get("admin_email") or obj.email
+         permission_flag = bool(form.cleaned_data.get("permission_flag"))
+
+         if store is None:
+                raise ValidationError("店舗アカウントの場合、店舗（store）は必須です。")
+
+         StoreAccount.objects.update_or_create(
+                account_ptr=obj,
+                defaults={
+                    "store": store,
+                    "admin_email": admin_email,
+                    "permission_flag": permission_flag,
+                },
+            )
+        else:
+            # 店舗以外に変えたら StoreAccount を消す（不要ならコメントアウト）
+         if hasattr(obj, "storeaccount"):
+                obj.storeaccount.delete()
 
 # ==========================================================
 # 子モデルは単独追加禁止（誤作成防止）
