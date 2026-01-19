@@ -154,3 +154,6 @@ class store_restaurant_info_registerView(LoginRequiredMixin, TemplateView):
         store.save()
         messages.success(request, "店舗情報を保存しました。")
         return redirect("reservations:store_restaurant_info_register", store_id=store.id)
+
+class store_topView(TemplateView):
+    template_name = "reservations/store_top.html"
