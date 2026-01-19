@@ -37,16 +37,10 @@ class company_review_listView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # ① 「通報済み（adminでONにされた）」口コミだけを取得（新しい順）
-        reviews = (
-            Review.objects
-            .select_related("reviewer", "store")
-            .filter(reviewreport__report_status=True)
-            .distinct()
-            .order_by("-posted_at")
-        )
+        # ✅ チェックONなら "reported=1" をURLに付ける想定
+        only_reported = self.request.GET.get("reported") == "1"
 
-        # ② 「通報済み口コミID」リスト（チェックボックス用）
+        # ✅ 通報済みID（バッジ表示・JS用）
         reported_review_ids = (
             ReviewReport.objects
             .filter(report_status=True)
@@ -54,9 +48,19 @@ class company_review_listView(TemplateView):
             .distinct()
         )
 
+        # ✅ 一覧（チェック状態で切り替え）
+        qs = Review.objects.select_related("reviewer", "store").all()
+
+        if only_reported:
+            qs = qs.filter(reviewreport__report_status=True).distinct()
+
+        reviews = qs.order_by("-posted_at")
+
         context["reviews"] = reviews
         context["reported_review_ids"] = reported_review_ids
+        context["only_reported"] = only_reported  # テンプレでchecked制御に使う
         return context
+        
 
 
 class customer_report_input(TemplateView):
