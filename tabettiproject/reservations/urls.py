@@ -13,3 +13,4 @@ urlpatterns = [
         name="store_restaurant_info_register",
     ),
 ]
+

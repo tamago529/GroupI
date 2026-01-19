@@ -157,3 +157,4 @@ class store_restaurant_info_registerView(LoginRequiredMixin, TemplateView):
 
 class store_topView(TemplateView):
     template_name = "reservations/store_top.html"
+    
