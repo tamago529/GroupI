@@ -1,12 +1,5 @@
-{% extends "store_base.html" %}
+{% extends "scustomer_base.html" %}
 {% block content %}
-
-{% comment %}
-<a href = "{% url 'reservations:store_reservation_register' %}">ネット予約登録画面へ移動</a>
-<a href = "{% url 'reservations:store_reservation_confirm' %}">ネット予約確認画面へ移動</a>
-<a href = "{% url 'reservations:store_reservation_edit' %}">ネット予約変更画面へ移動</a>
-<a href = "{% url 'reservations:store_reservation_cancel' %}">ネット予約キャンセル画面へ移動</a>
-{% endcomment %}
 
 <!DOCTYPE html>
 <html lang="ja">
@@ -34,58 +27,6 @@
       color:var(--text);
     }
 
-    /* top header */
-    .topbar{
-      background:#fff;
-      border-bottom:1px solid var(--line);
-    }
-    .topbar-inner{
-      max-width:980px;
-      margin:0 auto;
-      padding:14px 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-    }
-    .logo{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      font-weight:900;
-      color:var(--brand);
-      letter-spacing:.5px;
-      white-space:nowrap;
-    }
-    .logo small{
-      color:#999;
-      font-weight:800;
-      font-size:12px;
-    }
-    .nav{
-      display:flex;
-      gap:14px;
-      flex-wrap:wrap;
-      font-size:13px;
-      color:var(--sub);
-      justify-content:flex-end;
-    }
-    .nav a{color:var(--sub); text-decoration:none}
-    .nav a:hover{text-decoration:underline}
-    .help{
-      border:1px solid #cfc8bd;
-      background:#fff;
-      border-radius:4px;
-      padding:6px 10px;
-      font-size:12px;
-      font-weight:700;
-      color:#333;
-      text-decoration:none;
-      white-space:nowrap;
-    }
-    .help:hover{background:#f3f3f3}
-
-    /* page */
     .wrap{
       max-width:980px;
       margin:0 auto;
@@ -121,7 +62,6 @@
       background:var(--line);
     }
 
-    /* info link (右上のリンク) */
     .info-link{
       margin:10px 0 0;
       text-align:right;
@@ -135,7 +75,6 @@
     }
     .info-link a:hover{text-decoration:underline}
 
-    /* reservation area */
     .section{
       margin-top:12px;
       background:var(--card);
@@ -162,31 +101,104 @@
       font-size:12px;
     }
 
-    /* footer */
-    .footer{
-      margin-top:26px;
-      text-align:center;
-      color:#888;
+    /* list */
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .item{
+      border:1px solid var(--line);
+      border-radius:6px;
+      background:#fff;
+      padding:12px;
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+    }
+    .thumb{
+      width:70px;
+      height:70px;
+      border-radius:6px;
+      background:#ddd;
+      flex:0 0 70px;
+    }
+    .main{
+      flex:1;
+      min-width:0;
+    }
+    .title{
+      font-weight:900;
+      font-size:14px;
+      margin:0 0 6px;
+      color:#0b63d1;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .meta{
       font-size:12px;
-      line-height:1.9;
+      color:var(--sub);
+      line-height:1.7;
     }
-    .footer a{
-      color:var(--link);
-      text-decoration:none;
-      margin:0 6px;
+    .badges{
+      margin-top:8px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
     }
-    .footer a:hover{text-decoration:underline}
-
-    .copyright{
-      margin-top:10px;
-      color:#999;
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid #cfc8bd;
+      background:#fff;
+      padding:4px 8px;
+      border-radius:999px;
       font-size:11px;
+      font-weight:900;
+      color:#333;
+    }
+    .actions{
+      margin-left:auto;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      flex:0 0 auto;
+    }
+    .btn{
+      height:36px;
+      min-width:170px;
+      border-radius:4px;
+      border:1px solid #cfc8bd;
+      background:#fff;
+      font-weight:900;
+      cursor:pointer;
+      font-size:12px;
+      color:#333;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      white-space:nowrap;
+    }
+    .btn:hover{background:#f3f3f3}
+    .btn-primary{
+      border:none;
+      background:var(--brand);
+      color:#fff;
+    }
+    .btn-primary:hover{filter:brightness(.95)}
+
+    @media (max-width: 720px){
+      .item{flex-direction:column}
+      .actions{margin-left:0; width:100%}
+      .btn{min-width:100%}
     }
   </style>
 </head>
 
 <body>
-  
   <div class="wrap">
     <div class="breadcrumb">
       <a href="#">タベッチ</a> ＞ <a href="#">予約確認</a> ＞ 予約履歴
@@ -200,20 +212,54 @@
       <span>をご確認ください。</span>
     </div>
 
-    <!-- 即予約セクション -->
     <div class="section" style="margin-top:14px;">
       <div class="section-head">即予約</div>
+
       <div class="section-body">
-        <div class="empty-box">
-          現在、ご予約中のレストランはありません。
-        </div>
+
+        {% if reservations %}
+          <div class="list">
+            {% for r in reservations %}
+              <div class="item">
+                <div class="thumb"></div>
+
+                <div class="main">
+                  <div class="title">{{ r.store.store_name }}</div>
+
+                  <div class="meta">
+                    来店日：{{ r.visit_date|date:"Y年n月j日(D)" }}<br>
+                    来店時刻：{{ r.visit_time|time:"H:i" }} ／ 人数：{{ r.visit_count }}名<br>
+                    コース：{{ r.course }}
+                  </div>
+
+                  <div class="badges">
+                    <span class="badge">ステータス：{{ r.booking_status }}</span>
+                    <span class="badge">予約ID：{{ r.id }}</span>
+                  </div>
+                </div>
+
+                <div class="actions">
+                  <a class="btn btn-primary" href="{% url 'reservations:store_reservation_confirm' r.id %}">
+                    予約内容を確認
+                  </a>
+                  <a class="btn" href="{% url 'reservations:store_page' r.store_id %}">
+                    店舗ページ
+                  </a>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-box">
+            現在、ご予約中のレストランはありません。
+          </div>
+        {% endif %}
+
       </div>
     </div>
-    
-    </div>
+
   </div>
 </body>
 </html>
-
 
 {% endblock %}

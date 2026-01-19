@@ -33,30 +33,50 @@ class store_review_listView(TemplateView):
 
 class company_review_listView(TemplateView):
     template_name = "reviews/company_review_list.html"
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # ① すべての口コミを取得（投稿が新しい順）
-        # select_relatedを使うと、投稿者(reviewer)や店舗(store)のデータも一緒に取れるので動作が速くなります
-        reviews = Review.objects.select_related('reviewer', 'store').all().order_by('-posted_at')
-        
-        # ② 「どの口コミが通報されているか」のIDリストを取得（チェックボックス用）
-        reported_review_ids = ReviewReport.objects.values_list('review_id', flat=True).distinct()
-        
-        context['reviews'] = reviews
-        context['reported_review_ids'] = reported_review_ids
+
+        # ✅ チェックONなら "reported=1" をURLに付ける想定
+        only_reported = self.request.GET.get("reported") == "1"
+
+        # ✅ 通報済みID（バッジ表示・JS用）
+        reported_review_ids = (
+            ReviewReport.objects
+            .filter(report_status=True)
+            .values_list("review_id", flat=True)
+            .distinct()
+        )
+
+        # ✅ 一覧（チェック状態で切り替え）
+        qs = Review.objects.select_related("reviewer", "store").all()
+
+        if only_reported:
+            qs = qs.filter(reviewreport__report_status=True).distinct()
+
+        reviews = qs.order_by("-posted_at")
+
+        context["reviews"] = reviews
+        context["reported_review_ids"] = reported_review_ids
+        context["only_reported"] = only_reported  # テンプレでchecked制御に使う
         return context
+        
 
 
 class customer_report_input(TemplateView):
     template_name = "reviews/customer_report_input.html"
 
+
 class reportView(TemplateView):
     template_name = "reviews/report.html"
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # ① すべての通報（Report）を取得
-        # 通報者(reporter)と、通報された口コミ(review)のデータをまとめて取得
-        reports = ReviewReport.objects.select_related('review', 'reporter', 'review__reviewer').all().order_by('-reported_at')
-        
-        context['reports'] = reports
+        reports = (
+            ReviewReport.objects
+            .select_related("review", "reporter", "review__reviewer")
+            .all()
+            .order_by("-reported_at")
+        )
+        context["reports"] = reports
         return context

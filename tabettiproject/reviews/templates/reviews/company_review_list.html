@@ -9,6 +9,8 @@
         margin: 40px auto;
         padding: 0 20px;
         font-family: sans-serif;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .page-title {
@@ -16,7 +18,7 @@
         font-weight: bold;
         margin-bottom: 25px;
         color: #333;
-        border-left: 5px solid #ff9600; 
+        border-left: 5px solid #ff9600;
         padding-left: 15px;
     }
 
@@ -29,6 +31,8 @@
         display: flex;
         align-items: center;
         border: 1px solid #eee;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .filter-label {
@@ -40,7 +44,6 @@
         gap: 8px;
     }
 
-    /* チェックボックスを少し大きく押しやすく */
     .filter-label input[type="checkbox"] {
         width: 18px;
         height: 18px;
@@ -52,6 +55,8 @@
         display: flex;
         flex-direction: column;
         gap: 20px;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .review-card {
@@ -60,6 +65,8 @@
         border-radius: 8px;
         padding: 20px;
         transition: box-shadow 0.2s;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .review-card:hover {
@@ -72,11 +79,13 @@
         justify-content: space-between;
         align-items: flex-start;
         margin-bottom: 15px;
+        gap: 12px;
     }
 
     .user-info {
         display: flex;
         flex-direction: column;
+        min-width: 0; /* はみ出し対策 */
     }
 
     .user-name {
@@ -90,11 +99,11 @@
         color: #888;
     }
 
-    /* 星評価の見た目 */
     .rating-stars {
         color: #ff9600;
         font-size: 18px;
         font-weight: bold;
+        white-space: nowrap;
     }
 
     /* 口コミ本文 */
@@ -103,6 +112,10 @@
         line-height: 1.6;
         color: #444;
         margin-bottom: 15px;
+
+        /* 長い文字列で横が伸びるのを防ぐ */
+        overflow-wrap: anywhere;
+        word-break: break-word;
     }
 
     /* 通報済みバッジ */
@@ -115,6 +128,30 @@
         border-radius: 4px;
         font-size: 12px;
         font-weight: bold;
+        margin-top: 8px;
+    }
+
+    /* 削除ボタンエリア（各カード右下） */
+    .review-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 12px;
+    }
+
+    .btn-delete {
+        display: inline-block;
+        padding: 8px 14px;
+        border: 2px solid #d9534f;
+        color: #d9534f;
+        background: #fff;
+        border-radius: 6px;
+        font-weight: bold;
+        text-decoration: none;
+        font-size: 13px;
+    }
+
+    .btn-delete:hover {
+        background: #fff2f2;
     }
 
     /* 4. 戻るボタン */
@@ -146,7 +183,15 @@
     <!-- フィルタエリア -->
     <div class="filter-section">
         <label class="filter-label">
-            <input type="checkbox" name="reported" value="1" id="reportedFilter" onchange="toggleFilter()">
+            {# ★チェック状態はサーバから渡された only_reported で制御 #}
+            <input
+                type="checkbox"
+                name="reported"
+                value="1"
+                id="reportedFilter"
+                onchange="toggleFilter()"
+                {% if only_reported %}checked{% endif %}
+            >
             <span>通報済みのみ表示</span>
         </label>
     </div>
@@ -154,31 +199,43 @@
     <!-- 口コミ一覧 -->
     <div class="review-list">
         {% for review in reviews %}
-    <!-- 
-        JSの絞り込み機能のために、通報されている場合は 'is-reported' クラスを付与します 
-    -->
-    <div class="review-card {% if review.id in reported_review_ids %}is-reported{% endif %}">
-        <div class="review-header">
-            <div class="user-info">
-                <span class="user-name">{{ review.reviewer.nickname }} さん</span>
-                <span class="review-date">{{ review.posted_at|date:"Y/m/d H:i" }}</span>
+            <div class="review-card {% if review.id in reported_review_ids %}is-reported{% endif %}">
+                <div class="review-header">
+                    <div class="user-info">
+                        <span class="user-name">{{ review.reviewer.nickname }} さん</span>
+                        <span class="review-date">{{ review.posted_at|date:"Y/m/d H:i" }}</span>
+                    </div>
+                    <div class="rating-stars">★ {{ review.score }}</div>
+                </div>
+
+                <div class="review-body">
+                    {{ review.review_text|linebreaksbr }}
+                </div>
+
+                <div style="font-size: 0.8em; color: #666;">
+                    対象店舗：{{ review.store.store_name }}
+                </div>
+
+                {% if review.id in reported_review_ids %}
+                    <span class="reported-badge">🚩 通報済み</span>
+                {% endif %}
+
+                <!-- ✅ 削除ボタン（各カード右下） -->
+                <div class="review-actions">
+                    <a class="btn-delete"
+                       href="{% url 'commons:review_delete_confirm' review.pk %}?next={{ request.get_full_path|urlencode }}">
+                        削除
+                    </a>
+                </div>
             </div>
-            <div class="rating-stars">★ {{ review.score }}</div>
-        </div>
-        <div class="review-body">
-            {{ review.review_text|linebreaksbr }}
-        </div>
-        <div style="font-size: 0.8em; color: #666;">対象店舗：{{ review.store.store_name }}</div>
-        
-        <!-- 通報バッジを表示するか判定 -->
-        {% if review.id in reported_review_ids %}
-            <span class="reported-badge">🚩 通報あり</span>
-        {% endif %}
+        {% empty %}
+            {% if only_reported %}
+                <p>通報済みの口コミはまだありません。</p>
+            {% else %}
+                <p>口コミはまだありません。</p>
+            {% endif %}
+        {% endfor %}
     </div>
-    {% empty %}
-        <p>口コミはまだありません。</p>
-    {% endfor %}
-</div>
 
     <!-- 戻るボタン -->
     <div class="footer-nav">
@@ -187,33 +244,20 @@
 </div>
 
 <script>
-    /**
-     * JSの解説：
-     * チェックボックスを切り替えた時に、通報されていないカードを
-     * 消したり（隠したり）出したりするスイッチの役割をします。
-     */
+    // ✅ チェックON/OFFでサーバに取りに行く（GETパラメータ切替）
     function toggleFilter() {
-        // 1. チェックボックスの状態を取得（チェックされてるか？）
         const isChecked = document.getElementById('reportedFilter').checked;
-        
-        // 2. 全ての口コミカードを取得
-        const cards = document.querySelectorAll('.review-card');
+        const url = new URL(window.location.href);
 
-        // 3. 各カードを1つずつチェックして隠すか決める
-        cards.forEach(card => {
-            // 「通報済み」という目印（is-reportedクラス）を持っているか確認
-            const isReported = card.classList.contains('is-reported');
+        if (isChecked) {
+            url.searchParams.set('reported', '1');
+        } else {
+            url.searchParams.set('reported', '0');
+            // もしくはパラメータ削除でもOK
+            // url.searchParams.delete('reported');
+        }
 
-            if (isChecked) {
-                // 「通報済みのみ表示」がONのとき、通報されてないカードを隠す
-                if (!isReported) {
-                    card.style.display = 'none';
-                }
-            } else {
-                // チェックがOFFなら、全部表示する
-                card.style.display = 'block';
-            }
-        });
+        window.location.href = url.toString();
     }
 </script>
 {% endblock %}

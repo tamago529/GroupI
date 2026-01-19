@@ -1,382 +1,335 @@
-{% extends "store_base.html" %}
+{% extends "customer_base.html" %}
 {% block content %}
 
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ご予約内容の変更</title>
-  <style>
-    :root{
-      --bg:#f6f6f6;
-      --card:#ffffff;
-      --line:#e6e0d7;
-      --head:#f2efe9;
-      --soft:#faf8f4;
-      --text:#333;
-      --sub:#666;
-      --link:#1a73e8;
-      --green:#6fbf2f;
-      --green-dark:#4ea318;
-      --warn-bg:#fde8e8;
-      --warn:#c8342a;
-      --shadow: 0 1px 0 rgba(0,0,0,.03);
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: "Hiragino Kaku Gothic ProN","Meiryo",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-      background:var(--bg);
-      color:var(--text);
-    }
+<style>
+  :root{
+    --bg:#f6f6f6;
+    --card:#ffffff;
+    --line:#e6e0d7;
+    --head:#f2efe9;
+    --soft:#faf8f4;
+    --text:#333;
+    --sub:#666;
+    --link:#1a73e8;
+    --green:#6fbf2f;
+    --green-dark:#4ea318;
+    --warn-bg:#fde8e8;
+    --warn:#c8342a;
+    --shadow: 0 1px 0 rgba(0,0,0,.03);
+  }
+  *{box-sizing:border-box}
 
-    /* 簡易ヘッダー（雰囲気） */
-    .topbar{
-      background:#fff;
-      border-bottom:1px solid var(--line);
-    }
-    .topbar-inner{
-      max-width:980px;
-      margin:0 auto;
-      padding:14px 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-    }
-    .logo{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      font-weight:800;
-      color:#d86b00;
-      letter-spacing:.5px;
-    }
-    .nav{
-      display:flex;
-      gap:14px;
-      flex-wrap:wrap;
-      font-size:13px;
-      color:var(--sub);
-    }
-    .nav a{color:var(--sub); text-decoration:none}
-    .nav a:hover{text-decoration:underline}
+  .wrap{
+    max-width:980px;
+    margin:0 auto;
+    padding:18px 16px 40px;
+    color:var(--text);
+  }
+  .breadcrumb{
+    font-size:12px;
+    color:#777;
+    margin:10px 0 14px;
+  }
+  .breadcrumb a{color:#777; text-decoration:none}
+  .breadcrumb a:hover{text-decoration:underline}
 
-    .wrap{
-      max-width:980px;
-      margin:0 auto;
-      padding:18px 16px 40px;
-    }
-    .breadcrumb{
-      font-size:12px;
-      color:#777;
-      margin:10px 0 14px;
-    }
-    .breadcrumb a{color:#777; text-decoration:none}
-    .breadcrumb a:hover{text-decoration:underline}
+  .page-title{
+    background:var(--card);
+    border:1px solid var(--line);
+    padding:14px 16px;
+    font-size:18px;
+    font-weight:800;
+    box-shadow:var(--shadow);
+  }
 
-    .page-title{
-      background:var(--card);
-      border:1px solid var(--line);
-      padding:14px 16px;
-      font-size:18px;
-      font-weight:800;
-      box-shadow:var(--shadow);
-    }
+  .shop-card{
+    margin-top:12px;
+    background:var(--card);
+    border:1px solid var(--line);
+    padding:14px;
+    display:flex;
+    gap:14px;
+    align-items:center;
+    border-radius:4px;
+    box-shadow:var(--shadow);
+  }
+  .thumb{
+    width:72px;
+    height:72px;
+    border-radius:4px;
+    background:#ddd;
+    flex:0 0 72px;
+    overflow:hidden;
+  }
+  .thumb img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .shop-info{
+    flex:1;
+    min-width:0;
+  }
+  .shop-name{
+    font-weight:900;
+    font-size:14px;
+    margin:0 0 6px;
+    color:#0b63d1;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    text-decoration:none;
+    display:inline-block;
+  }
+  .shop-name:hover{text-decoration:underline}
+  .shop-meta{
+    font-size:12px;
+    color:var(--sub);
+    line-height:1.6;
+  }
 
-    /* 店舗カード */
-    .shop-card{
-      margin-top:12px;
-      background:var(--card);
-      border:1px solid var(--line);
-      padding:14px;
-      display:flex;
-      gap:14px;
-      align-items:center;
-      border-radius:4px;
-      box-shadow:var(--shadow);
-    }
-    .thumb{
-      width:72px;
-      height:72px;
-      border-radius:4px;
-      background:#ddd;
-      flex:0 0 72px;
-      overflow:hidden;
-    }
-    .thumb img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-    }
-    .shop-info{
-      flex:1;
-      min-width:0;
-    }
-    .shop-name{
-      font-weight:900;
-      font-size:14px;
-      margin:0 0 6px;
-      color:#0b63d1;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .shop-meta{
-      font-size:12px;
-      color:var(--sub);
-      line-height:1.6;
-    }
+  .section{
+    margin-top:14px;
+    background:var(--card);
+    border:1px solid var(--line);
+    box-shadow:var(--shadow);
+  }
+  .section-head{
+    padding:10px 14px;
+    background:var(--head);
+    border-bottom:1px solid var(--line);
+    font-weight:900;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .caret{
+    width:0;height:0;
+    border-left:5px solid transparent;
+    border-right:5px solid transparent;
+    border-top:7px solid #333;
+    transform:translateY(1px);
+  }
+  .section-body{
+    padding:14px;
+  }
 
-    /* セクション */
-    .section{
-      margin-top:14px;
-      background:var(--card);
-      border:1px solid var(--line);
-      box-shadow:var(--shadow);
-    }
-    .section-head{
-      padding:10px 14px;
-      background:var(--head);
-      border-bottom:1px solid var(--line);
-      font-weight:900;
-      font-size:13px;
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    .caret{
-      width:0;height:0;
-      border-left:5px solid transparent;
-      border-right:5px solid transparent;
-      border-top:7px solid #333;
-      transform:translateY(1px);
-    }
-    .section-body{
-      padding:14px;
-    }
+  .help{
+    font-size:12px;
+    color:var(--sub);
+    margin:0 0 10px;
+    line-height:1.6;
+  }
 
-    .help{
-      font-size:12px;
-      color:var(--sub);
-      margin:0 0 10px;
-      line-height:1.6;
-    }
+  .form-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+    margin-bottom:10px;
+  }
+  .form-row label{
+    font-size:12px;
+    color:#333;
+    font-weight:800;
+    min-width:52px;
+  }
 
-    /* 入力行 */
-    .form-row{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
-      margin-bottom:10px;
-    }
-    .form-row label{
-      font-size:12px;
-      color:#333;
-      font-weight:800;
-      min-width:52px;
-    }
+  input[type="text"], input[type="number"], input[type="time"], input[type="date"], select, textarea{
+    border:1px solid #d7d2c9;
+    border-radius:4px;
+    padding:9px 10px;
+    font-size:13px;
+    background:#fff;
+    outline:none;
+  }
+  input:focus, select:focus, textarea:focus{
+    border-color:#9aa7b5;
+    box-shadow:0 0 0 2px rgba(26,115,232,.12);
+  }
 
-    input[type="text"], input[type="number"], input[type="time"], input[type="date"], select, textarea{
-      border:1px solid #d7d2c9;
-      border-radius:4px;
-      padding:9px 10px;
-      font-size:13px;
-      background:#fff;
-      outline:none;
-    }
-    input:focus, select:focus, textarea:focus{
-      border-color:#9aa7b5;
-      box-shadow:0 0 0 2px rgba(26,115,232,.12);
-    }
+  .w-date{width:170px}
+  .w-time{width:120px}
+  .w-people{width:110px}
+  .w-child{width:110px}
 
-    .w-date{width:170px}
-    .w-time{width:120px}
-    .w-people{width:90px}
-    .w-child{width:110px}
-    .w-small{width:140px}
+  .seat-box{
+    margin-top:10px;
+    border:1px solid var(--line);
+    background:var(--soft);
+    padding:12px;
+    border-radius:4px;
+  }
+  .seat-title{
+    font-size:12px;
+    font-weight:900;
+    margin-bottom:6px;
+  }
+  .seat-note{
+    font-size:12px;
+    color:var(--sub);
+    margin-top:6px;
+  }
 
-    /* お席表示風（編集可能） */
-    .seat-box{
-      margin-top:10px;
-      border:1px solid var(--line);
-      background:var(--soft);
-      padding:12px;
-      border-radius:4px;
-    }
-    .seat-title{
-      font-size:12px;
-      font-weight:900;
-      margin-bottom:6px;
-    }
-    .seat-note{
-      font-size:12px;
-      color:var(--sub);
-      margin-top:6px;
-    }
+  .grid2{
+    display:grid;
+    grid-template-columns: 220px 1fr;
+    border-top:1px solid var(--line);
+    margin-top:12px;
+  }
+  .grid2 .left{
+    background:var(--soft);
+    padding:12px;
+    font-size:12px;
+    font-weight:900;
+    border-right:1px solid var(--line);
+  }
+  .grid2 .right{
+    padding:12px;
+  }
+  textarea{
+    width:100%;
+    min-height:120px;
+    resize:vertical;
+  }
 
-    /* 要望 */
-    .grid2{
-      display:grid;
-      grid-template-columns: 220px 1fr;
-      border-top:1px solid var(--line);
-      margin-top:12px;
-    }
-    .grid2 .left{
-      background:var(--soft);
-      padding:12px;
-      font-size:12px;
-      font-weight:900;
-      border-right:1px solid var(--line);
-    }
-    .grid2 .right{
-      padding:12px;
-    }
-    textarea{
-      width:100%;
-      min-height:120px;
-      resize:vertical;
-    }
+  .warn{
+    margin-top:14px;
+    padding:10px 12px;
+    border:1px solid #f2b8b8;
+    background:var(--warn-bg);
+    color:var(--warn);
+    font-size:12px;
+    line-height:1.6;
+  }
 
-    /* 注意 */
-    .warn{
-      margin-top:14px;
-      padding:10px 12px;
-      border:1px solid #f2b8b8;
-      background:var(--warn-bg);
-      color:var(--warn);
-      font-size:12px;
-      line-height:1.6;
-    }
+  .actions{
+    margin-top:12px;
+    display:flex;
+    justify-content:center;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .btn{
+    min-width:260px;
+    height:44px;
+    border-radius:4px;
+    border:1px solid #cfc8bd;
+    background:#fff;
+    font-weight:900;
+    cursor:pointer;
+    font-size:13px;
+  }
+  .btn:hover{background:#f3f3f3}
+  .btn-green{
+    border:none;
+    background:var(--green);
+    color:#fff;
+  }
+  .btn-green:hover{background:var(--green-dark)}
 
-    /* ボタン */
-    .actions{
-      margin-top:12px;
-      display:flex;
-      justify-content:center;
-      gap:14px;
-      flex-wrap:wrap;
-    }
-    .btn{
-      min-width:260px;
-      height:44px;
-      border-radius:4px;
-      border:1px solid #cfc8bd;
-      background:#fff;
-      font-weight:900;
-      cursor:pointer;
-      font-size:13px;
-    }
-    .btn:hover{background:#f3f3f3}
-    .btn-green{
-      border:none;
-      background:var(--green);
-      color:#fff;
-    }
-    .btn-green:hover{background:var(--green-dark)}
+  @media (max-width: 720px){
+    .grid2{grid-template-columns:1fr}
+    .grid2 .left{border-right:none; border-bottom:1px solid var(--line)}
+    .btn{min-width:100%}
+  }
+</style>
 
-    .footer{
-      margin-top:28px;
-      color:#888;
-      font-size:12px;
-      text-align:center;
-    }
-
-    @media (max-width: 720px){
-      .grid2{grid-template-columns:1fr}
-      .grid2 .left{border-right:none; border-bottom:1px solid var(--line)}
-      .btn{min-width:100%}
-    }
-  </style>
-</head>
-
-<body>
-  <div class="wrap">
-    <div class="breadcrumb">
-      <a href="#">食べログ</a> ＞ <a href="#">予約確認</a> ＞ <a href="#">ご予約内容の確認</a> ＞ ご予約内容の変更
-    </div>
-
-    <div class="page-title">ご予約内容の変更</div>
-
-    <!-- 店舗カード -->
-    <div class="shop-card">
-      <div class="thumb">
-        <!-- 画像は仮。不要ならimgタグを消してOK -->
-        <img alt="店舗画像" src="https://picsum.photos/200/200?random=12">
-      </div>
-      <div class="shop-info">
-        <div class="shop-name">THE PUBLIC COFFEE</div>
-        <div class="shop-meta">
-          2025年 11月 10日（月） 1名　15:30<br>
-          ご予約のコース：指定しない
-        </div>
-      </div>
-    </div>
-
-    <form action="#" method="post">
-      <!-- 来店日時・人数 -->
-      <div class="section">
-        <div class="section-head"><span class="caret"></span>ご来店日時・人数の変更</div>
-        <div class="section-body">
-          <p class="help">ご希望の日時・人数を選択してください</p>
-
-          <div class="form-row">
-            <label for="visit_date">来店日</label>
-            <input id="visit_date" class="w-date" type="date" value="2025-11-10">
-
-            <label for="visit_time">時間</label>
-            <input id="visit_time" class="w-time" type="time" value="15:30">
-
-            <label for="people">人数</label>
-            <select id="people" class="w-people">
-              <option>1名</option>
-              <option selected>2名</option>
-              <option>3名</option>
-              <option>4名</option>
-              <option>5名</option>
-            </select>
-
-            <label for="child">うちお子様</label>
-            <select id="child" class="w-child">
-              <option selected>0名</option>
-              <option>1名</option>
-              <option>2名</option>
-              <option>3名</option>
-            </select>
-          </div>
-
-          <div class="seat-box">
-            <div class="seat-title">お席</div>
-            <input type="text" value="カウンター / 禁煙" />
-            <div class="seat-note">個室希望：なし</div>
-          </div>
-        </div>
-
-        <!-- ご要望の追加 -->
-        <div class="grid2">
-          <div class="left">レストランへの<br>追加のご要望</div>
-          <div class="right">
-            <textarea>窓際の席があれば希望します。</textarea>
-          </div>
-        </div>
-
-        <!-- 注意文 -->
-        <div class="warn">
-          直前のご予約内容の変更については店舗が受付できない場合があります。変更後、必ず店舗にお電話でご確認ください。
-        </div>
-
-        <!-- ボタン -->
-        <div class="actions" style="padding:14px;">
-          <button type="button" class="btn" onclick="location.href='#';">ご予約内容の確認へ戻る</button>
-          <button type="submit" class="btn btn-green">この内容で変更する</button>
-        </div>
-      </div>
-    </form>
+<div class="wrap">
+  <div class="breadcrumb">
+    <a href="#">タベッチ</a> ＞ <a href="#">予約確認</a> ＞
+    <a href="{{ confirm_url }}">ご予約内容の確認</a> ＞ ご予約内容の変更
   </div>
-</body>
-</html>
+
+  <div class="page-title">ご予約内容の変更</div>
+
+  <div class="shop-card">
+    <div class="thumb">
+      {# 画像は今は仮。store側に画像ができたら差し替え #}
+      <img alt="店舗画像" src="https://picsum.photos/200/200?random=12">
+    </div>
+    <div class="shop-info">
+      <a class="shop-name" href="{{ store_url }}">{{ reservation.store.store_name }}</a>
+      <div class="shop-meta">
+        {{ reservation.visit_date|date:"Y年 n月 j日(D)" }} {{ reservation.visit_count }}名 {{ reservation.visit_time|time:"H:i" }}<br>
+        ご予約のコース：{{ reservation.course }}
+      </div>
+    </div>
+  </div>
+
+  <form method="post" action="">
+    {% csrf_token %}
+
+    <div class="section">
+      <div class="section-head"><span class="caret"></span>ご来店日時・人数の変更</div>
+
+      <div class="section-body">
+        <p class="help">ご希望の日時・人数を選択してください</p>
+
+        <div class="form-row">
+          <label for="visit_date">来店日</label>
+          <input id="visit_date" name="visit_date" class="w-date" type="date"
+                 value="{{ reservation.visit_date|date:'Y-m-d' }}" required>
+
+          <label for="visit_time">時間</label>
+          <input id="visit_time" name="visit_time" class="w-time" type="time"
+                 value="{{ reservation.visit_time|time:'H:i' }}" required>
+
+          <label for="visit_count">人数</label>
+          <select id="visit_count" name="visit_count" class="w-people" required>
+            {% for n in "12345678910"|make_list %}
+              {# make_list は 1文字ずつになるので10が崩れる。なので下の方式に変更 #}
+            {% endfor %}
+            {% for n in people_choices %}
+            {% endfor %}
+            {# ↑ 上は使わない。下で固定 options を作る #}
+            <option value="1" {% if reservation.visit_count == 1 %}selected{% endif %}>1名</option>
+            <option value="2" {% if reservation.visit_count == 2 %}selected{% endif %}>2名</option>
+            <option value="3" {% if reservation.visit_count == 3 %}selected{% endif %}>3名</option>
+            <option value="4" {% if reservation.visit_count == 4 %}selected{% endif %}>4名</option>
+            <option value="5" {% if reservation.visit_count == 5 %}selected{% endif %}>5名</option>
+            <option value="6" {% if reservation.visit_count == 6 %}selected{% endif %}>6名</option>
+            <option value="7" {% if reservation.visit_count == 7 %}selected{% endif %}>7名</option>
+            <option value="8" {% if reservation.visit_count == 8 %}selected{% endif %}>8名</option>
+            <option value="9" {% if reservation.visit_count == 9 %}selected{% endif %}>9名</option>
+            <option value="10" {% if reservation.visit_count == 10 %}selected{% endif %}>10名</option>
+          </select>
+
+          <label for="child_count">うちお子様</label>
+          <select id="child_count" name="child_count" class="w-child">
+            <option value="0" selected>0名</option>
+            <option value="1">1名</option>
+            <option value="2">2名</option>
+            <option value="3">3名</option>
+          </select>
+        </div>
+
+        <div class="seat-box">
+          <div class="seat-title">お席</div>
+          <input type="text" name="seat_text" value="カウンター / 禁煙" />
+          <div class="seat-note">個室希望：なし</div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="left">レストランへの<br>追加のご要望</div>
+        <div class="right">
+          <textarea name="request_note">窓際の席があれば希望します。</textarea>
+        </div>
+      </div>
+
+      <div class="warn">
+        直前のご予約内容の変更については店舗が受付できない場合があります。変更後、必ず店舗にお電話でご確認ください。
+      </div>
+
+      <div class="actions" style="padding:14px;">
+        <button type="button" class="btn" onclick="location.href='{{ confirm_url }}';">ご予約内容の確認へ戻る</button>
+        <button type="submit" class="btn btn-green">この内容で変更する</button>
+      </div>
+    </div>
+  </form>
+</div>
 
 {% endblock %}

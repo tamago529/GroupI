@@ -1,4 +1,4 @@
-{% extends "store_base.html" %}
+{% extends "customer_base.html" %}
 {% block content %}
 
 <!DOCTYPE html>
@@ -30,293 +30,45 @@
       background:var(--bg);
       color:var(--text);
     }
-
-    /* Header */
-    .topbar{
-      background:#fff;
-      border-bottom:1px solid var(--line);
-    }
-    .topbar-inner{
-      max-width:980px;
-      margin:0 auto;
-      padding:14px 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-    }
-    .logo{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      font-weight:900;
-      color:var(--brand);
-      letter-spacing:.5px;
-      white-space:nowrap;
-    }
-    .logo small{
-      color:#999;
-      font-weight:800;
-      font-size:12px;
-    }
-    .nav{
-      display:flex;
-      gap:14px;
-      flex-wrap:wrap;
-      font-size:13px;
-      color:var(--sub);
-      justify-content:flex-end;
-    }
-    .nav a{color:var(--sub); text-decoration:none}
-    .nav a:hover{text-decoration:underline}
-
-    /* Layout */
-    .wrap{
-      max-width:980px;
-      margin:0 auto;
-      padding:16px 16px 44px;
-    }
-    .breadcrumb{
-      font-size:12px;
-      color:#777;
-      margin:10px 0 12px;
-    }
-    .breadcrumb a{color:#777; text-decoration:none}
+    .wrap{max-width:980px;margin:0 auto;padding:16px 16px 44px;}
+    .breadcrumb{font-size:12px;color:#777;margin:10px 0 12px;}
+    .breadcrumb a{color:#777;text-decoration:none}
     .breadcrumb a:hover{text-decoration:underline}
+    .page-title{background:var(--card);border:1px solid var(--line);padding:14px 16px;font-size:18px;font-weight:900;}
+    .desc{background:var(--card);border:1px solid var(--line);border-top:none;padding:12px 16px;font-size:12px;color:#444;line-height:1.7;}
 
-    .page-title{
-      background:var(--card);
-      border:1px solid var(--line);
-      padding:14px 16px;
-      font-size:18px;
-      font-weight:900;
-    }
-    .desc{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-top:none;
-      padding:12px 16px;
-      font-size:12px;
-      color:#444;
-      line-height:1.7;
-    }
+    .section{margin-top:14px;background:var(--card);border:1px solid var(--line);}
+    .section-head{padding:10px 14px;background:var(--head);border-bottom:1px solid var(--line);font-weight:900;font-size:13px;display:flex;align-items:center;gap:8px;}
+    .caret{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid #333;transform:translateY(1px);}
 
-    /* Section */
-    .section{
-      margin-top:14px;
-      background:var(--card);
-      border:1px solid var(--line);
-    }
-    .section-head{
-      padding:10px 14px;
-      background:var(--head);
-      border-bottom:1px solid var(--line);
-      font-weight:900;
-      font-size:13px;
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    .caret{
-      width:0;height:0;
-      border-left:5px solid transparent;
-      border-right:5px solid transparent;
-      border-top:7px solid #333;
-      transform:translateY(1px);
-    }
-    .section-body{
-      padding:14px;
-    }
-
-    /* Form rows (table-like) */
-    .row{
-      display:grid;
-      grid-template-columns: 220px 1fr;
-      border-bottom:1px solid var(--line);
-    }
+    .row{display:grid;grid-template-columns:220px 1fr;border-bottom:1px solid var(--line);}
     .row:last-child{border-bottom:none}
-    .label{
-      background:var(--soft);
-      padding:12px;
-      font-size:12px;
-      font-weight:900;
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    .value{
-      padding:10px 12px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-    }
+    .label{background:var(--soft);padding:12px;font-size:12px;font-weight:900;display:flex;align-items:center;gap:8px;}
+    .value{padding:10px 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .req{display:inline-flex;align-items:center;justify-content:center;padding:2px 6px;border-radius:3px;background:var(--warn);color:#fff;font-size:11px;font-weight:900;margin-left:6px;}
+    .hint{width:100%;font-size:12px;color:var(--sub);line-height:1.6;}
 
-    .req{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:2px 6px;
-      border-radius:3px;
-      background:var(--warn);
-      color:#fff;
-      font-size:11px;
-      font-weight:900;
-      margin-left:6px;
+    input[type="text"],input[type="number"],input[type="email"],textarea,select{
+      border:1px solid #d7d2c9;border-radius:4px;padding:9px 10px;font-size:13px;background:#fff;outline:none;
+      min-width:180px;flex:1 1 240px;
     }
-    .hint{
-      width:100%;
-      font-size:12px;
-      color:var(--sub);
-      line-height:1.6;
-    }
+    input:focus,select:focus,textarea:focus{border-color:#9aa7b5;box-shadow:0 0 0 2px rgba(26,115,232,.12);}
+    textarea{width:100%;min-height:90px;resize:vertical;flex:1 1 100%;}
+    .w-s{flex:1 1 160px;min-width:160px;}
+    .w-m{flex:1 1 240px;min-width:240px;}
+    .w-l{flex:1 1 420px;min-width:260px;}
 
-    input[type="text"],
-    input[type="number"],
-    input[type="url"],
-    input[type="email"],
-    input[type="time"],
-    input[type="date"],
-    select,
-    textarea{
-      border:1px solid #d7d2c9;
-      border-radius:4px;
-      padding:9px 10px;
-      font-size:13px;
-      background:#fff;
-      outline:none;
-      min-width: 180px;
-      flex: 1 1 240px;
-    }
-    input:focus, select:focus, textarea:focus{
-      border-color:#9aa7b5;
-      box-shadow:0 0 0 2px rgba(26,115,232,.12);
-    }
-    textarea{
-      width:100%;
-      min-height:90px;
-      resize:vertical;
-      flex: 1 1 100%;
-    }
-
-    .inline{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      width:100%;
-    }
-    .w-xs{flex: 1 1 120px; min-width:120px;}
-    .w-s{flex: 1 1 160px; min-width:160px;}
-    .w-m{flex: 1 1 240px; min-width:240px;}
-    .w-l{flex: 1 1 420px; min-width:260px;}
-
-    /* Map placeholder */
-    .mapbox{
-      width:100%;
-      border:1px solid var(--line);
-      border-radius:4px;
-      background:#eef3ff;
-      padding:12px;
-      display:grid;
-      grid-template-columns: 1fr 260px;
-      gap:12px;
-      align-items:stretch;
-    }
-    .maparea{
-      height:240px;
-      border-radius:4px;
-      background:
-        linear-gradient(0deg, rgba(255,255,255,.2), rgba(255,255,255,.2)),
-        repeating-linear-gradient(90deg, rgba(0,0,0,.06) 0 12px, rgba(0,0,0,0) 12px 24px),
-        repeating-linear-gradient(0deg, rgba(0,0,0,.06) 0 12px, rgba(0,0,0,0) 12px 24px);
-      position:relative;
-      overflow:hidden;
-    }
-    .pin{
-      position:absolute;
-      left:56%;
-      top:48%;
-      transform:translate(-50%,-100%);
-      width:18px;height:18px;
-      background:#e53935;
-      border-radius:50% 50% 50% 0;
-      transform:translate(-50%,-100%) rotate(-45deg);
-      box-shadow:0 2px 4px rgba(0,0,0,.2);
-    }
-    .pin:after{
-      content:"";
-      position:absolute;
-      left:50%; top:50%;
-      width:8px;height:8px;
-      background:#fff;
-      border-radius:50%;
-      transform:translate(-50%,-50%) rotate(45deg);
-    }
-    .mapside{
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:4px;
-      padding:10px;
-      font-size:12px;
-      color:#444;
-      line-height:1.6;
-    }
-
-    /* Notice */
-    .notice{
-      margin-top:12px;
-      padding:10px 12px;
-      border:1px solid #f2b8b8;
-      background:var(--warnbg);
-      color:var(--warn);
-      font-size:12px;
-      line-height:1.6;
-    }
-
-    /* Actions */
-    .actions{
-      margin-top:14px;
-      background:var(--card);
-      border:1px solid var(--line);
-      padding:14px;
-      display:flex;
-      justify-content:center;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-    .btn{
-      min-width:220px;
-      height:44px;
-      border-radius:4px;
-      border:1px solid #cfc8bd;
-      background:#fff;
-      font-weight:900;
-      cursor:pointer;
-      font-size:13px;
-    }
+    .notice{margin-top:12px;padding:10px 12px;border:1px solid #f2b8b8;background:var(--warnbg);color:var(--warn);font-size:12px;line-height:1.6;}
+    .actions{margin-top:14px;background:var(--card);border:1px solid var(--line);padding:14px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap;}
+    .btn{min-width:220px;height:44px;border-radius:4px;border:1px solid #cfc8bd;background:#fff;font-weight:900;cursor:pointer;font-size:13px;}
     .btn:hover{background:#f3f3f3}
-    .btn-green{
-      border:none;
-      background:var(--green);
-      color:#fff;
-    }
+    .btn-green{border:none;background:var(--green);color:#fff;}
     .btn-green:hover{background:var(--green2)}
 
-    .footer{
-      margin-top:26px;
-      text-align:center;
-      color:#888;
-      font-size:12px;
-      line-height:1.9;
-    }
-    .footer a{color:var(--link); text-decoration:none; margin:0 6px;}
-    .footer a:hover{text-decoration:underline}
-
-    @media (max-width: 860px){
-      .row{grid-template-columns: 1fr}
+    @media (max-width:860px){
+      .row{grid-template-columns:1fr}
       .label{border-bottom:1px solid var(--line)}
-      .mapbox{grid-template-columns: 1fr}
-      input, select{flex-basis: 100%;}
+      input,select{flex-basis:100%;}
     }
   </style>
 </head>
@@ -333,7 +85,19 @@
       「必須」の項目は必ず入力してください。
     </div>
 
-    <form action="#" method="post">
+    {% if messages %}
+      <div style="margin-top:12px;">
+        {% for message in messages %}
+          <div style="border:1px solid #e6e0d7;background:#fff;padding:10px 12px;margin-bottom:8px;font-size:12px;font-weight:900;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form action="{% url 'reservations:store_restaurant_info_register' store.id %}" method="post">
+      {% csrf_token %}
+
       <!-- 基本情報 -->
       <div class="section">
         <div class="section-head"><span class="caret"></span>基本情報入力</div>
@@ -341,54 +105,15 @@
         <div class="row">
           <div class="label">店名 <span class="req">必須</span></div>
           <div class="value">
-            <input class="w-l" type="text" value="THE PUBLIC COFFEE">
+            <input class="w-l" type="text" name="store_name" value="{{ store.store_name }}">
             <div class="hint">例：〇〇食堂 / THE PUBLIC COFFEE</div>
           </div>
         </div>
 
         <div class="row">
-          <div class="label">店名（カナ）<span class="req">必須</span></div>
+          <div class="label">支店名（枝番）</div>
           <div class="value">
-            <input class="w-l" type="text" value="ザ パブリック コーヒー">
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="label">フリガナ（ローマ字）</div>
-          <div class="value">
-            <input class="w-l" type="text" value="THE PUBLIC COFFEE">
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="label">ジャンル <span class="req">必須</span></div>
-          <div class="value">
-            <div class="inline">
-              <select class="w-m">
-                <option selected>カフェ</option>
-                <option>喫茶店</option>
-                <option>居酒屋</option>
-                <option>焼肉</option>
-                <option>中華料理</option>
-              </select>
-              <select class="w-m">
-                <option selected>コーヒー</option>
-                <option>スイーツ</option>
-                <option>ランチ</option>
-              </select>
-              <select class="w-m">
-                <option selected>その他</option>
-                <option>—</option>
-              </select>
-            </div>
-            <div class="hint">最大3つまでのジャンルを想定</div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="label">キャッチコピー</div>
-          <div class="value">
-            <input class="w-l" type="text" value="落ち着いた空間でこだわりの一杯を。">
+            <input class="w-l" type="text" name="branch_name" value="{{ store.branch_name }}">
           </div>
         </div>
       </div>
@@ -398,57 +123,29 @@
         <div class="section-head"><span class="caret"></span>所在地入力</div>
 
         <div class="row">
-          <div class="label">郵便番号 <span class="req">必須</span></div>
+          <div class="label">エリア <span class="req">必須</span></div>
           <div class="value">
-            <input class="w-s" type="text" value="150-0001">
-            <button class="btn" type="button" style="min-width:auto;height:38px;">住所検索</button>
-            <div class="hint">テスト：ボタンはダミーです</div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="label">都道府県 <span class="req">必須</span></div>
-          <div class="value">
-            <select class="w-m">
-              <option selected>東京都</option>
-              <option>神奈川県</option>
-              <option>大阪府</option>
-              <option>福岡県</option>
+            <select class="w-m" name="area_id" required>
+              <option value="">選択してください</option>
+              {% for a in areas %}
+                <option value="{{ a.id }}" {% if store.area_id == a.id %}selected{% endif %}>{{ a.area_name }}</option>
+              {% endfor %}
             </select>
           </div>
         </div>
 
         <div class="row">
-          <div class="label">市区町村・番地 <span class="req">必須</span></div>
+          <div class="label">住所 <span class="req">必須</span></div>
           <div class="value">
-            <input class="w-l" type="text" value="渋谷区神宮前1-2-3">
+            <input class="w-l" type="text" name="address" value="{{ store.address }}">
           </div>
         </div>
 
         <div class="row">
-          <div class="label">建物名・部屋番号</div>
+          <div class="label">地図（URL/埋め込み等）</div>
           <div class="value">
-            <input class="w-l" type="text" value="Publicビル 2F">
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="label">地図（位置）</div>
-          <div class="value">
-            <div class="mapbox">
-              <div class="maparea">
-                <div class="pin"></div>
-              </div>
-              <div class="mapside">
-                <strong>地図位置の調整</strong><br>
-                ・ドラッグでピン移動<br>
-                ・緯度/経度（任意）<br><br>
-                <label style="font-weight:900;">緯度</label><br>
-                <input type="text" class="w-xs" value="35.6700"><br><br>
-                <label style="font-weight:900;">経度</label><br>
-                <input type="text" class="w-xs" value="139.7020">
-              </div>
-            </div>
+            <input class="w-l" type="text" name="map_location" value="{{ store.map_location }}">
+            <div class="hint">GoogleマップURL等を保存（Store.map_location）</div>
           </div>
         </div>
       </div>
@@ -460,21 +157,14 @@
         <div class="row">
           <div class="label">電話番号 <span class="req">必須</span></div>
           <div class="value">
-            <input class="w-m" type="text" value="03-1234-5678">
+            <input class="w-m" type="text" name="phone_number" value="{{ store.phone_number }}">
           </div>
         </div>
 
         <div class="row">
           <div class="label">メールアドレス</div>
           <div class="value">
-            <input class="w-l" type="email" value="info@example.com">
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="label">公式サイトURL</div>
-          <div class="value">
-            <input class="w-l" type="url" value="https://example.com">
+            <input class="w-l" type="email" name="email" value="{{ store.email }}">
           </div>
         </div>
       </div>
@@ -486,36 +176,26 @@
         <div class="row">
           <div class="label">営業時間</div>
           <div class="value">
-            <textarea>月〜金 11:00〜20:00
-土日祝 10:00〜21:00</textarea>
-            <div class="hint">テキスト入力で自由に記入できる形式</div>
+            <textarea name="business_hours">{{ store.business_hours }}</textarea>
           </div>
         </div>
 
         <div class="row">
-          <div class="label">定休日</div>
+          <div class="label">利用シーン <span class="req">必須</span></div>
           <div class="value">
-            <input class="w-l" type="text" value="不定休（年末年始除く）">
+            <select class="w-m" name="scene_id" required>
+              <option value="">選択してください</option>
+              {% for s in scenes %}
+                <option value="{{ s.id }}" {% if store.scene_id == s.id %}selected{% endif %}>{{ s.scene_name }}</option>
+              {% endfor %}
+            </select>
           </div>
         </div>
 
         <div class="row">
           <div class="label">予算（目安）</div>
           <div class="value">
-            <div class="inline">
-              <select class="w-m">
-                <option>〜999円</option>
-                <option selected>1,000〜1,999円</option>
-                <option>2,000〜2,999円</option>
-                <option>3,000〜3,999円</option>
-              </select>
-              <select class="w-m">
-                <option>〜999円</option>
-                <option selected>1,000〜1,999円</option>
-                <option>2,000〜2,999円</option>
-              </select>
-            </div>
-            <div class="hint">昼/夜の予算イメージ</div>
+            <input class="w-s" type="number" name="budget" value="{{ store.budget }}" min="0">
           </div>
         </div>
       </div>
@@ -527,71 +207,37 @@
         <div class="row">
           <div class="label">席数</div>
           <div class="value">
-            <input class="w-s" type="number" value="28" min="0">
-            <span class="hint">（例）テーブル20席 / カウンター8席</span>
+            <input class="w-s" type="number" name="seats" value="{{ store.seats }}" min="0">
           </div>
         </div>
 
         <div class="row">
-          <div class="label">個室</div>
+          <div class="label">予約可否</div>
           <div class="value">
-            <label><input type="radio" name="private" checked> なし</label>
-            <label><input type="radio" name="private"> あり</label>
+            <label><input type="radio" name="reservable" value="1" {% if store.reservable %}checked{% endif %}> 予約可</label>
+            <label><input type="radio" name="reservable" value="0" {% if not store.reservable %}checked{% endif %}> 予約不可</label>
           </div>
         </div>
 
         <div class="row">
-          <div class="label">禁煙・喫煙</div>
+          <div class="label">編集可能</div>
           <div class="value">
-            <label><input type="radio" name="smoke" checked> 全席禁煙</label>
-            <label><input type="radio" name="smoke"> 分煙</label>
-            <label><input type="radio" name="smoke"> 喫煙可</label>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="label">支払い方法</div>
-          <div class="value">
-            <label><input type="checkbox" checked> 現金</label>
-            <label><input type="checkbox" checked> クレジットカード</label>
-            <label><input type="checkbox"> 電子マネー</label>
-            <label><input type="checkbox"> QR決済</label>
-          </div>
-        </div>
-      </div>
-
-      <!-- メニュー・備考 -->
-      <div class="section">
-        <div class="section-head"><span class="caret"></span>補足情報</div>
-
-        <div class="row">
-          <div class="label">メニューの特徴</div>
-          <div class="value">
-            <textarea>・自家焙煎コーヒー
-・季節のスイーツ
-・ランチプレート</textarea>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="label">備考</div>
-          <div class="value">
-            <textarea>アレルギー対応は事前にご相談ください。ベビーカー入店可。</textarea>
+            <label><input type="radio" name="editable" value="1" {% if store.editable %}checked{% endif %}> 可</label>
+            <label><input type="radio" name="editable" value="0" {% if not store.editable %}checked{% endif %}> 不可</label>
           </div>
         </div>
       </div>
 
       <div class="notice">
-        実際の食べログ画面そのものではありません。<br>
-        ※入力項目・バリデーション・送信先はシステム要件に合わせて調整してください。
+        ※この画面は Store にある項目だけ保存します。<br>
+        カナ/ジャンル/郵便番号/支払い方法なども保存したい場合は、保存先（モデル）を増やす必要があります。
       </div>
 
       <div class="actions">
-        <button type="button" class="btn" onclick="location.href='#';">戻る</button>
+        <button type="button" class="btn" onclick="history.back();">戻る</button>
         <button type="submit" class="btn btn-green">入力内容を保存する</button>
       </div>
     </form>
-    </div>
   </div>
 </body>
 </html>
