@@ -1,7 +1,14 @@
 from django.shortcuts import render
 from django.views.generic.base import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import DetailView
 
-from commons.models import Review, ReviewReport
+
+from commons.models import Review, ReviewReport,CustomerAccount, ReviewPhoto
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.urls import reverse
 
 class customer_review_listView(TemplateView):
     template_name = "reviews/customer_review_list.html"
@@ -11,8 +18,95 @@ class customer_reviewer_review_listView(TemplateView):
     template_name = "reviews/customer_reviewer_review_list.html"
 
 
-class customer_reviewer_detailView(TemplateView):
+@method_decorator(login_required, name="dispatch")
+class customer_reviewer_detailView(LoginRequiredMixin, DetailView):
     template_name = "reviews/customer_reviewer_detail.html"
+
+    odel = CustomerAccount
+    template_name = "reviews/customer_reviewer_detail.html"
+    context_object_name = "customer"
+
+    def get_object(self, queryset=None):
+        user = self.request.user
+
+        # ① 顧客以外は弾く（AccountType 名称はあなたのマスタに合わせて）
+        if not getattr(user, "account_type", None) or user.account_type.account_type != "顧客":
+            return None
+
+        # ② CustomerAccount が存在するか（無ければ None）
+        return CustomerAccount.objects.filter(pk=user.pk).first()
+
+    def dispatch(self, request, *args, **kwargs):
+        """
+        get_object が None のときに DetailView は死ぬので、先に分岐して戻す
+        """
+        obj = self.get_object()
+        if obj is None:
+            return redirect("accounts:customer_login")  # 必要なら別ページに変更OK
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        customer = self.object
+
+        # テンプレが期待してるキーに合わせて詰める
+        context["user_name"] = customer.nickname
+
+        # まだDBにカバー/アイコンのフィールドが無いなら空で渡す（テンプレ側でプレースホルダー）
+        context["cover_image_url"] = getattr(customer, "cover_image_url", "")
+        context["user_icon_url"] = getattr(customer, "icon_image_url", "")
+
+        # 例：統計（必要な分だけ）
+        context["stats_reviews"] = Review.objects.filter(reviewer=customer).count()
+        context["stats_photos"] = ReviewPhoto.objects.filter(review__reviewer=customer).count()
+        context["stats_visitors"] = 0
+        context["stats_likes"] = customer.total_likes
+
+        context["count_reviews"] = context["stats_reviews"]
+        context["count_following"] = 0
+        context["count_followers"] = 0
+
+        return context
+
+
+   
+    def get_customer(self, request):
+        # 多テーブル継承：request.user が Account の場合でも pk は共通
+        return CustomerAccount.objects.get(pk=request.user.pk)
+
+    def get(self, request, *args, **kwargs):
+        customer = self.get_customer(request)
+
+        context = {
+            "user_name": customer.nickname,
+            "cover_image_url": customer.cover_image.url if customer.cover_image else "",
+            "user_icon_url": customer.icon_image.url if customer.icon_image else "",
+            "stats_reviews": customer.review_count,
+            "stats_photos": 0,
+            "stats_visitors": 0,
+            "stats_likes": customer.total_likes,
+            "count_reviews": customer.review_count,
+            "count_following": 0,
+            "count_followers": 0,
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        customer = self.get_customer(request)
+
+        # ✅カバー更新
+        if request.FILES.get("cover_image"):
+            customer.cover_image = request.FILES["cover_image"]
+            customer.save()
+            return redirect(reverse("reviews:customer_reviewer_detail"))
+
+        # ✅アイコン更新
+        if request.FILES.get("icon_image"):
+            customer.icon_image = request.FILES["icon_image"]
+            customer.save()
+            return redirect(reverse("reviews:customer_reviewer_detail"))
+
+        return redirect(reverse("reviews:customer_reviewer_detail"))
 
 
 class customer_reviewer_searchView(TemplateView):

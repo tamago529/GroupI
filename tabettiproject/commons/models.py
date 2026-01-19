@@ -66,6 +66,16 @@ class CustomerAccount(Account):
     review_count = models.IntegerField(verbose_name="口コミ数", default=0)
     total_likes = models.IntegerField(verbose_name="総いいね数", default=0)
     standard_score = models.IntegerField(verbose_name="標準点", default=0)
+    icon_image = models.ImageField(
+        upload_to="customer/icon/",
+        null=True, blank=True,
+        verbose_name="アイコン画像"
+    )
+    cover_image = models.ImageField(
+        upload_to="customer/cover/",
+        null=True, blank=True,
+        verbose_name="カバー画像"
+    )
     class Meta:
         db_table = "customer_account"; verbose_name = "顧客アカウント情報"; verbose_name_plural = "顧客アカウント情報"
     def __str__(self):
@@ -127,11 +137,14 @@ class Review(models.Model):
 
 class ReviewPhoto(models.Model):
     review = models.ForeignKey("Review", on_delete=models.CASCADE, related_name="photos", verbose_name="口コミ")
-    image_path = models.CharField(max_length=255, verbose_name="画像パス")
+    image_path = models.ImageField(
+        upload_to="review/photos/",
+        verbose_name="画像")
+
     class Meta:
         db_table = "review_photos"; verbose_name = "口コミ写真"; verbose_name_plural = "口コミ写真"
     def __str__(self):
-        return self.image_path
+        return str(self.image_path)
 
 class ReviewReport(models.Model):
     review = models.ForeignKey("Review", on_delete=models.CASCADE, verbose_name="口コミ")

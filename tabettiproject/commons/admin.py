@@ -9,6 +9,7 @@ from django.contrib.auth.forms import UserChangeForm
 from django.contrib import admin, messages
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.utils.html import format_html
 
 from .models import (
     Account,
@@ -330,7 +331,17 @@ class ReviewAdmin(admin.ModelAdmin):
 @admin.register(ReviewPhoto)
 class ReviewPhotoAdmin(admin.ModelAdmin):
     list_display = ("id", "review", "image_path")
+    readonly_fields = ("image_preview",)
+    fields = ("review", "image_path", "image_preview")
 
+    def image_preview(self, obj):
+        if obj and obj.image_path:
+            return format_html(
+                '<img src="{}" style="height:120px; border:1px solid #ccc;">',
+                obj.image_path.url
+            )
+        return "-"
+    image_preview.short_description = "プレビュー"
 
 @admin.register(ReviewReport)
 class ReviewReportAdmin(admin.ModelAdmin):

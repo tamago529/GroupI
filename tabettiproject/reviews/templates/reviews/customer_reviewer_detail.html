@@ -14,7 +14,7 @@
         --tb-text-sub: #666;         /* 補助テキスト */
     }
 
-    /* [エラー対策] 視覚的に隠すための設定（スクリーンリーダーには読み上げさせます） */
+    /* 視覚的に隠す（スクリーンリーダーには読み上げさせる） */
     .visually-hidden {
         position: absolute;
         width: 1px;
@@ -42,47 +42,84 @@
     .mp-cover {
         position: relative;
         height: 250px;
-        background: url('{{ cover_image_url }}') center/cover no-repeat;
+        background: url('{{ cover_image_url|default:"/static/images/default_cover.jpg" }}') center/cover no-repeat;
         background-color: #eee;
         border-bottom: 1px solid #ccc;
+    }
+
+    /* ✅ カバー変更ボタン */
+    .cover-edit-btn {
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        background: rgba(255,255,255,0.9);
+        border: 1px solid #999;
+        padding: 8px 12px;
+        font-size: 12px;
+        font-weight: bold;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+    .cover-edit-btn:hover {
+        background: rgba(255,255,255,1);
     }
 
     /* ==========================================
        3. プロフィールヘッダー (アイコン・名前・統計)
        ========================================== */
     .mp-header {
-        display: flex;         /* 横並びにする */
+        display: flex;
         padding: 0 20px 15px;
-        align-items: flex-end; /* 下端で揃える */
+        align-items: flex-end;
     }
 
-    /* ユーザーアイコン：突き出しの設定 */
+    /* ✅ アイコン：クリック可能に */
     .mp-user-avatar {
         width: 120px;
         height: 120px;
-        flex-shrink: 0;        /* 横幅を固定 */
+        flex-shrink: 0;
         background-color: #fff;
         border: 4px solid #fff;
         border-radius: 4px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-        margin-top: -55px;     /* 上に突き出させてカバーに被せる */
+        margin-top: -55px;
         position: relative;
-        z-index: 10;           /* 他の要素より上に表示 */
+        z-index: 10;
         overflow: hidden;
+        cursor: pointer;
     }
     .mp-user-avatar img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        display: block;
     }
 
-    /* テキスト情報エリア：アイコンの右側に配置 */
+    /* ✅ アイコンのホバー表示（クリックで変更） */
+    .avatar-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0,0,0,0.35);
+        color: #fff;
+        font-size: 11px;
+        font-weight: bold;
+        opacity: 0;
+        transition: 0.2s;
+    }
+    .mp-user-avatar:hover .avatar-overlay {
+        opacity: 1;
+    }
+
+    /* テキスト情報エリア */
     .mp-user-info {
-        margin-left: 20px;     /* アイコンとの間に隙間を作る（これで重なりを解消） */
-        flex-grow: 1;          /* 残りの幅を埋める */
+        margin-left: 20px;
+        flex-grow: 1;
         padding-bottom: 5px;
     }
-    
+
     .mp-tagline { font-size: 12px; color: #666; margin-bottom: 5px; }
     .mp-user-name { font-size: 22px; font-weight: bold; margin-bottom: 8px; line-height: 1.2; }
     .mp-detail-link { font-size: 11px; color: #06c; text-decoration: none; }
@@ -90,7 +127,6 @@
     /* ==========================================
        4. 統計データテーブル（右端）
        ========================================== */
-    /* [アクセシビリティ対応済] 統計テーブル */
     .mp-stats-table {
         min-width: 180px;
         border-collapse: collapse;
@@ -122,7 +158,6 @@
         color: #333;
         text-decoration: none;
     }
-    /* アクティブなタブの強調表示 */
     .mp-nav-item.active {
         border-bottom: 4px solid #f60;
         margin-bottom: -2px;
@@ -134,14 +169,41 @@
 {% block content %}
 <div class="mp-container">
 
+    <!-- ✅ カバー：ボタン押下 → ファイル選択 → 自動アップロード -->
     <section class="mp-cover" aria-label="マイページカバー写真">
-        <div style="position:absolute; bottom:15px; right:15px; background:rgba(255,255,255,0.9); border:1px solid #999; padding:5px 10px; font-size:11px;">📷 カバー写真を変更</div>
+        <form id="coverForm" method="post" enctype="multipart/form-data" style="margin:0;">
+            {% csrf_token %}
+            <input
+                id="coverInput"
+                class="visually-hidden"
+                type="file"
+                name="cover_image"
+                accept="image/*"
+            >
+            <button type="button" class="cover-edit-btn" onclick="document.getElementById('coverInput').click();">
+                📷 カバー写真を変更
+            </button>
+        </form>
     </section>
 
     <section class="mp-header">
-        <div class="mp-user-avatar">
-            <img src="{{ user_icon_url }}" alt="{{ user_name }}さんのアイコン" width="120" height="120">
-        </div>
+
+        <!-- ✅ アイコン：クリック → ファイル選択 → 自動アップロード -->
+        <form id="iconForm" method="post" enctype="multipart/form-data" style="margin:0;">
+            {% csrf_token %}
+            <input
+                id="iconInput"
+                class="visually-hidden"
+                type="file"
+                name="icon_image"
+                accept="image/*"
+            >
+
+            <label class="mp-user-avatar" for="iconInput" title="クリックしてアイコン変更">
+                <img src="{{ user_icon_url|default:'/static/images/default_icon.png' }}" alt="{{ user_name }}さんのアイコン" width="120" height="120">
+                <div class="avatar-overlay">クリックして変更</div>
+            </label>
+        </form>
 
         <div class="mp-user-info">
             <div style="color:#666; font-size:12px;">僕のレストランガイド</div>
@@ -188,4 +250,20 @@
         </div>
     </div>
 </div>
+
+<script>
+    // ✅ カバー画像：選択したら自動送信
+    document.getElementById('coverInput').addEventListener('change', function () {
+        if (this.files && this.files.length > 0) {
+            document.getElementById('coverForm').submit();
+        }
+    });
+
+    // ✅ アイコン画像：選択したら自動送信
+    document.getElementById('iconInput').addEventListener('change', function () {
+        if (this.files && this.files.length > 0) {
+            document.getElementById('iconForm').submit();
+        }
+    });
+</script>
 {% endblock %}
