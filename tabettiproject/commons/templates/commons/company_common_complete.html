@@ -3,17 +3,10 @@
 
 {% block content %}
 <style>
-    .complete-wrapper {
-        max-width: 850px;
-        margin: 100px auto;
-        padding: 0 20px;
-        font-family: sans-serif;
-    }
-
-    /* ② 完了メッセージを囲む角丸のボックス */
+    .complete-wrapper { max-width: 850px; margin: 100px auto; padding: 0 20px; font-family: sans-serif; }
     .complete-box {
         border: 2px solid #ccc;
-        border-radius: 40px;       /* 設計図の大きな角丸 */
+        border-radius: 40px;
         background-color: #fff;
         padding: 80px 40px;
         text-align: center;
@@ -23,21 +16,11 @@
         align-items: center;
         justify-content: center;
     }
+    .complete-text { font-size: 24px; color: #333; margin: 0; }
 
-    .complete-text {
-        font-size: 24px;
-        color: #333;
-        margin: 0;
-    }
+    .complete-button-row { display: flex; justify-content: flex-end; gap: 16px; }
 
-    /* ボタン配置エリア（右寄せ） */
-    .complete-button-row {
-        display: flex;
-        justify-content: flex-end;
-    }
-
-    /* ① TOPへボタン */
-    .btn-top {
+    .btn-top, .btn-back {
         display: inline-block;
         border: 2px solid #333;
         border-radius: 15px;
@@ -49,8 +32,7 @@
         background-color: #fff;
         transition: 0.2s;
     }
-
-    .btn-top:hover {
+    .btn-top:hover, .btn-back:hover {
         background-color: #f0f0f0;
         border-color: #ff9600;
         color: #ff9600;
@@ -58,13 +40,12 @@
 </style>
 
 <div class="complete-wrapper">
-    <!-- ② 完了メッセージ項目 -->
     <div class="complete-box">
-        <p class="complete-text">{{ display_message|default:"～～～～～～" }}が完了しました</p>
+        <p class="complete-text">{{ display_message|default:"処理" }}が完了しました</p>
     </div>
 
-    <!-- ① TOPへボタン -->
     <div class="complete-button-row">
+        <a href="{{ next_url|default:request.META.HTTP_REFERER }}" class="btn-back">一覧へ</a>
         <a href="{% url 'accounts:company_top' %}" class="btn-top">TOPへ</a>
     </div>
 </div>
