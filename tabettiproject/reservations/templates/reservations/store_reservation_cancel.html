@@ -1,5 +1,20 @@
-{% extends "store_base.html" %}
+{% extends "customer_base.html" %}
 {% block content %}
+
+<div style="max-width:980px;margin:0 auto;padding:18px 16px 40px;">
+
+  {# Django messages #}
+  {% if messages %}
+    <div style="margin:10px 0;">
+      {% for message in messages %}
+        <div style="padding:10px 12px;border:1px solid #e6e0d7;background:#fff;margin-bottom:8px;font-size:12px;">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+</div>
 
 <!DOCTYPE html>
 <html lang="ja">
@@ -28,39 +43,6 @@
       color:var(--text);
     }
 
-    /* ---- top header (簡易) ---- */
-    .topbar{
-      background:#fff;
-      border-bottom:1px solid var(--line);
-    }
-    .topbar-inner{
-      max-width:980px;
-      margin:0 auto;
-      padding:14px 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-    }
-    .logo{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      font-weight:800;
-      color:#d86b00;
-      letter-spacing:.5px;
-    }
-    .nav{
-      display:flex;
-      gap:14px;
-      flex-wrap:wrap;
-      font-size:13px;
-      color:var(--sub);
-    }
-    .nav a{color:var(--sub); text-decoration:none}
-    .nav a:hover{text-decoration:underline}
-
-    /* ---- page ---- */
     .wrap{
       max-width:980px;
       margin:0 auto;
@@ -91,7 +73,6 @@
       line-height:1.7;
     }
 
-    /* ---- section ---- */
     .section{
       margin-top:14px;
       background:#fff;
@@ -115,11 +96,6 @@
       transform:translateY(1px);
     }
 
-    /* ---- table-like form ---- */
-    .grid{
-      width:100%;
-      border-collapse:collapse;
-    }
     .row{
       display:grid;
       grid-template-columns: 220px 1fr;
@@ -143,7 +119,7 @@
       gap:10px;
     }
 
-    input[type="text"], input[type="number"], input[type="time"], input[type="date"], select, textarea{
+    input[type="text"], select, textarea{
       width:100%;
       border:1px solid #d7d2c9;
       border-radius:4px;
@@ -156,12 +132,8 @@
       border-color:#9aa7b5;
       box-shadow:0 0 0 2px rgba(26,115,232,.12);
     }
-    .inline{
-      display:flex;
-      gap:10px;
-      width:100%;
-    }
-    .inline > *{flex:1}
+    textarea{min-height:110px; resize:vertical;}
+
     .linklike{
       color:var(--link);
       text-decoration:none;
@@ -182,7 +154,6 @@
       margin-left:8px;
     }
 
-    /* ---- action box ---- */
     .action-box{
       background:#fff7d9;
       border-top:1px solid var(--line);
@@ -224,17 +195,11 @@
       color:#fff;
     }
     .btn-green:hover{filter:brightness(.95)}
-    .footer{
-      margin-top:28px;
-      color:#888;
-      font-size:12px;
-      text-align:center;
-    }
 
-    /* responsive */
     @media (max-width: 720px){
       .row{grid-template-columns: 1fr}
       .cell-label{border-bottom:1px solid var(--line)}
+      .btn{min-width:100%}
     }
   </style>
 </head>
@@ -242,7 +207,8 @@
 <body>
   <div class="wrap">
     <div class="breadcrumb">
-      <a href="#">タベッチ</a> ＞ <a href="#">予約確認</a> ＞ <a href="#">ご予約内容の確認</a> ＞ ご予約のキャンセル
+      <a href="#">タベッチ</a> ＞ <a href="{% url 'reservations:store_reservation_history' %}">予約一覧</a> ＞
+      <a href="{% url 'reservations:store_reservation_confirm' reservation.id %}">ご予約内容の確認</a> ＞ ご予約のキャンセル
     </div>
 
     <div class="page-title">ご予約のキャンセル</div>
@@ -251,72 +217,66 @@
       内容をご確認のうえ、よろしければ「この予約をキャンセルする」ボタンを押してください。
     </div>
 
-    <form action="#" method="post">
-      <!-- 予約情報 -->
+    <form action="{% url 'reservations:store_reservation_cancel' reservation.id %}" method="post">
+      {% csrf_token %}
+
       <div class="section">
         <div class="section-head"><span class="caret"></span>ご予約情報</div>
 
         <div class="row">
           <div class="cell-label">予約ステータス</div>
           <div class="cell-value">
-            <input type="text" value="予約中">
+            <input type="text" value="{{ reservation.booking_status }}" readonly>
           </div>
         </div>
 
         <div class="row">
           <div class="cell-label">ご予約番号</div>
           <div class="cell-value">
-            <input type="text" value="JMZVZ93N99">
+            <input type="text" value="{{ reservation.id }}" readonly>
           </div>
         </div>
 
         <div class="row">
           <div class="cell-label">レストラン名</div>
           <div class="cell-value">
-            <input type="text" value="THE PUBLIC COFFEE">
-            <a class="linklike" href="#">店舗ページ</a>
+            <input type="text" value="{{ store.store_name }}" readonly>
+            <a class="linklike" href="{{ store_page_url }}">店舗ページ</a>
           </div>
         </div>
 
         <div class="row">
           <div class="cell-label">来店人数</div>
           <div class="cell-value">
-            <input type="text" value="1名">
+            <input type="text" value="{{ reservation.visit_count }}名" readonly>
           </div>
         </div>
 
         <div class="row">
           <div class="cell-label">来店日</div>
           <div class="cell-value">
-            <input type="text" value="2025年11月10日(月)">
+            <input type="text" value="{{ reservation.visit_date|date:'Y年n月j日(D)' }}" readonly>
           </div>
         </div>
 
         <div class="row">
           <div class="cell-label">来店時刻</div>
           <div class="cell-value">
-            <input type="text" value="15:30">
+            <input type="text" value="{{ reservation.visit_time|time:'H:i' }}" readonly>
           </div>
         </div>
 
         <div class="row">
           <div class="cell-label">コース</div>
           <div class="cell-value">
-            <input type="text" value="指定しない / お会計は当日">
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="cell-label">お席</div>
-          <div class="cell-value">
-            <input type="text" value="カウンター / 禁煙（個室希望：なし）">
+            <input type="text" value="{{ reservation.course }}" readonly>
           </div>
         </div>
 
         <div class="row">
           <div class="cell-label">キャンセル理由 <span class="required">必須</span></div>
           <div class="cell-value">
-            <select>
+            <select name="cancel_reason" required>
               <option selected>選択してください</option>
               <option>予定が変わった</option>
               <option>人数が変わった</option>
@@ -330,28 +290,28 @@
         <div class="row">
           <div class="cell-label">キャンセル理由について<br>詳しく教えてください</div>
           <div class="cell-value">
-            <textarea rows="5">家族の予定が急に入ってしまったため、今回はキャンセルさせてください。</textarea>
+            <textarea name="cancel_detail" rows="5" placeholder="任意で入力してください"></textarea>
           </div>
         </div>
 
-        <!-- アクション -->
         <div class="action-box">
           <div class="action-title">この予約をキャンセルします</div>
           <div class="action-desc">
             一度キャンセルされた予約は、元に戻すことはできません。<br>
-            よろしければ「この予約をキャンセルする」ボタンを押してください。<br>
-            ※ご予約内容の変更をご希望の場合は、「ご予約内容の確認へ戻る」よりお手続きください。
+            よろしければ「この予約をキャンセルする」ボタンを押してください。
           </div>
           <div class="buttons">
-            <a href="#"><button type="button" class="btn">ご予約内容の確認へ戻る</button></a>
+            <button type="button" class="btn" onclick="location.href='{% url 'reservations:store_reservation_confirm' reservation.id %}';">
+              ご予約内容の確認へ戻る
+            </button>
             <button type="submit" class="btn btn-green">この予約をキャンセルする</button>
           </div>
         </div>
+
       </div>
     </form>
   </div>
 </body>
 </html>
-
 
 {% endblock %}
