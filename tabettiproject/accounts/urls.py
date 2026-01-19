@@ -11,7 +11,7 @@ urlpatterns = [
 
     path("company_account_management/", company_account_managementView.as_view(), name="company_account_management"),
     path("company_login/", company_loginView.as_view(), name="company_login"),
-    path("company_logout/", company_logoutView.as_view(), name="company_logout"),
+    path("company/logout/", company_logout_view, name="company_logout"),
     path("company_store_review_detail/", company_store_review_detailView.as_view(), name="company_store_review_detail"),
     path("company_store_review/", company_store_reviewView.as_view(), name="company_store_review"),
     path("company_top/", company_topView.as_view(), name="company_top"),

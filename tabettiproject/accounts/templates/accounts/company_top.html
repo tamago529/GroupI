@@ -1,119 +1,200 @@
 {% extends 'company_base.html' %}
 
 {% block content %}
-<!-- デザイン用のスタイルを直接記述 -->
+<!-- FontAwesome アイコン（もしbase.htmlで読み込んでいない場合） -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
 <style>
+    :root {
+        --primary-color: #ff9600; /* 食べログ風オレンジ */
+        --bg-color: #f8f9fa;
+        --text-dark: #333;
+        --text-muted: #666;
+        --border-color: #e0e0e0;
+        --logout-color: #e74c3c; /* ログアウト用の赤 */
+    }
+
     .company-top-wrapper {
         max-width: 1000px;
         margin: 40px auto;
         padding: 0 20px;
-        font-family: sans-serif;
+        font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
     }
 
-    /* ⑦ 運用トップ タイトル */
+    /* 挨拶セクション */
+    .admin-header {
+        margin-bottom: 40px;
+    }
+
     .admin-title {
-        font-size: 24px;
+        font-size: 28px;
         font-weight: bold;
-        margin-bottom: 30px;
-        color: #333;
-        border-left: 5px solid #ff9600; /* 食べログっぽいアクセントカラー */
-        padding-left: 15px;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 12px;
     }
 
-    /* 1〜6を並べるグリッド */
+    .admin-title::before {
+        content: "";
+        width: 6px;
+        height: 32px;
+        background: var(--primary-color);
+        border-radius: 3px;
+    }
+
+    .admin-subtitle {
+        color: var(--text-muted);
+        margin-top: 8px;
+        font-size: 14px;
+    }
+
+    /* グリッドレイアウト */
     .menu-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr); /* 横3列 */
-        gap: 20px;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 24px;
     }
 
-    /* ボタン（カード）の共通設定 */
+    /* カード（ボタン）のデザイン */
     .menu-item {
         background: #ffffff;
-        border: 2px solid #e0e0e0;
-        border-radius: 10px;
-        transition: all 0.2s ease;
-        text-align: center;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        position: relative;
+        overflow: hidden;
     }
 
-    /* マウスを乗せた時の動き */
-    .menu-item:hover {
-        border-color: #ff9600;
-        background-color: #fffaf0;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-
-    /* リンクをカード全体に広げる */
     .menu-link {
-        display: block;
-        padding: 40px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 24px;
         text-decoration: none;
-        color: #333;
-        font-weight: bold;
-        font-size: 18px;
+        color: var(--text-dark);
         height: 100%;
     }
 
-    /* ⑥ ログアウトだけ少し色味を変える（任意） */
-    .logout-item {
-        background-color: #f9f9f9;
+    /* アイコン */
+    .menu-icon {
+        font-size: 32px;
+        color: var(--primary-color);
+        margin-bottom: 16px;
+        transition: transform 0.3s ease;
     }
 
-    /* レスポンシブ対応：画面が狭いときは2列、さらに狭いときは1列にする */
-    @media (max-width: 768px) {
-        .menu-grid { grid-template-columns: repeat(2, 1fr); }
+    .menu-text {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 8px;
     }
-    @media (max-width: 480px) {
-        .menu-grid { grid-template-columns: 1fr; }
+
+    .menu-desc {
+        font-size: 13px;
+        color: var(--text-muted);
+        font-weight: normal;
+        line-height: 1.4;
+    }
+
+    /* ホバーアクション */
+    .menu-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+        border-color: var(--primary-color);
+    }
+
+    .menu-item:hover .menu-icon {
+        transform: scale(1.1);
+    }
+
+    /* ログアウトの特殊設定 */
+    .logout-item {
+        background-color: #fffafa;
+    }
+    .logout-item .menu-icon {
+        color: var(--logout-color);
+    }
+    .logout-item:hover {
+        border-color: var(--logout-color);
+    }
+
+    /* レスポンシブ */
+    @media (max-width: 600px) {
+        .menu-grid {
+            grid-template-columns: 1fr;
+        }
+        .menu-link {
+            padding: 30px 20px;
+            flex-direction: row; /* スマホでは横並びに */
+            text-align: left;
+        }
+        .menu-icon {
+            margin-bottom: 0;
+            margin-right: 20px;
+            font-size: 24px;
+        }
     }
 </style>
 
 <div class="company-top-wrapper">
-    <!-- ⑦ タイトル -->
-    <h1 class="admin-title">運用トップ</h1>
+    <header class="admin-header">
+        <h1 class="admin-title">運用トップ</h1>
+        <p class="admin-subtitle">管理したい項目を選択してください。</p>
+    </header>
 
-    <!-- ボタン配置エリア -->
     <div class="menu-grid">
         <!-- ① 口コミの閲覧 -->
         <div class="menu-item">
-            <a href="#" class="menu-link">
-                口コミの閲覧
+            <a href="{% url 'reviews:company_review_list' %}" class="menu-link">
+                <i class="fa-solid fa-comments menu-icon"></i>
+                <span class="menu-text">口コミの閲覧</span>
+                <span class="menu-desc">投稿された口コミの内容確認と返信管理</span>
             </a>
         </div>
 
         <!-- ② アカウント管理 -->
         <div class="menu-item">
             <a href="{% url 'accounts:company_account_management' %}" class="menu-link">
-                アカウント管理
+                <i class="fa-solid fa-user-gear menu-icon"></i>
+                <span class="menu-text">アカウント管理</span>
+                <span class="menu-desc">管理者情報の編集・権限の設定</span>
             </a>
         </div>
 
         <!-- ③ 店舗アカウント審査 -->
         <div class="menu-item">
             <a href="{% url 'accounts:company_store_review' %}" class="menu-link">
-                店舗アカウント審査
+                <i class="fa-solid fa-clipboard-check menu-icon"></i>
+                <span class="menu-text">店舗アカウント審査</span>
+                <span class="menu-desc">新規登録店舗の承認・否認の判断</span>
             </a>
         </div>
 
         <!-- ④ 報告管理 -->
         <div class="menu-item">
-            <a href="#" class="menu-link">
-                報告管理
+            <a href="{% url 'reviews:report' %}" class="menu-link">
+                <i class="fa-solid fa-triangle-exclamation menu-icon"></i>
+                <span class="menu-text">報告管理</span>
+                <span class="menu-desc">不適切なコンテンツ通報の確認と対処</span>
             </a>
         </div>
 
         <!-- ⑤ 店舗管理 -->
         <div class="menu-item">
-            <a href="#" class="menu-link">
-                店舗管理
+            <a href="{% url 'stores:company_store_management' %}" class="menu-link">
+                <i class="fa-solid fa-shop menu-icon"></i>
+                <span class="menu-text">店舗管理</span>
+                <span class="menu-desc">登録店舗情報の修正・ステータス確認</span>
             </a>
         </div>
 
         <!-- ⑥ ログアウト -->
         <div class="menu-item logout-item">
             <a href="{% url 'accounts:company_logout' %}" class="menu-link">
-                ログアウト
+                <i class="fa-solid fa-right-from-bracket menu-icon"></i>
+                <span class="menu-text">ログアウト</span>
+                <span class="menu-desc">セッションを終了してログアウトします</span>
             </a>
         </div>
     </div>

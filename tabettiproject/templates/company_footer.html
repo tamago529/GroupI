@@ -1,4 +1,154 @@
 <footer class="company-footer">
-    <div class="inner">
-        <p>&copy; 2025 タべっち運用管理サイト</p>
-    </div></footer>
+    <div class="footer-inner">
+        <!-- 左側：サイトロゴ・概要 -->
+        <div class="footer-section brand-info">
+            <h2 class="footer-logo">タべっち<span>運用管理</span></h2>
+            <p class="footer-desc">
+                店舗・口コミ・アカウントの統合管理プラットフォーム。<br>
+                効率的な運用でサービスの質を向上させます。
+            </p>
+        </div>
+
+        <!-- 中央：クイックリンク -->
+        <div class="footer-section">
+            <h3 class="footer-heading">メニュー</h3>
+            <ul class="footer-links">
+                <li><a href="{% url 'reviews:company_review_list' %}">口コミ管理</a></li>
+                <li><a href="{% url 'stores:company_store_management' %}">店舗管理</a></li>
+                <li><a href="{% url 'accounts:company_account_management' %}">アカウント設定</a></li>
+            </ul>
+        </div>
+
+        <!-- 右側：サポート・法的情報 -->
+        <div class="footer-section">
+            <h3 class="footer-heading">サポート</h3>
+            <ul class="footer-links">
+                <li><a href="#"><i class="fa-solid fa-book"></i> 操作マニュアル</a></li>
+                <li><a href="#"><i class="fa-solid fa-envelope"></i> システムお問い合わせ</a></li>
+                <li><a href="#">プライバシーポリシー</a></li>
+                <li><a href="#">利用規約</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- コピーライトエリア -->
+    <div class="footer-bottom">
+        <p>&copy; 2025 タべっち運用管理事務局 All Rights Reserved.</p>
+    </div>
+</footer>
+
+<style>
+    /* 1. フッターを常に最下部にするための設定（親要素に適用してください） */
+    /* 
+       body {
+           display: flex;
+           flex-direction: column;
+           min-height: 100vh;
+       }
+       main { flex: 1; } 
+    */
+
+    .company-footer {
+        background-color: #333; /* 濃いグレーで画面を引き締める */
+        color: #fff;
+        padding: 60px 0 20px;
+        margin-top: 60px;
+        font-family: sans-serif;
+    }
+
+    .footer-inner {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr; /* 比率を変えてバランス調整 */
+        gap: 40px;
+    }
+
+    .footer-section {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* ロゴ部分 */
+    .footer-logo {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #ff9600; /* 食べログオレンジ */
+    }
+    .footer-logo span {
+        color: #fff;
+        font-size: 16px;
+        margin-left: 5px;
+    }
+
+    .footer-desc {
+        font-size: 13px;
+        line-height: 1.6;
+        color: #ccc;
+    }
+
+    /* 見出し */
+    .footer-heading {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        position: relative;
+        padding-bottom: 8px;
+    }
+    .footer-heading::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 30px;
+        height: 2px;
+        background: #ff9600;
+    }
+
+    /* リンク一覧 */
+    .footer-links {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .footer-links li {
+        margin-bottom: 10px;
+    }
+    .footer-links a {
+        color: #ccc;
+        text-decoration: none;
+        font-size: 14px;
+        transition: color 0.2s;
+    }
+    .footer-links a:hover {
+        color: #ff9600;
+        text-decoration: underline;
+    }
+
+    /* コピーライトエリア */
+    .footer-bottom {
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid #444;
+        text-align: center;
+    }
+    .footer-bottom p {
+        font-size: 12px;
+        color: #888;
+    }
+
+    /* レスポンシブ：スマホでは縦に並べる */
+    @media (max-width: 768px) {
+        .footer-inner {
+            grid-template-columns: 1fr;
+            gap: 30px;
+            text-align: center;
+        }
+        .footer-heading::after {
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    }
+</style>

@@ -122,7 +122,7 @@
 
 <div class="login-container">
     <!-- ① 画面タイトル -->
-    <h2>タべっち 運用管理画面ログイン</h2>
+    <h2>タベッチ 運用管理画面ログイン</h2>
 
     <!-- エラーメッセージ表示エリア -->
     {% if form.errors or messages %}
@@ -142,16 +142,17 @@
     <form method="post">
         {% csrf_token %}
 
-        <!-- ② ログインID -->
+        <!-- ② ログインID (nameを username に変更) -->
         <div class="form-group">
-            <label for="id">ログインID</label>
-            <input type="text" name="id" id="id" placeholder="6～12桁の半角英数">
-            {% if form.id.errors %}
-                <p class="field-error">{{ form.id.errors.0 }}</p>
+            <label for="id_username">ログインID</label>
+            <input type="text" name="username" id="id_username" placeholder="6～12桁の半角英数">
+            <!-- エラー表示も username に合わせる -->
+            {% if form.username.errors %}
+                <p class="field-error">{{ form.username.errors.0 }}</p>
             {% endif %}
         </div>
 
-        <!-- ③ パスワード -->
+        <!-- ③ パスワード (nameは password のままでOK) -->
         <div class="form-group">
             <label for="password">パスワード</label>
             <input type="password" name="password" id="password" placeholder="8～20桁の半角英数（英大文字・小文字含む）">
@@ -168,7 +169,7 @@
 
         <!-- ④ ログインボタン -->
         <div class="submit-area">
-            <input type="submit" name="login" value="ログインする">
+            <input type="submit" value="ログインする">
         </div>
     </form>
 
@@ -179,3 +180,7 @@
 
 </div>
 {% endblock %}
+
+<!-- ログイン画面ではこれらを表示しないように「空」で上書きする -->
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}

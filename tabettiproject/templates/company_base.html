@@ -2,19 +2,22 @@
 <!-- shared/base_company.html --> <!DOCTYPE html><html lang="ja"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}運用管理サイト{% endblock %}</title>
+    <title>{% block title %}タベッチ運用管理サイト{% endblock %}</title>
 
     <link rel="stylesheet" href="{% static 'css/company.css' %}">
     {% block css %}{% endblock %}</head>
 <body class="company">
-
-    {% include 'company_header.html' %}
+    {% block header %}
+        {% include 'company_header.html' %}
+    {% endblock %}
 
     <main class="content">
         {% block content %}{% endblock %}
     </main>
 
-    {% include 'company_footer.html' %}
+    {% block footer %}
+        {% include 'company_footer.html' %}
+    {% endblock %}
 
     <script src="{% static 'js/company.js' %}"></script>
     {% block js %}{% endblock %}</body></html>

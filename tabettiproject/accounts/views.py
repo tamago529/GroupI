@@ -7,17 +7,73 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
 
 from commons.models import StoreAccount,Account
-
+from django.contrib.auth.views import LoginView
+from django.urls import reverse_lazy, reverse # 追加
+from django.contrib import messages                         # エラー表示用
+from django.db.models import Q
+from django.views.generic import ListView
 #共通機能の定義
 
-class company_account_managementView(TemplateView):
+class company_account_managementView(ListView):
     template_name = "accounts/company_account_management.html"
+    model = Account
+    context_object_name = "accounts"
 
-class company_loginView(TemplateView):
+    def get_queryset(self):
+        queryset = super().get_queryset().select_related('account_type')
+        
+        # 1. 検索ワード（ID、メアド、名前で検索）
+        q = self.request.GET.get('q')
+        if q:
+            queryset = queryset.filter(
+                Q(username__icontains=q) | 
+                Q(email__icontains=q) |
+                Q(customeraccount__nickname__icontains=q)
+            )
+
+        # 2. アカウント種別絞り込み
+        # チェックボックスの値（customer, store）を取得
+        types = self.request.GET.getlist('type')
+        if types:
+            # AccountTypeマスタの名称で絞り込む（マスタの名称に合わせて調整してください）
+            type_queries = Q()
+            if 'customer' in types:
+                type_queries |= Q(account_type__account_type='顧客')
+            if 'store' in types:
+                type_queries |= Q(account_type__account_type='店舗')
+            queryset = queryset.filter(type_queries)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['query'] = self.request.GET.get('q', '')
+        context['selected_types'] = self.request.GET.getlist('type')
+        return context
+    
+class company_loginView(LoginView):
     template_name = "accounts/company_login.html"
 
-class company_logoutView(TemplateView):
-    template_name = "accounts/company_logout.html" 
+     # ログイン成功時のリダイレクト先
+    def get_success_url(self):
+        return reverse_lazy('accounts:company_top')
+
+    # ログインボタンが押された後のチェック処理
+    def form_valid(self, form):
+        user = form.get_user()
+        # ログインしたユーザーが「企業（運用管理側）」かチェック
+        # マスタデータ（AccountType）の名称が「企業」の場合
+        if user.account_type.account_type != "企業":
+            messages.error(self.request, "運用管理アカウント以外はログインできません。")
+            return self.form_invalid(form)
+        
+        return super().form_valid(form)
+
+def company_logout_view(request):
+    logout(request) # ここで実際にログアウト処理を実行
+    return render(request, "accounts/company_logout.html") # ログアウト完了画面を表示
+
+    
 
 class company_store_review_detailView(TemplateView):
     template_name = "accounts/company_store_review_detail.html"

@@ -2,192 +2,111 @@
 
 {% block content %}
 <style>
-    /* 全体のコンテナ */
+    /* （既存のスタイルは維持） */
     .account-admin-wrapper {
-        max-width: 900px;
+        max-width: 950px;
         margin: 40px auto;
         padding: 0 20px;
-        font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+        font-family: sans-serif;
     }
-
-    /* ①② 検索エリア */
-    .search-row {
-        display: flex;
-        gap: 15px;
+    .search-section {
+        background: #f9f9f9;
+        padding: 30px;
+        border-radius: 20px;
+        border: 1px solid #ddd;
         margin-bottom: 40px;
-        align-items: center;
     }
-
-    .search-input {
-        flex: 1;
-        padding: 12px 20px;
-        border: 2px solid #333;
-        border-radius: 15px; /* 設計図通りの角丸 */
-        font-size: 18px;
-        font-weight: bold;
-    }
-
-    .btn-search {
-        padding: 10px 30px;
-        background-color: #fff;
-        border: 2px solid #333;
-        border-radius: 15px;
-        font-size: 18px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-
-    /* ③④⑤ アカウントリスト */
-    .account-list {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-
+    .search-row { display: flex; gap: 15px; margin-bottom: 20px; }
+    .search-input { flex: 1; padding: 12px 20px; border: 2px solid #333; border-radius: 15px; font-size: 18px; }
+    .filter-row { display: flex; gap: 20px; align-items: center; padding-left: 10px; }
+    .filter-label { display: flex; align-items: center; gap: 8px; font-weight: bold; cursor: pointer; }
+    
+    .account-list { display: flex; flex-direction: column; gap: 15px; }
     .account-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px 25px;
-        border: 2px solid #333;
-        border-radius: 15px; /* 設計図通りの角丸 */
-        background-color: #fff;
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 20px 30px; border: 2px solid #333; border-radius: 15px; background-color: #fff;
     }
+    .account-info { display: flex; flex-direction: column; gap: 5px; }
+    .type-badge { font-size: 12px; padding: 2px 8px; border-radius: 5px; background: #333; color: #fff; width: fit-content; }
+    .account-name { font-size: 22px; font-weight: bold; color: #333; }
+    .account-sub-info { font-size: 14px; color: #666; }
+    .btn-item { padding: 8px 25px; border: 2px solid #333; border-radius: 12px; background-color: #fff; font-size: 18px; font-weight: bold; text-decoration: none; color: #000; }
 
-    .account-name {
-        font-size: 22px;
-        color: #333;
-    }
-
-    .item-actions {
-        display: flex;
-        gap: 10px;
-    }
-
-    /* ボタン共通（詳細・削除） */
-    .btn-item {
-        padding: 8px 25px;
-        border: 2px solid #333;
-        border-radius: 12px;
-        background-color: #fff;
+    /* 見つからない時のメッセージ */
+    .no-results {
+        text-align: center;
+        padding: 50px;
+        background: #fdfdfd;
+        border: 2px dashed #ccc;
+        border-radius: 15px;
+        color: #888;
         font-size: 18px;
-        font-weight: bold;
-        text-decoration: none;
-        color: #000;
-        cursor: pointer;
-    }
-
-    /* ⑥ ポップアップ（モーダル） */
-    .modal-overlay {
-        display: none; /* 最初は隠す */
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.2);
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-    }
-
-    .modal-box {
-        background: #fff;
-        border: 2px solid #333;
-        border-radius: 30px; /* 大きめの角丸 */
-        width: 450px;
-        padding: 40px;
-        position: relative;
-    }
-
-    .modal-text {
-        font-size: 18px;
-        margin-bottom: 30px;
-        color: #333;
-    }
-
-    .modal-footer {
-        display: flex;
-        justify-content: flex-end;
-    }
-
-    .btn-ok {
-        padding: 8px 30px;
-        border: 2px solid #333;
-        border-radius: 12px;
-        background-color: #fff;
-        font-size: 18px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-
-    /* 下部ナビゲーション */
-    .footer-nav {
-        margin-top: 40px;
-        border-top: 1px solid #eee;
-        padding-top: 20px;
     }
 </style>
 
 <div class="account-admin-wrapper">
-    <!-- ①② 検索セクション -->
-    <div class="search-row">
-        <input type="text" id="searchInput" class="search-input" placeholder="検索条件">
-        <button class="btn-search" onclick="handleSearch()">検索</button>
+    <div class="search-section">
+        <form method="get" action="">
+            <div class="search-row">
+                <input type="text" name="q" class="search-input" placeholder="名前、ID、メールアドレスで検索" value="{{ query }}">
+                <button type="submit" class="btn-search">検索</button>
+            </div>
+            
+            <div class="filter-row">
+                <span style="font-size: 14px; color: #666;">絞り込み：</span>
+                <label class="filter-label">
+                    <input type="checkbox" name="type" value="customer" {% if 'customer' in selected_types %}checked{% endif %}> 顧客
+                </label>
+                <label class="filter-label">
+                    <input type="checkbox" name="type" value="store" {% if 'store' in selected_types %}checked{% endif %}> 店舗
+                </label>
+            </div>
+        </form>
     </div>
 
-    <!-- ③④⑤ 一覧セクション -->
-    <div class="account-list" id="accountList">
-        <!-- サンプル1 -->
+    <div class="account-list">
+        {% for acc in accounts %}
         <div class="account-item">
-            <div class="account-name">アカウント名</div>
+            <div class="account-info">
+                <span class="type-badge">{{ acc.account_type.account_type }}</span>
+                <span class="account-name">
+                    {% if acc.customeraccount %}
+                        {{ acc.customeraccount.nickname }}
+                    {% elif acc.storeaccount %}
+                        {{ acc.storeaccount.store.store_name }}
+                    {% else %}
+                        {{ acc.username }}
+                    {% endif %}
+                </span>
+                <span class="account-sub-info">ID: {{ acc.username }} / {{ acc.email }}</span>
+            </div>
             <div class="item-actions">
-                <button class="btn-item" onclick="alert('詳細ポップを表示')">詳細</button>
-                <a href="{% url 'commons:company_common_confirm.html' %}" class="btn-item">削除</a>
+                <button class="btn-item" onclick="showDetail('{{ acc.username }}')">詳細</button>
+                <a href="{% url 'commons:company_common_confirm' %}?message={{ acc.username }}を削除しますか？&next_url=#" class="btn-item">削除</a>
             </div>
         </div>
-        <!-- サンプル2 -->
-        <div class="account-item">
-            <div class="account-name">アカウント名</div>
-            <div class="item-actions">
-                <button class="btn-item">詳細</button>
-                <a href="{% url 'commons:company_common_confirm.html' %}" class="btn-item">削除</a>
+        {% empty %}
+            <!-- ここがポイント：見つからない時はリストの中にメッセージを出す -->
+            <div class="no-results">
+                {% if query %}
+                    「{{ query }}」に一致するアカウントは見つかりませんでした。
+                {% else %}
+                    該当するアカウントはありません。
+                {% endif %}
             </div>
-        </div>
+        {% endfor %}
     </div>
 
-    <!-- 運用トップへのリンク -->
     <div class="footer-nav">
         <a href="{% url 'accounts:company_top' %}">運用トップへ戻る</a>
     </div>
 </div>
 
-<!-- ⑥ 未入力・不一致時のポップアップ -->
-<div class="modal-overlay" id="errorModal">
-    <div class="modal-box">
-        <p class="modal-text">該当するユーザーは存在しません</p>
-        <div class="modal-footer">
-            <button class="btn-ok" onclick="closeModal()">OK</button>
-        </div>
-    </div>
-</div>
+<!-- モーダルは完全に削除しました -->
 
 <script>
-    // ② 検索ボタンを押した時の処理
-    function handleSearch() {
-        const input = document.getElementById('searchInput').value;
-        const modal = document.getElementById('errorModal');
-        
-        // 未入力、または特定の条件（ここでは仮に "error" と入力された場合）でポップアップを出す
-        if (input.trim() === "" || input === "存在しない名前") {
-            modal.style.display = "flex";
-        } else {
-            alert(input + " で検索しました（一覧を更新する処理をここに書く）");
-        }
-    }
-
-    // ⑥ OKボタンでポップアップを閉じる
-    function closeModal() {
-        document.getElementById('errorModal').style.display = "none";
+    function showDetail(username) {
+        alert(username + " の詳細を表示します");
     }
 </script>
-
 {% endblock %}
