@@ -1,4 +1,4 @@
-{% extends "store_base.html" %}
+{% extends "customer_base.html" %}
 {% block content %}
 
 <!DOCTYPE html>
@@ -33,7 +33,6 @@
       padding:18px 16px 40px;
     }
 
-    /* header line */
     .page-head{
       display:flex;
       justify-content:space-between;
@@ -75,7 +74,6 @@
     }
     .print-btn:hover{background:#f3f3f3}
 
-    /* section */
     .section{
       background:#fff;
       border:1px solid var(--line);
@@ -99,7 +97,6 @@
       transform:translateY(1px);
     }
 
-    /* rows */
     .row{
       display:grid;
       grid-template-columns: 220px 1fr;
@@ -136,27 +133,6 @@
       line-height:1.5;
     }
 
-    /* point row */
-    .point-line{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      font-size:13px;
-      padding:12px;
-      border-top:1px solid var(--line);
-    }
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      width:18px;height:18px;
-      border-radius:3px;
-      background:#ffd200;
-      font-weight:900;
-      font-size:12px;
-    }
-
-    /* action area */
     .actions{
       background:#efefef;
       border:1px solid var(--line);
@@ -185,54 +161,6 @@
     }
     .btn-green:hover{background:var(--green-dark)}
 
-    /* google cal note */
-    .note{
-      margin:12px 0 0;
-      background:#fff;
-      border:1px solid var(--line);
-      padding:12px;
-      font-size:12px;
-      color:#555;
-      line-height:1.7;
-    }
-    .note-head{
-      font-weight:800;
-      margin-bottom:6px;
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    .note-pill{
-      border:1px solid #cfc8bd;
-      background:#fff;
-      padding:6px 10px;
-      border-radius:4px;
-      font-weight:800;
-      font-size:12px;
-      color:#333;
-      display:inline-block;
-      margin-top:8px;
-    }
-
-    /* update table */
-    .table{
-      width:100%;
-      border-collapse:collapse;
-      font-size:12px;
-    }
-    .table th{
-      background:var(--head);
-      border-bottom:1px solid var(--line);
-      padding:10px 8px;
-      text-align:left;
-      white-space:nowrap;
-    }
-    .table td{
-      border-bottom:1px solid var(--line);
-      padding:10px 8px;
-      color:#333;
-    }
-
     @media (max-width: 720px){
       .row{grid-template-columns: 1fr}
       .label{border-bottom:1px solid var(--line)}
@@ -249,120 +177,65 @@
     <div class="page-head">
       <div class="title-area">
         <h1>ご予約内容の確認</h1>
-        <p><strong>THE PUBLIC COFFEE</strong> でご予約済みの内容を確認できます。</p>
+        <p><strong>{{ store.store_name }}</strong> でご予約済みの内容を確認できます。</p>
       </div>
-      <a class="backlink" href="#">予約一覧へ戻る</a>
+      <a class="backlink" href="{% url 'reservations:store_reservation_history' %}">予約一覧へ戻る</a>
     </div>
 
     <a class="print-btn" href="javascript:window.print();">この画面を印刷する</a>
     <div style="clear:both;"></div>
 
-    <!-- 予約情報 -->
     <div class="section">
       <div class="section-head"><span class="caret"></span>ご予約情報</div>
 
       <div class="row">
         <div class="label">予約ステータス</div>
-        <div class="value">予約中</div>
+        <div class="value">{{ reservation.booking_status }}</div>
       </div>
 
       <div class="row">
         <div class="label">ご予約番号</div>
-        <div class="value">JMZVZ93N99</div>
+        <div class="value">{{ reservation.id }}</div>
       </div>
 
       <div class="row">
         <div class="label">レストラン名</div>
         <div class="value">
-          <a href="#">THE PUBLIC COFFEE</a>
+          <a href="{{ store_page_url }}">{{ store.store_name }}</a>
         </div>
       </div>
 
       <div class="row">
         <div class="label">来店人数</div>
-        <div class="value">1名</div>
+        <div class="value">{{ reservation.visit_count }}名</div>
       </div>
 
       <div class="row">
         <div class="label">来店日</div>
-        <div class="value">2025年11月10日(月)</div>
+        <div class="value">{{ reservation.visit_date|date:'Y年n月j日(D)' }}</div>
       </div>
 
       <div class="row">
         <div class="label">来店時刻</div>
-        <div class="value">15:30</div>
+        <div class="value">{{ reservation.visit_time|time:'H:i' }}</div>
       </div>
 
       <div class="row">
         <div class="label">コース</div>
         <div class="value">
-          指定しない
+          {{ reservation.course }}
           <span class="subnote">お会計は当日</span>
         </div>
       </div>
-
-      <div class="row">
-        <div class="label">お席</div>
-        <div class="value">
-          カウンター / 禁煙
-          <span class="subnote">個室希望：なし</span>
-        </div>
-      </div>
-
-      <div class="point-line">
-        <span class="badge">V</span>
-        <strong>Vポイント</strong>
-        <span style="margin-left:auto; color:var(--sub);">獲得Vポイント</span>
-        <strong>10 pt</strong>
-        <span style="color:var(--sub);">（タベッチ限定Vポイント）</span>
-      </div>
     </div>
 
-    <!-- ボタンエリア -->
     <div class="actions">
-      <button type="button" class="btn" onclick="location.href='#';">予約をキャンセルする</button>
-      <button type="button" class="btn btn-green" onclick="location.href='#';">ご予約内容を変更する</button>
-    </div>
-
-    <!-- Google カレンダー注意 -->
-    <div class="note">
-      <div class="note-head">Google カレンダーへ予定を登録する</div>
-      <div>
-        ※Googleカレンダーについて：予定は自動的に登録されます。お店の変更を削除しているということではございませんのでご注意ください。<br>
-        ※お店の営業時間等やコース内容によっては予約時間が異なる場合がありますので必ず店にご確認ください。
-      </div>
-      <div class="note-pill">Google カレンダーへ予定を登録する</div>
-    </div>
-
-    <!-- 更新情報 -->
-    <div class="section" style="margin-top:14px;">
-      <div class="section-head"><span class="caret"></span>更新情報</div>
-      <div style="padding:0;">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>操作</th>
-              <th>来店日</th>
-              <th>来店時刻</th>
-              <th>人数</th>
-              <th>操作者</th>
-              <th>レストランへの通知</th>
-              <th>処理時間</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>予約</td>
-              <td>2025年11月10日(月)</td>
-              <td>15:30</td>
-              <td>1名</td>
-              <td>お客様より</td>
-              <td>通知済み</td>
-              <td>—</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <button type="button" class="btn" onclick="location.href='{% url 'reservations:store_reservation_cancel' reservation.id %}';">
+        予約をキャンセルする
+      </button>
+      <button type="button" class="btn btn-green" onclick="location.href='{% url 'reservations:store_reservation_edit' reservation.id %}';">
+        ご予約内容を変更する
+      </button>
     </div>
 
   </div>
