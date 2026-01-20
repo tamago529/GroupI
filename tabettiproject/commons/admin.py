@@ -230,11 +230,3 @@ admin.site.register(Area)
 admin.site.register(ReservationStatus)
 admin.site.register(ImageStatus)
 admin.site.register(ApplicationStatus)
-admin.site.register([
-    AccountType, Area, Scene, Gender, AgeGroup,
-    ReservationStatus, ImageStatus, ApplicationStatus,
-    Review, ReviewPhoto, ReviewReport, Follow, Reservator, Reservation,
-    StoreOnlineReservation, StoreImage, StoreMenu,
-    StoreAccountRequest, StoreAccountRequestLog,
-    PasswordResetLog, TempRequestMailLog
-])
