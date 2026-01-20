@@ -21,7 +21,7 @@
       <a href="#">行ったお店</a>
       <a href="#">保存リスト</a>
       <a href="{% url 'reviews:customer_reviewer_detail' %}">マイページ</a>
-
+    </nav>
   </div>
 
   <!-- 下段：ロゴ＋検索バー -->
@@ -30,23 +30,52 @@
       <img src="{% static 'images/Tabecchi.png' %}" alt="Tabecchi Logo">
     </div>
 
-    <form class="search-bar">
-      <input type="text" placeholder="エリア・駅（例：銀座、渋谷）">
-      <input type="text" placeholder="キーワード（例：焼肉、個室）">
-      <input type="date">
-      <input type="time" value="19:00">
-      <select>
-        <option>1名</option>
-        <option>2名</option>
-        <option>3名</option>
-        <option>4名</option>
-      </select>
-      <button type="submit" class="search-btn">🔍</button>
-    </form>
+    <!-- 🔽 action を追加 -->
+    <form class="search-bar" method="get" action="{% url 'search:customer_search_list' %}">
+
+  <input
+    type="text"
+    name="area"
+    placeholder="エリア・駅（例：銀座、渋谷）"
+    value="{{ request.GET.area }}"
+  >
+
+  <input
+    type="text"
+    name="keyword"
+    placeholder="キーワード（例：焼肉、個室）"
+    value="{{ request.GET.keyword }}"
+  >
+
+  <input
+    type="date"
+    name="date"
+    value="{{ request.GET.date }}"
+  >
+
+  <input
+    type="time"
+    name="time"
+    value="{{ request.GET.time|default:'19:00' }}"
+  >
+
+  <select name="people">
+    <option value="1" {% if request.GET.people == "1" %}selected{% endif %}>1名</option>
+    <option value="2" {% if request.GET.people == "2" %}selected{% endif %}>2名</option>
+    <option value="3" {% if request.GET.people == "3" %}selected{% endif %}>3名</option>
+    <option value="4" {% if request.GET.people == "4" %}selected{% endif %}>4名</option>
+  </select>
+
+  <button type="submit" class="search-btn">🔍</button>
+</form>
+
   </div>
 </header>
 
 {% block content %}{% endblock %}
+
+<!-- 🔽 これを必ず追加 -->
+{% block js %}{% endblock %}
 
 </body>
 </html>
