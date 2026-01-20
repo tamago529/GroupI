@@ -16,10 +16,4 @@ urlpatterns = [
         name="customer_genre_list"
     ),
 
-    # 関数ベースビュー（検索結果）
-    path(
-        "search_list/",
-        views.customer_search_listView,
-        name="customer_search_list"
-    ),
 ]
