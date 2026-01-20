@@ -165,6 +165,7 @@ class CustomerAccount(Account):
     review_count = models.IntegerField(verbose_name="口コミ数", default=0)
     total_likes = models.IntegerField(verbose_name="総いいね数", default=0)
     standard_score = models.IntegerField(verbose_name="標準点", default=0)
+    inquiry_log = models.TextField(verbose_name="問い合わせ内容", blank=True, default="")
     icon_image = models.ImageField(
         upload_to="customer/icon/",
         null=True,

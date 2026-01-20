@@ -16,33 +16,33 @@ from django.views.generic import View
 from django.urls import reverse
 from datetime import date, time
 from django.contrib import messages
+from django.utils import timezone
 
 from commons.models import (
     CustomerAccount, Store,
     Reservator, Reservation, ReservationStatus,
 )
 
-class customer_review_listView(View):
+from django.shortcuts import render, redirect
+from django.views.generic import View
+from django.urls import reverse
+from django.contrib import messages
+from datetime import date, time
+
+from commons.models import (
+    CustomerAccount, Store,
+    Reservator, Reservation, ReservationStatus,
+    Review,
+)
+
+class customer_review_listView(LoginRequiredMixin, View):
     template_name = "reviews/customer_review_list.html"
 
-    def _get_customer(self, request):
-        """
-        ログイン未実装前提：
-        - ?customer_id=xx / POST customer_id があれば優先
-        - なければ CustomerAccount 先頭1件
-        """
-        cid = request.GET.get("customer_id") or request.POST.get("customer_id")
-        if cid:
-            customer = CustomerAccount.objects.filter(pk=cid).first()
-            if customer:
-                return customer
-        return CustomerAccount.objects.order_by("pk").first()
+    def _get_login_customer(self, request):
+        # CustomerAccount を pk で引き直す（継承モデル対策）
+        return CustomerAccount.objects.filter(pk=request.user.pk).first()
 
     def _get_store(self, request):
-        """
-        - ?store_id=xx / POST store_id があれば優先
-        - なければ Store 先頭1件
-        """
         sid = request.GET.get("store_id") or request.POST.get("store_id")
         if sid:
             store = Store.objects.filter(pk=sid).first()
@@ -51,191 +51,224 @@ class customer_review_listView(View):
         return Store.objects.order_by("pk").first()
 
     def get(self, request, *args, **kwargs):
-        customer = self._get_customer(request)
+        customer = self._get_login_customer(request)
+        if customer is None:
+            messages.error(request, "顧客アカウントでログインしてください。")
+            return redirect(reverse("accounts:customer_login"))
+
         store = self._get_store(request)
 
-        # 店舗が1件もない場合でも落とさない
+        store_reviews = []
+        if store:
+            store_reviews = (
+                Review.objects
+                .select_related("reviewer")
+                .filter(store=store)
+                .order_by("-posted_at")
+            )
+
+        # 保存済み判定（ログインユーザー + 対象店舗）
+        is_saved = False
+        if store:
+            saved_status = ReservationStatus.objects.filter(status="保存済み").first()
+            reservator = Reservator.objects.filter(customer_account=customer).first()
+            if saved_status and reservator:
+                is_saved = Reservation.objects.filter(
+                    booking_user=reservator,
+                    store=store,
+                    booking_status=saved_status,
+                ).exists()
+
         context = {
-            "shop": store,  # テンプレが shop を見てるのでそのまま
+            "shop": store,
             "customer": customer,
-            "customer_id": customer.pk if customer else "",
             "store_id": store.pk if store else "",
+            "reviews": store_reviews,
+            "is_saved": is_saved,  # ✅ 追加
         }
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
-        # 保存ボタン以外のPOSTは無視してGETに戻す
         action = request.POST.get("action")
-        if action != "save_store":
-            return redirect(reverse("reviews:customer_review_list"))
+        customer = self._get_login_customer(request)
 
-        customer = self._get_customer(request)
+        if customer is None:
+            messages.error(request, "顧客アカウントでログインしてください。")
+            return redirect(reverse("accounts:customer_login"))
 
-        # 保存先のstoreは「POSTのstore_id」を最優先にする（押した店を確実に保存）
         store_id = request.POST.get("store_id")
         store = Store.objects.filter(pk=store_id).first() if store_id else self._get_store(request)
 
-        if customer is None or store is None:
+        if store is None:
+            messages.error(request, "店舗情報が取得できませんでした。")
             return redirect(reverse("reviews:customer_review_list"))
 
-        # 予約ステータス「保存済み」を用意
-        saved_status, _ = ReservationStatus.objects.get_or_create(status="保存済み")
+        # -------------------------
+        # 1) 保存（ログインユーザーに紐づく）
+        # -------------------------
+        if action == "save_store":
+            saved_status, _ = ReservationStatus.objects.get_or_create(status="保存済み")
 
-        # Reservator を（顧客に紐づく形で）用意
-        reservator, _ = Reservator.objects.get_or_create(
-            customer_account=customer,
-            defaults={
-                "full_name": customer.nickname,
-                "full_name_kana": customer.nickname,   # 仮
-                "email": customer.sub_email,
-                "phone_number": customer.phone_number,
-            }
-        )
+            reservator, _ = Reservator.objects.get_or_create(
+                customer_account=customer,
+                defaults={
+                    "full_name": customer.nickname,
+                    "full_name_kana": customer.nickname,
+                    "email": customer.sub_email,
+                    "phone_number": customer.phone_number,
+                }
+            )
 
-        # すでに保存済みなら重複作成しない
-        exists = Reservation.objects.filter(
-            booking_user=reservator,
-            store=store,
-            booking_status=saved_status,
-        ).exists()
-
-        if not exists:
-            Reservation.objects.create(
+            exists = Reservation.objects.filter(
                 booking_user=reservator,
                 store=store,
                 booking_status=saved_status,
-                visit_date=date.today(),           # 保存用ダミー
-                visit_time=time(0, 0),             # 保存用ダミー
-                visit_count=1,                     # 保存用ダミー
-                course="保存",                     # 保存用ダミー
+            ).exists()
+
+            if exists:
+                messages.info(request, "すでに保存済みです。")
+            else:
+                Reservation.objects.create(
+                    booking_user=reservator,
+                    store=store,
+                    booking_status=saved_status,
+                    visit_date=date.today(),
+                    visit_time=time(0, 0),
+                    visit_count=1,
+                    course="保存",
+                )
+                messages.success(request, "保存しました。")
+
+            return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
+
+        # -------------------------
+        # 2) 口コミ投稿（ログインユーザーに紐づく）
+        # -------------------------
+        if action == "create_review":
+            time_slot = (request.POST.get("time_slot") or "").strip()  # "昼" or "夜"
+            score_raw = (request.POST.get("score") or "").strip()
+            title = (request.POST.get("title") or "").strip()
+            body = (request.POST.get("body") or "").strip()
+            agree = request.POST.get("agree")  # "on" or None
+
+            try:
+                score = int(score_raw)
+            except ValueError:
+                score = 0
+
+            if time_slot not in ("昼", "夜"):
+                messages.error(request, "時間帯（昼/夜）を選択してください。")
+                return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
+
+            if score < 1 or score > 5:
+                messages.error(request, "星評価（1〜5）を選択してください。")
+                return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
+
+            if not title:
+                messages.error(request, "タイトルを入力してください。")
+                return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
+
+            if not body:
+                messages.error(request, "本文を入力してください。")
+                return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
+
+            if not agree:
+                messages.error(request, "同意にチェックしてください。")
+                return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
+
+            review_text = f"【{time_slot}】{title}\n{body}"
+
+            Review.objects.create(
+                reviewer=customer,   # ✅ ログインユーザー
+                store=store,
+                score=score,
+                review_text=review_text,
             )
 
-        # 保存リストへ（customer_id を引き継ぐ）
-        return redirect(
-            f"{reverse('reviews:customer_store_preserve')}?customer_id={customer.pk}"
-        )
+            messages.success(request, "口コミを投稿しました。")
+            return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
+
+        return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
 
 
-class customer_store_preserveView(View):
+
+from django.shortcuts import render, redirect
+from django.views.generic import View
+from django.urls import reverse
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+from commons.models import CustomerAccount, Reservator, Reservation, ReservationStatus
+
+
+class customer_store_preserveView(LoginRequiredMixin, View):
     template_name = "reviews/customer_store_preserve.html"
 
-    def _get_customer(self, request):
-        """
-        - GET ?customer_id=xx を優先
-        - POST customer_id=xx も見る（保存解除POSTのため）
-        - なければ CustomerAccount 先頭1件
-        """
-        cid = request.GET.get("customer_id") or request.POST.get("customer_id")
-        if cid:
-            customer = CustomerAccount.objects.filter(pk=cid).first()
-            if customer:
-                return customer
-        return CustomerAccount.objects.order_by("pk").first()
-
-    def post(self, request, *args, **kwargs):
-        """
-        保存解除（Reservationの「保存済み」を削除）
-        """
-        action = request.POST.get("action")
-        if action != "remove_store":
-            # 想定外POSTは一覧へ戻す
-            customer = self._get_customer(request)
-            cid = customer.pk if customer else ""
-            return redirect(f"{reverse('reviews:customer_store_preserve')}?customer_id={cid}")
-
-        customer = self._get_customer(request)
-        if customer is None:
-            return redirect(reverse("reviews:customer_store_preserve"))
-
-        saved_status = ReservationStatus.objects.filter(status="保存済み").first()
-        reservator = Reservator.objects.filter(customer_account=customer).first()
-        if saved_status is None or reservator is None:
-            return redirect(f"{reverse('reviews:customer_store_preserve')}?customer_id={customer.pk}")
-
-        # 解除対象（reservation_id を優先）
-        reservation_id = request.POST.get("reservation_id")
-        store_id = request.POST.get("store_id")
-
-        qs = Reservation.objects.filter(
-            booking_user=reservator,
-            booking_status=saved_status,
-        )
-
-        if reservation_id:
-            qs = qs.filter(pk=reservation_id)
-        elif store_id:
-            qs = qs.filter(store_id=store_id)
-        else:
-            # 解除対象が取れないなら何もしない
-            return redirect(f"{reverse('reviews:customer_store_preserve')}?customer_id={customer.pk}")
-
-        qs.delete()
-
-        return redirect(f"{reverse('reviews:customer_store_preserve')}?customer_id={customer.pk}")
+    def _get_login_customer(self, request):
+        # CustomerAccount を pk で引き直す（継承モデル対策）
+        return CustomerAccount.objects.filter(pk=request.user.pk).first()
 
     def get(self, request, *args, **kwargs):
-        customer = self._get_customer(request)
+        customer = self._get_login_customer(request)
 
-        # 顧客がいない場合でも落とさない
+        # 顧客ログインじゃない場合
         if customer is None:
-            context = {"customer": None, "saved_list": []}
-            return render(request, self.template_name, context)
+            messages.error(request, "顧客アカウントでログインしてください。")
+            return redirect(reverse("accounts:customer_login"))
 
         saved_status = ReservationStatus.objects.filter(status="保存済み").first()
         if saved_status is None:
-            context = {"customer": customer, "saved_list": []}
-            return render(request, self.template_name, context)
+            return render(request, self.template_name, {"customer": customer, "saved_list": []})
 
         reservator = Reservator.objects.filter(customer_account=customer).first()
         if reservator is None:
-            context = {"customer": customer, "saved_list": []}
-            return render(request, self.template_name, context)
+            return render(request, self.template_name, {"customer": customer, "saved_list": []})
 
         saved_list = (
             Reservation.objects
-            .select_related("store", "booking_status")
+            .select_related("store", "booking_status", "store__area", "store__scene")
             .filter(booking_user=reservator, booking_status=saved_status)
             .order_by("-created_at")
         )
 
         context = {
             "customer": customer,
-            "customer_id": customer.pk,
             "saved_list": saved_list,
         }
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get("action")
-        customer = self._get_customer(request)
+        customer = self._get_login_customer(request)
 
-        # customer が取れない場合は一覧へ戻す
         if customer is None:
-            messages.error(request, "ユーザー情報が取得できませんでした。")
-            return redirect(reverse("reviews:customer_store_preserve"))
+            messages.error(request, "顧客アカウントでログインしてください。")
+            return redirect(reverse("accounts:customer_login"))
 
         # ---- 保存解除 ----
         if action == "remove_store":
             reservation_id = request.POST.get("reservation_id")
 
-            if reservation_id:
-                deleted, _ = Reservation.objects.filter(
-                    id=reservation_id,
-                    booking_user__customer_account=customer,
-                    booking_status__status="保存済み",
-                ).delete()
-
-                if deleted > 0:
-                    messages.success(request, "保存解除しました。")
-                else:
-                    messages.warning(request, "対象の保存データが見つかりませんでした。")
-            else:
+            if not reservation_id:
                 messages.warning(request, "保存解除に必要な情報が不足しています。")
+                return redirect(reverse("reviews:customer_store_preserve"))
 
-            return redirect(f"{reverse('reviews:customer_store_preserve')}?customer_id={customer.pk}")
+            deleted, _ = Reservation.objects.filter(
+                id=reservation_id,
+                booking_user__customer_account=customer,  # ✅ 本人の保存のみ
+                booking_status__status="保存済み",
+            ).delete()
 
-        # それ以外のPOSTはGETへ
-        return redirect(f"{reverse('reviews:customer_store_preserve')}?customer_id={customer.pk}")
+            if deleted > 0:
+                messages.success(request, "保存解除しました。")
+            else:
+                messages.warning(request, "対象の保存データが見つかりませんでした。")
+
+            return redirect(reverse("reviews:customer_store_preserve"))
+
+        # 想定外POSTはGETへ
+        return redirect(reverse("reviews:customer_store_preserve"))
+
 
 class customer_reviewer_review_listView(TemplateView):
     template_name = "reviews/customer_reviewer_review_list.html"
@@ -245,50 +278,27 @@ class customer_reviewer_detail_selfView(LoginRequiredMixin, View):
         return redirect(reverse("reviews:customer_reviewer_detail", args=[request.user.pk]))
 
 
-class customer_reviewer_detailView(View):
+class customer_reviewer_detailView(LoginRequiredMixin, View):
     template_name = "reviews/customer_reviewer_detail.html"
 
-    def _get_customer(self, request):
-        """
-        ログイン未実装前提：
-        - ?customer_id=xx があればそれを優先
-        - なければ CustomerAccount の先頭1件
-        - それも無ければ None
-        """
-        cid = request.GET.get("customer_id") or request.POST.get("customer_id")
-        if cid:
-            customer = CustomerAccount.objects.filter(pk=cid).first()
-            if customer:
-                return customer
-
-        return CustomerAccount.objects.order_by("pk").first()
+    def _get_login_customer(self, request):
+        # マルチテーブル継承対策：CustomerAccountをpkで引き直す
+        return CustomerAccount.objects.filter(pk=request.user.pk).first()
 
     def get(self, request, *args, **kwargs):
-        customer = self._get_customer(request)
+        customer = self._get_login_customer(request)
 
-        # CustomerAccount が1件も無い場合でも落とさない
+        # CustomerAccount でログインしてない場合
         if customer is None:
-            context = {
-                "customer": None,
-                "user_name": "ゲスト",
-                "cover_image_url": "",
-                "user_icon_url": "",
-                "stats_reviews": 0,
-                "stats_photos": 0,
-                "stats_visitors": 0,
-                "stats_likes": 0,
-                "count_reviews": 0,
-                "count_following": 0,
-                "count_followers": 0,
-            }
-            return render(request, self.template_name, context)
+            messages.error(request, "顧客アカウントでログインしてください。")
+            return redirect(reverse("accounts:customer_login"))
 
         cover_field = getattr(customer, "cover_image", None)
         icon_field = getattr(customer, "icon_image", None)
 
         context = {
             "customer": customer,
-            "user_name": customer.nickname,
+            "user_name": customer.nickname,  # ← ここが表示名
             "cover_image_url": cover_field.url if cover_field else "",
             "user_icon_url": icon_field.url if icon_field else "",
 
@@ -304,32 +314,85 @@ class customer_reviewer_detailView(View):
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
-        customer = self._get_customer(request)
+        # ✅ hidden の customer_id は使わず、必ずログインユーザー本人を更新
+        customer = self._get_login_customer(request)
         if customer is None:
-            # そもそも更新対象がない
-            return redirect(reverse("reviews:customer_reviewer_detail"))
+            messages.error(request, "顧客アカウントでログインしてください。")
+            return redirect(reverse("accounts:customer_login"))
 
         # ✅ カバー更新
         if request.FILES.get("cover_image") and hasattr(customer, "cover_image"):
             customer.cover_image = request.FILES["cover_image"]
-            customer.save()
+            customer.save(update_fields=["cover_image"])
 
         # ✅ アイコン更新
         if request.FILES.get("icon_image") and hasattr(customer, "icon_image"):
             customer.icon_image = request.FILES["icon_image"]
-            customer.save()
+            customer.save(update_fields=["icon_image"])
 
-        # 更新後も同じ人を見せたい（customer_id を維持）
-        return redirect(f"{reverse('reviews:customer_reviewer_detail')}?customer_id={customer.pk}")
+        return redirect(reverse("reviews:customer_reviewer_detail"))
 
 
 class customer_reviewer_searchView(TemplateView):
     template_name = "reviews/customer_reviewer_search.html"
 
-
-class customer_review_reportView(TemplateView):
+class customer_review_reportView(LoginRequiredMixin, View):
     template_name = "reviews/customer_review_report.html"
 
+    def _get_login_customer(self, request):
+        # マルチテーブル継承対策：CustomerAccountをpkで引き直す
+        return CustomerAccount.objects.filter(pk=request.user.pk).first()
+
+    def get(self, request, *args, **kwargs):
+        customer = self._get_login_customer(request)
+        if customer is None:
+            messages.error(request, "顧客アカウントでログインしてください。")
+            return redirect(reverse("accounts:customer_login"))
+
+        context = {
+            "customer": customer,
+            "display_nickname": customer.nickname,
+            "display_email": customer.sub_email or customer.email,
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        customer = self._get_login_customer(request)
+        if customer is None:
+            messages.error(request, "ユーザー情報が取得できませんでした。")
+            return redirect(reverse("reviews:customer_review_report"))
+
+        message = (request.POST.get("message") or "").strip()
+        user_type = (request.POST.get("user_type") or "").strip()  # 1/2/3
+        agree = request.POST.get("agree")  # on/None
+
+        if not message:
+            messages.error(request, "お問い合わせ内容をご記入ください。")
+            return redirect(reverse("reviews:customer_review_report"))
+
+        if user_type not in ("1", "2", "3"):
+            messages.error(request, "ご入力者を選択してください。")
+            return redirect(reverse("reviews:customer_review_report"))
+
+        if not agree:
+            messages.error(request, "同意事項にチェックしてください。")
+            return redirect(reverse("reviews:customer_review_report"))
+
+        user_type_label = {"1": "一般ユーザー", "2": "飲食店関係者", "3": "その他"}.get(user_type, "-")
+        now_str = timezone.localtime(timezone.now()).strftime("%Y/%m/%d %H:%M")
+
+        entry = (
+            f"【{now_str}】入力者:{user_type_label}\n"
+            f"ニックネーム:{customer.nickname}\n"
+            f"メール:{(customer.sub_email or customer.email)}\n"
+            f"内容:\n{message}\n"
+            f"------------------------------\n"
+        )
+
+        customer.inquiry_log = entry + (customer.inquiry_log or "")
+        customer.save(update_fields=["inquiry_log"])
+
+        return redirect(f"{reverse('reviews:customer_common_complete')}?msg=問い合わせが完了しました。")
 
 class store_review_reportView(TemplateView):
     template_name = "reviews/store_review_report.html"
@@ -388,3 +451,11 @@ class reportView(TemplateView):
         )
         context["reports"] = reports
         return context
+    
+
+class customer_common_completeView(View):
+    template_name = "commons/customer_common_complete.html"
+
+    def get(self, request, *args, **kwargs):
+        msg = request.GET.get("msg", "完了しました。")
+        return render(request, self.template_name, {"msg": msg})

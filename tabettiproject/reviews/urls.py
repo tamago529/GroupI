@@ -36,6 +36,11 @@ urlpatterns = [
         name="customer_review_report",
     ),
     path(
+        "customer_common_complete/",
+        customer_common_completeView.as_view(),
+        name="customer_common_complete",
+    ),
+    path(
         "store_review_report/",
         store_review_reportView.as_view(),
         name="store_review_report",

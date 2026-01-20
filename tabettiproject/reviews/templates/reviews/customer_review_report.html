@@ -131,7 +131,7 @@
 
     <section class="info-message-box">
         <p>
-            「<a href="#" class="link-blue">よくある質問</a>」をご確認のうえ、解決しない場合は、以下のフォームよりお問い合わせください。
+            「<a href="https://help.tabelog.com/" class="link-blue">よくある質問</a>」をご確認のうえ、解決しない場合は、以下のフォームよりお問い合わせください。
         </p>
         <p class="text-note">
             ※ 内容によっては、ご返信までお時間をいただく場合がございます。
@@ -140,12 +140,13 @@
             なお、店舗への要望・相談については、直接店舗へお問い合わせください。
         </p>
         <div class="align-right">
-            <a href="#" class="link-blue">飲食店の方のお申し込みに関するお問い合わせはこちら</a>
+            <a href="https://tabelog.com/support/inquiry?type=99" class="link-blue">飲食店の方のお申し込みに関するお問い合わせはこちら</a>
         </div>
     </section>
 
-    <form action="{% url 'stores:customer_map' %}" method="post">
+    <form action="{% url 'reviews:customer_review_report' %}" method="post">
         {% csrf_token %}
+        <input type="hidden" name="customer_id" value="{{ customer_id }}">
 
         <div class="form-item">
             <label for="message" class="form-label">
@@ -167,12 +168,22 @@
 
         <div class="form-item">
             <span class="form-label">ニックネーム</span>
-            <div style="padding-left: 5px;">noconeco</div>
+            <div style="padding-left: 5px;">{{ request.user }}</div>
         </div>
 
         <div class="form-item">
             <span class="form-label">メールアドレス</span>
-            <div style="padding-left: 5px;">n.s20060322@gmail.com</div>
+            <div style="padding-left: 5px;">{{ request.user.email }}</div>
+        </div>
+
+        <div class="form-item">
+            <span class="form-label">
+                同意事項 <span class="badge-must">必須</span>
+            </span>
+            <label class="agree-row">
+                <input type="checkbox" name="agree">
+                上記の同意事項に同意します
+            </label>
         </div>
 
         <div class="action-container">
@@ -183,5 +194,3 @@
     </form>
 </div>
 {% endblock %}
-
-<a href="#">確認画面へ</a>

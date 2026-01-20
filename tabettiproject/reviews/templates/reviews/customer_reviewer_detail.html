@@ -190,7 +190,6 @@
         {# ✅ icon もプレースホルダーをテンプレ側で #}
         <form id="iconForm" method="post" enctype="multipart/form-data" style="margin:0;">
             {% csrf_token %}
-            <input type="hidden" name="customer_id" value="{% if customer %}{{ customer.pk }}{% endif %}">
             <input id="iconInput" class="visually-hidden" type="file" name="icon_image" accept="image/*">
 
             <label class="mp-user-avatar" for="iconInput" title="クリックしてアイコン変更">

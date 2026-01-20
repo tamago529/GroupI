@@ -225,6 +225,149 @@
 
     .user-avatar { border-radius: 50%; object-fit: cover; }
     .review-title { font-weight: bold; font-size: 17px; margin: 12px 0; }
+ /* -------------------------
+       投稿モーダル（追加）
+    ------------------------- */
+    .modal-backdrop{
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.45);
+        display:none;
+        align-items:center;
+        justify-content:center;
+        z-index: 2000;
+        padding: 18px;
+    }
+    .modal-backdrop.active{ display:flex; }
+
+    .modal-card{
+        width: 100%;
+        max-width: 560px;
+        background:#fff;
+        border-radius: 10px;
+        border:1px solid #e5e5e5;
+        box-shadow: 0 12px 30px rgba(0,0,0,.18);
+        overflow:hidden;
+    }
+    .modal-head{
+        display:flex;
+        justify-content: space-between;
+        align-items:center;
+        padding: 12px 14px;
+        border-bottom: 1px solid #eee;
+        background: #fafafa;
+    }
+    .modal-title{
+        font-weight:bold;
+        font-size: 14px;
+    }
+    .modal-close{
+        border:none;
+        background:transparent;
+        font-size:18px;
+        cursor:pointer;
+        line-height:1;
+    }
+    .modal-body{
+        padding: 14px;
+    }
+    .field{
+        margin-bottom: 12px;
+    }
+    .label{
+        font-size: 12px;
+        color:#666;
+        margin-bottom: 6px;
+        display:block;
+    }
+
+    .time-slot{
+        display:flex;
+        gap:10px;
+    }
+    .slot-btn{
+        flex: 1;
+        border: 1px solid #ddd;
+        background:#fff;
+        border-radius: 8px;
+        padding: 10px 12px;
+        cursor:pointer;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        gap:8px;
+        font-weight:bold;
+    }
+    .slot-btn.active{
+        border-color:#93c02d;
+        box-shadow: 0 0 0 2px rgba(147,192,45,.18);
+    }
+
+    .stars{
+        display:flex;
+        gap:6px;
+        align-items:center;
+        font-size: 22px;
+        user-select:none;
+    }
+    .star{
+        cursor:pointer;
+        color:#ccc;
+    }
+    .star.filled{
+        color:#ff9800;
+    }
+    .score-badge{
+        margin-left:10px;
+        font-size: 12px;
+        color:#666;
+    }
+
+    .text-input, .text-area{
+        width: 100%;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 10px 10px;
+        font-size: 13px;
+        box-sizing: border-box;
+    }
+    .text-area{ min-height: 120px; resize: vertical; }
+
+    .agree-row{
+        display:flex;
+        gap:8px;
+        align-items:flex-start;
+        font-size: 12px;
+        color:#555;
+        margin-top: 6px;
+    }
+
+    .modal-foot{
+        padding: 12px 14px;
+        border-top: 1px solid #eee;
+        display:flex;
+        justify-content:flex-end;
+        gap:10px;
+        background:#fafafa;
+    }
+    .btn{
+        border:1px solid #ccc;
+        background:#fff;
+        padding: 8px 14px;
+        border-radius: 6px;
+        cursor:pointer;
+        font-size: 13px;
+        font-weight:bold;
+    }
+    .btn-primary{
+        background:#93c02d;
+        color:#fff;
+        border:none;
+    }
+    .btn-primary:disabled{
+        opacity:.5;
+        cursor:not-allowed;
+    }
 </style>
 {% endblock %}
 
@@ -242,12 +385,14 @@
      {% csrf_token %}
      <input type="hidden" name="action" value="save_store">
      <input type="hidden" name="store_id" value="{{ shop.id }}">
-     <input type="hidden" name="customer_id" value="{{ customer_id }}">
-     <button class="btn-action" type="submit">保存</button>
+     <button class="btn-action" type="submit">
+        {% if is_saved %}保存済み{% else %}保存{% endif %}
+    </button>
     </form>
 
 
-    <button class="btn-action btn-post" type="button">投稿</button>
+    <!-- ✅ 投稿（モーダルを開く） -->
+            <button id="openPostModal" class="btn-action btn-post" type="button">投稿</button>
 
 </div>
 
@@ -350,4 +495,156 @@
     </section>
 
 </article>
+
+<!-- ==========================
+     投稿モーダル（追加）
+========================== -->
+<div id="postModal" class="modal-backdrop" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-label="口コミ投稿">
+    <div class="modal-head">
+      <div class="modal-title">口コミを投稿</div>
+      <button id="closePostModal" class="modal-close" type="button">×</button>
+    </div>
+
+    <form id="reviewPostForm" method="post" action="{% url 'reviews:customer_review_list' %}">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="create_review">
+      <input type="hidden" name="store_id" value="{{ shop.id }}">
+      <input type="hidden" name="time_slot" id="timeSlotInput" value="">
+      <input type="hidden" name="score" id="scoreInput" value="">
+
+      <div class="modal-body">
+        <div class="field">
+          <span class="label">時間帯</span>
+          <div class="time-slot">
+            <button type="button" class="slot-btn" data-slot="昼">☀ 昼</button>
+            <button type="button" class="slot-btn" data-slot="夜">🌙 夜</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="label">評価</span>
+          <div class="stars" id="stars">
+            <span class="star" data-v="1">★</span>
+            <span class="star" data-v="2">★</span>
+            <span class="star" data-v="3">★</span>
+            <span class="star" data-v="4">★</span>
+            <span class="star" data-v="5">★</span>
+            <span class="score-badge" id="scoreBadge">未選択</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="reviewTitle">タイトル</label>
+          <input id="reviewTitle" class="text-input" type="text" name="title" maxlength="100" placeholder="例）また行きたい！">
+        </div>
+
+        <div class="field">
+          <label class="label" for="reviewBody">本文</label>
+          <textarea id="reviewBody" class="text-area" name="body" placeholder="料理・接客・雰囲気など自由に書いてください"></textarea>
+        </div>
+
+        <div class="agree-row">
+          <input id="agreeCheck" type="checkbox" name="agree">
+          <label for="agreeCheck">
+            内容に同意して投稿します（誹謗中傷・個人情報の投稿はしません）
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button id="cancelBtn" class="btn" type="button">キャンセル</button>
+        <button id="submitBtn" class="btn btn-primary" type="submit" disabled>同意して投稿</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function(){
+  const modal = document.getElementById("postModal");
+  const openBtn = document.getElementById("openPostModal");
+  const closeBtn = document.getElementById("closePostModal");
+  const cancelBtn = document.getElementById("cancelBtn");
+
+  const slotBtns = modal.querySelectorAll(".slot-btn");
+  const timeSlotInput = document.getElementById("timeSlotInput");
+
+  const starsWrap = document.getElementById("stars");
+  const stars = starsWrap.querySelectorAll(".star");
+  const scoreInput = document.getElementById("scoreInput");
+  const scoreBadge = document.getElementById("scoreBadge");
+
+  const agree = document.getElementById("agreeCheck");
+  const submitBtn = document.getElementById("submitBtn");
+
+  function openModal(){
+    modal.classList.add("active");
+    modal.setAttribute("aria-hidden", "false");
+  }
+  function closeModal(){
+    modal.classList.remove("active");
+    modal.setAttribute("aria-hidden", "true");
+  }
+
+  function updateSubmitState(){
+    const okAgree = agree.checked;
+    const okSlot = timeSlotInput.value === "昼" || timeSlotInput.value === "夜";
+    const okScore = Number(scoreInput.value || "0") >= 1;
+    submitBtn.disabled = !(okAgree && okSlot && okScore);
+  }
+
+  openBtn.addEventListener("click", openModal);
+  closeBtn.addEventListener("click", closeModal);
+  cancelBtn.addEventListener("click", closeModal);
+
+  // 背景クリックで閉じる
+  modal.addEventListener("click", (e) => {
+    if(e.target === modal) closeModal();
+  });
+
+  // 昼/夜
+  slotBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      slotBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      timeSlotInput.value = btn.dataset.slot;
+      updateSubmitState();
+    });
+  });
+
+  // 星
+  function paintStars(v){
+    stars.forEach(s => {
+      const sv = Number(s.dataset.v);
+      s.classList.toggle("filled", sv <= v);
+    });
+    scoreBadge.textContent = v ? (v + " / 5") : "未選択";
+  }
+
+  stars.forEach(s => {
+    s.addEventListener("click", () => {
+      const v = Number(s.dataset.v);
+      scoreInput.value = String(v);
+      paintStars(v);
+      updateSubmitState();
+    });
+    s.addEventListener("mouseenter", () => {
+      const v = Number(s.dataset.v);
+      paintStars(v);
+    });
+  });
+
+  starsWrap.addEventListener("mouseleave", () => {
+    const v = Number(scoreInput.value || "0");
+    paintStars(v);
+  });
+
+  agree.addEventListener("change", updateSubmitState);
+
+  // 初期化
+  paintStars(0);
+  updateSubmitState();
+})();
+</script>
 {% endblock %}

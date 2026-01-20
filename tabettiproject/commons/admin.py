@@ -107,6 +107,12 @@ class CustomerAccountAdmin(UserAdmin):
     list_display = ('id', 'username', 'nickname', 'account_type')
     
     # 🌟作成画面のレイアウト
+    def inquiry_short(self, obj):
+        if not obj.inquiry_log:
+            return "-"
+        return (obj.inquiry_log[:40] + "…") if len(obj.inquiry_log) > 40 else obj.inquiry_log
+    inquiry_short.short_description = "問い合わせ(最新抜粋)"
+
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
@@ -116,7 +122,7 @@ class CustomerAccountAdmin(UserAdmin):
     )
     # 編集画面のレイアウト
     fieldsets = UserAdmin.fieldsets + (
-        ('顧客詳細情報', {'fields': ('nickname', 'phone_number', 'age_group', 'gender', 'birth_date', 'account_type')}),
+        ('顧客詳細情報', {'fields': ('nickname', 'phone_number', 'age_group', 'gender', 'birth_date', 'account_type', 'inquiry_log')}),
     )
 
 # --- 企業アカウント管理 ---
