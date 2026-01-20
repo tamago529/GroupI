@@ -1,11 +1,25 @@
 from django.urls import path
-from .views import *
+from . import views
 
 app_name = "search"
 
 urlpatterns = [
-  path("customer_top/", customer_topView.as_view(), name="customer_top.html"),
-  path("genre_list/", customer_genre_listView.as_view(), name="customer_genre_list.html"),
-  path("search_list/", customer_search_listView.as_view(), name="customer_search_list.html")
+    # クラスベースビュー
+    path(
+        "customer_top/",
+        views.customer_topView.as_view(),
+        name="customer_top"
+    ),
+    path(
+        "genre_list/",
+        views.customer_genre_listView.as_view(),
+        name="customer_genre_list"
+    ),
 
+    # 関数ベースビュー（検索結果）
+    path(
+        "search_list/",
+        views.customer_search_listView,
+        name="customer_search_list"
+    ),
 ]
