@@ -7,11 +7,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
 
 from commons.models import StoreAccount,Account
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy, reverse # 追加
 from django.contrib import messages                         # エラー表示用
 from django.db.models import Q
 from django.views.generic import ListView
+from .forms import CustomerLoginForm
 #共通機能の定義
 
 class company_account_managementView(ListView):
@@ -84,11 +85,32 @@ class company_store_reviewView(TemplateView):
 class company_topView(TemplateView):
     template_name = "accounts/company_top.html"       
 
-class customer_loginView(TemplateView):
+class customer_loginView(LoginView):
     template_name = "accounts/customer_login.html"
+    authentication_form = CustomerLoginForm # 🌟作成したメール用フォームを指定
 
-class customer_logoutView(TemplateView):
-    template_name = "accounts/customer_logout.html"
+    def get_success_url(self):
+        # ログイン成功後は顧客トップへ
+        return reverse_lazy('accounts:customer_top')
+
+    def form_valid(self, form):
+        user = form.get_user()
+        # ★顧客ユーザー（CustomerAccount）かチェック
+        try:
+            _ = user.customeraccount
+        except:
+            messages.error(self.request, "顧客アカウントではありません。")
+            return self.form_invalid(form)
+        
+        return super().form_valid(form)
+
+# --- 顧客ログアウト ---
+def customer_logout_view(request):
+    logout(request)
+    return redirect("accounts:customer_login")
+
+#class customer_logoutView(TemplateView):
+#    template_name = "accounts/customer_logout.html"
 
 class customer_registerView(TemplateView):
     template_name = "accounts/customer_register.html"
@@ -133,59 +155,51 @@ def is_store_user(user) -> bool:
         return False
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class store_loginView(TemplateView):
+# --- 店舗ログイン ---
+class store_loginView(LoginView):
     template_name = "accounts/store_login.html"
 
-    def get(self, request, *args, **kwargs):
-        # すでにログインしていても「店舗ユーザーじゃない」なら一旦ログアウトして店舗ログイン画面へ
+    def get_success_url(self):
+        return reverse_lazy("stores:store_top")
+
+    def dispatch(self, request, *args, **kwargs):
+        # GETアクセス時、もし店舗以外（企業や顧客）がログイン済みなら強制ログアウトさせる（既存ロジックの継承）
         if request.user.is_authenticated and not is_store_user(request.user):
             logout(request)
-
-        # 店舗ユーザーでログイン済みなら店舗トップへ
-        if is_store_user(request.user):
-            return redirect("stores:store_top" )
-
-        return render(request, self.template_name)
-
-    def post(self, request, *args, **kwargs):
-        login_id = (request.POST.get("login_id") or "").strip()
-        password = request.POST.get("password") or ""
-        remember = request.POST.get("remember")  # checkbox
-        print("login_id:", login_id, " password:", password, " remember:", remember)
-
-        if not login_id or not password:
-            messages.error(request, "ログインIDとパスワードを入力してください。")
-            return render(request, self.template_name)
         
-        user = Account.objects.filter(username=login_id).first()
-        print("test_user:", user)
-        print("RAW PASSWORD FIELD:", user.password)
-        print("CHECK_PASSWORD:", user.check_password(password))
+        # 店舗ユーザーとしてログイン済みならトップへ飛ばす
+        if is_store_user(request.user):
+            return redirect(self.get_success_url())
+            
+        return super().dispatch(request, *args, **kwargs)
 
-        # login_id を username として認証（Account(AbstractUser)のusername）
-        # user = authenticate(request, username=login_id, password=password)
-        # print("AUTHENTICATED USER:", user)
-        if user is None:
-            print("AUTHENTICATION FAILED")
-            messages.error(request, "ログインIDまたはパスワードが正しくありません。")
-            return render(request, self.template_name)
-
-        # ★店舗ユーザー以外は店舗ログインとして通さない
+    def form_valid(self, form):
+        user = form.get_user()
+        # ★店舗ユーザー判定
         if not is_store_user(user):
-            print("NOT A STORE USER")
-            messages.error(request, "店舗アカウントではありません。店舗用のログインIDをご確認ください。")
-            return render(request, self.template_name)
+            messages.error(self.request, "店舗アカウントではありません。店舗用のログインIDをご確認ください。")
+            return self.form_invalid(form)
 
-        login(request, user)
-
-        # 自動ログイン未チェックならブラウザ終了でセッション破棄
+        # 「次回から自動的にログインする」の処理（remember）
+        remember = self.request.POST.get('remember')
         if not remember:
-            request.session.set_expiry(0)
+            self.request.session.set_expiry(0) # ブラウザを閉じたら終了
+        else:
+            self.request.session.set_expiry(None) # デフォルト期間（2週間など）保持
 
-        return redirect("stores:store_top")
+        return super().form_valid(form)
 
+# --- 店舗ログアウト ---
+class store_logoutView(LogoutView):
+    # ログアウト後に店舗ログイン画面へリダイレクト
+    next_page = reverse_lazy("accounts:store_login")
+    
+    # Django 4.0であれば、リンク(GET)でのログアウトを許可するためにdispatchを微調整
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+    
 
+#ここまで
 
 class store_registerView(TemplateView):
     template_name = "accounts/store_register.html"
@@ -216,3 +230,4 @@ class store_account_staff_inputView(TemplateView):
 
 class customer_topView(TemplateView):
     template_name = "accounts/customer_top.html"
+

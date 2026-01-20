@@ -45,20 +45,28 @@
       </p>
 
       <form class="login-form" method="post">
-        {% csrf_token %}
+  {% csrf_token %}
 
-        <label>
-          メールアドレス
-          <input type="email" name="email" required>
-        </label>
+  <!-- エラーメッセージの表示（追加） -->
+  {% if form.non_field_errors %}
+    <div style="color: red; font-size: 12px; margin-bottom: 10px;">
+      {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+    </div>
+  {% endif %}
 
-        <label>
-          パスワード
-          <input type="password" name="password" required>
-        </label>
+  <label>
+    メールアドレス
+    <!-- name="email" を name="username" に変更 -->
+    <input type="email" name="username" required value="{{ form.username.value|default:'' }}">
+  </label>
 
-        <button type="submit" class="btn-login">ログイン</button>
-      </form>
+  <label>
+    パスワード
+    <input type="password" name="password" required>
+  </label>
+
+  <button type="submit" class="btn-login">ログイン</button>
+</form>
 
       <div class="login-links">
         <a href="{% url 'accounts:customer_password_reset' %}">パスワードを忘れた方</a>
