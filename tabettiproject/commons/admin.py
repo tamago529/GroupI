@@ -352,7 +352,6 @@ class ReviewReportAdmin(admin.ModelAdmin):
 class FollowAdmin(admin.ModelAdmin):
     list_display = ("id", "follower", "followee", "is_blocked", "is_muted", "followed_at")
 
-
 @admin.register(Reservator)
 class ReservatorAdmin(admin.ModelAdmin):
     list_display = ("id", "full_name", "email", "phone_number")

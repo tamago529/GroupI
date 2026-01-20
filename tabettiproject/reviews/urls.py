@@ -9,6 +9,11 @@ urlpatterns = [
         customer_review_listView.as_view(),
         name="customer_review_list",
     ),
+    
+    path("customer_store_preserve/", 
+         customer_store_preserveView.as_view(), 
+         name="customer_store_preserve"),
+
     path(
         "customer_reviewer_review_list/",
         customer_reviewer_review_listView.as_view(),

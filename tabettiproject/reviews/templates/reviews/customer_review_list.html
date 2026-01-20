@@ -233,11 +233,24 @@
 
     <div class="header-upper-row">
         <div><span class="official-label">公式</span></div>
-        <div class="action-buttons">
-            <button class="btn-action">行った</button>
-            <button class="btn-action">保存</button>
-            <button class="btn-action btn-post">投稿</button>
-        </div>
+       <div class="action-buttons">
+
+    <button class="btn-action" type="button">行った</button>
+
+    <!-- ✅ 保存：POSTで保存リスト＆Reservation(保存済み)を作る -->
+    <form method="post" action="{% url 'reviews:customer_review_list' %}" style="margin:0;">
+     {% csrf_token %}
+     <input type="hidden" name="action" value="save_store">
+     <input type="hidden" name="store_id" value="{{ shop.id }}">
+     <input type="hidden" name="customer_id" value="{{ customer_id }}">
+     <button class="btn-action" type="submit">保存</button>
+    </form>
+
+
+    <button class="btn-action btn-post" type="button">投稿</button>
+
+</div>
+
     </div>
 
     <div class="shop-main-info">
