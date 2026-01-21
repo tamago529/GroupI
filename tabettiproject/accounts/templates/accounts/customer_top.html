@@ -11,20 +11,40 @@
 .hero {
   position: relative;
   width: 100%;
-  height: 420px;
+  height: 690px;
   overflow: hidden;
+  background-color: #000; /* 切り替え時の背景を黒にしておくと自然です */
 }
 
-.hero img {
+/* 画像の基本設定を共通化 */
+.hero-image {
+  position: absolute; /* 全ての画像を同じ位置に重ねる */
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
+  opacity: 0; /* 最初は全て透明にする */
+  animation: hero-fade 15s infinite; /* 15秒で1ループ（1枚5秒計算） */
+}
+
+/* 画像ごとにアニメーションの開始時間をずらす */
+.hero-image:nth-of-type(1) { animation-delay: 0s; }
+.hero-image:nth-of-type(2) { animation-delay: 5s; }
+.hero-image:nth-of-type(3) { animation-delay: 10s; }
+
+/* フェードイン・アウトのアニメーション */
+@keyframes hero-fade {
+  0%   { opacity: 0; }
+  10%  { opacity: 1; } /* 1.5秒かけてフェードイン */
+  33%  { opacity: 1; } /* しばらく表示 */
+  43%  { opacity: 0; } /* 1.5秒かけてフェードアウト */
+  100% { opacity: 0; }
 }
 
 .hero-overlay {
   position: absolute;
   inset: 0;
+  z-index: 10; /* 画像より上に表示されるように */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -68,7 +88,7 @@
 /* ===== カード ===== */
 .cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 18px;
 }
 
@@ -81,12 +101,13 @@
 
 .card img {
   width: 100%;
-  height: 160px;
+  height: 130px;
   object-fit: cover;
 }
 
 .card-body {
   padding: 12px;
+  text-align: center;
 }
 
 .card-title {
@@ -104,11 +125,14 @@
 .genres {
   display: flex;
   gap: 16px;
+  width: 100%;
   flex-wrap: wrap;
 }
 
 .genre-card {
-  width: 120px;
+  flex: 1;
+  min-width: 150px;
+
   background: #fff;
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
@@ -118,7 +142,7 @@
 
 .genre-card img {
   width: 100%;
-  height: 80px;
+  height: 100px;
   object-fit: cover;
   border-radius: 4px;
   margin-bottom: 8px;
@@ -135,7 +159,10 @@
 
 <!-- ===== ヒーロー ===== -->
 <div class="hero">
-  <img src="{% static 'images/hero.png' %}" alt="">
+  <img src="{% static 'images/red.png' %}" alt="" class="hero-image">
+  <img src="{% static 'images/blue.jpg' %}" alt="" class="hero-image">
+  <img src="{% static 'images/green.jpg' %}" alt="" class="hero-image">
+  
   <div class="hero-overlay">
     <h1>行きたいお店が、きっと見つかる</h1>
     <p>日本最大級のグルメレビューサイト</p>
@@ -178,11 +205,11 @@
   <section class="section">
     <div class="section-title">料理ジャンルから探す</div>
     <div class="genres">
-      <div class="genre-card"><img src="{% static 'img/sushi.jpg' %}"><span>寿司</span></div>
-      <div class="genre-card"><img src="{% static 'img/ramen.jpg' %}"><span>ラーメン</span></div>
-      <div class="genre-card"><img src="{% static 'img/yakiniku.jpg' %}"><span>焼肉</span></div>
-      <div class="genre-card"><img src="{% static 'img/cafe.jpg' %}"><span>カフェ</span></div>
-      <div class="genre-card"><img src="{% static 'img/izakaya.jpg' %}"><span>居酒屋</span></div>
+      <div class="genre-card"><img src="{% static 'images/sushi.jpg' %}"><span>寿司</span></div>
+      <div class="genre-card"><img src="{% static 'images/ramen.jpg' %}"><span>ラーメン</span></div>
+      <div class="genre-card"><img src="{% static 'images/yakiniku.jpg' %}"><span>焼肉</span></div>
+      <div class="genre-card"><img src="{% static 'images/cafe.jpg' %}"><span>カフェ</span></div>
+      <div class="genre-card"><img src="{% static 'images/izakaya.jpg' %}"><span>居酒屋</span></div>
     </div>
   </section>
 
@@ -211,6 +238,22 @@
         <div class="card-body">
           <div class="card-title">人気店 3</div>
           <div class="card-sub">★4.5 福岡</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="{% static 'img/top_rest4.jpg' %}">
+        <div class="card-body">
+          <div class="card-title">人気店 4</div>
+          <div class="card-sub">★4.4 福岡</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="{% static 'img/top_rest5.jpg' %}">
+        <div class="card-body">
+          <div class="card-title">人気店 5</div>
+          <div class="card-sub">★4.3 福岡</div>
         </div>
       </div>
     </div>
