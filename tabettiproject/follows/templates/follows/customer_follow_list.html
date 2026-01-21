@@ -1,4 +1,5 @@
 {% extends "customer_base.html" %}
+{% load static %}
 
 {% block title %}フォロー中 - Tabecchi{% endblock %}
 
@@ -34,6 +35,11 @@
     background: linear-gradient(to right, #dbd4c4, #eeeae0);
     border-bottom: 3px solid #595950;
     position: relative;
+
+    /* ✅ 追加：カバー画像を背景にする */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
   }
 
   .profile-title-text {
@@ -68,6 +74,15 @@
     border-radius: 4px;
     margin-top: -50px; /* 帯に被せる */
     z-index: 10;
+
+    /* ✅ 追加：画像を枠内に収める */
+    overflow: hidden;
+  }
+  .profile-icon-main img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   .profile-user-name {
@@ -195,20 +210,31 @@
 
 {% block content %}
 <div class="profile-header">
-  <div class="profile-cover">
+
+  {# ✅ カバー画像をログインユーザーに合わせる（無ければ default_cover.jpg） #}
+  <div class="profile-cover"style="background-image:url('{% if cover_image_url %}{{ cover_image_url }}{% else %}{% static 'images/default_cover.jpg' %}{% endif %}');">
     <div class="inner-container">
       <div class="profile-title-text">{{ profile_title }}</div>
     </div>
   </div>
-  
+
   <div class="profile-sub-nav">
     <div class="inner-container">
       <div class="user-info-area">
-        <div class="profile-icon-main"></div>
+
+        {# ✅ アイコンをログインユーザーに合わせる（無ければ Tabecchi.png を仮フォールバック） #}
+        <div class="profile-icon-main">
+          <img
+            src="{% if user_icon_url %}{{ user_icon_url }}{% else %}{% static 'images/Tabecchi.png' %}{% endif %}"
+            alt="{{ user_name }}さんのアイコン"
+          >
+        </div>
+
         <div class="profile-user-name">
-          {% if user.is_authenticated %}{{ user.username }}{% else %}ゲスト{% endif %}
+          {% if user.is_authenticated %}{{ user_name }}{% else %}ゲスト{% endif %}
         </div>
       </div>
+
       <nav class="profile-nav-links">
         <a href="{% url 'reviews:customer_reviewer_detail' %}">トップ</a>
         <a href="{% url 'reviews:customer_reviewer_review_list' %}">口コミ</a>
@@ -228,17 +254,19 @@
       <div class="card-top-bg"></div>
       <div class="card-avatar-box"></div>
       <div class="card-inner-body">
-        
+
         <form method="post" style="display: inline;">
           {% csrf_token %}
           <input type="hidden" name="user_id" value="{{ item.id }}">
-          <button type="submit" class="btn-unfollow" onclick="return confirm('{{ item.user.username }}さんのフォローを解除しますか？')">
+          <button type="submit"
+                  class="btn-unfollow"
+                  onclick="return confirm('{{ item.user.username }}さんのフォローを解除しますか？')">
             フォロー中
           </button>
         </form>
 
         <a href="#" class="card-user-link">{{ item.user.username }}</a>
-        
+
         <div class="card-meta-info">
           <div class="is-follower-tag">あなたのフォロワーです</div>
           <div>{{ item.review_count }}ログ</div>

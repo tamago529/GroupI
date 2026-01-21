@@ -15,7 +15,16 @@ class customer_mapView(TemplateView):
 
 class customer_menu_courseView(TemplateView):
     template_name = "stores/customer_menu_course.html"
-
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # 1. 店舗情報を取得
+        store = get_object_or_404(Store, pk=self.kwargs['pk'])
+        # 2. その店舗に紐づくメニューをすべて取得
+        menu_items = StoreMenu.objects.filter(store=store)
+        
+        context['store'] = store
+        context['menu_items'] = menu_items
+        return context
 
 class customer_store_basic_editView(TemplateView):
     template_name = "stores/customer_store_basic_edit.html"
@@ -36,7 +45,11 @@ class company_store_infoView(TemplateView):
 
 class customer_store_infoView(TemplateView):
     template_name = "stores/customer_store_info.html"
-
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # URLの数字を使って店舗データを1件取得
+        context['store'] = get_object_or_404(Store, pk=self.kwargs['pk'])
+        return context
 
 class customer_store_new_registerView(TemplateView):
     template_name = "stores/customer_store_new_register.html"

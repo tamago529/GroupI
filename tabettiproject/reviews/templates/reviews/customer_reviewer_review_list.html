@@ -469,7 +469,7 @@
             <div class="name-set"><h1 class="main-nick">{{ user_name }}</h1></div>
             <nav>
                 <ul class="mypage-tabs">
-                    <li><a href="#">トップ</a></li>
+                    <li><a href="{% url 'reviews:customer_reviewer_detail' %}">トップ</a></li>
                     <li><a href="#" class="active">口コミ</a></li>
                     <li><a href="{% url 'follows:customer_follow_list' %}">フォロー中</a></li>
                     <li><a href="{% url 'follows:customer_follower_list' %}">フォロワー</a></li>
@@ -560,12 +560,6 @@
                     </ul>
                     <a href="#" style="color:#06c; text-decoration:none; font-weight:bold;">地図表示</a>
                 </nav>
-
-                <div class="disclaimer-box">
-                    これらの口コミは、訪問した当時の主観的なご意見・ご感想です。<br>
-                    最新の情報とは異なる可能性がありますので、お店の方にご確認ください。
-                    <a href="#" style="color:#06c;">&gt; 詳しくはこちら</a>
-                </div>
 
                 <div style="font-size: 13px; margin: 15px 0 10px;">
                     <strong>全 {{ my_reviews_total }}</strong> 件
@@ -796,8 +790,3 @@
 </script>
 
 {% endblock %}
-
-<a href="{% url 'reviews:customer_reviewer_detail'%}">トップ</a>
-<a href="{% url 'reviews:customer_reviewer_review_list' %}">レビュアー口コミ一覧</a>
-<a href="{% url 'follows:customer_follow_list' %}">フォロー中一覧</a>
-<a href="{% url 'follows:customer_follower_list' %}">フォロワー一覧</a>
