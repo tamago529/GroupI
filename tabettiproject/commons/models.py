@@ -217,6 +217,7 @@ class Store(models.Model):
 
     seats = models.IntegerField(verbose_name="席数")
     budget = models.IntegerField(verbose_name="予算")
+    genre = models.CharField(max_length=100, verbose_name="ジャンル")
     scene = models.ForeignKey("Scene", on_delete=models.PROTECT, verbose_name="利用シーン")
     reservable = models.BooleanField(verbose_name="予約可否", default=True)
     editable = models.BooleanField(verbose_name="編集可能", default=True)
