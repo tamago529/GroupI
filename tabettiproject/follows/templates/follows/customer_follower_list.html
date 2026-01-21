@@ -238,17 +238,32 @@
       <div class="card-user-icon"></div>
       
       <div class="card-body">
-        <button class="follow-btn">+ フォロー</button>
+        
+        <form method="post" style="display: inline;">
+          {% csrf_token %}
+          <input type="hidden" name="user_id" value="{{ item.id }}">
+          
+          {% if item.is_following %}
+            <button type="submit" class="follow-btn" style="background: #f2f2ef; color: #666;" onclick="return confirm('フォローを解除しますか？')">
+              フォロー中
+            </button>
+          {% else %}
+            <button type="submit" class="follow-btn" style="color: #f0a500; border-color: #f0a500;">
+              + フォロー
+            </button>
+          {% endif %}
+        </form>
         <a href="#" class="card-name">{{ item.user.username }}</a>
         
         <div class="card-info">
+          <div style="color: #f0a500; font-weight: bold; margin-bottom: 4px;">あなたをフォローしています</div>
           <div>{{ item.review_count }}ログ</div>
           <div>フォロワー数：{{ item.follower_count }}人</div>
         </div>
       </div>
     </div>
     {% empty %}
-    <p>フォロワーはいません。</p>
+    <p style="padding: 20px;">フォロワーはいません。</p>
     {% endfor %}
   </div>
 </div>
