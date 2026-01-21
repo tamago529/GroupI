@@ -1,4 +1,6 @@
 {% extends "store_base.html" %}
+{% block title %}店舗管理予約台帳{% endblock %}
+
 {% block content %}
 
 <style>
@@ -214,77 +216,60 @@ input[type="date"], input[type="time"], input[type="number"]{
 }
 </style>
 
+
 <div class="wrap">
 
-  <div class="top-links">
-    <a href="{% url 'reservations_management:store_reservation_calendar' %}">予約カレンダー</a> /
-    <a href="{% url 'reservations_management:store_reservation_ledger' %}">予約台帳</a> /
-    <a href="{% url 'reservations_management:store_customer_ledger' %}">顧客台帳</a> /
-    <a href="{% url 'reservations_management:store_reservation_settings' %}">ネット予約受付設定</a> /
-    <a href="{% url 'reservations_management:store_seat_settings' %}">席設定</a>
-  </div>
+  {% url 'reservations_management:store_reservation_calendar' as url_calendar %}
+  {% url 'reservations_management:store_reservation_ledger' as url_ledger %}
+  {% url 'reservations_management:store_customer_ledger' as url_customer %}
+  {% url 'reservations_management:store_reservation_settings' as url_settings %}
+  {% url 'reservations_management:store_seat_settings' as url_seats %}
 
-  {% if mode == "day" %}
 
-    <div class="hd">
-      <div class="hd-left">
-        <div class="title">予約台帳</div>
-        <div class="sub">日別（予約内容を見る）</div>
-      </div>
 
-      <div class="btns">
-        {% if is_debug %}
-          <a class="btn"
-             href="{% url 'reservations_management:store_reservation_ledger_day_debug' %}?store_id={{ store_id }}&date={{ target_date|date:'Y-m-d' }}">更新</a>
-        {% else %}
-          <a class="btn"
-             href="{% url 'reservations_management:store_reservation_ledger_day' %}?date={{ target_date|date:'Y-m-d' }}">更新</a>
-        {% endif %}
-      </div>
-    </div>
+  {# mode が無い場合は day 扱いに寄せる #}
+  {% with current_mode=mode|default:"day" %}
 
-    <div class="card">
-      <div class="card-body">
+    {% if current_mode == "day" %}
 
-        <div class="day-nav">
-          <span class="date-chip">対象日：{{ target_date|date:'Y年n月j日' }}</span>
-
-          {% if is_debug %}
-            <a class="btn small"
-               href="{% url 'reservations_management:store_reservation_ledger_day_debug' %}?store_id={{ store_id }}&date={{ prev_date|date:'Y-m-d' }}">‹ 前日</a>
-            <a class="btn small"
-               href="{% url 'reservations_management:store_reservation_ledger_day_debug' %}?store_id={{ store_id }}&date={{ next_date|date:'Y-m-d' }}">翌日 ›</a>
-          {% else %}
-            <a class="btn small"
-               href="{% url 'reservations_management:store_reservation_ledger_day' %}?date={{ prev_date|date:'Y-m-d' }}">‹ 前日</a>
-            <a class="btn small"
-               href="{% url 'reservations_management:store_reservation_ledger_day' %}?date={{ next_date|date:'Y-m-d' }}">翌日 ›</a>
-          {% endif %}
+      <div class="hd">
+        <div class="hd-left">
+          <div class="title">予約台帳</div>
+          <div class="sub">日別（予約内容を見る）</div>
         </div>
 
-        <div class="timeline">
-          <div class="timeline-head">
-            {% for t in time_labels %}
-              <div>{{ t }}</div>
-            {% endfor %}
+        <div class="btns">
+          {% url 'reservations_management:store_reservation_ledger_day' as url_day %}
+          <a class="btn" href="{% if url_day %}{{ url_day }}?date={{ target_date|date:'Y-m-d' }}{% else %}#{% endif %}">
+            更新
+          </a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+
+          <div class="day-nav">
+            <span class="date-chip">対象日：{{ target_date|date:'Y年n月j日' }}</span>
+
+            {% url 'reservations_management:store_reservation_ledger_day' as url_day %}
+            <a class="btn small" href="{% if url_day %}{{ url_day }}?date={{ prev_date|date:'Y-m-d' }}{% else %}#{% endif %}">‹ 前日</a>
+            <a class="btn small" href="{% if url_day %}{{ url_day }}?date={{ next_date|date:'Y-m-d' }}{% else %}#{% endif %}">翌日 ›</a>
           </div>
 
-          {% if lanes %}
-            {% for lane in lanes %}
-              <div class="lane-row">
-                <div class="lane" style="height:{{ lane.height }}px;">
-                  {% for b in lane.bars %}
-                    {% if is_debug %}
-                      <a class="bar"
-                         href="{% url 'reservations_management:store_reservation_detail_debug' b.reservation_id %}?store_id={{ store_id }}"
-                         style="top:{{ b.top_px }}px; left:{{ b.left_pct }}%; width:{{ b.width_pct }}%;">
-                        <span class="left">
-                          <span class="badge">{{ b.start|time:'H:i' }}</span>
-                          <span class="name">{{ b.title }}</span>
-                        </span>
-                        <span class="badge">{{ b.visit_count }}名</span>
-                      </a>
-                    {% else %}
+          <div class="timeline">
+            <div class="timeline-head">
+              {% for t in time_labels %}
+                <div>{{ t }}</div>
+              {% endfor %}
+            </div>
+
+            {% if lanes %}
+              {% for lane in lanes %}
+                <div class="lane-row">
+                  <div class="lane" style="height:{{ lane.height }}px;">
+                    {% for b in lane.bars %}
+                      {# 引数付き url は as できないので直接出す #}
                       <a class="bar"
                          href="{% url 'reservations_management:store_reservation_detail' b.reservation_id %}"
                          style="top:{{ b.top_px }}px; left:{{ b.left_pct }}%; width:{{ b.width_pct }}%;">
@@ -294,144 +279,154 @@ input[type="date"], input[type="time"], input[type="number"]{
                         </span>
                         <span class="badge">{{ b.visit_count }}名</span>
                       </a>
-                    {% endif %}
-                  {% empty %}
-                    <div style="padding:14px; font-size:12px; color:var(--muted); font-weight:900;">
-                      予約がありません
-                    </div>
-                  {% endfor %}
+                    {% empty %}
+                      <div style="padding:14px; font-size:12px; color:var(--muted); font-weight:900;">
+                        予約がありません
+                      </div>
+                    {% endfor %}
+                  </div>
                 </div>
-              </div>
-            {% endfor %}
-          {% else %}
-            <div style="padding:14px; font-size:12px; color:var(--muted); font-weight:900;">
-              lanes がありません（views.py で lanes を渡してください）
-            </div>
-          {% endif %}
-        </div>
-
-        <table class="table">
-          <thead>
-            <tr>
-              <th style="width:90px;">時刻</th>
-              <th>予約者</th>
-              <th style="width:90px;">人数</th>
-              <th style="width:120px;">ステータス</th>
-              <th style="width:110px;">操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% if bars %}
-              {% for b in bars %}
-                <tr>
-                  <td>{{ b.start|time:'H:i' }}</td>
-                  <td>{{ b.title }}</td>
-                  <td>{{ b.visit_count }}名</td>
-                  <td class="muted">{{ b.status_label }}</td>
-                  <td>
-                    {% if is_debug %}
-                      <a class="btn small"
-                         href="{% url 'reservations_management:store_reservation_detail_debug' b.reservation_id %}?store_id={{ store_id }}">見る</a>
-                    {% else %}
-                      <a class="btn small"
-                         href="{% url 'reservations_management:store_reservation_detail' b.reservation_id %}">見る</a>
-                    {% endif %}
-                  </td>
-                </tr>
               {% endfor %}
             {% else %}
-              <tr><td colspan="5" class="muted">予約データがありません</td></tr>
+              <div style="padding:14px; font-size:12px; color:var(--muted); font-weight:900;">
+                lanes がありません（views.py で lanes を渡してください）
+              </div>
             {% endif %}
-          </tbody>
-        </table>
+          </div>
 
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width:140px;">時刻</th>
+                <th>予約者</th>
+                <th style="width:90px;">人数</th>
+                <th style="width:120px;">ステータス</th>
+                <th style="width:110px;">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if bars %}
+                {% for b in bars %}
+                  <tr>
+                    <td>
+                      {{ b.start|time:'H:i' }}〜{{ b.end|time:'H:i' }}
+                    </td>
+                    <td>{{ b.title }}</td>
+                    <td>{{ b.visit_count }}名</td>
+                    <td class="muted">{{ b.status_label }}</td>
+                    <td>
+                      <a class="btn small" href="{% url 'reservations_management:store_reservation_detail' b.reservation_id %}">
+                        見る
+                      </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr><td colspan="5" class="muted">予約データがありません</td></tr>
+              {% endif %}
+            </tbody>
+          </table>
+
+        </div>
       </div>
-    </div>
 
-  {% elif mode == "detail" %}
+    {% elif current_mode == "detail" %}
 
-    <div class="hd">
-      <div class="hd-left">
-        <div class="title">予約詳細</div>
-        <div class="sub">予約内容を見る</div>
+      <div class="hd">
+        <div class="hd-left">
+          <div class="title">予約詳細</div>
+          <div class="sub">予約内容を見る</div>
+        </div>
+        <div class="btns">
+          {% url 'reservations_management:store_reservation_ledger_day' as url_day %}
+          <a class="btn" href="{% if url_day %}{{ url_day }}?date={{ reservation.visit_date|date:'Y-m-d' }}{% else %}#{% endif %}">
+            一覧へ戻る
+          </a>
+        </div>
       </div>
-      <div class="btns">
-        {% if is_debug %}
-          <a class="btn"
-             href="{% url 'reservations_management:store_reservation_ledger_day_debug' %}?store_id={{ store_id }}&date={{ reservation.visit_date|date:'Y-m-d' }}">一覧へ戻る</a>
-        {% else %}
-          <a class="btn"
-             href="{% url 'reservations_management:store_reservation_ledger_day' %}?date={{ reservation.visit_date|date:'Y-m-d' }}">一覧へ戻る</a>
-        {% endif %}
-      </div>
-    </div>
 
-    <div class="card">
-      <div class="card-body">
-        <div class="kv">
+      <div class="card">
+        <div class="card-body">
+          <div class="kv">
             <div class="k">予約ID</div><div class="v">{{ reservation.id }}</div>
-            <div class="k">来店日時</div><div class="v">{{ reservation.visit_date|date:'Y/m/d' }} {{ reservation.visit_time|time:'H:i' }}</div>
+            <div class="k">来店日時</div>
+            <div class="v">
+              {{ reservation.visit_date|date:'Y/m/d' }}
+              {{ reservation.start_time|time:'H:i' }}〜{{ reservation.end_time|time:'H:i' }}
+            </div>
             <div class="k">人数</div><div class="v">{{ reservation.visit_count }}名</div>
             <div class="k">ステータス</div><div class="v">{{ reservation.booking_status }}</div>
             <div class="k">予約者</div><div class="v">{{ reservation.booking_user.full_name }}</div>
             <div class="k">メール</div><div class="v">{{ reservation.booking_user.email }}</div>
             <div class="k">電話番号</div><div class="v">{{ reservation.booking_user.phone_number }}</div>
-        </div>
-
-        <div class="actions">
-          {% if is_debug %}
-            <a class="btn" href="{% url 'reservations_management:store_reservation_edit_debug' reservation.id %}?store_id={{ store_id }}">編集</a>
-          {% else %}
-            <a class="btn" href="{% url 'reservations_management:store_reservation_edit' reservation.id %}">編集</a>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-
-  {% elif mode == "edit" %}
-
-    <div class="hd">
-      <div class="hd-left">
-        <div class="title">予約編集</div>
-        <div class="sub">来店日時・人数を変更</div>
-      </div>
-      <div class="btns">
-        {% if is_debug %}
-          <a class="btn" href="{% url 'reservations_management:store_reservation_detail_debug' reservation.id %}?store_id={{ store_id }}">詳細へ戻る</a>
-        {% else %}
-          <a class="btn" href="{% url 'reservations_management:store_reservation_detail' reservation.id %}">詳細へ戻る</a>
-        {% endif %}
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-body">
-        <form method="post"
-              action="{% if is_debug %}{% url 'reservations_management:store_reservation_edit_debug' reservation.id %}?store_id={{ store_id }}{% else %}{% url 'reservations_management:store_reservation_edit' reservation.id %}{% endif %}">
-          {% csrf_token %}
-          <div class="kv">
-            <div class="k">来店日</div>
-            <div class="v"><input type="date" name="visit_date" value="{{ reservation.visit_date|date:'Y-m-d' }}" required></div>
-
-            <div class="k">来店時刻</div>
-            <div class="v"><input type="time" name="visit_time" value="{{ reservation.visit_time|time:'H:i' }}" required></div>
-
-            <div class="k">人数</div>
-            <div class="v"><input type="number" name="visit_count" value="{{ reservation.visit_count }}" min="1" required></div>
           </div>
 
           <div class="actions">
-            <button class="btn primary" type="submit">保存</button>
+            {% url 'reservations_management:store_reservation_edit' reservation.id as url_edit %}
+            <a class="btn" href="{{ url_edit|default:'#' }}">編集</a>
           </div>
-        </form>
+        </div>
       </div>
-    </div>
 
-  {% else %}
-    <div class="notice">
-      mode が不正です。views.py で mode を day / detail / edit のいずれかで渡してください。
-    </div>
-  {% endif %}
+    {% elif current_mode == "edit" %}
+
+      <div class="hd">
+        <div class="hd-left">
+          <div class="title">予約編集</div>
+          <div class="sub">来店日時・人数を変更</div>
+        </div>
+        <div class="btns">
+          <a class="btn" href="{% url 'reservations_management:store_reservation_detail' reservation.id %}">
+            詳細へ戻る
+          </a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          {% url 'reservations_management:store_reservation_edit' reservation.id as url_edit %}
+          <form method="post" action="{{ url_edit|default:'#' }}">
+            {% csrf_token %}
+            <div class="kv">
+              <div class="k">来店日</div>
+              <div class="v">
+                <input type="date" name="visit_date"
+                       value="{{ reservation.visit_date|date:'Y-m-d' }}" required>
+              </div>
+
+              <div class="k">来店時刻</div>
+              <div class="v">
+                <input type="time" name="start_time"
+                       value="{{ reservation.start_time|time:'H:i' }}" required>
+                〜
+                <input type="time" name="end_time"
+                       value="{{ reservation.end_time|time:'H:i' }}" required>
+              </div>
+
+              <div class="k">人数</div>
+              <div class="v">
+                <input type="number" name="visit_count"
+                       value="{{ reservation.visit_count }}" min="1" required>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn primary" type="submit">保存</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    {% else %}
+      <div class="notice">
+        mode が不正です。views.py で mode を day / detail / edit のいずれかで渡してください。
+      </div>
+    {% endif %}
+
+  {% endwith %}
 
 </div>
+
+
 {% endblock %}
+

@@ -1,5 +1,6 @@
 {% extends "store_base.html" %}
 {% load dict_extras %}
+{% block title %}店舗管理予約カレンダー{% endblock %}
 
 {% block content %}
 
@@ -108,14 +109,7 @@ a:hover{text-decoration:underline}
 }
 </style>
 
-<!-- （このリンク群はデバッグ用なら残してOK。不要なら消してOK） -->
-<div style="margin:8px 0 12px; font-size:12px;">
-  <a href="{% url 'reservations_management:store_reservation_calendar' %}">予約カレンダー</a> /
-  <a href="{% url 'reservations_management:store_reservation_ledger' %}">予約台帳</a> /
-  <a href="{% url 'reservations_management:store_customer_ledger' %}">顧客台帳</a> /
-  <a href="{% url 'reservations_management:store_reservation_settings' %}">ネット予約受付設定</a> /
-  <a href="{% url 'reservations_management:store_seat_settings' %}">席設定</a>
-</div>
+
 
 <div class="cal-wrap">
 
@@ -123,33 +117,19 @@ a:hover{text-decoration:underline}
     <div class="cal-month">{{ month_label }}</div>
 
     <div class="cal-nav">
-      {% if request.resolver_match.url_name == 'store_reservation_calendar_debug' %}
-        <a class="cal-btn"
-           href="{% url 'reservations_management:store_reservation_calendar_debug' %}?store_id={{ store.id }}&year={{ today.year }}&month={{ today.month }}">
-          今月
-        </a>
-        <a class="cal-btn"
-           href="{% url 'reservations_management:store_reservation_calendar_debug' %}?store_id={{ store.id }}&year={{ prev_year }}&month={{ prev_month }}">
-          ‹
-        </a>
-        <a class="cal-btn"
-           href="{% url 'reservations_management:store_reservation_calendar_debug' %}?store_id={{ store.id }}&year={{ next_year }}&month={{ next_month }}">
-          ›
-        </a>
-      {% else %}
-        <a class="cal-btn"
-           href="{% url 'reservations_management:store_reservation_calendar' %}?year={{ today.year }}&month={{ today.month }}">
-          今月
-        </a>
-        <a class="cal-btn"
-           href="{% url 'reservations_management:store_reservation_calendar' %}?year={{ prev_year }}&month={{ prev_month }}">
-          ‹
-        </a>
-        <a class="cal-btn"
-           href="{% url 'reservations_management:store_reservation_calendar' %}?year={{ next_year }}&month={{ next_month }}">
-          ›
-        </a>
-      {% endif %}
+      {% url 'reservations_management:store_reservation_calendar' as url_cal %}
+      <a class="cal-btn"
+         href="{% if url_cal %}{{ url_cal }}?year={{ today.year }}&month={{ today.month }}{% else %}#{% endif %}">
+        今月
+      </a>
+      <a class="cal-btn"
+         href="{% if url_cal %}{{ url_cal }}?year={{ prev_year }}&month={{ prev_month }}{% else %}#{% endif %}">
+        ‹
+      </a>
+      <a class="cal-btn"
+         href="{% if url_cal %}{{ url_cal }}?year={{ next_year }}&month={{ next_month }}{% else %}#{% endif %}">
+        ›
+      </a>
     </div>
   </div>
 
@@ -170,9 +150,11 @@ a:hover{text-decoration:underline}
           {% with info=daily|get_item:d %}
           {% with o=online|get_item:d %}
 
+            {# 週内の曜日インデックス：0(月) ... 5(土) 6(日) #}
+            {% with wd=forloop.counter0 %}
             <div class="cal-cell
-                        {% if forloop.counter0 == 5 %}sat{% endif %}
-                        {% if forloop.counter0 == 6 %}sun{% endif %}
+                        {% if wd == 5 %}sat{% endif %}
+                        {% if wd == 6 %}sun{% endif %}
                         {% if d.month != month %}other{% endif %}
                         {% if d == today %}today{% endif %}
                         {% if d in closed_days %}closed{% endif %}">
@@ -204,6 +186,7 @@ a:hover{text-decoration:underline}
               </div>
 
             </div>
+            {% endwith %}
 
           {% endwith %}
           {% endwith %}
