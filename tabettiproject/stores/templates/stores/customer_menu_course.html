@@ -223,6 +223,56 @@
         font-weight: bold;
         border-radius: 4px;
         margin-top: 10px;
+
+
+        .modal-overlay {
+        display: none; /* 初期は非表示 */
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+    .modal-box {
+        background: #fff;
+        width: 450px;
+        padding: 30px;
+        border-radius: 8px;
+        position: relative;
+        text-align: center;
+    }
+    .modal-close {
+        position: absolute;
+        top: 10px; right: 15px;
+        font-size: 24px;
+        cursor: pointer;
+        color: #999;
+    }
+    .modal-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #333;
+    }
+    .reserve-option-btn {
+        display: block;
+        width: 100%;
+        padding: 15px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background: #f9f9f9;
+        text-decoration: none;
+        color: #333;
+        font-weight: bold;
+        transition: 0.2s;
+    }
+    .reserve-option-btn:hover {
+        background: #fff4e6;
+        border-color: #ff6600;
+    }
     }
 </style>
 {% endblock %}
@@ -232,7 +282,8 @@
     <header class="shop-header">
         <span class="label-official">公式</span>
         <div class="header-top-row">
-            <h1 class="shop-name-title">{{ store.name }}</h1>
+            <!-- 🌟 店名を動的に変更 -->
+            <h1 class="shop-name-title">{{ store.store_name }} {{ store.branch_name }}</h1>
             <div class="action-group">
                 <button class="btn-action-white"><span>📍</span>行った</button>
                 <button class="btn-action-white"><span>🔖</span>保存</button>
@@ -242,60 +293,68 @@
 
         <div class="rating-container">
             <span class="stars">★★★☆☆</span>
-            <span class="score-value">3.09</span>
-            <a href="#" class="review-count">92人</a>
+            <span class="score-value">3.00</span>
+            <a href="{% url 'reviews:customer_review_list' %}" class="review-count">口コミを表示</a>
         </div>
 
         <div class="meta-info-text">
-            大宮駅 161m ／ ジャンル：カフェ、パンケーキ、ケーキ<br>
-            予算： 🌙 ￥1,000～￥1,999 ／ ☀️ ￥1,000～￥1,999
+            ジャンル：{{ store.scene.scene_name }}<br>
+            予算： ☀️ ￥{{ store.budget }}〜
         </div>
     </header>
 
+    <!-- 🌟 タブリンクに store.pk を追加 -->
     <ul class="main-navigation">
-        <li><a href="#">トップ</a></li>
-        <li class="active"><a href="#">メニュー・コース</a></li>
+        <li><a href="{% url 'stores:customer_store_info' store.pk %}">トップ</a></li>
+        <li class="active"><a href="{% url 'stores:customer_menu_course' store.pk %}">メニュー・コース</a></li>
         <li><a href="#">写真</a></li>
-        <li><a href="#">口コミ</a></li>
-        <li><a href="#">地図</a></li>
+        <li><a href="{% url 'reviews:customer_review_list' %}">口コミ</a></li>
+        <li><a href="{% url 'stores:customer_map' %}">地図</a></li>
     </ul>
 
     <ul class="sub-navigation">
         <li>コース (0)</li>
-        <li class="active">料理 (13)</li>
-        <li>ドリンク (14)</li>
+        <!-- 🌟 実際のメニュー数を表示 -->
+        <li class="active">料理 ({{ menu_items.count }})</li>
+        <li>ドリンク (0)</li>
         <li>ランチ (0)</li>
-        <li>写真 (10)</li>
+        <li>写真</li>
     </ul>
 
     <div class="content-layout">
         <main class="left-column">
             <h2 class="section-head">料理メニュー</h2>
             
+            <!-- 🌟 データベースから取得したメニューをループで回す -->
             {% for item in menu_items %}
             <article class="menu-item-box">
                 <div class="menu-item-left">
                     <div class="menu-photo-frame">
-                        {% if item.image %}
-                            <img src="{{ item.image.url }}" alt="{{ item.name }}" width="120" height="120">
+                        <!-- 🌟 画像があれば表示（image_pathフィールドを想定） -->
+                        {% if item.image_path %}
+                            <img src="{{ item.image_path }}" alt="{{ item.menu_name }}">
                         {% endif %}
                     </div>
                     <div>
-                        <h3 class="menu-name-link">{{ item.name }}</h3>
-                        <p style="font-size: 12px; color: #666; margin-top: 8px;">{{ item.description }}</p>
+                        <!-- 🌟 メニュー名 -->
+                        <h3 class="menu-name-link">{{ item.menu_name }}</h3>
+                        <p style="font-size: 12px; color: #666; margin-top: 8px;">美味しい季節の料理をご堪能ください。</p>
                     </div>
                 </div>
+                <!-- 🌟 価格 -->
                 <div class="menu-item-price">{{ item.price }}円</div>
             </article>
+            {% empty %}
+                <p>現在、登録されているメニューはありません。</p>
             {% endfor %}
 
             <h2 class="section-head">店舗基本情報</h2>
             <table class="info-table-tabelog">
-                <caption class="visually-hidden">{{ store.name }} の詳細情報テーブル</caption>
+                <caption class="visually-hidden">{{ store.store_name }} の詳細情報テーブル</caption>
                 <tbody>
                     <tr>
                         <th scope="row">店名</th>
-                        <td>{{ store.name }}</td>
+                        <td>{{ store.store_name }} {{ store.branch_name }}</td>
                     </tr>
                     <tr>
                         <th scope="row">住所</th>
@@ -305,13 +364,7 @@
             </table>
         </main>
 
-        <aside class="right-column">
-            <div style="font-size: 20px; font-weight: bold; margin-bottom: 20px;">☎ {{ store.phone_number }}</div>
-            <div class="sidebar-reserve-card">
-                <p style="font-size: 13px; font-weight: bold; margin: 0;">空席確認・ネット予約</p>
-                <a href="#" class="btn-reserve-orange">ネット予約登録画面へ移動</a>
-            </div>
-        </aside>
+        
     </div>
 </div>
 {% endblock %}

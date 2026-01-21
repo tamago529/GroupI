@@ -1,6 +1,6 @@
 {% extends "customer_base.html" %}
 
-{% block title %}顧客店舗基本情報画面{% endblock %}
+{% block title %}{{ store.store_name }} - 店舗情報{% endblock %}
 
 {% block css %}
 <style>
@@ -129,7 +129,7 @@
         margin: 30px 0 15px 0;
     }
 
-    /* 詳細テーブル：アクセシビリティ対応含む */
+    /* 詳細テーブル */
     .detail-table {
         width: 100%;
         border-collapse: collapse;
@@ -169,7 +169,7 @@
     }
 
     /* --------------------------------------------------------------------------
-        右側：サイドバー（予約・広告）
+        右側：サイドバー（予約）
        -------------------------------------------------------------------------- */
     .side-box {
         border: 1px solid #e6e6e6;
@@ -188,6 +188,51 @@
         text-decoration: none;
         text-align: center;
         margin-top: 10px;
+        border: none;
+        cursor: pointer;
+    }
+
+    /* 🌟 追加：予約モーダルのスタイル */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+    .modal-box {
+        background: #fff;
+        width: 400px;
+        padding: 30px;
+        border-radius: 8px;
+        text-align: center;
+        position: relative;
+    }
+    .modal-close {
+        position: absolute;
+        top: 10px; right: 15px;
+        font-size: 24px;
+        cursor: pointer;
+        color: #999;
+    }
+    .reserve-option-btn {
+        display: block;
+        width: 100%;
+        padding: 15px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background: #f9f9f9;
+        text-decoration: none;
+        color: #333;
+        font-weight: bold;
+    }
+    .reserve-option-btn:hover {
+        background: #e6f7ff;
+        border-color: #00a0e9;
     }
 </style>
 {% endblock %}
@@ -196,29 +241,32 @@
 <div class="shop-main">
     
     <nav class="back-nav">
-        <a href="{% url 'stores:customer_store_new_register' %}" class="back-link">« 店舗登録へ戻る</a>
+        <!-- 顧客トップ画面へ戻る -->
+        <a href="{% url 'accounts:customer_top' %}" class="back-link">« 検索結果へ戻る</a>
     </nav>
 
     <header class="shop-header">
         <div class="title-area">
             <span class="official-label">公式</span>
-            <h1 class="shop-name">幸せのパンケーキ 大宮店</h1>
+            <!-- 🌟 店名を動的に表示 -->
+            <h1 class="shop-name">{{ store.store_name }} {{ store.branch_name }}</h1>
         </div>
         
         <div class="score-container">
             <span class="stars">★★★☆☆</span>
-            <span class="score-number">3.09</span>
+            <span class="score-number">3.00</span>
             <a href="{% url 'reviews:customer_review_list' %}" style="color: #06c; font-size: 12px; text-decoration: none;">
-                口コミ 93人
+                口コミを表示
             </a>
         </div>
 
         <nav>
             <ul class="tab-menu">
                 <li class="active">トップ</li>
-                <li><a href="{% url 'stores:customer_menu_course' %}">メニュー・コース</a></li>
-                <li>写真 (215)</li>
-                <li><a href="{% url 'reviews:customer_review_list' %}">口コミ (93)</a></li>
+                <!-- 🌟 リンクに store.pk を追加 -->
+                <li><a href="{% url 'stores:customer_menu_course' store.pk %}">メニュー・コース</a></li>
+                <li>写真</li>
+                <li><a href="{% url 'reviews:customer_review_list' %}">口コミ</a></li>
                 <li><a href="{% url 'stores:customer_map' %}">地図</a></li>
             </ul>
         </nav>
@@ -228,21 +276,22 @@
         
         <main class="left-content">
             <section class="photo-preview">
-                <img src="https://via.placeholder.com/150" alt="パンケーキ1" width="150" height="150">
-                <img src="https://via.placeholder.com/150" alt="パンケーキ2" width="150" height="150">
-                <img src="https://via.placeholder.com/150" alt="パンケーキ3" width="150" height="150">
-                <img src="https://via.placeholder.com/150" alt="内観" width="150" height="150">
-                <img src="https://via.placeholder.com/150" alt="外観" width="150" height="150">
+                <img src="https://via.placeholder.com/150" alt="店舗写真1">
+                <img src="https://via.placeholder.com/150" alt="店舗写真2">
+                <img src="https://via.placeholder.com/150" alt="店舗写真3">
+                <img src="https://via.placeholder.com/150" alt="内観">
+                <img src="https://via.placeholder.com/150" alt="外観">
             </section>
 
             <section>
                 <h2 class="info-title">店舗情報（詳細）</h2>
                 <table class="detail-table">
-                    <caption>幸せのパンケーキ 大宮店の詳細情報一覧</caption>
+                    <caption>{{ store.store_name }}の詳細情報一覧</caption>
                     <tbody>
                         <tr>
                             <th scope="row">店名</th>
-                            <td>幸せのパンケーキ 大宮店</td>
+                            <!-- 🌟 店名 -->
+                            <td>{{ store.store_name }} {{ store.branch_name }}</td>
                         </tr>
                         <tr>
                             <th scope="row">地図</th>
@@ -250,22 +299,24 @@
                         </tr>
                         <tr>
                             <th scope="row">ジャンル</th>
-                            <td>カフェ、パンケーキ、ケーキ</td>
+                            <!-- 🌟 モデルの scene を表示 -->
+                            <td>{{ store.scene.scene_name }}</td>
                         </tr>
                         <tr>
                             <th scope="row">住所</th>
-                            <td>埼玉県さいたま市大宮区桜木町2-1-1 アルシェ 3F</td>
+                            <!-- 🌟 住所 -->
+                            <td>{{ store.address }}</td>
                         </tr>
                         <tr>
                             <th scope="row">営業時間</th>
                             <td>
-                                [月～金] 10:30～19:30 (L.O.18:45)<br>
-                                [土・日・祝] 10:00～20:30 (L.O.19:40)
+                                <!-- 🌟 営業時間（改行対応） -->
+                                {{ store.business_hours|linebreaksbr }}
                             </td>
                         </tr>
                         <tr>
                             <th scope="row">支払い方法</th>
-                            <td>カード可 / QRコード決済可 (PayPay)</td>
+                            <td>店舗にご確認ください。</td>
                         </tr>
                     </tbody>
                 </table>
@@ -279,27 +330,50 @@
 
         <aside class="right-sidebar">
             <div class="side-box">
-                <p style="text-align: center; color: #666; font-size: 11px; margin: 0;">お問い合わせ専用番号</p>
-                <p style="text-align: center; font-size: 22px; font-weight: bold; margin: 5px 0;">048-644-5281</p>
-                <a href="#" class="btn-reserve">空席確認・予約する</a>
+                <p style="text-align: center; color: #666; font-size: 11px; margin: 0;">お問い合わせ番号</p>
+                <!-- 🌟 電話番号 -->
+                <p style="text-align: center; font-size: 22px; font-weight: bold; margin: 5px 0;">{{ store.phone_number }}</p>
+                
+                <!-- 🌟 リンクの代わりにボタンにして JS を呼び出す -->
+                <button type="button" class="btn-reserve" onclick="openReserveModal()">
+                    空席確認・予約する
+                </button>
             </div>
 
             <div class="side-box">
                 <p style="font-size: 14px; font-weight: bold;">メニュー・コース</p>
                 <p style="font-size: 12px; margin-top: 10px;">
-                    <a href="{% url 'stores:customer_menu_course' %}" style="color: #06c; text-decoration: none;">メニュー・コースを見る</a>
+                    <a href="{% url 'stores:customer_menu_course' store.pk %}" style="color: #06c; text-decoration: none;">メニュー・コースを見る</a>
                 </p>
             </div>
         </aside>
     </div>
 </div>
+
+<!-- 🌟 追加：予約用モーダルHTML -->
+<div class="modal-overlay" id="reserveModal" onclick="closeReserveModal()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <span class="modal-close" onclick="closeReserveModal()">&times;</span>
+        <h3 style="margin-bottom:20px;">ご予約方法の選択</h3>
+        <p style="margin-bottom:20px; font-size:14px; color:#666;">{{ store.store_name }}</p>
+        
+        <!-- 予約機能へ繋げるためのダミーリンク -->
+        <a href="#" class="reserve-option-btn">日付・時間を選んで予約</a>
+        <a href="#" class="reserve-option-btn">コースを選んで予約</a>
+        
+        <p style="font-size: 12px; color: #999; margin-top: 15px;">
+            ※ネット予約不可の日はお電話にて承ります。
+        </p>
+    </div>
+</div>
+
+<!-- 🌟 追加：JavaScript -->
+<script>
+    function openReserveModal() {
+        document.getElementById('reserveModal').style.display = 'flex';
+    }
+    function closeReserveModal() {
+        document.getElementById('reserveModal').style.display = 'none';
+    }
+</script>
 {% endblock %}
-
-<h2>店舗基本情報画面</h2>
-
-<a href="{% url 'stores:customer_store_new_register' %}">戻る</a>
-<a href="{% url 'stores:customer_map' %}">地図を見る</a>
-<a href="{% url 'stores:customer_menu_course' %}">メニュー・コースを見る</a>
-<a href="{% url 'stores:store_basic_edit' %}">店舗基本情報編集</a>
-<a href="{% url 'reviews:customer_report_input' %}">店舗の誤りなどを報告する</a><!--顧客共通報告入力画面に遷移-->
-<a href="{% url 'reviews:customer_review_list' %}">口コミ</a>
