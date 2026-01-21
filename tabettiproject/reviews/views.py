@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.urls import reverse
 from datetime import date, time
+from django.db.models import Max, Count
 
 from django.shortcuts import render, redirect
 from django.views.generic import View
@@ -268,16 +269,6 @@ class customer_store_preserveView(LoginRequiredMixin, View):
 
         # 想定外POSTはGETへ
         return redirect(reverse("reviews:customer_store_preserve"))
-
-
-class customer_reviewer_review_listView(TemplateView):
-    template_name = "reviews/customer_reviewer_review_list.html"
-
-class customer_reviewer_detail_selfView(LoginRequiredMixin, View):
-    def get(self, request, *args, **kwargs):
-        return redirect(reverse("reviews:customer_reviewer_detail", args=[request.user.pk]))
-
-
 class customer_reviewer_detailView(LoginRequiredMixin, View):
     template_name = "reviews/customer_reviewer_detail.html"
 
@@ -331,6 +322,148 @@ class customer_reviewer_detailView(LoginRequiredMixin, View):
             customer.save(update_fields=["icon_image"])
 
         return redirect(reverse("reviews:customer_reviewer_detail"))
+
+class customer_reviewer_detail_selfView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        return redirect(reverse("reviews:customer_reviewer_detail", args=[request.user.pk]))
+
+class customer_reviewer_review_listView(LoginRequiredMixin, View):
+    template_name = "reviews/customer_reviewer_review_list.html"
+
+    def _get_login_customer(self, request):
+        return CustomerAccount.objects.filter(pk=request.user.pk).first()
+
+    def get(self, request, *args, **kwargs):
+        customer = self._get_login_customer(request)
+        if customer is None:
+            messages.error(request, "顧客アカウントでログインしてください。")
+            return redirect(reverse("accounts:customer_login"))
+
+        cover_field = getattr(customer, "cover_image", None)
+        icon_field = getattr(customer, "icon_image", None)
+
+        # ✅ このユーザーの「口コミ（個別）」一覧（削除ボタン用）
+        my_reviews = (
+            Review.objects
+            .select_related("store")
+            .filter(reviewer=customer)
+            .order_by("-posted_at")
+        )
+
+        # ✅ 既存の「口コミ投稿したお店」集計（必要なら残す）
+        reviewed_store_rows = (
+            Review.objects
+            .filter(reviewer=customer)
+            .values("store_id", "store__store_name", "store__branch_name")
+            .annotate(
+                latest_posted_at=Max("posted_at"),
+                visit_count=Count("id"),
+            )
+            .order_by("-latest_posted_at")
+        )
+
+        # ✅ 追加モーダル用：店舗プルダウン
+        store_choices = Store.objects.order_by("store_name", "branch_name")
+
+        context = {
+            "customer": customer,
+            "user_name": customer.nickname,
+            "cover_image_url": cover_field.url if cover_field else "",
+            "user_icon_url": icon_field.url if icon_field else "",
+
+            "reviewed_store_list": reviewed_store_rows,
+            "reviewed_total": reviewed_store_rows.count(),
+
+            "my_reviews": my_reviews,
+            "my_reviews_total": my_reviews.count(),
+
+            "store_choices": store_choices,  # ✅ 追加
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        customer = self._get_login_customer(request)
+        if customer is None:
+            messages.error(request, "顧客アカウントでログインしてください。")
+            return redirect(reverse("accounts:customer_login"))
+
+        action = request.POST.get("action")
+
+        # -------------------------
+        # 1) 口コミ追加
+        # -------------------------
+        if action == "create_review":
+            store_id = request.POST.get("store_id")
+            store = Store.objects.filter(pk=store_id).first() if store_id else None
+            if store is None:
+                messages.error(request, "店舗を選択してください。")
+                return redirect(reverse("reviews:customer_reviewer_review_list"))
+
+            time_slot = (request.POST.get("time_slot") or "").strip()  # "昼" or "夜"
+            score_raw = (request.POST.get("score") or "").strip()
+            title = (request.POST.get("title") or "").strip()
+            body = (request.POST.get("body") or "").strip()
+            agree = request.POST.get("agree")  # "on" or None
+
+            try:
+                score = int(score_raw)
+            except ValueError:
+                score = 0
+
+            if time_slot not in ("昼", "夜"):
+                messages.error(request, "時間帯（昼/夜）を選択してください。")
+                return redirect(reverse("reviews:customer_reviewer_review_list"))
+
+            if score < 1 or score > 5:
+                messages.error(request, "星評価（1〜5）を選択してください。")
+                return redirect(reverse("reviews:customer_reviewer_review_list"))
+
+            if not title:
+                messages.error(request, "タイトルを入力してください。")
+                return redirect(reverse("reviews:customer_reviewer_review_list"))
+
+            if not body:
+                messages.error(request, "本文を入力してください。")
+                return redirect(reverse("reviews:customer_reviewer_review_list"))
+
+            if not agree:
+                messages.error(request, "同意にチェックしてください。")
+                return redirect(reverse("reviews:customer_reviewer_review_list"))
+
+            review_text = f"【{time_slot}】{title}\n{body}"
+
+            Review.objects.create(
+                reviewer=customer,
+                store=store,
+                score=score,
+                review_text=review_text,
+            )
+
+            messages.success(request, "口コミを投稿しました。")
+            return redirect(reverse("reviews:customer_reviewer_review_list"))
+
+        # -------------------------
+        # 2) 口コミ削除（自分の口コミのみ）
+        # -------------------------
+        if action == "delete_review":
+            review_id = request.POST.get("review_id")
+            if not review_id:
+                messages.error(request, "削除対象の口コミが取得できませんでした。")
+                return redirect(reverse("reviews:customer_reviewer_review_list"))
+
+            deleted, _ = Review.objects.filter(
+                id=review_id,
+                reviewer=customer,
+            ).delete()
+
+            if deleted == 0:
+                messages.error(request, "削除できませんでした（他ユーザーの口コミ、または存在しません）。")
+            else:
+                messages.success(request, "口コミを削除しました。")
+
+            return redirect(reverse("reviews:customer_reviewer_review_list"))
+
+        return redirect(reverse("reviews:customer_reviewer_review_list"))
 
 
 class customer_reviewer_searchView(TemplateView):

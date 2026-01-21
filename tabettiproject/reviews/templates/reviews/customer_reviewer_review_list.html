@@ -1,6 +1,7 @@
 {% extends 'customer_base.html' %}
+{% load static %}
 
-{% block title %}ニックネーム16191さんの口コミ投稿したお店 [食べログ]{% endblock %}
+{% block title %}{{ user_name }}さんの口コミ投稿したお店 [タベッチ]{% endblock %}
 
 {% block css %}
 <style>
@@ -53,14 +54,6 @@
         text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
     }
 
-    .user-actions-in-cover {
-        position: absolute;
-        right: 20px;
-        bottom: 15px;
-        display: flex;
-        gap: 8px;
-    }
-
     .btn-action {
         background: #fff;
         border: 1px solid #ccc;
@@ -70,6 +63,27 @@
         border-radius: 2px;
         cursor: pointer;
     }
+
+    /* 口コミ投稿ボタンを緑 */
+    .btn-action.btn-green{
+      background: #82c00e;
+      border-color: #6a9c0b;
+      color: #fff;
+      box-shadow: 0 2px 0 #6a9c0b;
+    }
+    .btn-action.btn-green:hover{
+      filter: brightness(0.98);
+    }
+
+    /* 投稿コメントを左揃えで整える */
+   .review-text{
+  font-size: 13px;
+  margin-top: 8px;
+  white-space: normal;   /* 連続スペースは潰す */
+  text-align: left;
+  line-height: 1.6;
+}
+
 
     .user-icon-box {
         position: absolute;
@@ -188,11 +202,11 @@
     /* 変更箇所：詳細検索ボタンのスタイル */
     .btn-detailed-search {
         display: flex;
-        align-items: center;      /* 垂直方向の中央 */
-        justify-content: center;   /* 水平方向の中央（偏りの解消） */
-        gap: 5px;                 /* アイコンと文字の間の隙間 */
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
         width: 100%;
-        background: linear-gradient(#ffffff, #f2f2f2); /* 微かなグラデーション */
+        background: linear-gradient(#ffffff, #f2f2f2);
         border: 1px solid #ccc;
         padding: 6px 0;
         font-size: 11px;
@@ -200,7 +214,7 @@
         color: #333;
         border-radius: 3px;
         text-decoration: none;
-        box-sizing: border-box;   /* パディングを含めた幅計算 */
+        box-sizing: border-box;
     }
 
     .btn-detailed-search:hover {
@@ -208,7 +222,6 @@
         border-color: #bbb;
     }
 
-    /* 変更箇所：アイコンの自作（画像ズレの防止） */
     .icon-paper {
         display: inline-block;
         width: 12px;
@@ -216,10 +229,9 @@
         background: #fff;
         border: 1px solid #bbb;
         position: relative;
-        flex-shrink: 0;           /* アイコンが潰れないように固定 */
+        flex-shrink: 0;
     }
-    
-    /* アイコンの中の線（より詳細な再現） */
+
     .icon-paper::after {
         content: "";
         position: absolute;
@@ -247,7 +259,6 @@
         margin-bottom: 10px;
     }
 
-    /* 並び替えバーのレイアウト */
     .sort-nav {
         border-bottom: 1px solid #e6e6e2;
         padding: 8px 0;
@@ -274,6 +285,168 @@
 
     .icon-inline { vertical-align: middle; }
     .select-sm { width: 75px; padding: 2px; border: 1px solid #ccc; font-size: 12px; }
+
+    /* ==========================
+       口コミ投稿モーダル
+    ========================== */
+    .modal-backdrop{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 9999;
+    }
+    .modal-backdrop.active{ display:flex; }
+
+    .modal-card{
+      width: 100%;
+      max-width: 560px;
+      background: #fff;
+      border: 1px solid #e6e6e2;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,.2);
+    }
+
+    .modal-head{
+      display:flex;
+      justify-content: space-between;
+      align-items:center;
+      padding: 12px 14px;
+      background: #f9f9f7;
+      border-bottom: 1px solid #e6e6e2;
+    }
+    .modal-title{ font-weight: bold; font-size: 14px; }
+    .modal-close{
+      border: none;
+      background: transparent;
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .modal-body{ padding: 14px; }
+
+    .field{ margin-bottom: 12px; }
+    .label{
+      display:block;
+      font-size: 12px;
+      font-weight: bold;
+      color: #444;
+      margin-bottom: 6px;
+    }
+
+    .text-input{
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 13px;
+      box-sizing: border-box;
+    }
+    .text-area{
+      width: 100%;
+      min-height: 120px;
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 13px;
+      box-sizing: border-box;
+      resize: vertical;
+    }
+
+    .time-slot{
+      display:flex;
+      gap: 8px;
+    }
+    .slot-btn{
+      border: 1px solid #ccc;
+      background: #fff;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .slot-btn.active{
+      border-color: #66635c;
+      background: #f4f4f2;
+    }
+
+    .stars{
+      display:flex;
+      align-items:center;
+      gap: 4px;
+      user-select:none;
+    }
+    .star{
+      font-size: 20px;
+      color: #ccc;
+      cursor: pointer;
+    }
+    .star.filled{ color: #f2b01e; }
+    .score-badge{
+      margin-left: 8px;
+      font-size: 12px;
+      color: #666;
+      border: 1px solid #e6e6e2;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #fafafa;
+    }
+
+    .agree-row{
+      display:flex;
+      gap: 8px;
+      align-items:flex-start;
+      font-size: 12px;
+      color:#444;
+      line-height: 1.5;
+    }
+    .agree-row input{ margin-top: 2px; }
+
+    .modal-foot{
+      display:flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 12px 14px;
+      border-top: 1px solid #e6e6e2;
+      background: #fff;
+    }
+
+    .btn{
+      border: 1px solid #ccc;
+      background: #fff;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .btn-primary{
+      border-color: #6a9c0b;
+      background: #82c00e;
+      color: #fff;
+    }
+    .btn-primary:disabled{
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    /* 口コミカード左側を全部左揃えに（強制） */
+    .review-left{
+      text-align: left !important;
+    }
+    .review-title{
+      text-align: left !important;
+    }
+    .review-meta{
+      text-align: left !important;
+    }
 </style>
 {% endblock %}
 
@@ -281,24 +454,26 @@
 <div class="tabelog-container">
 
     <header class="user-header-unit">
-        <div class="cover-wallpaper">
-            <div class="sub-id-in-cover">2eeb92のレストランガイド</div>
-            <div class="user-actions-in-cover">
-                <button class="btn-action">フォロー中</button>
-                <button class="btn-action" style="color:#999;" disabled>メッセージを送る</button>
-            </div>
+        <div class="cover-wallpaper"
+     style="background-image:url('{% if cover_image_url %}{{ cover_image_url }}{% else %}{% static "images/default_cover.jpg" %}{% endif %}');">
+
+
+            <div class="sub-id-in-cover">{{ user_name }}のレストランガイド</div>
         </div>
         <div class="user-icon-box">
-            <img src="https://placehold.jp/110x110.png?text=User" alt="ユーザーアイコン" width="110" height="110">
+            <img src="{% if user_icon_url %}{{ user_icon_url }}{% else %}{% static 'images/default_icon.png' %}{% endif %}"
+                 alt="ユーザーアイコン"
+                 width="110"
+                 height="110">
         </div>
         <div class="profile-info-nav-bar">
-            <div class="name-set"><h1 class="main-nick">ニックネーム16191</h1></div>
+            <div class="name-set"><h1 class="main-nick">{{ user_name }}</h1></div>
             <nav>
                 <ul class="mypage-tabs">
                     <li><a href="#">トップ</a></li>
                     <li><a href="#" class="active">口コミ</a></li>
-                    <li><a href="#">フォロー中</a></li>
-                    <li><a href="#">フォロワー</a></li>
+                    <li><a href="{% url 'follows:customer_follow_list' %}">フォロー中</a></li>
+                    <li><a href="{% url 'follows:customer_follower_list' %}">フォロワー</a></li>
                 </ul>
             </nav>
         </div>
@@ -362,7 +537,7 @@
         <main class="main-col">
             <div class="main-content-card">
                 <div class="content-header">
-                    <h2 style="font-size: 18px; margin: 0;">口コミ投稿したお店</h2>
+                    <h2 style="font-size: 18px; margin: 0;">口コミ一覧</h2>
                     <a href="#" style="font-size: 12px; color: #06c; text-decoration: none;">
                         検索条件を変更 <img src="..." alt="..." width="12" height="12" class="icon-inline">
                     </a>
@@ -382,7 +557,7 @@
                         <li style="color:#ccc;">|</li>
                         <li><a href="#">行った回数順</a></li>
                         <li style="color:#ccc;">|</li>
-                        <li><a href="#">食べログ総合ランキング</a></li>
+                        <li><a href="#">タベッチ総合ランキング</a></li>
                     </ul>
                     <a href="#" style="color:#06c; text-decoration:none; font-weight:bold;">地図表示</a>
                 </nav>
@@ -393,23 +568,234 @@
                     <a href="#" style="color:#06c;">&gt; 詳しくはこちら</a>
                 </div>
 
-                <div style="font-size: 13px; margin-bottom: 10px;">
-                    <strong>1〜11</strong> 件を表示 ／ 全 <strong>11</strong> 件
+                <div style="font-size: 13px; margin: 15px 0 10px;">
+                    <strong>全 {{ my_reviews_total }}</strong> 件
                 </div>
 
-                <article style="border-top:1px dotted #ccc; padding: 20px 0;">
-                    <div style="display:flex; justify-content:space-between;">
-                        <div>
-                            <a href="#" style="font-size: 16px; font-weight: bold; color: #06c; text-decoration:none;">バタービールバー</a>
-                            <p style="font-size: 12px; color: #666; margin: 5px 0;">（豊島園、練馬春日町 / カフェ、バー）</p>
+                {% if my_reviews_total > 0 %}
+                  {% for rv in my_reviews %}
+                    <article style="border-top:1px dotted #ccc; padding: 16px 0;">
+                      <div style="display:flex; justify-content:space-between; gap:12px;">
+
+                        <!-- 左側：タイトル/時間帯/本文（全部左揃え） -->
+                        <div class="review-left" style="min-width:0;">
+                          <div class="review-title" style="font-weight:bold; font-size:15px;">
+                            {{ rv.store.store_name }}{% if rv.store.branch_name %} {{ rv.store.branch_name }}{% endif %}
+                          </div>
+
+                          <div class="review-meta" style="font-size:12px; color:#666; margin-top:4px;">
+                            投稿日：{{ rv.posted_at|date:"Y/m/d H:i" }} ／ 評価：{{ rv.score }}
+                          </div>
+
+                          <div class="review-text">
+                            {{ rv.review_text|linebreaksbr }}
+                          </div>
                         </div>
-                        <span style="border:1px solid #e6e6e2; padding:2px 8px; font-size:11px; background:#fafafa; align-self: flex-start;">1回</span>
-                    </div>
-                </article>
+
+                        <!-- 右側：ボタン群 -->
+                        <div style="display:flex; gap:8px; align-items:flex-start; flex-shrink:0;">
+
+                          <!-- 口コミを投稿（モーダル起動） -->
+                          <button type="button"
+                                  class="btn-action btn-green openPostModal"
+                                  style="white-space:nowrap;">
+                            口コミを投稿
+                          </button>
+
+                          <!-- 削除 -->
+                          <form method="post" action="{% url 'reviews:customer_reviewer_review_list' %}" style="margin:0;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="delete_review">
+                            <input type="hidden" name="review_id" value="{{ rv.id }}">
+                            <button type="submit" class="btn-action"
+                                    style="white-space:nowrap;"
+                                    onclick="return confirm('削除してもよろしいですか？');">
+                              削除
+                            </button>
+                          </form>
+
+                        </div>
+                      </div>
+                    </article>
+                  {% endfor %}
+                {% else %}
+                  <div style="padding:20px; color:#666;">
+                    まだ口コミがありません。
+                  </div>
+                {% endif %}
             </div>    
         </main>
     </div>
 </div>
+
+<!-- ==========================
+     投稿モーダル（追加）
+========================== -->
+<div id="postModal" class="modal-backdrop" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-label="口コミ投稿">
+    <div class="modal-head">
+      <div class="modal-title">口コミを投稿</div>
+      <button id="closePostModal" class="modal-close" type="button">×</button>
+    </div>
+
+    <form id="reviewPostForm" method="post" action="{% url 'reviews:customer_reviewer_review_list' %}">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="create_review">
+      <input type="hidden" name="time_slot" id="timeSlotInput" value="">
+      <input type="hidden" name="score" id="scoreInput" value="">
+
+      <div class="modal-body">
+
+        <!-- 店舗選択（追加） -->
+        <div class="field">
+          <label class="label" for="storeSelect">店舗</label>
+          <select id="storeSelect" name="store_id" class="text-input">
+            <option value="">選択してください</option>
+            {% for s in store_choices %}
+              <option value="{{ s.id }}">{{ s.store_name }}{% if s.branch_name %} {{ s.branch_name }}{% endif %}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="field">
+          <span class="label">時間帯</span>
+          <div class="time-slot">
+            <button type="button" class="slot-btn" data-slot="昼">☀ 昼</button>
+            <button type="button" class="slot-btn" data-slot="夜">🌙 夜</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="label">評価</span>
+          <div class="stars" id="stars">
+            <span class="star" data-v="1">★</span>
+            <span class="star" data-v="2">★</span>
+            <span class="star" data-v="3">★</span>
+            <span class="star" data-v="4">★</span>
+            <span class="star" data-v="5">★</span>
+            <span class="score-badge" id="scoreBadge">未選択</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="reviewTitle">タイトル</label>
+          <input id="reviewTitle" class="text-input" type="text" name="title" maxlength="100" placeholder="例）また行きたい！">
+        </div>
+
+        <div class="field">
+          <label class="label" for="reviewBody">本文</label>
+          <textarea id="reviewBody" class="text-area" name="body" placeholder="料理・接客・雰囲気など自由に書いてください"></textarea>
+        </div>
+
+        <div class="agree-row">
+          <input id="agreeCheck" type="checkbox" name="agree">
+          <label for="agreeCheck">
+            内容に同意して投稿します（誹謗中傷・個人情報の投稿はしません）
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button id="cancelBtn" class="btn" type="button">キャンセル</button>
+        <button id="submitBtn" class="btn btn-primary" type="submit" disabled>同意して投稿</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function(){
+  const modal = document.getElementById("postModal");
+  const closeBtn = document.getElementById("closePostModal");
+  const cancelBtn = document.getElementById("cancelBtn");
+
+  const storeSelect = document.getElementById("storeSelect");
+  const slotBtns = modal.querySelectorAll(".slot-btn");
+  const timeSlotInput = document.getElementById("timeSlotInput");
+
+  const starsWrap = document.getElementById("stars");
+  const stars = starsWrap.querySelectorAll(".star");
+  const scoreInput = document.getElementById("scoreInput");
+  const scoreBadge = document.getElementById("scoreBadge");
+
+  const agree = document.getElementById("agreeCheck");
+  const submitBtn = document.getElementById("submitBtn");
+
+  function openModal(){
+    modal.classList.add("active");
+    modal.setAttribute("aria-hidden", "false");
+  }
+  function closeModal(){
+    modal.classList.remove("active");
+    modal.setAttribute("aria-hidden", "true");
+  }
+
+  function updateSubmitState(){
+    const okStore = !!(storeSelect && storeSelect.value);
+    const okAgree = agree.checked;
+    const okSlot = timeSlotInput.value === "昼" || timeSlotInput.value === "夜";
+    const okScore = Number(scoreInput.value || "0") >= 1;
+    submitBtn.disabled = !(okStore && okAgree && okSlot && okScore);
+  }
+
+  // 複数の「口コミを投稿」ボタンに対応
+  document.querySelectorAll(".openPostModal").forEach(btn => {
+    btn.addEventListener("click", openModal);
+  });
+
+  closeBtn.addEventListener("click", closeModal);
+  cancelBtn.addEventListener("click", closeModal);
+
+  modal.addEventListener("click", (e) => {
+    if(e.target === modal) closeModal();
+  });
+
+  if(storeSelect){
+    storeSelect.addEventListener("change", updateSubmitState);
+  }
+
+  slotBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      slotBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      timeSlotInput.value = btn.dataset.slot;
+      updateSubmitState();
+    });
+  });
+
+  function paintStars(v){
+    stars.forEach(s => {
+      const sv = Number(s.dataset.v);
+      s.classList.toggle("filled", sv <= v);
+    });
+    scoreBadge.textContent = v ? (v + " / 5") : "未選択";
+  }
+
+  stars.forEach(s => {
+    s.addEventListener("click", () => {
+      const v = Number(s.dataset.v);
+      scoreInput.value = String(v);
+      paintStars(v);
+      updateSubmitState();
+    });
+    s.addEventListener("mouseenter", () => {
+      const v = Number(s.dataset.v);
+      paintStars(v);
+    });
+  });
+
+  starsWrap.addEventListener("mouseleave", () => {
+    const v = Number(scoreInput.value || "0");
+    paintStars(v);
+  });
+
+  agree.addEventListener("change", updateSubmitState);
+
+  paintStars(0);
+  updateSubmitState();
+})();
+</script>
+
 {% endblock %}
 
 <a href="{% url 'reviews:customer_reviewer_detail'%}">トップ</a>
