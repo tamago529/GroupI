@@ -2,6 +2,21 @@ from django.shortcuts import render
 from django.core.paginator import Paginator
 from commons.models import Store
 
+def genre_list(request):
+    genres = [
+        "焼肉",
+        "寿司",
+        "ラーメン",
+        "居酒屋",
+        "カフェ",
+        "イタリアン",
+        "中華",
+        "フレンチ",
+    ]
+    return render(request, "search/customer_genre_list.html", {
+        "genres": genres
+    })
+
 def customer_search_listView(request):
     store_qs = Store.objects.select_related("area", "scene").order_by("id")
 
