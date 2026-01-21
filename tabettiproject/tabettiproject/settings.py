@@ -144,3 +144,4 @@ STATICFILES_DIRS = [
 ]
 
 AUTH_USER_MODEL = "commons.Account"
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

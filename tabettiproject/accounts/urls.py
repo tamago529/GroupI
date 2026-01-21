@@ -3,6 +3,7 @@ from .views import *
 from django.conf import settings
 from django.conf.urls.static import static
 
+from . import views
 app_name = "accounts"
 
 urlpatterns = [
@@ -19,9 +20,14 @@ urlpatterns = [
     path("customer_logout/", customer_logout_view, name="customer_logout"),
     path("customer_register/", customer_registerView.as_view(), name="customer_register"),
     path("customer_settings/", customer_settingsView.as_view(), name="customer_settings"),
-    path("customermail_send/", customermail_sendView.as_view(), name="customermail_send"),
+    path("customer_mail_send/", customermail_sendView.as_view(), name="customer_mail_send"),
     path("customer_password_reset_complete/", customer_password_reset_completeView.as_view(), name="customer_password_reset_complete"),
     path("customer_password_reset_expire/", customer_password_reset_expireView.as_view(), name="customer_password_reset_expire"),
+    
+    path('password_reset/done/', views.customer_password_doneView.as_view(), name='customer_password_done'),
+    path('reset/<uidb64>/<token>/', views.customer_password_resetView.as_view(), name='password_reset_confirm'),
+    path('reset/done/', views.customer_password_reset_completeView.as_view(), name='customer_password_reset_complete'),
+
     path("customer_password_reset/", customer_password_resetView.as_view(), name="customer_password_reset"),
     path("store_account_edit/", store_account_editView.as_view(), name="store_account_edit"),
     path("store_login/", store_loginView.as_view(), name="store_login"),

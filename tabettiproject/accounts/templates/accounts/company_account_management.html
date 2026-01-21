@@ -81,7 +81,7 @@
                 <span class="account-sub-info">ID: {{ acc.username }} / {{ acc.email }}</span>
             </div>
             <div class="item-actions">
-<<<<<<< HEAD
+
                 <button class="btn-item" onclick="showDetail('{{ acc.username }}')">詳細</button>
                 <a href="{% url 'commons:company_common_confirm' %}?message={{ acc.username }}を削除しますか？&next_url=#" class="btn-item">削除</a>
             </div>
@@ -94,7 +94,7 @@
                 {% else %}
                     該当するアカウントはありません。
                 {% endif %}
-=======
+
                 <button class="btn-item" onclick="alert('詳細ポップを表示')">詳細</button>
                 <a href="{% url 'commons:company_common_confirm' %}" class="btn-item">削除</a>
             </div>
@@ -105,7 +105,7 @@
             <div class="item-actions">
                 <button class="btn-item">詳細</button>
                 <a href="{% url 'commons:company_common_confirm' %}" class="btn-item">削除</a>
->>>>>>> c72850d54a74a6b31d380ed2403fe2731fad0ea0
+
             </div>
         {% endfor %}
     </div>

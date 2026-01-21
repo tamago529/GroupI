@@ -13,6 +13,7 @@ from django.contrib import messages                         # エラー表示用
 from django.db.models import Q
 from django.views.generic import ListView
 from .forms import CustomerLoginForm
+from django.contrib.auth.views import PasswordResetView , PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 #共通機能の定義
 
 class company_account_managementView(ListView):
@@ -118,17 +119,24 @@ class customer_registerView(TemplateView):
 class customer_settingsView(TemplateView):
     template_name = "accounts/customer_settings.html"
 
-class customermail_sendView(TemplateView):
+class customermail_sendView(PasswordResetView):
     template_name = "accounts/customer_mail_send.html"
+    email_template_name = "accounts/password_reset_email.html"
+    success_url = reverse_lazy('accounts:customer_password_done') # 送信完了画面へ
 
-class customer_password_reset_completeView(TemplateView):
+class customer_password_reset_completeView(PasswordResetCompleteView):
     template_name = "accounts/customer_password_reset_complete.html"
+    success_url = reverse_lazy('accounts:customer_password_reset_complete')
 
-class customer_password_reset_expireView(TemplateView):                    
+class customer_password_doneView(PasswordResetDoneView):
+    template_name = "accounts/customer_mail_sent_info.html"
+
+class customer_password_reset_expireView(TemplateView):
     template_name = "accounts/customer_password_reset_expire.html"
 
-class customer_password_resetView(TemplateView):
+class customer_password_resetView(PasswordResetConfirmView):
     template_name = "accounts/customer_password_reset.html"
+    success_url = reverse_lazy('accounts:customer_password_reset_complete')
 
 class store_account_editView(TemplateView):
     template_name = "accounts/store_account_edit.html"
@@ -199,7 +207,6 @@ class store_logoutView(LogoutView):
         return self.post(request, *args, **kwargs)
     
 
-#ここまで
 
 class store_registerView(TemplateView):
     template_name = "accounts/store_register.html"
