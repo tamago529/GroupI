@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from datetime import time
 
 
 # ----------------
@@ -197,6 +198,23 @@ class Store(models.Model):
     map_location = models.CharField(max_length=255, verbose_name="地図")
     area = models.ForeignKey("Area", on_delete=models.PROTECT, verbose_name="エリア")
     business_hours = models.CharField(max_length=50, verbose_name="営業時間")
+
+    # 営業時間（1枠目）
+    open_time_1 = models.TimeField(
+        null=True, blank=True, verbose_name="開店時間①"
+    )
+    close_time_1 = models.TimeField(
+        null=True, blank=True, verbose_name="閉店時間①"
+    )
+
+    # 営業時間（2枠目：ランチ・ディナー想定）
+    open_time_2 = models.TimeField(
+        null=True, blank=True, verbose_name="開店時間②"
+    )
+    close_time_2 = models.TimeField(
+        null=True, blank=True, verbose_name="閉店時間②"
+    )
+
     seats = models.IntegerField(verbose_name="席数")
     budget = models.IntegerField(verbose_name="予算")
     scene = models.ForeignKey("Scene", on_delete=models.PROTECT, verbose_name="利用シーン")
@@ -332,6 +350,14 @@ class Reservation(models.Model):
     store = models.ForeignKey("Store", on_delete=models.CASCADE, verbose_name="店舗")
     visit_date = models.DateField(verbose_name="来店日")
     visit_time = models.TimeField(verbose_name="来店時刻")
+
+    start_time = models.TimeField(
+        null=True, blank=True, verbose_name="来店開始時刻"
+    )
+    end_time = models.TimeField(
+        null=True, blank=True, verbose_name="来店終了時刻"
+    )
+
     visit_count = models.IntegerField(verbose_name="来店人数")
     course = models.CharField(max_length=255, verbose_name="コース")
     booking_status = models.ForeignKey("ReservationStatus", on_delete=models.PROTECT, verbose_name="予約ステータス")
@@ -348,18 +374,24 @@ class Reservation(models.Model):
 
 
 class StoreOnlineReservation(models.Model):
-    store = models.OneToOneField("Store", on_delete=models.CASCADE, verbose_name="店舗")
-    booking_status = models.BooleanField(verbose_name="予約受付状況")
-    available_seats = models.IntegerField(verbose_name="予約可能席数")
+    store = models.ForeignKey("Store", on_delete=models.CASCADE, verbose_name="店舗")
     date = models.DateField(verbose_name="日付")
+    booking_status = models.BooleanField(verbose_name="予約受付状況", default=True)
+    available_seats = models.IntegerField(verbose_name="予約可能席数", default=0)
 
     class Meta:
         db_table = "store_online_reservations"
         verbose_name = "店舗ネット予約情報"
         verbose_name_plural = "店舗ネット予約情報"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["store", "date"],
+                name="uniq_store_date"
+            )
+        ]
 
     def __str__(self):
-        return f"Online Reservation Info for {self.store.store_name} on {self.date}"
+        return f"{self.store.store_name} - {self.date}"
 
 
 # ----------------
