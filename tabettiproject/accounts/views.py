@@ -24,7 +24,7 @@ class company_account_managementView(ListView):
     def get_queryset(self):
         queryset = super().get_queryset().select_related('account_type')
         
-        # 1. 検索ワード（ID、メアド、名前で検索）
+        # 1. 検索ワード
         q = self.request.GET.get('q')
         if q:
             queryset = queryset.filter(
@@ -33,24 +33,23 @@ class company_account_managementView(ListView):
                 Q(customeraccount__nickname__icontains=q)
             )
 
-        # 2. アカウント種別絞り込み
-        # チェックボックスの値（customer, store）を取得
-        types = self.request.GET.getlist('type')
-        if types:
-            # AccountTypeマスタの名称で絞り込む（マスタの名称に合わせて調整してください）
-            type_queries = Q()
-            if 'customer' in types:
-                type_queries |= Q(account_type__account_type='顧客')
-            if 'store' in types:
-                type_queries |= Q(account_type__account_type='店舗')
-            queryset = queryset.filter(type_queries)
+        # 2. アカウント種別絞り込み（ラジオボタン形式に対応）
+        # getlist ではなく get で単一の値として取得します
+        selected_type = self.request.GET.get('type', 'all') 
+        
+        if selected_type == 'customer':
+            queryset = queryset.filter(account_type__account_type='顧客')
+        elif selected_type == 'store':
+            queryset = queryset.filter(account_type__account_type='店舗')
+        # 'all' の場合は filter をかけずに全件表示
 
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['query'] = self.request.GET.get('q', '')
-        context['selected_types'] = self.request.GET.getlist('type')
+        # 現在選択されている値をテンプレートに返す（デフォルトは 'all'）
+        context['selected_type'] = self.request.GET.get('type', 'all')
         return context
     
 class company_loginView(LoginView):

@@ -54,11 +54,23 @@
             
             <div class="filter-row">
                 <span style="font-size: 14px; color: #666;">絞り込み：</span>
+                
                 <label class="filter-label">
-                    <input type="checkbox" name="type" value="customer" {% if 'customer' in selected_types %}checked{% endif %}> 顧客
+                    <input type="radio" name="type" value="all" 
+                        {% if selected_type == 'all' %}checked{% endif %} 
+                        onchange="this.form.submit()"> すべて
                 </label>
+                
                 <label class="filter-label">
-                    <input type="checkbox" name="type" value="store" {% if 'store' in selected_types %}checked{% endif %}> 店舗
+                    <input type="radio" name="type" value="customer" 
+                        {% if selected_type == 'customer' %}checked{% endif %} 
+                        onchange="this.form.submit()"> 顧客
+                </label>
+                
+                <label class="filter-label">
+                    <input type="radio" name="type" value="store" 
+                        {% if selected_type == 'store' %}checked{% endif %} 
+                        onchange="this.form.submit()"> 店舗
                 </label>
             </div>
         </form>
@@ -66,46 +78,32 @@
 
     <div class="account-list">
         {% for acc in accounts %}
-        <div class="account-item">
-            <div class="account-info">
-                <span class="type-badge">{{ acc.account_type.account_type }}</span>
-                <span class="account-name">
-                    {% if acc.customeraccount %}
-                        {{ acc.customeraccount.nickname }}
-                    {% elif acc.storeaccount %}
-                        {{ acc.storeaccount.store.store_name }}
-                    {% else %}
-                        {{ acc.username }}
-                    {% endif %}
-                </span>
-                <span class="account-sub-info">ID: {{ acc.username }} / {{ acc.email }}</span>
+            <div class="account-item">
+                <div class="account-info">
+                    <span class="type-badge">{{ acc.account_type.account_type }}</span>
+                    <span class="account-name">
+                        {% if acc.customeraccount %}
+                            {{ acc.customeraccount.nickname }}
+                        {% elif acc.storeaccount %}
+                            {{ acc.storeaccount.store.store_name }}
+                        {% else %}
+                            {{ acc.username }}
+                        {% endif %}
+                    </span>
+                    <span class="account-sub-info">ID: {{ acc.username }} / {{ acc.email }}</span>
+                </div>
+                <div class="item-actions">
+                    <button class="btn-item" onclick="showDetail('{{ acc.username }}')">詳細</button>
+                    <a href="{% url 'commons:company_common_confirm' %}?message={{ acc.username }}を削除しますか？&next_url={% url 'commons:company_common_confirm'%}" class="btn-item">削除</a>
+                </div>
             </div>
-            <div class="item-actions">
-
-                <button class="btn-item" onclick="showDetail('{{ acc.username }}')">詳細</button>
-                <a href="{% url 'commons:company_common_confirm' %}?message={{ acc.username }}を削除しますか？&next_url=#" class="btn-item">削除</a>
-            </div>
-        </div>
         {% empty %}
-            <!-- ここがポイント：見つからない時はリストの中にメッセージを出す -->
             <div class="no-results">
                 {% if query %}
                     「{{ query }}」に一致するアカウントは見つかりませんでした。
                 {% else %}
                     該当するアカウントはありません。
                 {% endif %}
-
-                <button class="btn-item" onclick="alert('詳細ポップを表示')">詳細</button>
-                <a href="{% url 'commons:company_common_confirm' %}" class="btn-item">削除</a>
-            </div>
-        </div>
-        <!-- サンプル2 -->
-        <div class="account-item">
-            <div class="account-name">アカウント名</div>
-            <div class="item-actions">
-                <button class="btn-item">詳細</button>
-                <a href="{% url 'commons:company_common_confirm' %}" class="btn-item">削除</a>
-
             </div>
         {% endfor %}
     </div>
