@@ -27,8 +27,11 @@
   <!-- 下段：ロゴ＋検索バー -->
   <div class="header-bottom">
     <div class="logo">
-      <img src="{% static 'images/Tabecchi.png' %}" alt="Tabecchi Logo">
-    </div>
+  <a href="{% url 'accounts:customer_top' %}">
+    <img src="{% static 'images/Tabecchi.png' %}" alt="Tabecchi Logo">
+  </a>
+</div>
+
 
     <!-- 🔽 action を追加 -->
     <form class="search-bar" method="get" action="{% url 'search:customer_search_list' %}">

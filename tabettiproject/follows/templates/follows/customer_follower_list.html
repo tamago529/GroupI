@@ -1,4 +1,5 @@
 {% extends "customer_base.html" %}
+{% load static %}
 
 {% block title %}フォロワー{% endblock %}
 
@@ -33,9 +34,14 @@
   .profile-cover {
     width: 100%;
     height: 140px;
-    background: #e2dfd4; 
+    background: #e2dfd4;
     border-bottom: 3px solid #595950;
     overflow: visible;
+
+    /* ✅ 追加：背景画像が設定される前提 */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
   }
 
   .profile-cover .inner-container {
@@ -53,18 +59,27 @@
       border: 1px solid #c2c2b8;
       border-radius: 4px;
       z-index: 10;
+
+      /* ✅ 追加：画像を枠内に収める */
+      overflow: hidden;
+  }
+  .profile-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
   }
 
   /* タイトル */
   .profile-title {
       position: absolute;
       top: 65px;
-      left: 120px; 
+      left: 120px;
       color: #fff;
       font-size: 18px;
       font-weight: bold;
       text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
-  } 
+  }
 
   /* マイページ設定：右側に配置 */
   .profile-setting-wrapper {
@@ -190,6 +205,7 @@
       font-size: 11px;
       color: #333;
       border-radius: 2px;
+      cursor: pointer;
   }
 
   .card-info {
@@ -203,21 +219,40 @@
 
 {% block content %}
 <div class="profile-header">
-  <div class="profile-cover">
+
+  {# ✅ cover_image_url を背景に反映（なければ default_cover.jpg） #}
+  <div class="profile-cover"style="background-image:url('{% if cover_image_url %}{{ cover_image_url }}{% else %}{% static 'images/default_cover.jpg' %}{% endif %}');">
     <div class="inner-container">
-        <div class="profile-icon"></div>
-        <div class="profile-title">{{ profile_title }}</div>
-        <div class="profile-setting-wrapper">
-          <a href="{% url 'accounts:customer_settings' %}" class="profile-setting">マイページ設定</a>
-        </div>
+
+      {# ✅ アイコンを表示（なければ Tabecchi.png を仮フォールバック） #}
+      <div class="profile-icon">
+        <img
+          src="{% if user_icon_url %}{{ user_icon_url }}{% else %}{% static 'images/Tabecchi.png' %}{% endif %}"
+          alt="{{ user_name }}さんのアイコン"
+        >
+      </div>
+
+      {# ✅ タイトル（クラス名をCSSに合わせて profile-title に統一） #}
+      <div class="profile-title">{{ profile_title }}</div>
+
+      <div class="profile-setting-wrapper">
+        <a href="{% url 'accounts:customer_settings' %}" class="profile-setting">マイページ設定</a>
+      </div>
+
     </div>
   </div>
-  
+
   <div class="profile-sub-nav">
     <div class="inner-container">
       <div class="profile-name">
-        {% if user.is_authenticated %}{{ user.username }}{% else %}ゲスト{% endif %}
+        {# ✅ nickname を優先して表示 #}
+        {% if user.is_authenticated %}
+          {{ user_name }}
+        {% else %}
+          ゲスト
+        {% endif %}
       </div>
+
       <nav class="profile-nav">
         <a href="{% url 'reviews:customer_reviewer_detail' %}">トップ</a>
         <a href="{% url 'reviews:customer_reviewer_review_list' %}">口コミ</a>
@@ -236,25 +271,30 @@
     <div class="user-card">
       <div class="card-image"></div>
       <div class="card-user-icon"></div>
-      
+
       <div class="card-body">
-        
         <form method="post" style="display: inline;">
           {% csrf_token %}
           <input type="hidden" name="user_id" value="{{ item.id }}">
-          
+
           {% if item.is_following %}
-            <button type="submit" class="follow-btn" style="background: #f2f2ef; color: #666;" onclick="return confirm('フォローを解除しますか？')">
+            <button type="submit"
+                    class="follow-btn"
+                    style="background: #f2f2ef; color: #666;"
+                    onclick="return confirm('フォローを解除しますか？')">
               フォロー中
             </button>
           {% else %}
-            <button type="submit" class="follow-btn" style="color: #f0a500; border-color: #f0a500;">
+            <button type="submit"
+                    class="follow-btn"
+                    style="color: #f0a500; border-color: #f0a500;">
               + フォロー
             </button>
           {% endif %}
         </form>
+
         <a href="#" class="card-name">{{ item.user.username }}</a>
-        
+
         <div class="card-info">
           <div style="color: #f0a500; font-weight: bold; margin-bottom: 4px;">あなたをフォローしています</div>
           <div>{{ item.review_count }}ログ</div>
