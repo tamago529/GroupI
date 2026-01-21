@@ -463,3 +463,49 @@ class TempRequestMailLog(models.Model):
 
     def __str__(self):
         return f"Temp Request Mail for {self.requester.nickname} requested at {self.requested_at}"
+
+class StoreInfoReport(models.Model):
+    store = models.ForeignKey(
+        "Store",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="対象店舗",
+    )
+    reporter = models.ForeignKey(
+        "CustomerAccount",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="報告者",
+    )
+    message = models.TextField(verbose_name="報告内容")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="報告日時")
+
+    class Meta:
+        db_table = "store_info_reports"
+        verbose_name = "店舗情報の報告"
+        verbose_name_plural = "店舗情報の報告"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"store={self.store_id} reporter={self.reporter_id} {self.created_at}"
+
+
+class StoreInfoReportPhoto(models.Model):
+    report = models.ForeignKey(
+        "StoreInfoReport",
+        on_delete=models.CASCADE,
+        related_name="photos",
+        verbose_name="報告",
+    )
+    image = models.ImageField(upload_to="store_reports/photos/", verbose_name="写真")
+    uploaded_at = models.DateTimeField(auto_now_add=True, verbose_name="アップロード日時")
+
+    class Meta:
+        db_table = "store_info_report_photos"
+        verbose_name = "店舗情報報告の写真"
+        verbose_name_plural = "店舗情報報告の写真"
+
+    def __str__(self):
+        return str(self.image)

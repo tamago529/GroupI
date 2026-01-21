@@ -1,5 +1,3 @@
-顧客共通報告入力画面
-
 {% extends "customer_base.html" %}
 
 {% block content %}
@@ -162,8 +160,12 @@
         <span style="color: #666;">※ご返信は基本的に行っておりませんので、ご了承ください。</span></p>
     </div>
 
-    <form action="{% url 'stores:customer_map' %}" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
+    <form action="{% url 'reviews:customer_report_input' %}" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  {% if store %}
+    <input type="hidden" name="store_id" value="{{ store.id }}">
+  {% endif %}
         
         <table class="report-table">
             <caption>店舗情報報告用入力項目</caption>
@@ -187,9 +189,8 @@
                     <td>
                         <p class="photo-info">張り紙や外観などで確認した場合、確認出来る写真があれば、添付してください（最大5枚まで写真を登録できます）。</p>
                         <div class="photo-upload-area">
-                            <input type="file" name="files[]">
+                            <input type="file" name="files" multiple>
                         </div>
-                        <button type="button" class="btn-secondary">写真を追加する</button>
                     </td>
                 </tr>
             </tbody>
@@ -200,19 +201,35 @@
             <ol class="agreement-list">
                 <li>事業者の名称、個人情報保護管理者等の職名、連絡先については、<a href="#">個人情報保護方針</a>をご覧ください。</li>
                 <li>当社はお問い合わせフォームで取得した個人情報を返信目的にのみ利用いたします。</li>
-                <li>なお返信目的に必要な限度において、当該個人情報について<a href="#">食べログ正規代理店</a>へ提供する場合があります。または、返信目的に必要な限度において、当該個人情報の取扱いを当社業務委託先へ委託する場合があります。</li>
+                <li>なお返信目的に必要な限度において、当該個人情報について<a href="#">タベッチ正規代理店</a>へ提供する場合があります。または、返信目的に必要な限度において、当該個人情報の取扱いを当社業務委託先へ委託する場合があります。</li>
                 <li>個人情報の利用目的の通知、開示、訂正、追加、削除等をお求めの場合は、<a href="#">「個人情報の取扱いについて」</a>をご覧ください。</li>
                 <li>すべての項目にご記入いただけなかった場合、お問い合わせ内容に対する返信などにおいて、適切な対応ができなくなる場合がありますのでご了承ください。</li>
             </ol>
         </div>
 
-        <div class="action-box">
-            <button type="submit" class="btn-submit" disabled>
-                上記の同意事項に同意の上、記入内容を確認する
-            </button>
+        <div style="margin: 10px 0; font-size: 12px;">
+  <label>
+    <input type="checkbox" id="agree" name="agree">
+    上記の同意事項に同意します
+  </label>
+</div>
+
+<button type="submit" class="btn-submit" id="submitBtn" disabled>
+  上記の同意事項に同意の上、記入内容を確認する
+</button>
+
+<script>
+  const agree = document.getElementById("agree");
+  const btn = document.getElementById("submitBtn");
+  agree.addEventListener("change", () => {
+    btn.disabled = !agree.checked;
+    btn.style.cursor = agree.checked ? "pointer" : "not-allowed";
+    btn.style.backgroundColor = agree.checked ? "#f5b400" : "#e6e6e6";
+    btn.style.color = agree.checked ? "#000" : "#999";
+  });
+</script>
+        
         </div>
     </form>
 </div>
-
-<a href="{% url 'stores:customer_map' %}">確認画面へ</a>
 {% endblock %}

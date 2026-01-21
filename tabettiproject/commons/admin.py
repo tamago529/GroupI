@@ -11,7 +11,7 @@ from .models import (
     ReservationStatus, ImageStatus, ApplicationStatus,
     Review, ReviewPhoto, ReviewReport, Follow, Reservator,
     Reservation, StoreOnlineReservation, StoreImage, StoreMenu,
-    StoreAccountRequest, StoreAccountRequestLog, PasswordResetLog, TempRequestMailLog
+    StoreAccountRequest, StoreAccountRequestLog, PasswordResetLog, TempRequestMailLog,StoreInfoReport
 )
 
 # ==========================================================
@@ -82,6 +82,27 @@ class StoreAccountAdmin(UserAdmin):
 
     list_display = ('id', 'username', 'store', 'account_type')
 
+    readonly_fields = UserAdmin.readonly_fields + ("store_info_reports",)
+
+    def store_info_reports(self, obj):
+        if not obj or not obj.store_id:
+            return "-"
+
+        qs = StoreInfoReport.objects.filter(store=obj.store).order_by("-created_at")[:20]
+        if not qs.exists():
+            return "報告はありません。"
+
+        lines = []
+        for r in qs:
+            reporter = r.reporter.nickname if r.reporter else "-"
+            text = r.message.replace("\n", " ")
+            if len(text) > 80:
+                text = text[:80] + "…"
+            lines.append(f"{r.created_at:%Y/%m/%d %H:%M} / {reporter} / {text}")
+        return "\n".join(lines)
+
+    store_info_reports.short_description = "店舗情報の報告（最新20件）"
+
     # 🌟作成画面のレイアウトを修正（password1, password2が出るようにする）
     add_fieldsets = (
         (None, {
@@ -96,7 +117,7 @@ class StoreAccountAdmin(UserAdmin):
 
     # 編集画面のレイアウト
     fieldsets = UserAdmin.fieldsets + (
-        ('店舗詳細情報', {'fields': ('store', 'admin_email', 'permission_flag', 'account_type')}),
+        ('店舗詳細情報', {'fields': ('store', 'admin_email', 'permission_flag', 'account_type', 'store_info_reports')}),
     )
     
 

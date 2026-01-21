@@ -22,6 +22,7 @@ from django.utils import timezone
 from commons.models import (
     CustomerAccount, Store,
     Reservator, Reservation, ReservationStatus,
+    StoreInfoReport, StoreInfoReportPhoto
 )
 
 from django.shortcuts import render, redirect
@@ -567,8 +568,65 @@ class company_review_listView(TemplateView):
         
 
 
-class customer_report_input(TemplateView):
+# reviews/views.py（既存の customer_report_input を置き換え）
+
+class customer_report_input(LoginRequiredMixin, View):
     template_name = "reviews/customer_report_input.html"
+
+    def _get_login_customer(self, request):
+        return CustomerAccount.objects.filter(pk=request.user.pk).first()
+
+    def get(self, request, *args, **kwargs):
+        customer = self._get_login_customer(request)
+        if customer is None:
+            messages.error(request, "顧客アカウントでログインしてください。")
+            return redirect(reverse("accounts:customer_login"))
+
+        # store_id が来ていれば対象店舗を特定（無くてもOKにしておく）
+        store_id = request.GET.get("store_id")
+        store = Store.objects.filter(pk=store_id).first() if store_id else None
+
+        return render(request, self.template_name, {"customer": customer, "store": store})
+
+    def post(self, request, *args, **kwargs):
+        customer = self._get_login_customer(request)
+        if customer is None:
+            messages.error(request, "顧客アカウントでログインしてください。")
+            return redirect(reverse("accounts:customer_login"))
+
+        message = (request.POST.get("comment") or "").strip()
+        agree = request.POST.get("agree")  # on / None
+        store_id = request.POST.get("store_id") or ""
+        store = Store.objects.filter(pk=store_id).first() if store_id else None
+
+        if not message:
+            messages.error(request, "コメントを入力してください。")
+            redirect_url = reverse("reviews:customer_report_input")
+            if store_id:
+                redirect_url += f"?store_id={store_id}"
+            return redirect(redirect_url)
+
+        if not agree:
+            messages.error(request, "同意事項にチェックしてください。")
+            redirect_url = reverse("reviews:customer_report_input")
+            if store_id:
+                redirect_url += f"?store_id={store_id}"
+            return redirect(redirect_url)
+
+        report = StoreInfoReport.objects.create(
+            store=store,
+            reporter=customer,
+            message=message,
+        )
+
+        # ファイル（最大5枚）
+        files = request.FILES.getlist("files") or request.FILES.getlist("files[]")
+        files = files[:5]
+        for f in files:
+            StoreInfoReportPhoto.objects.create(report=report, image=f)
+
+        return redirect(f"{reverse('reviews:customer_common_complete')}?msg=店舗情報の報告が完了しました。")
+
 
 
 class reportView(TemplateView):
