@@ -308,10 +308,13 @@
 
               <!-- ✅ 保存解除ボタン -->
               <form method="post" action="{% url 'reviews:customer_store_preserve' %}" style="margin:0;">
-                {% csrf_token %}
-                <input type="hidden" name="reservation_id" value="{{ r.id }}">
-                <button type="submit" class="btn-remove">保存解除</button>
-              </form>
+  {% csrf_token %}
+  <input type="hidden" name="action" value="remove_store">
+  <input type="hidden" name="reservation_id" value="{{ r.id }}">
+  <button type="submit" class="btn-remove" onclick="return confirm('保存解除しますか？');">
+    保存解除
+  </button>
+</form>
             </div>
           {% endfor %}
         </div>
