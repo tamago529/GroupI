@@ -1,196 +1,154 @@
 {% extends "customer_base.html" %}
 
-{% block title %}マップ画面{% endblock %}
+{% block title %}店舗マップ検索{% endblock %}
 
 {% block css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-    /* --- セクション：全体レイアウト（幅を980pxに固定し中央寄せ） --- */
     body { background-color: #fff; margin: 0; padding: 0; }
-
     .tabelog-wrapper {
         font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
-        color: #333;
-        min-width: 1120px; /* 本家食べログの標準幅 */
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 0 10px;
+        color: #333; min-width: 1120px; max-width: 1400px; margin: 0 auto; padding: 0 10px;
     }
-
-    /* --- セクション：ヘッダー（背景色と余白の再現） --- */
-    .header-section {
-        background-color: #f7f6f5; /* 画像に見られる薄ベージュ背景 */
-        padding: 24px 20px;
-        margin-left: -10px; margin-right: -10px;
-        border-bottom: 1px solid #e6e6e6;
-    }
-    .main-heading { font-size: 22px; font-weight: bold; margin: 0 0 10px 0; }
-    .modal-link { color: #06c; text-decoration: none; font-size: 12px; cursor: pointer; border: none; background: none; padding: 0; }
-
-    /* --- セクション：ツールバー（タブとセレクトボックス） --- */
-    .toolbar-container {
-        display: flex; justify-content: space-between; align-items: flex-end;
-        margin-top: 25px; border-bottom: 1px solid #ddd;
-    }
-    .tab-group { display: flex; gap: 4px; }
-    .tab-item {
-        padding: 10px 18px; font-size: 13px; color: #06c; cursor: pointer;
-        border: 1px solid transparent; border-bottom: none;
-    }
-    .tab-item.active {
-        color: #333; font-weight: bold; background: #fff;
-        border: 1px solid #ddd; border-top: 2px solid #e67e22;
-        position: relative; bottom: -1px;
-    }
-    .limit-control { font-size: 12px; margin-bottom: 8px; }
-    .limit-select { padding: 3px; border: 1px solid #ccc; border-radius: 2px; }
-
-    /* --- セクション：統計バー --- */
+    .header-section { background-color: #f7f6f5; padding: 24px 20px; margin: 0 -10px; border-bottom: 1px solid #e6e6e6; }
+    .main-heading { font-size: 22px; font-weight: bold; margin: 0; }
     .stats-bar { padding: 12px 0; border-bottom: 1px solid #eee; }
-    .stats-text { font-size: 11px; color: #666; }
+    #loading-status { font-size: 12px; color: #e67e22; font-weight: bold; }
 
-    /* --- セクション：メインエリア（リスト 310px + 地図 670px） --- */
+    /* メインレイアウト */
     .main-content { display: flex; border: 1px solid #ddd; height: 600px; margin-top: 10px; }
-    .side-list { width: 310px; overflow-y: auto; border-right: 1px solid #ddd; background: #fff; }
-    .map-area { flex: 1; background-color: #e5e3df; position: relative; }
+    .side-list { width: 320px; overflow-y: auto; border-right: 1px solid #ddd; background: #fff; }
+    .map-area { flex: 1; background-color: #e5e3df; }
     
-    .shop-card { padding: 15px; border-bottom: 1px solid #eee; display: flex; gap: 12px; }
-    .shop-img { width: 75px; height: 75px; background: #f0f0f0; flex-shrink: 0; border: 1px solid #eee; }
+    /* 店舗カード（リンク） */
+    .shop-link { text-decoration: none; color: inherit; display: block; }
+    .shop-card { padding: 15px; border-bottom: 1px solid #eee; display: flex; gap: 12px; transition: background 0.2s; }
+    .shop-card:hover { background: #fdf5ee; }
+    .shop-img { width: 80px; height: 80px; background: #f0f0f0; flex-shrink: 0; border: 1px solid #eee; border-radius: 4px; }
     .shop-name { font-weight: bold; color: #06c; font-size: 14px; margin-bottom: 4px; }
-    .rating-star { color: #f39c12; font-size: 12px; font-weight: bold; }
-
-    /* --- セクション：下部URL ＆ エリア絞り込み --- */
-    .url-section {
-        background-color: #f7f7f7; padding: 15px; margin: 25px 0;
-        display: flex; align-items: center; gap: 15px; font-size: 12px; border: 1px solid #eee;
-    }
-    .url-input { flex: 1; padding: 6px 10px; border: 1px solid #ccc; color: #666; background: #fff; }
-
-    .area-filter-container { padding-bottom: 50px; }
-    /* h2で見出し階層を適正化 */
-    .area-heading {
-        font-size: 14px; font-weight: bold; border-left: 4px solid #e67e22;
-        padding-left: 10px; margin: 25px 0 15px 0;
-    }
-    .area-list { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; color: #06c; line-height: 1.8; }
-    .area-list span { cursor: pointer; }
-
-    /* モーダル */
-    .modal-overlay {
-        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.6); z-index: 2000;
-    }
-    .modal-box {
-        background: #fff; width: 850px; margin: 5vh auto; border-radius: 4px;
-        position: relative; overflow: hidden;
-    }
+    .shop-genre { font-size: 11px; color: #e67e22; font-weight: bold; }
+    .shop-info { font-size: 11px; color: #666; margin-top: 2px; }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="tabelog-wrapper">
     <header class="header-section">
-        <h1 class="main-heading">全国のお店、レストランを地図から探す</h1>
-        <button id="btn-open-modal" class="modal-link">検索条件から検索する</button>
+        <h1 class="main-heading">周辺の店舗を地図から探す</h1>
     </header>
 
-    <nav class="toolbar-container" aria-label="並び替えと表示件数">
-        <div class="tab-group" role="tablist">
-            <div class="tab-item active" role="tab" aria-selected="true">標準</div>
-            <div class="tab-item" role="tab" aria-selected="false">総合ランキング</div>
-            <div class="tab-item" role="tab" aria-selected="false">ニューオープン</div>
-        </div>
-        <div class="limit-control">
-            <label for="limit-select">表示件数</label>
-            <select id="limit-select" class="limit-select">
-                <option value="20" selected>20</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-            </select>
-            件
-        </div>
-    </nav>
-
     <div class="stats-bar">
-        <div class="stats-text">
-            1〜<span id="display-num">20</span> 件を表示 / 全 883,216 件
-        </div>
+        <div id="loading-status">位置情報を取得しています...</div>
     </div>
 
     <div class="main-content">
-        <aside class="side-list">
-            <article class="shop-card">
-                <div class="shop-img" aria-hidden="true"></div>
-                <div>
-                    <div class="shop-name">ぐらんどーべ</div>
-                    <div class="rating-star">★ 3.06 <span style="color:#666; font-weight:normal;">11人</span></div>
-                    <div style="font-size:10px; color:#666; margin-top:4px;">太田川 / イタリアン</div>
-                </div>
-            </article>
-            <article class="shop-card">
-                <div class="shop-img" aria-hidden="true"></div>
-                <div>
-                    <div class="shop-name">やきとりや こころ</div>
-                    <div class="rating-star">★ 3.51 <span style="color:#666; font-weight:normal;">161人</span></div>
-                    <div style="font-size:10px; color:#666; margin-top:4px;">新福島 / 焼鳥</div>
-                </div>
-            </article>
+        <aside class="side-list" id="shop-list-container">
+            <div style="padding:20px; color:#999; text-align:center;">現在地周辺の店舗を検索中...</div>
         </aside>
-        <main class="map-area" aria-label="店舗地図">
-            <div style="text-align:center; padding-top:250px; color:#aaa;">[ Google Map ]</div>
-        </main>
-    </div>
-
-    <section class="url-section">
-        <label for="url-field">このページのURL</label>
-        <input type="text" id="url-field" class="url-input" readonly 
-               value="https://tabelog.com/rst/rstmap?clon=137.6367&clat=36.2088&lz=12...">
-    </section>
-
-    <section class="area-filter-container">
-        <h2 class="area-heading">エリア等を絞り込む</h2>
-        <div class="area-list">
-            <span>北海道</span> | <span>青森</span> | <span>秋田</span> | <span>岩手</span> | <span>宮城</span> | <span>東京</span> | <span>神奈川</span> | <span>大阪</span> | <span>福岡</span>
-        </div>
-        <p style="font-size:11px; color:#8eb400; margin-top:20px;">※表示件数が多いほど表示に時間がかかりますので、ご了承ください。</p>
-    </section>
-</div>
-
-<div id="modal-search" class="modal-overlay">
-    <div class="modal-box" role="dialog" aria-labelledby="modal-title">
-        <div style="padding:20px; text-align:center; border-bottom:1px solid #eee;">
-            <h3 id="modal-title">検索条件を変更する</h3>
-            <button id="btn-close-modal" aria-label="閉じる" style="position:absolute; top:10px; right:15px; font-size:24px; border:none; background:none; cursor:pointer;">&times;</button>
-        </div>
-        <div style="padding:20px; height:400px; overflow-y:auto;">
-            <p style="color:#999; text-align:center;">[ 検索フィルターの詳細設定 ]</p>
-        </div>
+        <main class="map-area" id="map-element"></main>
     </div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // 要素の取得
-    const sel = document.getElementById('limit-select');
-    const num = document.getElementById('display-num');
-    const modal = document.getElementById('modal-search');
-    const openBtn = document.getElementById('btn-open-modal');
-    const closeBtn = document.getElementById('btn-close-modal');
+    // 1. 地図初期化
+    const map = L.map('map-element').setView([35.6812, 139.7671], 15);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
 
-    // 表示件数の同期処理
-    sel.addEventListener('change', () => {
-        num.textContent = sel.value;
+    // 2. アイコン定義
+    const currentPosIcon = L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', 
+        iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -32]
+    });
+    const bluePinIcon = L.icon({
+        iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
     });
 
-    // モーダルの開閉制御
-    openBtn.onclick = () => {
-        modal.style.display = 'block';
-    };
-    closeBtn.onclick = () => {
-        modal.style.display = 'none';
-    };
-    window.onclick = (e) => {
-        if(e.target == modal) modal.style.display = 'none';
-    };
+    // 3. 【重要】Djangoデータベースからの店舗リスト（URLを自動生成）
+    const myShopList = [
+        {% for shop in stores %}
+        {
+            // 名前空間 'stores' が設定されている場合を想定
+            // もしエラーが出る場合は 'stores:customer_store_info' を 'customer_store_info' に変更してください
+            detailUrl: "{% url 'stores:customer_store_info' shop.pk %}",
+            name: "{{ shop.store_name|escapejs }}{% if shop.branch_name %} {{ shop.branch_name|escapejs }}{% endif %}",
+            address: "{{ shop.address|escapejs }}",
+            genre: "{{ shop.genre|escapejs }}",
+            hours: "{{ shop.business_hours|escapejs }}",
+            phone: "{{ shop.phone_number|escapejs }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(onSuccess, onError);
+    }
+
+    async function onSuccess(position) {
+        const userLat = position.coords.latitude;
+        const userLng = position.coords.longitude;
+        const userLatLng = L.latLng(userLat, userLng);
+
+        map.setView(userLatLng, 15);
+        L.marker(userLatLng, {icon: currentPosIcon}).addTo(map).bindPopup("<b>あなたの現在地</b>");
+
+        const listContainer = document.getElementById('shop-list-container');
+        listContainer.innerHTML = '';
+        let foundCount = 0;
+
+        for (const shop of myShopList) {
+            try {
+                // 住所から座標を取得（ジオコーディング）
+                const res = await fetch(`https://msearch.gsi.go.jp/address-search/AddressSearch?q=${encodeURIComponent(shop.address)}`);
+                const data = await res.json();
+
+                if (data && data.length > 0) {
+                    const sLat = data[0].geometry.coordinates[1];
+                    const sLng = data[0].geometry.coordinates[0];
+                    const shopLatLng = L.latLng(sLat, sLng);
+                    const distance = userLatLng.distanceTo(shopLatLng);
+
+                    // 半径1km以内の判定
+                    if (distance <= 1000) {
+                        foundCount++;
+
+                        // 地図のピンにポップアップを設定（リンクをshop.detailUrlに変更）
+                        L.marker(shopLatLng, {icon: bluePinIcon}).addTo(map)
+                            .bindPopup(`
+                                <div style="min-width:150px;">
+                                    <div style="font-weight:bold; color:#06c;">${shop.name}</div>
+                                    <div style="font-size:11px; color:#e67e22; margin-bottom:5px;">${shop.genre}</div>
+                                    <a href="${shop.detailUrl}" style="color:#06c; text-decoration:none; font-size:12px; font-weight:bold;">▶ 詳細を見る</a>
+                                </div>
+                            `);
+
+                        // 左側の店舗カード（リンクをshop.detailUrlに変更）
+                        const card = `
+                            <a href="${shop.detailUrl}" class="shop-link">
+                                <article class="shop-card">
+                                    <div class="shop-img"></div>
+                                    <div>
+                                        <div class="shop-genre">${shop.genre}</div>
+                                        <div class="shop-name">${shop.name}</div>
+                                        <div class="shop-info">🕒 ${shop.hours}</div>
+                                        <div class="shop-info">📞 ${shop.phone}</div>
+                                        <div style="font-size:10px; color:#999; margin-top:5px;">📍 現在地から 約${Math.round(distance)}m</div>
+                                    </div>
+                                </article>
+                            </a>`;
+                        listContainer.innerHTML += card;
+                    }
+                }
+            } catch (e) { console.error("住所変換エラー:", e); }
+            await new Promise(r => setTimeout(r, 150));
+        }
+        document.getElementById('loading-status').innerText = foundCount > 0 ? `1km圏内に ${foundCount} 件の店舗が見つかりました` : "近くに店舗が見つかりませんでした";
+    }
+
+    function onError() { document.getElementById('loading-status').innerText = "位置情報の取得に失敗しました。"; }
 </script>
 {% endblock %}
-
-<a href = "{% url 'stores:customer_map' %}">店舗基本情報（顧客）画面へ移動</a>

@@ -11,11 +11,14 @@ from django.contrib import messages
 
 import urllib.parse
 
-
-
 class customer_mapView(TemplateView):
     template_name = "stores/customer_map.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # データベースからすべての店舗情報を取得してコンテキストへ
+        context['stores'] = Store.objects.all()
+        return context
 
 class customer_menu_courseView(TemplateView):
     template_name = "stores/customer_menu_course.html"

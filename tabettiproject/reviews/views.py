@@ -3,7 +3,7 @@ from datetime import date, time
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Max, Count
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views.generic import View , ListView
 from django.views.generic.base import TemplateView
@@ -517,7 +517,31 @@ class customer_review_reportView(LoginRequiredMixin, View):
 
 class store_review_reportView(TemplateView):
     template_name = "reviews/store_review_report.html"
+    def get(self, request, pk):
+        # 1. 通報対象の口コミを1件取得
+        review = get_object_or_404(Review, pk=pk)
+        return render(request, self.template_name, {'review': review})
 
+    def post(self, request, pk):
+        # 2. 投稿ボタンが押された時の処理
+        review = get_object_or_404(Review, pk=pk)
+        report_text = request.POST.get('report_text')
+
+        if not report_text:
+            messages.error(request, "通報理由を入力してください。")
+            return render(request, self.template_name, {'review': review})
+
+        # 3. ReviewReportモデルに保存
+        ReviewReport.objects.create(
+            review=review,
+            reporter=request.user,  # 今ログインしている店舗ユーザー
+            report_text=report_text,
+            report_status=False      # 未対応状態
+        )
+
+        messages.success(request, "口コミを通報しました。運営にて内容を確認いたします。")
+        # 一覧画面に戻る
+        return redirect('reviews:store_review_list')
 
 class store_review_listView(LoginRequiredMixin, ListView):
     template_name = "reviews/store_review_list.html"
