@@ -189,11 +189,14 @@ class store_loginView(LoginView):
         return super().form_valid(form)
 
 
-class store_logoutView(LogoutView):
-    next_page = reverse_lazy("accounts:store_login")
+# --- 店舗ログアウト（顧客側と同じロジック） ---
+def store_logout_view(request):
+    """
+    ログアウト後に store_logout.html を表示する（顧客側と同じ）
+    """
+    logout(request)
+    return render(request, "accounts/store_logout.html")
 
-    def get(self, request, *args, **kwargs):
-        return self.post(request, *args, **kwargs)
 
 
 class store_registerView(TemplateView):
