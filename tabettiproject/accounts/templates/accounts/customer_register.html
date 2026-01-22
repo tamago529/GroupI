@@ -1,8 +1,7 @@
 {% load static %}
-{% include 'customer_header.html' %}
-
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
   <title>会員登録</title>
@@ -30,7 +29,7 @@
       background: #fff;
       padding: 32px 28px;
       border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
       text-align: center;
     }
 
@@ -58,7 +57,8 @@
       margin-bottom: 6px;
     }
 
-    input {
+    input,
+    select {
       width: 100%;
       padding: 10px 12px;
       font-size: 14px;
@@ -66,15 +66,10 @@
       border-radius: 4px;
     }
 
-    input:focus {
+    input:focus,
+    select:focus {
       outline: none;
       border-color: #ff8a00;
-    }
-
-    .password-rule {
-      font-size: 12px;
-      color: #777;
-      margin-top: 6px;
     }
 
     .btn-submit {
@@ -94,7 +89,6 @@
       opacity: 0.85;
     }
 
-    /* ===== 戻るリンク ===== */
     .back-link {
       margin-top: 20px;
       font-size: 13px;
@@ -113,60 +107,63 @@
 
 <body>
 
-<div class="register-wrapper">
-  <div class="register-box">
+  {# ★ 반드시 body 안에서 include #}
+  {% include 'customer_header.html' %}
 
-    <h2>会員登録</h2>
+  <div class="register-wrapper">
+    <div class="register-box">
 
-    <p class="register-description">
-      メールアドレスとパスワードを入力して、<br>
-      会員登録を行ってください。
-    </p>
+      <h2>会員登録</h2>
 
-    <form method="post">
-      {% csrf_token %}
+      <p class="register-description">
+        必要な情報を入力して、<br>
+        会員登録を行ってください。
+      </p>
 
-      <div class="form-group">
-        <label for="email">メールアドレス</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          placeholder="example@example.com"
-          required
-        >
-      </div>
+      <form method="post" action="">
+        {% csrf_token %}
 
-      <div class="form-group">
-        <label for="password">パスワード</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          required
-          minlength="8"
-          pattern="^(?=(?:.*[A-Z])|(?:.*[a-z]))(?=(?:.*[A-Za-z])(?:.*[0-9])|(?:.*[A-Z])(?:.*[a-z])|(?:.*[0-9])(?:.*[a-z])|(?:.*[0-9])(?:.*[A-Z])).{8,}$"
-        >
-        <div class="password-rule">
-          ※ 8文字以上で、大文字・小文字・英数字のうち2種類以上を含めてください
+        {% if form.non_field_errors %}
+        <div style="color: red; margin-bottom: 10px; text-align: left; font-size: 13px;">
+          {% for error in form.non_field_errors %}
+          <p style="margin: 0;">{{ error }}</p>
+          {% endfor %}
         </div>
+        {% endif %}
+
+        {% for field in form %}
+        <div class="form-group">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}
+          <div style="font-size: 11px; color: #666; margin-top: 4px;">
+            {{ field.help_text }}
+          </div>
+          {% endif %}
+          {% for error in field.errors %}
+          <div style="color: red; font-size: 12px; margin-top: 4px;">
+            {{ error }}
+          </div>
+          {% endfor %}
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="btn-submit">
+          登録する
+        </button>
+      </form>
+
+      <div class="back-link">
+        <a href="{% url 'accounts:customer_login' %}">
+          ログイン画面に戻る
+        </a>
       </div>
 
-      <button type="submit" class="btn-submit">
-        登録する
-      </button>
-    </form>
-
-    <div class="back-link">
-      <a href="{% url 'accounts:customer_login' %}">
-        ログイン画面に戻る
-      </a>
     </div>
-
   </div>
-</div>
+
+  {% include 'customer_footer.html' %}
 
 </body>
-</html>
 
-{% include 'customer_footer.html' %}
+</html>

@@ -1,15 +1,15 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.contrib.auth import logout
+from django.contrib.auth import logout, login
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
 from django.db.models import Q
-from django.views.generic import ListView
+from django.views.generic import ListView, CreateView
 from django.views.generic.base import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from commons.models import StoreAccount, Account
-from .forms import CustomerLoginForm
+from .forms import CustomerLoginForm, CustomerRegisterForm
 from django.contrib.auth.views import (
     PasswordResetView, PasswordResetDoneView,
     PasswordResetConfirmView, PasswordResetCompleteView
@@ -110,8 +110,18 @@ def customer_logout_view(request):
     return render(request, "accounts/customer_logout.html")
 
 
-class customer_registerView(TemplateView):
+class customer_registerView(CreateView):
     template_name = "accounts/customer_register.html"
+    form_class = CustomerRegisterForm
+    success_url = reverse_lazy("accounts:customer_top")
+
+    def form_valid(self, form):
+        # フォームの保存（ユーザー作成）
+        response = super().form_valid(form)
+        # 作成したユーザーでログイン
+        user = self.object
+        login(self.request, user)
+        return response
 
 
 class customer_settingsView(TemplateView):
