@@ -5,6 +5,11 @@ from commons.models import StoreAccount, Store, Reservation, StoreOnlineReservat
 from django.urls import reverse
 from django.db.models import Q
 from django.utils import timezone
+from stores.forms import StoreBasicForm
+from django.views import View
+from django.http import HttpRequest
+from django.contrib import messages
+
 import urllib.parse
 
 
@@ -21,9 +26,53 @@ class customer_store_basic_editView(TemplateView):
     template_name = "stores/customer_store_basic_edit.html"
 
 
-class store_basic_editView(TemplateView):
-    template_name = "stores/store_basic_edit.html"
+def _get_store_from_user(request: HttpRequest) -> Store | None:
+    """
+    ログイン中の店舗ユーザーから Store を取得
+    """
+    user = request.user
 
+    if not user.is_authenticated:
+        return None
+
+    # あなたのプロジェクトは request.user.storeaccount が存在する前提っぽい
+    try:
+        store_account = user.storeaccount
+    except Exception:
+        return None
+
+    return getattr(store_account, "store", None)
+
+
+class store_basic_editView(LoginRequiredMixin, View):
+    template_name = "stores/store_basic_edit.html"
+    login_url = "accounts:store_login"
+
+    def get(self, request, *args, **kwargs):
+        store = _get_store_from_user(request)
+        if store is None:
+            messages.error(request, "店舗アカウントでログインしてください。")
+            return redirect("accounts:store_login")
+
+        form = StoreBasicForm(instance=store)
+
+        return render(request, self.template_name, {"store": store, "form": form})
+
+    def post(self, request, *args, **kwargs):
+        store = _get_store_from_user(request)
+        if store is None:
+            messages.error(request, "店舗アカウントでログインしてください。")
+            return redirect("accounts:store_login")
+
+        form = StoreBasicForm(request.POST, instance=store)
+
+        if not form.is_valid():
+            messages.error(request, "入力内容にエラーがあります。")
+            return render(request, self.template_name, {"store": store, "form": form})
+
+        form.save()
+        messages.success(request, "店舗基本情報を保存しました。")
+        return redirect("stores:store_basic_edit")
 
 class company_store_infoView(TemplateView):
     template_name = "stores/company_store_info.html"
