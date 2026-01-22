@@ -8,6 +8,12 @@
     <title>{% block title %}顧客サイト{% endblock %}</title>
 
     {% load static %}
+
+    <!-- ✅ サイトアイコン（favicon） -->
+    <link rel="icon" href="{% static 'images/Tabecchi_icon.png' %}">
+    <!-- 互換用（必要なら） -->
+    <link rel="shortcut icon" href="{% static 'images/Tabecchi_icon.png' %}">
+
     <!-- 共通CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 
