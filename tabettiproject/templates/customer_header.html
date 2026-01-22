@@ -7,6 +7,49 @@
 
   <!-- CSS -->
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+  {# ✅ 追加：ヘッダー内ユーザー名バッジ用（style.cssに移してもOK） #}
+  <style>
+    .header-nav{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .nav-user-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border:1px solid #d9d9d9;
+      border-radius:999px;
+      background:#fff;
+      color:#333;
+      font-size:12px;
+      line-height:1;
+      white-space:nowrap;
+    }
+
+    .nav-user-dot{
+      width:9px;
+      height:9px;
+      border-radius:50%;
+      background:#22c55e;
+      box-shadow:0 0 0 2px rgba(34,197,94,0.18);
+      flex:0 0 auto;
+    }
+
+    .nav-user-sub{
+      color:#666;
+      font-size:11px;
+    }
+
+    .nav-user-name{
+      font-weight:bold;
+      color:#111;
+    }
+  </style>
 </head>
 <body>
 
@@ -15,62 +58,72 @@
   <!-- 上段：メニュー -->
   <div class="header-top">
     <nav class="header-nav">
+
+      {# ✅ ログイン時のみ表示（ゲストならバッジ自体を出さない） #}
+      {% if user.is_authenticated %}
+        <span class="nav-user-badge" aria-label="ログイン中ユーザー">
+          <span class="nav-user-dot" aria-hidden="true"></span>
+          <span class="nav-user-sub">ログイン中：</span>
+          <span class="nav-user-name">{{ user.username }}</span>
+        </span>
+      {% endif %}
+
       <a href="#">メッセージ</a>
       <a href="#">お知らせ</a>
       <a href="#">予約確認</a>
       <a href="#">行ったお店</a>
       <a href="{% url 'reviews:customer_store_preserve' %}">保存リスト</a>
       <a href="{% url 'reviews:customer_reviewer_detail' %}">マイページ</a>
+      <a href="{% url 'accounts:customer_logout' %}">ログアウト</a>
     </nav>
   </div>
 
   <!-- 下段：ロゴ＋検索バー -->
   <div class="header-bottom">
     <div class="logo">
-  <a href="{% url 'accounts:customer_top' %}">
-    <img src="{% static 'images/Tabecchi.png' %}" alt="Tabecchi Logo">
-  </a>
-</div>
-
+      <a href="{% url 'accounts:customer_top' %}">
+        <img src="{% static 'images/Tabecchi.png' %}" alt="Tabecchi Logo">
+      </a>
+    </div>
 
     <!-- 🔽 action を追加 -->
     <form class="search-bar" method="get" action="{% url 'search:customer_search_list' %}">
 
-  <input
-    type="text"
-    name="area"
-    placeholder="エリア・駅（例：銀座、渋谷）"
-    value="{{ request.GET.area }}"
-  >
+      <input
+        type="text"
+        name="area"
+        placeholder="エリア・駅（例：銀座、渋谷）"
+        value="{{ request.GET.area }}"
+      >
 
-  <input
-    type="text"
-    name="keyword"
-    placeholder="キーワード（例：焼肉、個室）"
-    value="{{ request.GET.keyword }}"
-  >
+      <input
+        type="text"
+        name="keyword"
+        placeholder="キーワード（例：焼肉、個室）"
+        value="{{ request.GET.keyword }}"
+      >
 
-  <input
-    type="date"
-    name="date"
-    value="{{ request.GET.date }}"
-  >
+      <input
+        type="date"
+        name="date"
+        value="{{ request.GET.date }}"
+      >
 
-  <input
-    type="time"
-    name="time"
-    value="{{ request.GET.time|default:'19:00' }}"
-  >
+      <input
+        type="time"
+        name="time"
+        value="{{ request.GET.time|default:'19:00' }}"
+      >
 
-  <select name="people">
-    <option value="1" {% if request.GET.people == "1" %}selected{% endif %}>1名</option>
-    <option value="2" {% if request.GET.people == "2" %}selected{% endif %}>2名</option>
-    <option value="3" {% if request.GET.people == "3" %}selected{% endif %}>3名</option>
-    <option value="4" {% if request.GET.people == "4" %}selected{% endif %}>4名</option>
-  </select>
+      <select name="people">
+        <option value="1" {% if request.GET.people == "1" %}selected{% endif %}>1名</option>
+        <option value="2" {% if request.GET.people == "2" %}selected{% endif %}>2名</option>
+        <option value="3" {% if request.GET.people == "3" %}selected{% endif %}>3名</option>
+        <option value="4" {% if request.GET.people == "4" %}selected{% endif %}>4名</option>
+      </select>
 
-  <button type="submit" class="search-btn">🔍</button>
-</form>
+      <button type="submit" class="search-btn">🔍</button>
+    </form>
 
   </div>
 </header>
