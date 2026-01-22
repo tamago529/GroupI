@@ -2,65 +2,84 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>完了画面</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ mode_label }}完了 | 食べログ管理</title>
     <style>
+        :root {
+            --tabelog-orange: #ff9900;
+            --success: #28a745;
+            --danger: #e02020;
+            --bg-gray: #f8f9fa;
+            --theme-color: #ff9900; /* デフォルト値 */
+        }
+
         body {
             margin: 0;
-            font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
-            background-color: #ffffff;
+            font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+            background-color: var(--bg-gray);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
 
-        .container {
-            width: 100%;
-            height: 100vh;
-            box-sizing: border-box;
-            padding: 40px;
-            position: relative;
-        }
-
-        .message-box {
-            border: 2px solid #ccc;
+        .complete-card {
+            width: 90%;
+            max-width: 480px;
+            background: #ffffff;
             border-radius: 16px;
-            padding: 40px;
-            font-size: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border-top: 8px solid var(--theme-color);
+            padding: 48px 32px;
+            text-align: center;
         }
 
-        .top-button {
-            position: absolute;
-            right: 40px;
-            bottom: 40px;
+        .status-icon {
+            width: 72px;
+            height: 72px;
+            background-color: var(--theme-color);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 24px;
+            font-size: 36px;
         }
 
-        .top-button a {
+        .title { font-size: 24px; font-weight: bold; margin-bottom: 16px; }
+        .message { color: #666; line-height: 1.8; margin-bottom: 40px; }
+
+        .btn-home {
             display: inline-block;
+            min-width: 200px;
             padding: 16px 32px;
-            border: 2px solid #333;
-            border-radius: 12px;
+            background-color: var(--theme-color);
+            color: #ffffff;
             text-decoration: none;
-            color: #000;
+            border-radius: 50px;
             font-weight: bold;
-        }
-
-        .top-button a:hover {
-            background-color: #f0f0f0;
         }
     </style>
 </head>
-<body>
-    <div class="container">
 
-        <!-- 完了メッセージ -->
-        <div class="message-box">
-            {{ msg|default:"完了しました。" }}
+<body style="--theme-color: {% if action_type == 'delete' %}#e02020{% elif action_type == 'update' %}#28a745{% else %}#ff9900{% endif %};">
+
+    <div class="complete-card">
+        <div class="status-icon">
+            {% if action_type == 'delete' %}🗑️{% else %}✓{% endif %}
         </div>
 
-        <!-- 顧客トップへ -->
-        <div class="top-button">
-            <a href="{% url 'accounts:customer_top' %}">
-                TOPへ
-            </a>
-        </div>
+        <h1 class="title">{{ mode_label }}完了</h1>
 
+        <p class="message">
+            {{ msg|safe }}
+        </p>
+
+        <a href="{% url 'accounts:customer_top' %}" class="btn-home">
+            TOPへ戻る
+        </a>
     </div>
+
 </body>
 </html>
