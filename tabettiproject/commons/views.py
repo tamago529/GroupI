@@ -8,13 +8,51 @@ from django.utils.decorators import method_decorator
 
 from commons.models import Review
 
-
 class customer_common_completeView(TemplateView):
     template_name = "commons/customer_common_complete.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # クエリパラメータ (?action=...&msg=...) を取得
+        action = self.request.GET.get('action', 'update')
+        msg = self.request.GET.get('msg', '完了しました。')
+
+        context['action_type'] = action
+        context['msg'] = msg
+        
+        # モードに応じたラベル設定
+        labels = {'create': '登録', 'update': '変更', 'delete': '削除'}
+        context['mode_label'] = labels.get(action, '処理')
+        
+        return context
 
 class customer_common_confirmView(TemplateView):
     template_name = "commons/customer_common_confirm.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # 1. 操作種別の定義 (create / update / delete)
+        context['action_type'] = 'update' 
+        context['mode_label'] = '登録内容の変更'
+        
+        # 2. 表示用データ (辞書形式で渡すと自動でテーブル化されます)
+        context['display_data'] = [
+            ('店舗名', '牛角 渋谷店', False),
+            ('予約日時', '2024年12月24日 19:00', True), # 重要！
+            ('人数', '4名', False),
+            ('コース名', 'クリスマス限定食べ放題コース', True),
+            ('合計金額', '¥24,000 (税込)', True),
+        ]
+        
+        # 3. 実際にPOSTするデータ (hidden field用)
+        context['hidden_data'] = {
+            "customer_id": 101,
+            "status": "active"
+        }
+        
+        return context
 
 
 class errorView(TemplateView):

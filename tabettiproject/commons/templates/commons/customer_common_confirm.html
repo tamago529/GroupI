@@ -2,91 +2,139 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>確認画面</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ mode_label }}確認 | 食べログ管理</title>
     <style>
+        :root {
+            --tabelog-orange: #ff9900;
+            --tabelog-dark: #333333;
+            --success: #28a745;
+            --danger: #e02020;
+            --bg-gray: #f4f4f4;
+            --border: #dddddd;
+            --theme-color: var(--tabelog-orange);
+        }
+
         body {
             margin: 0;
-            font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
-            background-color: #ffffff;
+            font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+            background-color: var(--bg-gray);
+            padding: 20px;
         }
 
-        .page {
+        .confirm-card {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+            border-top: 5px solid var(--theme-color);
+        }
+
+        /* プレビュー画像用のスタイル（条件分岐なしで記述） */
+        .preview-image {
             width: 100%;
-            height: 100vh;
-            box-sizing: border-box;
-            padding: 40px;
-            position: relative;
+            height: 240px;
+            object-fit: cover;
+            border-bottom: 1px solid var(--border);
+            display: block; /* 画像がない時はタグ自体が出力されないので、ここに書いてOK */
         }
 
-        /* 枠 */
-        .confirm-box {
-            width: 100%;
-            height: 70%;
-            border: 3px solid #000;
-            box-sizing: border-box;
-            position: relative;
-        }
-
-        .confirm-text {
-            position: absolute;
-            top: 40%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 32px;
-        }
-
-        /* ボタン（枠外） */
-        .button-area {
-            position: absolute;
-            right: 40px;
-            bottom: 40px;
-        }
-
-        .button-area a,
-        .button-area button {
-            display: inline-block;
-            min-width: 120px;
-            padding: 14px 0;
-            margin-left: 16px;
-            border: 2px solid #333;
-            border-radius: 12px;
-            background-color: #fff;
+        .header {
+            padding: 25px;
             text-align: center;
-            text-decoration: none;
-            color: #000;
-            font-size: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th, .data-table td {
+            padding: 18px 25px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .data-table th {
+            width: 30%;
+            background-color: #fafafa;
+            color: #777;
+            text-align: left;
+        }
+
+        /* 重要項目の強調クラス */
+        .is-important {
+            color: var(--danger);
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .actions {
+            padding: 30px 25px;
+            display: flex;
+            gap: 20px;
+            background: #fafafa;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px;
+            border-radius: 4px;
             font-weight: bold;
             cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            border: none;
         }
 
-        .button-area a:hover,
-        .button-area button:hover {
-            background-color: #f0f0f0;
-        }
+        .btn-back { background: #fff; border: 1px solid #ccc; color: #666; }
+        .btn-submit { background: var(--theme-color); color: #fff; }
+
+        .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
     </style>
 </head>
-<body>
-    <div class="page">
 
-        <!-- 枠内 -->
-        <div class="confirm-box">
-            <div class="confirm-text">
-                （確認内容）
-            </div>
-        </div>
+<body style="--theme-color: {% if action_type == 'delete' %}var(--danger){% elif action_type == 'update' %}var(--success){% else %}var(--tabelog-orange){% endif %};">
 
-        <!-- 枠外ボタン -->
-        <div class="button-area">
-            <a href="javascript:history.back();">
-                キャンセル
-            </a>
+<div class="confirm-card">
+    <header class="header">
+        <h1>{{ mode_label }}確認</h1>
+    </header>
 
-            <form action="" method="post" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit">OK</button>
-            </form>
-        </div>
+    {# 画像がある場合のみ、imgタグを出力する。スタイルは常に固定にする #}
+    {% if image_url %}
+        <img src="{{ image_url }}" alt="プレビュー画像" class="preview-image" height="200" width="300">
+    {% endif %}
 
+    <table class="data-table">
+        <caption class="visually-hidden">申請内容の詳細</caption>
+        <tbody>
+            {% for field_name, value, important in display_data %}
+            <tr>
+                <th scope="row">{{ field_name }}</th>
+                <td class="{% if important %}is-important{% endif %}">
+                    {{ value|default:"---"|linebreaksbr }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="actions">
+        <a href="javascript:history.back();" class="btn btn-back">修正する</a>
+        <form action="{{ submit_url }}" method="post" style="flex: 2; display: flex;">
+            {% csrf_token %}
+            {% for key, val in hidden_data.items %}
+                <input type="hidden" name="{{ key }}" value="{{ val }}">
+            {% endfor %}
+            <button type="submit" class="btn btn-submit">
+                {% if action_type == 'delete' %}削除を確定する{% else %}この内容で確定する{% endif %}
+            </button>
+        </form>
     </div>
+</div>
+
 </body>
 </html>
