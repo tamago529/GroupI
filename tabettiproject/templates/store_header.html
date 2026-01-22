@@ -76,8 +76,8 @@
       {# ✅ ログイン時のみ表示 #}
       {% if request.user.is_authenticated %}
         <a href="{% url 'stores:store_top' %}">トップ</a>
-        <a href="{% url 'reservations_management:store_reservation_settings' %}">ネット予約管理画面</a>
-        <a href="{% url 'stores:store_basic_edit' %}">店舗ページ表示</a>
+        <a href="{% url 'reservations_management:store_reservation_settings' %}">ネット予約管理</a>
+        <a href="{% url 'stores:store_basic_edit' %}">店舗基本情報編集</a>
         <a href="#">管理・メールでのお問い合わせ</a>
       {% endif %}
 
