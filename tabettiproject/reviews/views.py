@@ -20,34 +20,45 @@ from commons.models import (
     ReviewReport,
     StoreInfoReport,
     StoreInfoReportPhoto,
-    Follow,  # ✅ 追加
 )
 from django.utils import timezone
 
 
-class customer_review_listView(LoginRequiredMixin, View):
+class customer_review_listView(View): # 🌟 LoginRequiredMixinを外して誰でも見れるように変更
     template_name = "reviews/customer_review_list.html"
 
     def _get_login_customer(self, request):
-        # CustomerAccount を pk で引き直す（継承モデル対策）
+        """ログイン中の顧客アカウントを取得。未ログインならNoneを返す"""
+        if not request.user.is_authenticated:
+            return None
+        # Account(親)からCustomerAccount(子)を特定
         return CustomerAccount.objects.filter(pk=request.user.pk).first()
 
     def _get_store(self, request):
+        """表示対象の店舗を取得"""
+        # URL引数（pk）やGET/POSTパラメータ（store_id）から取得を試みる
         sid = request.GET.get("store_id") or request.POST.get("store_id")
+        
+        # もしURLに直接 <int:pk> が含まれている場合（kwargs経由）
+        if not sid and 'pk' in self.kwargs:
+            sid = self.kwargs['pk']
+
         if sid:
             store = Store.objects.filter(pk=sid).first()
             if store:
                 return store
+        
+        # 何も指定がない場合はIDが一番若い店を出す（エラー防止）
         return Store.objects.order_by("pk").first()
 
     def get(self, request, *args, **kwargs):
+        # 1. ログインユーザーの確認（いなくてもOK）
         customer = self._get_login_customer(request)
-        if customer is None:
-            messages.error(request, "顧客アカウントでログインしてください。")
-            return redirect(reverse("accounts:customer_login"))
-
+        
+        # 2. 対象店舗の取得
         store = self._get_store(request)
 
+        # 3. 口コミ一覧の取得（未ログインでも見れる）
         store_reviews = []
         if store:
             store_reviews = (
@@ -57,10 +68,11 @@ class customer_review_listView(LoginRequiredMixin, View):
                 .order_by("-posted_at")
             )
 
-        # 保存済み判定（ログインユーザー + 対象店舗）
+        # 4. 「保存済み」かどうかの判定（ログインしている場合のみチェック）
         is_saved = False
-        if store:
+        if customer and store:
             saved_status = ReservationStatus.objects.filter(status="保存済み").first()
+            # ログインユーザーが予約者名簿（Reservator）にいるか確認
             reservator = Reservator.objects.filter(customer_account=customer).first()
             if saved_status and reservator:
                 is_saved = Reservation.objects.filter(
@@ -69,36 +81,36 @@ class customer_review_listView(LoginRequiredMixin, View):
                     booking_status=saved_status,
                 ).exists()
 
+        # 5. 画面へ渡す荷物
         context = {
             "shop": store,
-            "customer": customer,
+            "customer": customer, # 未ログインならNone
             "store_id": store.pk if store else "",
             "reviews": store_reviews,
-            "is_saved": is_saved,  # ✅
+            "is_saved": is_saved,
         }
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
+        """保存や投稿はログインが必須"""
         action = request.POST.get("action")
         customer = self._get_login_customer(request)
 
+        # 🌟 投稿や保存をしようとした時だけログインチェックを行う
         if customer is None:
-            messages.error(request, "顧客アカウントでログインしてください。")
+            messages.error(request, "その機能を利用するには顧客アカウントでログインしてください。")
             return redirect(reverse("accounts:customer_login"))
 
         store_id = request.POST.get("store_id")
-        store = Store.objects.filter(pk=store_id).first() if store_id else self._get_store(request)
+        store = Store.objects.filter(pk=store_id).first()
 
         if store is None:
             messages.error(request, "店舗情報が取得できませんでした。")
             return redirect(reverse("reviews:customer_review_list"))
 
-        # -------------------------
-        # 1) 保存（ログインユーザーに紐づく）
-        # -------------------------
+        # --- 保存処理 (save_store) ---
         if action == "save_store":
             saved_status, _ = ReservationStatus.objects.get_or_create(status="保存済み")
-
             reservator, _ = Reservator.objects.get_or_create(
                 customer_account=customer,
                 defaults={
@@ -108,78 +120,47 @@ class customer_review_listView(LoginRequiredMixin, View):
                     "phone_number": customer.phone_number,
                 }
             )
-
-            exists = Reservation.objects.filter(
-                booking_user=reservator,
-                store=store,
-                booking_status=saved_status,
-            ).exists()
+            exists = Reservation.objects.filter(booking_user=reservator, store=store, booking_status=saved_status).exists()
 
             if exists:
                 messages.info(request, "すでに保存済みです。")
             else:
                 Reservation.objects.create(
-                    booking_user=reservator,
-                    store=store,
-                    booking_status=saved_status,
-                    visit_date=date.today(),
-                    visit_time=time(0, 0),
-                    visit_count=1,
-                    course="保存",
+                    booking_user=reservator, store=store, booking_status=saved_status,
+                    visit_date=date.today(), visit_time=time(0, 0), visit_count=1, course="保存"
                 )
                 messages.success(request, "保存しました。")
-
             return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
 
-        # -------------------------
-        # 2) 口コミ投稿（ログインユーザーに紐づく）
-        # -------------------------
+        # --- 口コミ投稿処理 (create_review) ---
         if action == "create_review":
-            time_slot = (request.POST.get("time_slot") or "").strip()  # "昼" or "夜"
+            time_slot = (request.POST.get("time_slot") or "").strip()
             score_raw = (request.POST.get("score") or "").strip()
             title = (request.POST.get("title") or "").strip()
             body = (request.POST.get("body") or "").strip()
-            agree = request.POST.get("agree")  # "on" or None
+            agree = request.POST.get("agree")
 
             try:
                 score = int(score_raw)
             except ValueError:
                 score = 0
 
-            if time_slot not in ("昼", "夜"):
-                messages.error(request, "時間帯（昼/夜）を選択してください。")
+            # バリデーション（入力チェック）
+            if time_slot not in ("昼", "夜") or score < 1 or not title or not body or not agree:
+                messages.error(request, "入力内容に不備があります。")
                 return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
 
-            if score < 1 or score > 5:
-                messages.error(request, "星評価（1〜5）を選択してください。")
-                return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
-
-            if not title:
-                messages.error(request, "タイトルを入力してください。")
-                return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
-
-            if not body:
-                messages.error(request, "本文を入力してください。")
-                return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
-
-            if not agree:
-                messages.error(request, "同意にチェックしてください。")
-                return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
-
-            review_text = f"【{time_slot}】{title}\n{body}"
-
+            # データベースに保存
             Review.objects.create(
-                reviewer=customer,   # ✅ ログインユーザー
+                reviewer=customer,
                 store=store,
                 score=score,
-                review_text=review_text,
+                review_text=f"【{time_slot}】{title}\n{body}"
             )
-
             messages.success(request, "口コミを投稿しました。")
             return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
 
-        return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
-
+        return redirect(reverse("reviews:customer_review_list"))
 
 class customer_store_preserveView(LoginRequiredMixin, View):
     template_name = "reviews/customer_store_preserve.html"
@@ -274,25 +255,20 @@ class customer_reviewer_detailView(LoginRequiredMixin, View):
         cover_field = getattr(customer, "cover_image", None)
         icon_field = getattr(customer, "icon_image", None)
 
-        # ✅ カウント系（1回だけ計算して使い回し）
-        count_reviews = Review.objects.filter(reviewer=customer).count()
-        count_following = Follow.objects.filter(follower=customer).count()
-        count_followers = Follow.objects.filter(followee=customer).count()
-
         context = {
             "customer": customer,
             "user_name": customer.nickname,
             "cover_image_url": cover_field.url if cover_field else "",
             "user_icon_url": icon_field.url if icon_field else "",
 
-            "stats_reviews": count_reviews,
+            "stats_reviews": Review.objects.filter(reviewer=customer).count(),
             "stats_photos": ReviewPhoto.objects.filter(review__reviewer=customer).count(),
             "stats_visitors": 0,
             "stats_likes": customer.total_likes,
 
-            "count_reviews": count_reviews,
-            "count_following": count_following,  # ✅ 0固定→実数へ
-            "count_followers": count_followers,  # ✅ 0固定→実数へ
+            "count_reviews": Review.objects.filter(reviewer=customer).count(),
+            "count_following": 0,
+            "count_followers": 0,
         }
         return render(request, self.template_name, context)
 

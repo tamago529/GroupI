@@ -255,7 +255,7 @@
         <div class="score-container">
             <span class="stars">★★★☆☆</span>
             <span class="score-number">3.00</span>
-            <a href="{% url 'reviews:customer_review_list' %}" style="color: #06c; font-size: 12px; text-decoration: none;">
+            <a href="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}" style="color: #06c; font-size: 12px; text-decoration: none;">
                 口コミを表示
             </a>
         </div>
@@ -266,7 +266,7 @@
                 <!-- 🌟 リンクに store.pk を追加 -->
                 <li><a href="{% url 'stores:customer_menu_course' store.pk %}">メニュー・コース</a></li>
                 <li>写真</li>
-                <li><a href="{% url 'reviews:customer_review_list' %}">口コミ</a></li>
+                <li><a href="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}">口コミ</a></li>
                 <li><a href="{% url 'stores:customer_map' %}">地図</a></li>
             </ul>
         </nav>
