@@ -31,6 +31,7 @@ urlpatterns = [
     path("customer_password_reset/", customer_password_resetView.as_view(), name="customer_password_reset"),
     path("store_account_edit/", store_account_editView.as_view(), name="store_account_edit"),
     path("store_login/", store_loginView.as_view(), name="store_login"),
+    path("store_logout/", store_logout_view, name="store_logout"),
     path("store_register/", store_registerView.as_view(), name="store_register"),
     path("store_account_application_confirm/", store_account_application_confirmView.as_view(), name="store_account_application_confirm"),
     path("store_account_application_input/", store_account_application_inputView.as_view(), name="store_account_application_input"),

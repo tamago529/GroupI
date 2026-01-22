@@ -181,23 +181,19 @@
     <div class="footer-red-zone">
         <div class="footer-inner">
             <ul class="major-services">
+                
                 <li>
-                    <a href="#">タベッチログまとめ
-                        <strong>グルメキュレーションサイト</strong>
-                    </a>
-                </li>
-                <li>
-                    <a href="#">タベッチログ
+                    <a href="https://magazine.tabelog.com/">タベッチログ
                         <strong>毎日のお外食が楽しくなるグルメ検索</strong>
                     </a>
                 </li>
                 <li>
-                    <a href="#">レビュアーランキング
+                    <a href="https://tabelog.com/rvwrs/rvwr_ranking">レビュアーランキング
                         <strong>全国で活躍するレビュアー</strong>
                     </a>
                 </li>
                 <li>
-                    <a href="#">タベッチ 求人
+                    <a href="https://job.tabelog.com/?cid=tb_footer">タベッチ 求人
                         <strong>飲食店採用担当の求人サイト</strong>
                     </a>
                 </li>
@@ -218,26 +214,25 @@
                     <li><a href="https://tabelog.com/advertisement">広告（メーカー・団体等様向け）について</a></li>
                 </ul>
                 <ul>
-                    <li><a href="{% url 'reviews:customer_review_report' %}">機能改善要望</a> <span>|</span></li>
-                    <li><a href="#">口コミガイドライン</a> <span>|</span></li>
+                    {# ✅ 未ログイン時は「機能改善要望」を表示しない #}
+                    {% if user.is_authenticated %}
+                      <li><a href="{% url 'reviews:customer_review_report' %}">機能改善要望</a> <span>|</span></li>
+                    {% endif %}
+
+                    <li><a href="https://tabelog.com/help/review_guide/">口コミガイドライン</a> <span>|</span></li>
                     <li><a href="https://tabelog.com/rst/premium_service_guide?tid=ps_footer">タベッチプレミアム</a> <span>|</span></li>
-                    <li><a href="#">タベッチプレミアムクーポン</a> <span>|</span></li>
-                    <li><a href="#">ネット予約（リクエスト予約）</a> <span>|</span></li>
+                    <li><a href="https://tabelog.com/ai_request_booking/guide/index">ネット予約（リクエスト予約）</a> <span>|</span></li>
                     <li><a href="https://tabelog.com/help/rules/">利用規約</a> <span>|</span></li>
-                    <li><a href="#">外部送信（オプトアウト）</a> <span>|</span></li>
+                    <li><a href="https://corporate.kakaku.com/privacy/about/optout">外部送信（オプトアウト）</a> <span>|</span></li>
                     <li><a href="https://corporate.kakaku.com/privacy/">個人情報保護方針</a> <span>|</span></li>
                     <li><a href="https://kakaku.com/info/recruit/">採用情報</a> <span>|</span></li>
                     <li><a href="https://corporate.kakaku.com/">企業情報</a></li>
                 </ul>
                 <ul>
-                    <li><a href="#">サイトマップ</a> <span>|</span></li>
+                    <li><a href="https://tabelog.com/sitemap/">サイトマップ</a> <span>|</span></li>
                     <li><a href="#">キーワード一覧</a></li>
                 </ul>
             </nav>
-
-            <div class="language-settings">
-                言語 : <a href="#">English</a> <span>|</span> <a href="#">簡体中文</a> <span>|</span> <a href="#">繁體中文</a> <span>|</span> <a href="#">한국어</a> <span>|</span> 日本語
-            </div>
 
             <div class="corporate-info">
                 <div class="kakaku-logo">

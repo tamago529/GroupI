@@ -13,38 +13,35 @@
   width: 100%;
   height: 690px;
   overflow: hidden;
-  background-color: #000; /* 切り替え時の背景を黒にしておくと自然です */
+  background-color: #000;
 }
 
-/* 画像の基本設定を共通化 */
 .hero-image {
-  position: absolute; /* 全ての画像を同じ位置に重ねる */
+  position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0; /* 最初は全て透明にする */
-  animation: hero-fade 15s infinite; /* 15秒で1ループ（1枚5秒計算） */
+  opacity: 0;
+  animation: hero-fade 15s infinite;
 }
 
-/* 画像ごとにアニメーションの開始時間をずらす */
 .hero-image:nth-of-type(1) { animation-delay: 0s; }
 .hero-image:nth-of-type(2) { animation-delay: 5s; }
 .hero-image:nth-of-type(3) { animation-delay: 10s; }
 
-/* フェードイン・アウトのアニメーション */
 @keyframes hero-fade {
   0%   { opacity: 0; }
-  10%  { opacity: 1; } /* 1.5秒かけてフェードイン */
-  33%  { opacity: 1; } /* しばらく表示 */
-  43%  { opacity: 0; } /* 1.5秒かけてフェードアウト */
+  10%  { opacity: 1; }
+  33%  { opacity: 1; }
+  43%  { opacity: 0; }
   100% { opacity: 0; }
 }
 
 .hero-overlay {
   position: absolute;
   inset: 0;
-  z-index: 10; /* 画像より上に表示されるように */
+  z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -152,6 +149,34 @@
   font-size: 14px;
   font-weight: bold;
 }
+
+/* ✅ 追加：ジャンル一覧へ（枠なし・青） */
+.genre-actions{
+  display:flex;
+  justify-content:flex-end;
+  margin: 12px 0 0 0;
+}
+
+.genre-list-btn{
+  display:inline-block;
+  padding: 0;                 /* 枠がないので余白は最低限でOK */
+  border: none;               /* ✅ 枠なし */
+  background: transparent;    /* ✅ 背景なし */
+  color: #1e73c9;             /* ✅ 青 */
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.genre-list-btn:hover{
+  text-decoration: underline; /* hoverだけ下線 */
+}
+
+.genre-list-btn:focus-visible{
+  outline: none;
+  text-decoration: underline;
+}
 </style>
 {% endblock %}
 
@@ -162,7 +187,7 @@
   <img src="{% static 'images/red.png' %}" alt="" class="hero-image">
   <img src="{% static 'images/blue.jpg' %}" alt="" class="hero-image">
   <img src="{% static 'images/green.jpg' %}" alt="" class="hero-image">
-  
+
   <div class="hero-overlay">
     <h1>行きたいお店が、きっと見つかる</h1>
     <p>日本最大級のグルメレビューサイト</p>
@@ -204,12 +229,20 @@
   <!-- ジャンル -->
   <section class="section">
     <div class="section-title">料理ジャンルから探す</div>
+
     <div class="genres">
       <div class="genre-card"><img src="{% static 'images/sushi.jpg' %}"><span>寿司</span></div>
       <div class="genre-card"><img src="{% static 'images/ramen.jpg' %}"><span>ラーメン</span></div>
       <div class="genre-card"><img src="{% static 'images/yakiniku.jpg' %}"><span>焼肉</span></div>
       <div class="genre-card"><img src="{% static 'images/cafe.jpg' %}"><span>カフェ</span></div>
       <div class="genre-card"><img src="{% static 'images/izakaya.jpg' %}"><span>居酒屋</span></div>
+    </div>
+
+    <!-- ✅ 追加：ジャンル一覧へ（枠なし・青） -->
+    <div class="genre-actions">
+      <a class="genre-list-btn" href="{% url 'search:customer_genre_list' %}">
+        ＜＜ジャンル一覧へ
+      </a>
     </div>
   </section>
 

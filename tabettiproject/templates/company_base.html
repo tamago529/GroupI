@@ -4,6 +4,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}タベッチ運用管理サイト{% endblock %}</title>
 
+     <!-- ✅ サイトアイコン（favicon） -->
+    <link rel="icon" href="{% static 'images/Tabecchi_icon.png' %}">
+    <!-- 互換用（必要なら） -->
+    <link rel="shortcut icon" href="{% static 'images/Tabecchi_icon.png' %}">
+
     <link rel="stylesheet" href="{% static 'css/company.css' %}">
     {% block css %}{% endblock %}</head>
 <body class="company">

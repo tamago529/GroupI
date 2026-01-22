@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ログアウト完了</title>
+  {# store側のCSSがあるならそれに差し替えOK #}
+  <link rel="stylesheet" href="{% static 'css/customer_login.css' %}">
+</head>
+<body>
+
+<div class="logout-wrapper">
+  <div class="logout-box">
+    <h2>ログアウトが完了しました</h2>
+
+    <p class="logout-message">
+      ご利用ありがとうございました。<br>
+      またのご利用をお待ちしております。
+    </p>
+
+    <a href="{% url 'accounts:store_login' %}" class="btn-top">
+      店舗ログイン画面へ
+    </a>
+  </div>
+</div>
+
+</body>
+</html>
