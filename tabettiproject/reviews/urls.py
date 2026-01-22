@@ -46,7 +46,7 @@ urlpatterns = [
         name="store_review_report",
     ),
     path(
-        "store_review_list/<int:store_pk>/",
+        "store_review_list/<int:pk>/",
         store_review_listView.as_view(),
         name="store_review_list",
     ),
