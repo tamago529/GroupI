@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic.base import TemplateView
-from commons.models import StoreAccount, Store, Reservation, StoreOnlineReservation
+from commons.models import StoreAccount, Store, Reservation, StoreOnlineReservation, StoreMenu
 from django.urls import reverse
 from django.db.models import Q
 from django.utils import timezone

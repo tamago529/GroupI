@@ -78,18 +78,37 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
+/* 店舗名 */
 .shop-name {
+    margin: 0;
+}
+
+/* ✅ 店舗名リンク（枠なし） */
+.shop-name-btn {
+    display: inline;
     font-size: 17px;
     font-weight: bold;
-    margin: 0;
+    color:#06c;
+    text-decoration: none; /* 通常は下線なし */
+}
+
+.shop-name-btn:hover {
+    text-decoration: underline; /* hoverだけ下線 */
+}
+
+.shop-name-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 122, 0, 0.18);
+    border-radius: 4px; /* 文字周りのフォーカスを少し丸く */
 }
 
 .rating-section {
     display: flex;
     gap: 8px;
+    align-items: center;
 }
 
 .rating-num {
@@ -103,20 +122,13 @@
     color: #555;
 }
 
-.reservation-bar {
+.budget-bar {
     margin-top: auto;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
-}
-
-.btn-reserve {
-    background: #ff7a00;
-    color: #fff;
     font-size: 13px;
-    font-weight: bold;
-    padding: 8px 18px;
-    border-radius: 20px;
+    color: #333;
 }
 
 /* ページネーション */
@@ -181,13 +193,18 @@
         {% for store in stores %}
         <article class="shop-card">
             <div class="shop-photo">
-                <img src="https://via.placeholder.com/200x150" width="200" height="150">
+                <img src="https://via.placeholder.com/200x150" width="200" height="150" alt="店舗画像">
             </div>
 
             <div class="shop-info">
                 <h2 class="shop-name">
-                    {{ stores.start_index|add:forloop.counter0 }}.
-                    {{ store.store_name }}{% if store.branch_name %}（{{ store.branch_name }}）{% endif %}
+                    <a
+                      class="shop-name-btn"
+                      href="{% url 'stores:customer_store_info' store.pk %}"
+                    >
+                      {{ stores.start_index|add:forloop.counter0 }}.
+                      {{ store.store_name }}{% if store.branch_name %}（{{ store.branch_name }}）{% endif %}
+                    </a>
                 </h2>
 
                 <div class="rating-section">
@@ -197,13 +214,13 @@
 
                 <div class="shop-meta">
                     {{ store.area.area_name }} /
-                    {{ store.scene.scene_name }}/
+                    {{ store.scene.scene_name }} /
                     {{ store.genre.genre_name }}
                 </div>
 
-                <div class="reservation-bar">
+                <!-- ✅ 予約するボタン削除 → 予算だけ表示 -->
+                <div class="budget-bar">
                     <span>予算：¥{{ store.budget }}</span>
-                    <span class="btn-reserve">予約する</span>
                 </div>
             </div>
         </article>

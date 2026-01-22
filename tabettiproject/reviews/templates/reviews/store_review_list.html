@@ -1,4 +1,79 @@
-口コミ一覧（店舗）画面
+{% extends "store_base.html" %}
+
 {% block content %}
-<a href="{% url 'accounts:company_top' %}">戻る</a>
+<style>
+/* --- 提供いただいた共通スタイル --- */
+:root{
+  --bg:#f3f4f6; --card:#ffffff; --line:#d9dde3; --text:#222; --muted:#6b7280;
+  --nav:#2f343a; --link:#1a73e8; --chip:#eef2f7; --bar:#ff9800; --bar2:#ffb74d;
+  --danger-bg:#ffe9e7; --danger-line:#f3b6b0; --danger-text:#b42318;
+}
+*{box-sizing:border-box}
+.wrap{max-width:1200px;margin:0 auto;padding:10px 12px 24px;color:var(--text); font-family: sans-serif;}
+.hd{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap; margin-bottom: 20px;}
+.title{font-size:18px;font-weight:900; border-left: 4px solid var(--bar); padding-left: 12px;}
+.card{border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden; height: 100%; display: flex; flex-direction: column;}
+.card-body{padding:16px; flex-grow: 1; display: flex; flex-direction: column;}
+.btn{
+  border:1px solid var(--line); background:#fff; padding:7px 10px; border-radius:6px;
+  cursor:pointer; font-weight:900; font-size:12px; color:#333; display:inline-flex; align-items:center; gap:6px; text-decoration: none;
+}
+.btn:hover{background:#f3f4f6}
+.btn.danger{color: var(--danger-text); border-color: var(--danger-line);}
+.btn.danger:hover{background: var(--danger-bg);}
+
+/* --- 今回の画面専用：4列グリッド --- */
+.review-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 🌟設計図通りの4列 */
+  gap: 16px;
+}
+.user-name { font-size: 13px; font-weight: 800; color: var(--muted); margin-bottom: 8px; }
+.review-text { font-size: 14px; font-weight: 700; line-height: 1.5; color: var(--text); flex-grow: 1; margin-bottom: 12px; }
+.card-footer { display: flex; justify-content: flex-end; padding-top: 10px; border-top: 1px dashed var(--line); }
+
+/* レスポンシブ対応 */
+@media (max-width: 1024px) { .review-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .review-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="wrap">
+    <!-- ヘッダーエリア -->
+    <div class="hd">
+        <div class="hd-left">
+            <h1 class="title">自店舗への口コミ一覧</h1>
+        </div>
+        <div class="btns">
+            <a href="{% url 'stores:store_top' %}" class="btn">← トップへ戻る</a>
+        </div>
+    </div>
+
+    <!-- ② 口コミグリッド（4列） -->
+    <div class="review-grid">
+        {% for review in reviews %}
+        <div class="card">
+            <div class="card-body">
+                <!-- ③ ユーザー名 -->
+                <div class="user-name">👤 {{ review.reviewer.nickname }} 様</div>
+                
+                <!-- ④ 口コミ内容 -->
+                <div class="review-text">
+                    {{ review.review_text|truncatechars:50 }}
+                </div>
+
+                <div class="card-footer">
+                    <!-- 通報ボタン（dangerスタイルを適用） -->
+                    <a href="{% url 'reviews:store_review_report' review.pk %}" class="btn danger small">
+                        🚩 通報
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div style="grid-column: span 4; text-align: center; padding: 60px; color: var(--muted);">
+            現在、投稿されている口コミはありません。
+        </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

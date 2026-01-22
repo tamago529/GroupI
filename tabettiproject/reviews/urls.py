@@ -46,9 +46,9 @@ urlpatterns = [
         name="store_review_report",
     ),
     path(
-        "store_review_list_all/",
+        "store_review_list",
         store_review_listView.as_view(),
-        name="store_review_list_all",
+        name="store_review_list",
     ),
     path(
         "company_review_list/",
