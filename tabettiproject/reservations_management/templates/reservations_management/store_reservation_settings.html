@@ -1,6 +1,8 @@
 {% extends "store_base.html" %}
 {% load dict_extras %}
 
+{% block title %}店舗管理予約受付設定{% endblock %}
+
 {% block content %}
 
 <style>
@@ -155,15 +157,27 @@ a:hover{text-decoration:underline}
     <div class="month">{{ month_label }}（ネット予約受付設定）</div>
 
     <div class="nav">
-      {% if request.resolver_match.url_name == 'store_reservation_settings_debug' %}
-        <a class="btn" href="{% url 'reservations_management:store_reservation_settings_debug' %}?store_id={{ store.id }}&year={{ today.year }}&month={{ today.month }}">今月</a>
-        <a class="btn" href="{% url 'reservations_management:store_reservation_settings_debug' %}?store_id={{ store.id }}&year={{ prev_year }}&month={{ prev_month }}">‹</a>
-        <a class="btn" href="{% url 'reservations_management:store_reservation_settings_debug' %}?store_id={{ store.id }}&year={{ next_year }}&month={{ next_month }}">›</a>
-      {% else %}
-        <a class="btn" href="{% url 'reservations_management:store_reservation_settings' %}?year={{ today.year }}&month={{ today.month }}">今月</a>
-        <a class="btn" href="{% url 'reservations_management:store_reservation_settings' %}?year={{ prev_year }}&month={{ prev_month }}">‹</a>
-        <a class="btn" href="{% url 'reservations_management:store_reservation_settings' %}?year={{ next_year }}&month={{ next_month }}">›</a>
-      {% endif %}
+      <a class="btn"
+         href="{% url 'reservations_management:store_reservation_settings' %}?year={{ today.year }}&month={{ today.month }}">
+        今月
+      </a>
+      <a class="btn"
+         href="{% url 'reservations_management:store_reservation_settings' %}?year={{ prev_year }}&month={{ prev_month }}">
+        ‹
+      </a>
+      <a class="btn"
+         href="{% url 'reservations_management:store_reservation_settings' %}?year={{ next_year }}&month={{ next_month }}">
+        ›
+      </a>
+
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="bulk_open">
+        <button class="btn" type="submit"
+              onclick="return confirm('この月をすべて受付中にします。よろしいですか？');">
+          今月をすべて受付中にする
+        </button>
+      </form>
     </div>
   </div>
 
@@ -212,8 +226,7 @@ a:hover{text-decoration:underline}
                 {% if d.month != month %}disabled{% endif %}
                 data-date="{{ d|date:'Y-m-d' }}"
                 data-is-open="{% if o and o.is_open %}1{% else %}0{% endif %}"
-                data-seats="{% if o %}{{ o.available_seats }}{% else %}{% endif %}"
-              >
+                data-seats="{% if o %}{{ o.available_seats }}{% else %}{% endif %}">
                 設定する
               </button>
 
@@ -225,10 +238,10 @@ a:hover{text-decoration:underline}
   </section>
 
   <div class="help">
-    {メモ}
+    メモ
     <ul style="margin:6px 0 0; padding-left:18px;">
-      <li>「休業日」は現在、DB上は <b>booking_status=False / available_seats=0</b> として保存します。</li>
-      <li>ユースケースの「営業時間」「予約不可」は、現モデルに列が無いので <b>まだ保存しません</b>（UIのみ置いてあります）。</li>
+      <li>休業日は <b>booking_status=False / available_seats=0</b> として保存されます。</li>
+      <li>営業時間・予約不可は将来拡張予定（現モデルでは未保存）。</li>
     </ul>
   </div>
 
@@ -236,34 +249,30 @@ a:hover{text-decoration:underline}
 
 <!-- Modal -->
 <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal" role="dialog" aria-modal="true">
     <div class="modal-h">
-      <b id="modalTitle">受付設定</b>
+      <b>受付設定</b>
       <button type="button" class="btn" id="modalCloseBtn">×</button>
     </div>
 
-    <form method="post" id="settingsForm">
+    <form method="post">
       {% csrf_token %}
       <div class="modal-b">
 
-        <input type="hidden" name="date" id="fDate" value="">
+        <input type="hidden" name="date" id="fDate">
 
         <div class="frow">
           <div class="label">対象日</div>
           <div>
             <div id="dateLabel" style="font-size:13px; font-weight:900;"></div>
-            <div class="small">※この日付のネット予約受付設定を登録します</div>
           </div>
         </div>
 
         <div class="frow">
-          <div class="label">営業/休業</div>
+          <div class="label">営業 / 休業</div>
           <div class="inline">
-            <label><input type="radio" name="day_type" value="open" checked> 営業日に設定</label>
-            <label><input type="radio" name="day_type" value="closed"> 休業日に設定</label>
-            <div class="help">
-              {メモ} 休業日は「反映」押下で <b>受付停止＋空き0</b> として保存します。
-            </div>
+            <label><input type="radio" name="day_type" value="open" checked> 営業日</label>
+            <label><input type="radio" name="day_type" value="closed"> 休業日</label>
           </div>
         </div>
 
@@ -276,44 +285,15 @@ a:hover{text-decoration:underline}
         </div>
 
         <div class="frow" id="seatsRow">
-          <div class="label">空き席数（必須）</div>
-          <div>
-            <input class="input" type="number" name="available_seats" id="fSeats" min="0" placeholder="例：9">
-            <div class="help">
-              {メモ} StoreOnlineReservation.available_seats に保存します。
-            </div>
-          </div>
-        </div>
-
-        <div class="frow">
-          <div class="label">営業時間</div>
-          <div>
-            <div class="inline">
-              <input class="input" type="time" disabled>
-              <span>〜</span>
-              <input class="input" type="time" disabled>
-            </div>
-            <div class="help">
-              {メモ} ユースケース必須だが、今のモデルに列が無いので未保存（将来、日別営業時間モデル/列を追加）。
-            </div>
-          </div>
-        </div>
-
-        <div class="frow">
-          <div class="label">予約不可</div>
-          <div class="inline">
-            <label><input type="checkbox" disabled> 予約不可にする</label>
-            <div class="help">
-              {メモ} これもモデルに列が無いので未保存。将来の拡張ポイント。
-            </div>
-          </div>
+          <div class="label">空き席数</div>
+          <input class="input" type="number" name="available_seats" id="fSeats" min="0">
         </div>
 
       </div>
 
       <div class="modal-f">
         <button type="button" class="btn" id="cancelBtn">キャンセル</button>
-        <button type="submit" class="btn" style="background:#2563eb;color:#fff;border-color:#2563eb;">反映する</button>
+        <button type="submit" class="btn primary">反映する</button>
       </div>
     </form>
   </div>
@@ -324,70 +304,41 @@ a:hover{text-decoration:underline}
   const backdrop = document.getElementById("modalBackdrop");
   const closeBtn = document.getElementById("modalCloseBtn");
   const cancelBtn = document.getElementById("cancelBtn");
-
   const fDate = document.getElementById("fDate");
   const dateLabel = document.getElementById("dateLabel");
   const fSeats = document.getElementById("fSeats");
-
   const openFields = document.getElementById("openFields");
   const seatsRow = document.getElementById("seatsRow");
 
   function openModal(btn){
-    const d = btn.dataset.date;
-    const isOpen = btn.dataset.isOpen; // "1" / "0"
-    const seats = btn.dataset.seats;
-
-    fDate.value = d;
-    dateLabel.textContent = d;
-
-    // 初期値（未設定なら空欄）
-    fSeats.value = seats || "";
-
-    // 受付中/停止中の初期
-    const radios = document.querySelectorAll("input[name='booking_status']");
-    radios.forEach(r => { r.checked = (r.value === (isOpen === "1" ? "1" : "0")); });
-
-    // day_type 初期は営業日（閉めたいならユーザーが切替）
-    const dayTypeRadios = document.querySelectorAll("input[name='day_type']");
-    dayTypeRadios.forEach(r => { r.checked = (r.value === "open"); });
-
-    // 表示制御
-    setDayTypeUI("open");
-
+    fDate.value = btn.dataset.date;
+    dateLabel.textContent = btn.dataset.date;
+    fSeats.value = btn.dataset.seats || "";
     backdrop.style.display = "flex";
-    backdrop.setAttribute("aria-hidden", "false");
   }
 
   function closeModal(){
     backdrop.style.display = "none";
-    backdrop.setAttribute("aria-hidden", "true");
   }
 
   function setDayTypeUI(type){
-    if(type === "closed"){
-      openFields.style.display = "none";
-      seatsRow.style.display = "none";
-    }else{
-      openFields.style.display = "";
-      seatsRow.style.display = "";
-    }
+    const show = (type === "open");
+    openFields.style.display = show ? "" : "none";
+    seatsRow.style.display = show ? "" : "none";
   }
 
-  document.querySelectorAll(".setbtn").forEach(btn => {
-    btn.addEventListener("click", () => openModal(btn));
-  });
+  document.querySelectorAll(".setbtn").forEach(b =>
+    b.addEventListener("click", () => openModal(b))
+  );
 
-  closeBtn.addEventListener("click", closeModal);
-  cancelBtn.addEventListener("click", closeModal);
+  document.querySelectorAll("input[name='day_type']").forEach(r =>
+    r.addEventListener("change", () => setDayTypeUI(r.value))
+  );
 
-  backdrop.addEventListener("click", (e) => {
-    if(e.target === backdrop) closeModal();
-  });
-
-  document.querySelectorAll("input[name='day_type']").forEach(r => {
-    r.addEventListener("change", () => setDayTypeUI(r.value));
-  });
+  closeBtn.onclick = cancelBtn.onclick = closeModal;
+  backdrop.onclick = e => { if(e.target === backdrop) closeModal(); };
 })();
 </script>
+
 
 {% endblock %}

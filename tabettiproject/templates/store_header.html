@@ -91,12 +91,18 @@
 
     <!-- 右：ナビ -->
     <nav class="header-nav">
-      <span class="username">ようこそ ○○様</span>
-      <a href="#">ネット予約管理画面</a>
-      <a href="#">店舗ページ表示</a>
+      <span class="username">ようこそ
+        {% if request.user.is_authenticated and request.user.storeaccount %}
+          {{ request.user.storeaccount.store.store_name }}
+        {% endif %} 様</span>
+       <a href="{% url 'stores:store_top' %}" class="nav-link">
+        トップ
+      </a>
+      <a href="{% url 'reservations_management:store_reservation_settings' %}">ネット予約管理画面</a>
+      <a href="{% url 'stores:store_basic_edit' %}">店舗ページ表示</a>
       <a href="#">管理・メールでのお問い合わせ</a>
       <a href="#">ヘルプ</a>
-      <a href="#">ログアウト</a>
+      
     </nav>
   </div>
 </header>

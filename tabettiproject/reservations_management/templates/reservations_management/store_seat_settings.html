@@ -1,4 +1,6 @@
 {% extends "store_base.html" %}
+
+{% block title %}店舗管理席設定{% endblock %}
 {% block content %}
 
 <style>
@@ -98,13 +100,7 @@ a:hover{text-decoration:underline}
 
 <div class="wrap">
 
-  <div class="top-links">
-    <a href="{% url 'reservations_management:store_reservation_calendar' %}">予約カレンダー</a> /
-    <a href="{% url 'reservations_management:store_reservation_ledger' %}">予約台帳</a> /
-    <a href="{% url 'reservations_management:store_customer_ledger' %}">顧客台帳</a> /
-    <a href="{% url 'reservations_management:store_reservation_settings' %}">ネット予約受付設定</a> /
-    <strong>席設定</strong>
-  </div>
+
 
   <div class="hd">
     <div>

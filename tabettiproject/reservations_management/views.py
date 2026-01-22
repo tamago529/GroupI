@@ -21,25 +21,25 @@ from commons.models import StoreAccount, Store, Reservation, StoreOnlineReservat
 
 
 # ----------------------------
-# 共通：storeの取り方
+# 共通：storeの取り方（本番のみ）
 # ----------------------------
 def _get_store_from_user(request: HttpRequest) -> Store:
-    """ログイン中ユーザーから店舗(Store)を特定（本番用）"""
+    """
+    ログイン中ユーザーから店舗(Store)を特定
+    StoreAccount は Account を継承している前提（pkは user.pk と一致）
+    """
+    user = request.user
+    if not user or not user.is_authenticated:
+        raise Http404("ログインしてください。")
+
+    # ここは request.user.storeaccount が一番安全（OneToOneでぶら下がってる想定）
     try:
-        sa = StoreAccount.objects.select_related("store").get(pk=request.user.pk)
-    except StoreAccount.DoesNotExist:
+        sa = user.storeaccount  # type: ignore[attr-defined]
+        sa.store  # 念のため
+        return sa.store
+    except Exception:
+        # storeaccount が無い（店舗アカウントではない）
         raise Http404("店舗アカウントではありません。")
-    return sa.store
-
-
-def _get_store_from_query(store_id: str | None) -> Store:
-    """ログイン未完成の間のデバッグ用：/?store_id=3 で店舗取得"""
-    if not store_id:
-        raise Http404("store_id がありません。")
-    try:
-        return Store.objects.get(pk=int(store_id))
-    except (Store.DoesNotExist, ValueError):
-        raise Http404("店舗が見つかりません。")
 
 
 # ----------------------------
@@ -105,25 +105,35 @@ def _build_day_bars(
     *,
     day_start: time = time(11, 0),
     day_end: time = time(23, 0),
-    default_stay_minutes: int = 90,
 ) -> tuple[list[LedgerBar], list[str]]:
-    """日別台帳の横棒データ（時間ズレ修正版）"""
-
+    """
+    日別台帳の横棒データ（start_time / end_time 版）
+    - start_time/end_time を使う（visit_time は使わない）
+    - 表示は day_start〜day_end にクリップ
+    """
     start_min = _time_to_minutes(day_start)
     end_min = _time_to_minutes(day_end)
-    span = max(1, end_min - start_min)  # 11:00→23:00 = 720
+    span = max(1, end_min - start_min)
 
-    # ★ ヘッダーは「枠の開始」だけ：11〜22（12個）
+    # ヘッダー（11〜22）
     labels = [f"{h:02d}:00" for h in range(day_start.hour, day_end.hour)]
     bars: list[LedgerBar] = []
 
     for r in reservations:
-        st = r.visit_time
-        st_min = _time_to_minutes(st)
+        st = getattr(r, "start_time", None)
+        ed = getattr(r, "end_time", None)
 
-        ed_dt = datetime.combine(date.today(), st) + timedelta(minutes=default_stay_minutes)
-        ed = ed_dt.time()
+        # もしNULLなどが混ざっても落とさない（基本は必須のはず）
+        if not isinstance(st, time) or not isinstance(ed, time):
+            continue
+
+        st_min = _time_to_minutes(st)
         ed_min = _time_to_minutes(ed)
+
+        # end が start より小さい（=日跨ぎ）ケースは一旦「当日表示は start から day_end まで」に寄せる
+        # ※ 日跨ぎ予約を真面目に表示したいなら別設計が必要
+        if ed_min <= st_min:
+            ed_min = end_min
 
         clip_st = max(start_min, min(end_min, st_min))
         clip_ed = max(start_min, min(end_min, ed_min))
@@ -139,7 +149,7 @@ def _build_day_bars(
                 reservation_id=r.id,
                 title=booking_name,
                 start=st,
-                end=ed,
+                end=time(ed_min // 60, ed_min % 60),
                 left_pct=left,
                 width_pct=width,
                 visit_count=int(getattr(r, "visit_count", 0) or 0),
@@ -148,7 +158,6 @@ def _build_day_bars(
         )
 
     return bars, labels
-
 
 
 def _assign_bars_to_fixed_lanes(
@@ -219,20 +228,6 @@ class store_reservation_ledgerView(LoginRequiredMixin, TemplateView):
 
 
 # ----------------------------
-# 予約台帳トップ（デバッグ）→ 今日へ（store_id維持）
-# ----------------------------
-class store_reservation_ledger_debugView(TemplateView):
-    template_name = "reservations_management/store_reservation_ledger.html"
-
-    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        store = _get_store_from_query(request.GET.get("store_id"))
-        today = timezone.localdate()
-        return redirect(
-            f"{reverse('reservations_management:store_reservation_ledger_day_debug')}?store_id={store.id}&date={today.isoformat()}"
-        )
-
-
-# ----------------------------
 # 予約台帳（日別）本番
 # ----------------------------
 class store_reservation_ledger_dayView(LoginRequiredMixin, TemplateView):
@@ -247,7 +242,7 @@ class store_reservation_ledger_dayView(LoginRequiredMixin, TemplateView):
         reservations = list(
             Reservation.objects.filter(store=store, visit_date=target_date)
             .select_related("booking_user", "booking_status")
-            .order_by("visit_time")
+            .order_by("start_time")
         )
 
         bars, time_labels = _build_day_bars(reservations)
@@ -266,52 +261,7 @@ class store_reservation_ledger_dayView(LoginRequiredMixin, TemplateView):
                 "bars": bars,
                 "lanes": lanes,
                 "time_labels": time_labels,
-                "is_debug": False,
-                "store_id": None,
                 "time_segments": max(1, len(time_labels)),
-            }
-        )
-        return ctx
-
-
-# ----------------------------
-# 予約台帳（日別）デバッグ
-# ----------------------------
-class store_reservation_ledger_day_debugView(TemplateView):
-    template_name = "reservations_management/store_reservation_ledger.html"
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        ctx = super().get_context_data(**kwargs)
-
-        store = _get_store_from_query(self.request.GET.get("store_id"))
-        target_date = _parse_target_date(self.request)
-
-        reservations = list(
-            Reservation.objects.filter(store=store, visit_date=target_date)
-            .select_related("booking_user", "booking_status")
-            .order_by("visit_time")
-        )
-
-        bars, time_labels = _build_day_bars(reservations)
-        lanes = _assign_bars_to_fixed_lanes(bars, lane_count=3)
-
-        prev_date = target_date - timedelta(days=1)
-        next_date = target_date + timedelta(days=1)
-
-        ctx.update(
-            {
-                "mode": "day",
-                "store": store,
-                "target_date": target_date,
-                "prev_date": prev_date,
-                "next_date": next_date,
-                "bars": bars,
-                "lanes": lanes,
-                "time_labels": time_labels,
-                "is_debug": True,
-                "store_id": store.id,
-                "time_segments": max(1, len(time_labels)),
-
             }
         )
         return ctx
@@ -334,33 +284,12 @@ class store_reservation_detailView(LoginRequiredMixin, TemplateView):
         except Reservation.DoesNotExist:
             raise Http404("予約が見つかりません。")
 
-        ctx.update({"mode": "detail", "store": store, "reservation": r, "is_debug": False, "store_id": None})
+        ctx.update({"mode": "detail", "store": store, "reservation": r})
         return ctx
 
 
 # ----------------------------
-# 予約詳細（デバッグ）
-# ----------------------------
-class store_reservation_detail_debugView(TemplateView):
-    template_name = "reservations_management/store_reservation_ledger.html"
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        ctx = super().get_context_data(**kwargs)
-
-        store = _get_store_from_query(self.request.GET.get("store_id"))
-        pk = kwargs.get("pk")
-
-        try:
-            r = Reservation.objects.select_related("store", "booking_user", "booking_status").get(pk=pk, store=store)
-        except Reservation.DoesNotExist:
-            raise Http404("予約が見つかりません。")
-
-        ctx.update({"mode": "detail", "store": store, "reservation": r, "is_debug": True, "store_id": store.id})
-        return ctx
-
-
-# ----------------------------
-# Phase3: 予約編集（本番：GET/POST）
+# 予約編集（本番：GET/POST）
 # ----------------------------
 class store_reservation_editView(LoginRequiredMixin, TemplateView):
     template_name = "reservations_management/store_reservation_ledger.html"
@@ -375,7 +304,7 @@ class store_reservation_editView(LoginRequiredMixin, TemplateView):
         except Reservation.DoesNotExist:
             raise Http404("予約が見つかりません。")
 
-        ctx.update({"mode": "edit", "store": store, "reservation": r, "is_debug": False, "store_id": None})
+        ctx.update({"mode": "edit", "store": store, "reservation": r})
         return ctx
 
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
@@ -388,18 +317,24 @@ class store_reservation_editView(LoginRequiredMixin, TemplateView):
             raise Http404("予約が見つかりません。")
 
         visit_date_s = request.POST.get("visit_date", "")
-        visit_time_s = request.POST.get("visit_time", "")
+        start_time_s = request.POST.get("start_time", "")
+        end_time_s = request.POST.get("end_time", "")
         visit_count_s = request.POST.get("visit_count", "")
 
         try:
             new_date = date.fromisoformat(visit_date_s)
-            new_time = time.fromisoformat(visit_time_s)
+            new_start = time.fromisoformat(start_time_s)
+            new_end = time.fromisoformat(end_time_s)
             new_count = int(visit_count_s)
+
             if new_count <= 0:
                 raise ValueError("人数は1以上で入力してください。")
+            if _time_to_minutes(new_end) <= _time_to_minutes(new_start):
+                raise ValueError("終了時刻は開始時刻より後にしてください。")
 
             r.visit_date = new_date
-            r.visit_time = new_time
+            r.start_time = new_start
+            r.end_time = new_end
             r.visit_count = new_count
             r.save()
 
@@ -411,60 +346,7 @@ class store_reservation_editView(LoginRequiredMixin, TemplateView):
 
 
 # ----------------------------
-# Phase3: 予約編集（デバッグ：GET/POST）
-# ----------------------------
-class store_reservation_edit_debugView(TemplateView):
-    template_name = "reservations_management/store_reservation_ledger.html"
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        ctx = super().get_context_data(**kwargs)
-        store = _get_store_from_query(self.request.GET.get("store_id"))
-        pk = kwargs.get("pk")
-
-        try:
-            r = Reservation.objects.select_related("store", "booking_user", "booking_status").get(pk=pk, store=store)
-        except Reservation.DoesNotExist:
-            raise Http404("予約が見つかりません。")
-
-        ctx.update({"mode": "edit", "store": store, "reservation": r, "is_debug": True, "store_id": store.id})
-        return ctx
-
-    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        store = _get_store_from_query(request.GET.get("store_id"))
-        pk = kwargs.get("pk")
-
-        try:
-            r = Reservation.objects.get(pk=pk, store=store)
-        except Reservation.DoesNotExist:
-            raise Http404("予約が見つかりません。")
-
-        visit_date_s = request.POST.get("visit_date", "")
-        visit_time_s = request.POST.get("visit_time", "")
-        visit_count_s = request.POST.get("visit_count", "")
-
-        try:
-            new_date = date.fromisoformat(visit_date_s)
-            new_time = time.fromisoformat(visit_time_s)
-            new_count = int(visit_count_s)
-            if new_count <= 0:
-                raise ValueError("人数は1以上で入力してください。")
-
-            r.visit_date = new_date
-            r.visit_time = new_time
-            r.visit_count = new_count
-            r.save()
-
-            messages.success(request, "予約内容を更新しました（debug）。")
-        except Exception as e:
-            messages.error(request, f"更新に失敗しました（debug）：{e}")
-
-        return redirect(
-            f"{reverse('reservations_management:store_reservation_detail_debug', kwargs={'pk': pk})}?store_id={store.id}"
-        )
-
-
-# ----------------------------
-# Phase2: booking_status を更新する共通ヘルパ
+# 予約ステータス更新ヘルパ
 # ----------------------------
 def _set_booking_status_safely(reservation: Reservation, action: str) -> None:
     if action not in ("cancel", "visited"):
@@ -531,7 +413,7 @@ def _set_booking_status_safely(reservation: Reservation, action: str) -> None:
 
 
 # ----------------------------
-# Phase2: 予約ステータス変更（本番：POST）
+# 予約ステータス変更（本番：POST）
 # ----------------------------
 class store_reservation_actionView(LoginRequiredMixin, View):
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
@@ -561,46 +443,13 @@ class store_reservation_actionView(LoginRequiredMixin, View):
 
 
 # ----------------------------
-# Phase2: 予約ステータス変更（デバッグ：POST）
-# ----------------------------
-class store_reservation_action_debugView(View):
-    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        pk = kwargs.get("pk")
-        action = request.POST.get("action")
-        store = _get_store_from_query(request.GET.get("store_id"))
-
-        if action not in ("cancel", "visited"):
-            messages.error(request, "不正な操作です。")
-            return redirect(
-                f"{reverse('reservations_management:store_reservation_detail_debug', kwargs={'pk': pk})}?store_id={store.id}"
-            )
-
-        try:
-            r = Reservation.objects.select_related("store", "booking_status").get(pk=pk, store=store)
-        except Reservation.DoesNotExist:
-            raise Http404("予約が見つかりません。")
-
-        try:
-            with transaction.atomic():
-                _set_booking_status_safely(r, action)
-                r.save()
-            messages.success(request, "予約ステータスを更新しました（debug）。")
-        except Exception as e:
-            messages.error(request, f"更新に失敗しました（debug）：{e}")
-
-        return redirect(
-            f"{reverse('reservations_management:store_reservation_detail_debug', kwargs={'pk': pk})}?store_id={store.id}"
-        )
-
-
-# ----------------------------
 # 顧客台帳・席設定（とりあえずTemplateView）
 # ----------------------------
-class store_customer_ledgerView(TemplateView):
+class store_customer_ledgerView(LoginRequiredMixin, TemplateView):
     template_name = "reservations_management/store_customer_ledger.html"
 
 
-class store_seat_settingsView(TemplateView):
+class store_seat_settingsView(LoginRequiredMixin, TemplateView):
     template_name = "reservations_management/store_seat_settings.html"
 
 
@@ -614,61 +463,6 @@ class store_reservation_calendarView(LoginRequiredMixin, TemplateView):
         ctx = super().get_context_data(**kwargs)
 
         store = _get_store_from_user(self.request)
-        year, month = _parse_year_month(self.request)
-        weeks = _build_month_weeks(year, month)
-        month_start, month_end = _month_range(year, month)
-
-        qs = (
-            Reservation.objects.filter(store=store, visit_date__gte=month_start, visit_date__lt=month_end)
-            .values("visit_date")
-            .annotate(groups=Count("id"), people=Sum("visit_count"))
-            .order_by("visit_date")
-        )
-        daily = {row["visit_date"]: {"groups": row["groups"], "people": int(row["people"] or 0)} for row in qs}
-
-        online_qs = (
-            StoreOnlineReservation.objects.filter(store=store, date__gte=month_start, date__lt=month_end)
-            .values("date", "booking_status", "available_seats")
-        )
-        online = {
-            row["date"]: {"is_open": bool(row["booking_status"]), "available_seats": int(row["available_seats"] or 0)}
-            for row in online_qs
-        }
-
-        today = timezone.localdate()
-        prev_year, prev_month = (year - 1, 12) if month == 1 else (year, month - 1)
-        next_year, next_month = (year + 1, 1) if month == 12 else (year, month + 1)
-
-        ctx.update(
-            {
-                "store": store,
-                "year": year,
-                "month": month,
-                "month_label": f"{year}年 {month}月",
-                "weeks": weeks,
-                "today": today,
-                "prev_year": prev_year,
-                "prev_month": prev_month,
-                "next_year": next_year,
-                "next_month": next_month,
-                "daily": daily,
-                "online": online,
-                "closed_days": set(),
-            }
-        )
-        return ctx
-
-
-# ----------------------------
-# 予約カレンダー（デバッグ）
-# ----------------------------
-class store_reservation_calendar_debugView(TemplateView):
-    template_name = "reservations_management/store_reservation_calendar.html"
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        ctx = super().get_context_data(**kwargs)
-
-        store = _get_store_from_query(self.request.GET.get("store_id"))
         year, month = _parse_year_month(self.request)
         weeks = _build_month_weeks(year, month)
         month_start, month_end = _month_range(year, month)
@@ -765,6 +559,29 @@ class store_reservation_settingsView(LoginRequiredMixin, TemplateView):
         year, month = _parse_year_month(request)
         month_start, month_end = _month_range(year, month)
 
+        action = request.POST.get("action", "")
+
+        # ==========================================
+        # ★ 追加：表示中の月を一括で「受付中」にする
+        # ==========================================
+        if action == "bulk_open":
+            default_seats = int(getattr(store, "seats", 0) or 0)
+
+            d = month_start
+            while d < month_end:
+                StoreOnlineReservation.objects.update_or_create(
+                    store=store,
+                    date=d,
+                    defaults={"booking_status": True, "available_seats": default_seats},
+                )
+                d += timedelta(days=1)
+
+            messages.success(request, f"{year}年{month}月をすべて『受付中』にしました。")
+            return redirect(f"{reverse('reservations_management:store_reservation_settings')}?year={year}&month={month}")
+
+        # ==========================================
+        # 既存：日別の設定を保存する
+        # ==========================================
         date_str = request.POST.get("date", "")
         day_type = request.POST.get("day_type", "open")
         booking_status = request.POST.get("booking_status", "0")
@@ -804,107 +621,3 @@ class store_reservation_settingsView(LoginRequiredMixin, TemplateView):
         )
         messages.success(request, f"{target_date} の設定を保存しました。")
         return redirect(f"{reverse('reservations_management:store_reservation_settings')}?year={year}&month={month}")
-
-
-# ----------------------------
-# 受付設定（デバッグ）
-# ----------------------------
-class store_reservation_settings_debugView(TemplateView):
-    template_name = "reservations_management/store_reservation_settings.html"
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        ctx = super().get_context_data(**kwargs)
-
-        store = _get_store_from_query(self.request.GET.get("store_id"))
-        year, month = _parse_year_month(self.request)
-        weeks = _build_month_weeks(year, month)
-        month_start, month_end = _month_range(year, month)
-
-        online_qs = (
-            StoreOnlineReservation.objects.filter(store=store, date__gte=month_start, date__lt=month_end)
-            .values("date", "booking_status", "available_seats")
-        )
-        online = {
-            row["date"]: {"is_open": bool(row["booking_status"]), "available_seats": int(row["available_seats"] or 0)}
-            for row in online_qs
-        }
-
-        today = timezone.localdate()
-        prev_year, prev_month = (year - 1, 12) if month == 1 else (year, month - 1)
-        next_year, next_month = (year + 1, 1) if month == 12 else (year, month + 1)
-
-        ctx.update(
-            {
-                "store": store,
-                "year": year,
-                "month": month,
-                "month_label": f"{year}年 {month}月",
-                "weeks": weeks,
-                "today": today,
-                "prev_year": prev_year,
-                "prev_month": prev_month,
-                "next_year": next_year,
-                "next_month": next_month,
-                "online": online,
-                "closed_days": set(),
-            }
-        )
-        return ctx
-
-    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        store = _get_store_from_query(request.GET.get("store_id"))
-
-        year, month = _parse_year_month(request)
-        month_start, month_end = _month_range(year, month)
-
-        date_str = request.POST.get("date", "")
-        day_type = request.POST.get("day_type", "open")
-        booking_status = request.POST.get("booking_status", "0")
-        available_seats_str = request.POST.get("available_seats", "")
-
-        try:
-            target_date = date.fromisoformat(date_str)
-        except ValueError:
-            messages.error(request, "日付が不正です。")
-            return redirect(
-                f"{reverse('reservations_management:store_reservation_settings_debug')}?store_id={store.id}&year={year}&month={month}"
-            )
-
-        if not (month_start <= target_date < month_end):
-            messages.error(request, "この月以外の日付は設定できません。")
-            return redirect(
-                f"{reverse('reservations_management:store_reservation_settings_debug')}?store_id={store.id}&year={year}&month={month}"
-            )
-
-        if day_type == "closed":
-            is_open = False
-            available_seats = 0
-        else:
-            is_open = (booking_status == "1")
-            if available_seats_str == "":
-                messages.error(request, "空き席数は必須です（営業日の場合）。")
-                return redirect(
-                    f"{reverse('reservations_management:store_reservation_settings_debug')}?store_id={store.id}&year={year}&month={month}"
-                )
-            try:
-                available_seats = int(available_seats_str)
-            except ValueError:
-                messages.error(request, "空き席数は数字で入力してください。")
-                return redirect(
-                    f"{reverse('reservations_management:store_reservation_settings_debug')}?store_id={store.id}&year={year}&month={month}"
-                )
-            if available_seats < 0:
-                messages.error(request, "空き席数は0以上で入力してください。")
-                return redirect(
-                    f"{reverse('reservations_management:store_reservation_settings_debug')}?store_id={store.id}&year={year}&month={month}"
-                )
-
-        StoreOnlineReservation.objects.update_or_create(
-            store=store,
-            date=target_date,
-            defaults={"booking_status": is_open, "available_seats": available_seats},
-        )
-        messages.success(request, f"{target_date} の設定を保存しました。")
-        return redirect(
-            f"{reverse('reservations_management:store_reservation_settings_debug')}?store_id={store.id}&year={year}&month={month}"
-        )
