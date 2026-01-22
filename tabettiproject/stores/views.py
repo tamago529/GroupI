@@ -5,6 +5,10 @@ from commons.models import StoreAccount, Store, Reservation, StoreOnlineReservat
 from django.urls import reverse
 from django.db.models import Q
 from django.utils import timezone
+from django.views.generic.edit import FormView
+from .form import StoreBasicForm
+from django.contrib import messages
+
 import urllib.parse
 
 
@@ -30,9 +34,40 @@ class customer_store_basic_editView(TemplateView):
     template_name = "stores/customer_store_basic_edit.html"
 
 
-class store_basic_editView(TemplateView):
-    template_name = "stores/store_basic_edit.html"
+def get_store_from_user(user) -> Store | None:
+    if not user.is_authenticated:
+        return None
+    try:
+        return user.storeaccount.store
+    except Exception:
+        return None
 
+
+class store_basic_editView(LoginRequiredMixin, FormView):
+    template_name = "stores/store_basic_edit.html"
+    form_class = StoreBasicForm
+    success_url = "/stores/store_basic_edit/"
+    login_url = "accounts:store_login"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        store = get_store_from_user(self.request.user)
+        kwargs["instance"] = store
+        return kwargs
+
+    def form_valid(self, form):
+        form.save()
+        messages.success(self.request, "店舗情報を保存しました。")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "入力内容にエラーがあります。")
+        return super().form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["store"] = get_store_from_user(self.request.user)
+        return context
 
 class company_store_infoView(TemplateView):
     template_name = "stores/company_store_info.html"
