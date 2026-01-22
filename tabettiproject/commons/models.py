@@ -399,9 +399,34 @@ class StoreOnlineReservation(models.Model):
 # 追加モデル：店舗画像・メニュー・申請・ログ・パスワード・仮申請
 # ----------------
 class StoreImage(models.Model):
-    store = models.ForeignKey("Store", on_delete=models.CASCADE, verbose_name="店舗")
-    image_path = models.CharField(max_length=255, verbose_name="画像パス")
-    image_status = models.ForeignKey("ImageStatus", on_delete=models.PROTECT, verbose_name="画像ステータス")
+    store = models.ForeignKey(
+        "Store",
+        on_delete=models.CASCADE,
+        verbose_name="店舗",
+        related_name="images",
+    )
+
+    # 旧：パス文字列（static等）を保持したい場合のため残す
+    image_path = models.CharField(
+        max_length=255,
+        verbose_name="画像パス（旧）",
+        blank=True,
+        default="",
+    )
+
+    # 新：アップロード画像を保持（media配下に保存される）
+    image_file = models.ImageField(
+        upload_to="store/images/",
+        verbose_name="画像ファイル（新）",
+        null=True,
+        blank=True,
+    )
+
+    image_status = models.ForeignKey(
+        "ImageStatus",
+        on_delete=models.PROTECT,
+        verbose_name="画像ステータス",
+    )
 
     class Meta:
         db_table = "store_images"
@@ -409,14 +434,37 @@ class StoreImage(models.Model):
         verbose_name_plural = "店舗画像"
 
     def __str__(self):
+        # 新があれば新、なければ旧
+        if self.image_file:
+            return str(self.image_file)
         return self.image_path
 
 
 class StoreMenu(models.Model):
-    store = models.ForeignKey("Store", on_delete=models.CASCADE, verbose_name="店舗")
+    store = models.ForeignKey(
+        "Store",
+        on_delete=models.CASCADE,
+        verbose_name="店舗",
+        related_name="menus",
+    )
     menu_name = models.CharField(max_length=100, verbose_name="メニュー名")
     price = models.IntegerField(verbose_name="価格")
-    image_path = models.CharField(max_length=255, verbose_name="メニュー画像パス")
+
+    # 旧：パス文字列（static等）を保持したい場合のため残す
+    image_path = models.CharField(
+        max_length=255,
+        verbose_name="メニュー画像パス（旧）",
+        blank=True,
+        default="",
+    )
+
+    # 新：アップロード画像を保持
+    image_file = models.ImageField(
+        upload_to="store/menus/",
+        verbose_name="メニュー画像ファイル（新）",
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         db_table = "store_menus"
@@ -425,6 +473,7 @@ class StoreMenu(models.Model):
 
     def __str__(self):
         return self.menu_name
+
 
 
 class StoreAccountRequest(models.Model):
