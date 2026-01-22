@@ -247,7 +247,6 @@
 
     <header class="shop-header">
         <div class="title-area">
-            <span class="official-label">公式</span>
             <!-- 🌟 店名を動的に表示 -->
             <h1 class="shop-name">{{ store.store_name }} {{ store.branch_name }}</h1>
         </div>
@@ -276,11 +275,18 @@
         
         <main class="left-content">
             <section class="photo-preview">
-                <img src="https://via.placeholder.com/150" alt="店舗写真1">
-                <img src="https://via.placeholder.com/150" alt="店舗写真2">
-                <img src="https://via.placeholder.com/150" alt="店舗写真3">
-                <img src="https://via.placeholder.com/150" alt="内観">
-                <img src="https://via.placeholder.com/150" alt="外観">
+                {% if store_images %}
+                    {% for img in store_images %}
+                        {% if img.image_file %}
+                            <img
+                                src="{{ img.image_file.url }}"
+                                alt="{{ store.store_name }} 画像">
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <!-- 画像が1枚もないとき -->
+                    <img src="https://via.placeholder.com/150" alt="no image">
+                {% endif %}
             </section>
 
             <section>
