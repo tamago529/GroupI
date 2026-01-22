@@ -1,68 +1,162 @@
 from django.views.generic import TemplateView
-from django.shortcuts import render
-from commons.models import CustomerAccount 
+from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import Http404
+from django.db import IntegrityError, transaction
 
-def get_default_follows():
-    """フォロー中の初期データ"""
-    return [
-        {'id': 1, 'user': {'username': 'レオ41919'}, 'review_count': 10, 'follower_count': 4},
-        {'id': 2, 'user': {'username': '75adf5'}, 'review_count': 1, 'follower_count': 3},
-        {'id': 3, 'user': {'username': 'ニックネーム16191'}, 'review_count': 11, 'follower_count': 4},
-        {'id': 4, 'user': {'username': 'グルメ太郎'}, 'review_count': 25, 'follower_count': 10},
-    ]
+from django.db.models import Sum
+from commons.models import CustomerAccount, Follow, Review,ReviewPhoto
 
-def get_default_followers():
-    """フォロワーの初期データ"""
-    return [
-        {'id': 101, 'user': {'username': 'フォロワーA'}, 'review_count': 5, 'follower_count': 2, 'is_following': False},
-        {'id': 102, 'user': {'username': 'フォロワーB'}, 'review_count': 0, 'follower_count': 1, 'is_following': False},
-    ]
+
+
+def _get_login_customer_or_404(request):
+    """
+    multi-table継承（Account -> CustomerAccount）対策：
+    request.user.pk で CustomerAccount を引き直す
+    """
+    customer = CustomerAccount.objects.filter(pk=request.user.pk).first()
+    if not customer:
+        raise Http404("CustomerAccount not found")
+    return customer
+
+
+def _pack_user_card(viewer: CustomerAccount, target: CustomerAccount):
+    """
+    テンプレの item.user.username 互換を保つため dict で返す
+    """
+    follower_count = Follow.objects.filter(followee=target).count()
+
+    rel = Follow.objects.filter(follower=viewer, followee=target).only("is_muted").first()
+    is_following = rel is not None
+    is_muted = rel.is_muted if rel else False
+
+    is_follower = Follow.objects.filter(follower=target, followee=viewer).exists()
+
+    return {
+        "id": target.pk,
+        "user": target,
+        "review_count": target.review_count,
+        "follower_count": follower_count,
+        "is_following": is_following,
+        "is_follower": is_follower,
+        "is_muted": is_muted,
+    }
+
 
 class Customer_follower_listView(LoginRequiredMixin, TemplateView):
     template_name = "follows/customer_follower_list.html"
 
     def _get_login_customer(self):
-        # ✅ 継承モデル対策：pkで引き直す
         return CustomerAccount.objects.filter(pk=self.request.user.pk).first()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         customer = self._get_login_customer()
-        cover_field = getattr(customer, "cover_image", None) if customer else None
-        icon_field = getattr(customer, "icon_image", None) if customer else None
+        if not customer:
+            raise Http404("CustomerAccount not found")
 
-        # タイトル
-        display_name = customer.nickname if customer else self.request.user.username
+        cover_field = getattr(customer, "cover_image", None)
+        icon_field = getattr(customer, "icon_image", None)
+
+        display_name = customer.nickname or self.request.user.username
         context["profile_title"] = f"{display_name}のレストランガイド"
 
-        # ✅ 追加：カバー/アイコン/表示名
         context["customer"] = customer
         context["user_name"] = display_name
         context["cover_image_url"] = cover_field.url if cover_field else ""
         context["user_icon_url"] = icon_field.url if icon_field else ""
 
-        if "my_followers" not in self.request.session:
-            self.request.session["my_followers"] = get_default_followers()
+        # ✅ あなたをフォローしている人（フォロワー）
+        follower_rels = (
+            Follow.objects
+            .filter(followee=customer)
+            .select_related("follower")
+            .order_by("-followed_at")
+        )
 
-        context["followers"] = self.request.session["my_followers"]
-        context["follower_count"] = len(context["followers"])
+        followers = [_pack_user_card(customer, rel.follower) for rel in follower_rels]
+
+        context["followers"] = followers
+        context["follower_count"] = len(followers)
         return context
+
+    def post(self, request, *args, **kwargs):
+        """
+        フォロワー一覧での操作：
+        - action=follow       -> Follow作成（adminにも反映）-> フォロー中一覧へ
+        - action=unfollow     -> Follow削除（adminからも消える）-> フォロワー一覧へ
+        - action=toggle_mute  -> Follow.is_muted をトグル（adminにも反映）-> フォロワー一覧へ
+
+        互換：actionが無い場合は従来通り「存在すれば解除／無ければフォロー」を実行
+        """
+        customer = CustomerAccount.objects.filter(pk=request.user.pk).first()
+        if not customer:
+            return redirect("accounts:customer_login")
+
+        target_id = request.POST.get("user_id")
+        action = request.POST.get("action", "")
+
+        if not target_id:
+            return redirect("follows:customer_follower_list")
+
+        target = get_object_or_404(CustomerAccount, pk=target_id)
+
+        if target.pk == customer.pk:
+            return redirect("follows:customer_follower_list")
+
+        rel = Follow.objects.filter(follower=customer, followee=target).first()
+
+        # ✅ ミュート切り替え（フォロー関係がある時のみ）
+        if action == "toggle_mute":
+            if rel:
+                rel.is_muted = not rel.is_muted
+                rel.save(update_fields=["is_muted"])
+            return redirect("follows:customer_follower_list")
+
+        # ✅ フォロー解除
+        if action == "unfollow":
+            if rel:
+                rel.delete()
+            return redirect("follows:customer_follower_list")
+
+        # ✅ フォローする（明示）
+        if action == "follow":
+            if not rel:
+                try:
+                    with transaction.atomic():
+                        Follow.objects.get_or_create(follower=customer, followee=target)
+                except IntegrityError:
+                    pass
+            return redirect("follows:customer_follow_list")
+
+        # ✅ 互換：action無し（従来のトグル動作）
+        if rel:
+            rel.delete()
+            return redirect("follows:customer_follower_list")
+
+        try:
+            with transaction.atomic():
+                Follow.objects.get_or_create(follower=customer, followee=target)
+        except IntegrityError:
+            pass
+        return redirect("follows:customer_follow_list")
+
 
 class Customer_follow_listView(LoginRequiredMixin, TemplateView):
     template_name = "follows/customer_follow_list.html"
 
     def _get_login_customer(self):
-        # ✅ 継承モデル対策：pkで引き直す
         return CustomerAccount.objects.filter(pk=self.request.user.pk).first()
 
     def _build_profile_context(self):
         customer = self._get_login_customer()
-        cover_field = getattr(customer, "cover_image", None) if customer else None
-        icon_field = getattr(customer, "icon_image", None) if customer else None
+        if not customer:
+            raise Http404("CustomerAccount not found")
 
-        display_name = customer.nickname if customer else self.request.user.username
+        cover_field = getattr(customer, "cover_image", None)
+        icon_field = getattr(customer, "icon_image", None)
+        display_name = customer.nickname or self.request.user.username
 
         return {
             "customer": customer,
@@ -74,39 +168,109 @@ class Customer_follow_listView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        # ✅ プロフィール情報（cover/icon/name）
         context.update(self._build_profile_context())
 
-        # ✅ フォロー中データ
-        if "my_follows" not in self.request.session:
-            self.request.session["my_follows"] = get_default_follows()
+        customer = context["customer"]
 
-        context["follows"] = self.request.session["my_follows"]
-        context["follow_count"] = len(context["follows"])
+        follow_rels = (
+            Follow.objects
+            .filter(follower=customer)
+            .select_related("followee")
+            .order_by("-followed_at")
+        )
+
+        follows = []
+        for rel in follow_rels:
+            card = _pack_user_card(customer, rel.followee)
+            card["is_muted"] = rel.is_muted
+            follows.append(card)
+
+        context["follows"] = follows
+        context["follow_count"] = len(follows)
         return context
 
     def post(self, request, *args, **kwargs):
-        user_id_to_remove = request.POST.get("user_id")
-        follows = request.session.get("my_follows", get_default_follows())
+        """
+        フォロー中一覧の操作：
+        - action=toggle_mute -> Follow.is_muted をトグル（adminにも反映）
+        - action=unfollow    -> Follow削除（adminからも消える）
+        """
+        customer = CustomerAccount.objects.filter(pk=request.user.pk).first()
+        if not customer:
+            return redirect("accounts:customer_login")
 
-        # 解除処理
-        updated_follows = [f for f in follows if str(f["id"]) != str(user_id_to_remove)]
-        request.session["my_follows"] = updated_follows
+        target_id = request.POST.get("user_id")
+        action = request.POST.get("action", "")
 
-        # フォロワーリスト側も同期（もしフォロワーA/Bならボタンを未フォローに戻す）
-        followers = request.session.get("my_followers", get_default_followers())
-        for f in followers:
-            if str(f["id"]) == str(user_id_to_remove):
-                f["is_following"] = False
+        if not target_id:
+            return redirect("follows:customer_follow_list")
 
-        request.session["my_followers"] = followers
-        request.session.modified = True
+        rel = Follow.objects.filter(follower=customer, followee_id=target_id).first()
+        if not rel:
+            return redirect("follows:customer_follow_list")
 
-        # ✅ renderでもプロフィール情報（cover/icon/name）を渡す
-        ctx = self._build_profile_context()
-        ctx.update({
-            "follows": updated_follows,
-            "follow_count": len(updated_follows),
+        if action == "toggle_mute":
+            rel.is_muted = not rel.is_muted
+            rel.save(update_fields=["is_muted"])
+            return redirect("follows:customer_follow_list")
+
+        if action == "unfollow":
+            rel.delete()
+            return redirect("follows:customer_follow_list")
+
+        return redirect("follows:customer_follow_list")
+    
+class Customer_user_pageView(LoginRequiredMixin, TemplateView):
+    """
+    フォロー一覧などから、対象ユーザーのマイページ（customer_reviewer_detail.html）を表示する
+    """
+    def get_template_names(self):
+        # テンプレの置き場所が「reviews/配下」でも「直下」でも動くように両対応
+        return [
+            "reviews/customer_reviewer_detail.html",
+            "customer_reviewer_detail.html",
+        ]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        target = get_object_or_404(CustomerAccount, pk=kwargs.get("customer_id"))
+
+        cover_field = getattr(target, "cover_image", None)
+        icon_field = getattr(target, "icon_image", None)
+
+        # counts / stats（テンプレが参照している変数を全部埋める）
+        count_reviews = Review.objects.filter(reviewer=target).count()
+        count_following = Follow.objects.filter(follower=target).count()
+        count_followers = Follow.objects.filter(followee=target).count()
+        stats_photos = ReviewPhoto.objects.filter(review__reviewer=target).count()
+        stats_likes = (
+            Review.objects.filter(reviewer=target).aggregate(total=Sum("like_count")).get("total") or 0
+        )
+        # 訪問者数っぽいもの：ユニーク店舗数（無ければ0）
+        stats_visitors = (
+            Review.objects.filter(reviewer=target).values("store_id").distinct().count()
+        )
+
+        display_name = target.nickname or target.username
+
+        context.update({
+            "customer": target,
+            "user_name": display_name,
+            "cover_image_url": cover_field.url if cover_field else "",
+            "user_icon_url": icon_field.url if icon_field else "",
+
+            "stats_reviews": count_reviews,
+            "stats_photos": stats_photos,
+            "stats_visitors": stats_visitors,
+            "stats_likes": stats_likes,
+
+            "count_reviews": count_reviews,
+            "count_following": count_following,
+            "count_followers": count_followers,
+
+            # ✅ 他人ページなので編集UIを出したくない場合に使う（任意）
+            "readonly_mode": True,
         })
-        return render(request, self.template_name, ctx)
+        return context
+

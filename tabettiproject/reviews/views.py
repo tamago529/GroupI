@@ -20,6 +20,7 @@ from commons.models import (
     ReviewReport,
     StoreInfoReport,
     StoreInfoReportPhoto,
+    Follow,  # ✅ 追加
 )
 from django.utils import timezone
 
@@ -273,20 +274,25 @@ class customer_reviewer_detailView(LoginRequiredMixin, View):
         cover_field = getattr(customer, "cover_image", None)
         icon_field = getattr(customer, "icon_image", None)
 
+        # ✅ カウント系（1回だけ計算して使い回し）
+        count_reviews = Review.objects.filter(reviewer=customer).count()
+        count_following = Follow.objects.filter(follower=customer).count()
+        count_followers = Follow.objects.filter(followee=customer).count()
+
         context = {
             "customer": customer,
             "user_name": customer.nickname,
             "cover_image_url": cover_field.url if cover_field else "",
             "user_icon_url": icon_field.url if icon_field else "",
 
-            "stats_reviews": Review.objects.filter(reviewer=customer).count(),
+            "stats_reviews": count_reviews,
             "stats_photos": ReviewPhoto.objects.filter(review__reviewer=customer).count(),
             "stats_visitors": 0,
             "stats_likes": customer.total_likes,
 
-            "count_reviews": Review.objects.filter(reviewer=customer).count(),
-            "count_following": 0,
-            "count_followers": 0,
+            "count_reviews": count_reviews,
+            "count_following": count_following,  # ✅ 0固定→実数へ
+            "count_followers": count_followers,  # ✅ 0固定→実数へ
         }
         return render(request, self.template_name, context)
 

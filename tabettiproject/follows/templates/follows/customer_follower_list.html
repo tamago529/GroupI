@@ -198,7 +198,6 @@
 
   /* フォロワー画面では、自分がフォローしていない場合は「フォローする」ボタンになります */
   .follow-btn {
-      float: right;
       padding: 2px 10px;
       background: #fff;
       border: 1px solid #c2c2b8;
@@ -206,6 +205,52 @@
       color: #333;
       border-radius: 2px;
       cursor: pointer;
+      white-space: nowrap;
+  }
+
+  /* ✅ 追加：フォロー中ボタンにホバーでメニュー表示（customer_follow_listと同じ要領） */
+  .follow-action {
+    margin-left: auto;
+    position: relative;
+    display: inline-block;
+  }
+
+  .follow-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    min-width: 160px;
+    background: #fff;
+    border: 1px solid #c2c2b8;
+    border-radius: 2px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.10);
+    z-index: 50;
+    padding: 4px 0;
+  }
+
+  .follow-action:hover .follow-menu,
+  .follow-action:focus-within .follow-menu {
+    display: block;
+  }
+
+  .follow-menu .menu-item {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    padding: 8px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #333;
+  }
+
+  .follow-menu .menu-item:hover {
+    background: #f4f4f2;
+  }
+
+  .follow-menu .menu-item.danger {
+    color: #b00020;
   }
 
   .card-info {
@@ -232,7 +277,7 @@
         >
       </div>
 
-      {# ✅ タイトル（クラス名をCSSに合わせて profile-title に統一） #}
+      {# ✅ タイトル #}
       <div class="profile-title">{{ profile_title }}</div>
 
       <div class="profile-setting-wrapper">
@@ -245,7 +290,6 @@
   <div class="profile-sub-nav">
     <div class="inner-container">
       <div class="profile-name">
-        {# ✅ nickname を優先して表示 #}
         {% if user.is_authenticated %}
           {{ user_name }}
         {% else %}
@@ -273,27 +317,52 @@
       <div class="card-user-icon"></div>
 
       <div class="card-body">
+
         <form method="post" style="display: inline;">
           {% csrf_token %}
           <input type="hidden" name="user_id" value="{{ item.id }}">
 
           {% if item.is_following %}
-            <button type="submit"
-                    class="follow-btn"
-                    style="background: #f2f2ef; color: #666;"
-                    onclick="return confirm('フォローを解除しますか？')">
-              フォロー中
-            </button>
+            <!-- ✅ フォロー中：ホバーで「ミュート/解除」＆「フォローをやめる」 -->
+            <div class="follow-action">
+              <button type="button"
+                      class="follow-btn"
+                      style="background: #f2f2ef; color: #666;">
+                フォロー中{% if item.is_muted %}（ミュート）{% endif %}
+              </button>
+
+              <div class="follow-menu">
+                <button type="submit"
+                        class="menu-item"
+                        name="action"
+                        value="toggle_mute">
+                  {% if item.is_muted %}ミュート解除{% else %}ミュートにする{% endif %}
+                </button>
+
+                <button type="submit"
+                        class="menu-item danger"
+                        name="action"
+                        value="unfollow"
+                        onclick="return confirm('フォローを解除しますか？')">
+                  フォローをやめる
+                </button>
+              </div>
+            </div>
           {% else %}
+            <!-- ✅ 未フォロー：通常の「+フォロー」 -->
             <button type="submit"
                     class="follow-btn"
+                    name="action"
+                    value="follow"
                     style="color: #f0a500; border-color: #f0a500;">
               + フォロー
             </button>
           {% endif %}
         </form>
 
-        <a href="#" class="card-name">{{ item.user.username }}</a>
+        <a href="{% url 'follows:customer_user_page' item.id %}" class="card-name">
+          {{ item.user.username }}
+       </a>
 
         <div class="card-info">
           <div style="color: #f0a500; font-weight: bold; margin-bottom: 4px;">あなたをフォローしています</div>

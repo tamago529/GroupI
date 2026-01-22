@@ -1,6 +1,6 @@
 {% extends 'customer_base.html' %}
 
-{% block title %}{{ user_name }}さんのマイページ [食べログ]{% endblock %}
+{% block title %}{{ user_name }}さんのマイページ{% endblock %}
 
 {% block css %}
 <style>
@@ -165,6 +165,16 @@
         margin-bottom: -2px;
         font-weight: bold;
     }
+
+    /* ✅ readonly_mode のときタブを押せない見た目にする */
+    .mp-nav-item.disabled {
+        color: #999;
+        cursor: not-allowed;
+        background: #fafafa;
+    }
+    .mp-nav-item.disabled .mp-nav-count {
+        color: #999;
+    }
 </style>
 {% endblock %}
 
@@ -175,6 +185,9 @@
     <section class="mp-cover"
              aria-label="マイページカバー写真"
              style="background-image:url('{% if cover_image_url %}{{ cover_image_url }}{% else %}/static/images/default_cover.jpg{% endif %}');">
+
+        {# ✅ 他人ページでは編集UIを出さない #}
+        {% if not readonly_mode %}
         <form id="coverForm" method="post" enctype="multipart/form-data" style="margin:0;">
             {% csrf_token %}
             <input type="hidden" name="customer_id" value="{% if customer %}{{ customer.pk }}{% endif %}">
@@ -183,11 +196,13 @@
                 📷 カバー写真を変更
             </button>
         </form>
+        {% endif %}
     </section>
 
     <section class="mp-header">
 
-        {# ✅ icon もプレースホルダーをテンプレ側で #}
+        {# ✅ 他人ページではアイコン変更UIを出さない（表示はする） #}
+        {% if not readonly_mode %}
         <form id="iconForm" method="post" enctype="multipart/form-data" style="margin:0;">
             {% csrf_token %}
             <input id="iconInput" class="visually-hidden" type="file" name="icon_image" accept="image/*">
@@ -202,6 +217,16 @@
                 <div class="avatar-overlay">クリックして変更</div>
             </label>
         </form>
+        {% else %}
+        <div class="mp-user-avatar" style="cursor: default;">
+            <img
+                src="{% if user_icon_url %}{{ user_icon_url }}{% else %}/static/images/default_icon.png{% endif %}"
+                alt="{{ user_name }}さんのアイコン"
+                width="120"
+                height="120"
+            >
+        </div>
+        {% endif %}
 
         <div class="mp-user-info">
             <div style="color:#666; font-size:12px;">僕のレストランガイド</div>
@@ -212,34 +237,63 @@
         <table class="mp-stats-table" aria-label="ユーザーアクティビティ統計">
             <caption class="visually-hidden">ユーザー統計データ一覧</caption>
             <tbody>
-                <tr><td>口コミ数</td><td class="val">{{ stats_reviews }}</td><td style="width:25px; color:#666;">件</td></tr>
-                <tr><td>写真</td><td class="val">{{ stats_photos }}</td><td style="color:#666;">枚</td></tr>
-                <tr><td>訪問者数</td><td class="val">{{ stats_visitors }}</td><td style="color:#666;">人</td></tr>
-                <tr><td>いいね！</td><td class="val">{{ stats_likes }}</td><td></td></tr>
+                <tr><td>口コミ数</td><td class="val">{{ stats_reviews|default:0 }}</td><td style="width:25px; color:#666;">件</td></tr>
+                <tr><td>写真</td><td class="val">{{ stats_photos|default:0 }}</td><td style="color:#666;">枚</td></tr>
+                <tr><td>訪問者数</td><td class="val">{{ stats_visitors|default:0 }}</td><td style="color:#666;">人</td></tr>
+                <tr><td>いいね！</td><td class="val">{{ stats_likes|default:0 }}</td><td></td></tr>
             </tbody>
         </table>
     </section>
 
     <nav class="mp-nav" aria-label="マイページメニュータブ">
+
+    {% if readonly_mode %}
+        {# ✅ 相手ページ：トップは相手ページのまま（自分のトップに飛ばさない） #}
+        <a href="{% url 'follows:customer_user_page' customer.pk %}"
+           class="mp-nav-item active"
+           style="padding-top: 28px;">
+            トップ
+        </a>
+
+        {# ✅ 相手ページ：口コミ/フォロー中/フォロワーは押せない #}
+        <span class="mp-nav-item disabled" aria-disabled="true">
+            <span class="mp-nav-count">{{ count_reviews|default:0 }}</span>
+            <span class="mp-nav-label">口コミ</span>
+        </span>
+
+        <span class="mp-nav-item disabled" aria-disabled="true">
+            <span class="mp-nav-count">{{ count_following|default:0 }}</span>
+            <span class="mp-nav-label">フォロー中</span>
+        </span>
+
+        <span class="mp-nav-item disabled" aria-disabled="true">
+            <span class="mp-nav-count">{{ count_followers|default:0 }}</span>
+            <span class="mp-nav-label">フォロワー</span>
+        </span>
+
+    {% else %}
+        {# ✅ 自分ページ：通常どおり押せる #}
         <a href="{% url 'reviews:customer_reviewer_detail' %}" class="mp-nav-item active" style="padding-top: 28px;">
             トップ
         </a>
 
         <a href="{% url 'reviews:customer_reviewer_review_list' %}" class="mp-nav-item">
-            <span class="mp-nav-count">{{ count_reviews }}</span>
+            <span class="mp-nav-count">{{ count_reviews|default:0 }}</span>
             <span class="mp-nav-label">口コミ</span>
         </a>
 
         <a href="{% url 'follows:customer_follow_list' %}" class="mp-nav-item">
-            <span class="mp-nav-count">{{ count_following }}</span>
+            <span class="mp-nav-count">{{ count_following|default:0 }}</span>
             <span class="mp-nav-label">フォロー中</span>
         </a>
 
         <a href="{% url 'follows:customer_follower_list' %}" class="mp-nav-item">
-            <span class="mp-nav-count">{{ count_followers }}</span>
+            <span class="mp-nav-count">{{ count_followers|default:0 }}</span>
             <span class="mp-nav-label">フォロワー</span>
         </a>
-    </nav>
+    {% endif %}
+
+</nav>
 
     <div style="display: flex; padding: 20px; gap: 20px;">
         <div style="width: 640px;">
@@ -249,6 +303,8 @@
     </div>
 </div>
 
+{# ✅ 他人ページでは自動submit script を出さない #}
+{% if not readonly_mode %}
 <script>
     // ✅ カバー画像：選択したら自動送信
     (function () {
@@ -276,4 +332,5 @@
         }
     })();
 </script>
+{% endif %}
 {% endblock %}
