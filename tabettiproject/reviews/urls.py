@@ -41,12 +41,12 @@ urlpatterns = [
         name="customer_common_complete",
     ),
     path(
-        "store_review_report/",
+        "store_review_report/<int:pk>/",
         store_review_reportView.as_view(),
         name="store_review_report",
     ),
     path(
-        "store_review_list",
+        "store_review_list/<int:store_pk>/",
         store_review_listView.as_view(),
         name="store_review_list",
     ),
