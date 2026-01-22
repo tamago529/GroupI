@@ -1,15 +1,13 @@
+{% extends "customer_base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>ログアウト完了</title>
-  <link rel="stylesheet" href="{% static 'css/customer_login.css' %}">
-</head>
-<body>
 
-{% include 'customer_header.html' %}
+{% block title %}ログアウト完了{% endblock %}
 
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/customer_login.css' %}">
+{% endblock %}
+
+{% block content %}
 <div class="logout-wrapper">
   <div class="logout-box">
     <h2>ログアウトが完了しました</h2>
@@ -19,12 +17,9 @@
       またのご利用をお待ちしております。
     </p>
 
-    <a href="{% url 'accounts:customer_top' %}" class="btn-top">
-      トップ画面に戻る
+    <a href="{% url 'accounts:customer_login' %}" class="btn-top">
+      ログイン画面に戻る
     </a>
   </div>
 </div>
-
-</body>
-{% include 'customer_footer.html' %}
-</html>
+{% endblock %}
