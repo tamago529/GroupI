@@ -51,7 +51,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'commons.middleware.AdminSeparateSessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -145,3 +145,7 @@ STATICFILES_DIRS = [
 
 AUTH_USER_MODEL = "commons.Account"
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# セッションCookie名の設定
+SESSION_COOKIE_NAME = "site_sessionid"
+ADMIN_SESSION_COOKIE_NAME = "admin_sessionid"
