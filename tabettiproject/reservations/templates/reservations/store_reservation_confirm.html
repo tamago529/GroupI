@@ -1,245 +1,258 @@
 {% extends "customer_base.html" %}
 {% block content %}
 
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ネット予約確認</title>
-  <style>
-    :root{
-      --bg:#f6f6f6;
-      --line:#e6e0d7;
-      --head:#f2efe9;
-      --soft:#faf8f4;
-      --text:#333;
-      --sub:#666;
-      --link:#1a73e8;
-      --green:#6fbf2f;
-      --green-dark:#4ea318;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: "Hiragino Kaku Gothic ProN","Meiryo",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-      background:var(--bg);
-      color:var(--text);
-    }
+<style>
+  :root{
+    --bg:#f6f6f6;
+    --line:#e6e0d7;
+    --head:#f2efe9;
+    --soft:#faf8f4;
+    --text:#333;
+    --sub:#666;
+    --link:#1a73e8;
+    --green:#6fbf2f;
+    --green-dark:#4ea318;
+  }
+  *{box-sizing:border-box}
+  /* extends前提なので body は触らない方が安全（崩れ防止） */
 
-    .wrap{
-      max-width:980px;
-      margin:0 auto;
-      padding:18px 16px 40px;
-    }
+  .wrap{
+    max-width:980px;
+    margin:0 auto;
+    padding:18px 16px 40px;
+  }
 
-    .page-head{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:12px;
-      margin-bottom:8px;
-    }
-    .title-area h1{
-      margin:0;
-      font-size:18px;
-      font-weight:800;
-    }
-    .title-area p{
-      margin:8px 0 0;
-      font-size:12px;
-      color:var(--sub);
-    }
-    .backlink{
-      font-size:12px;
-      color:var(--link);
-      text-decoration:none;
-      white-space:nowrap;
-      margin-top:2px;
-    }
-    .backlink:hover{text-decoration:underline}
+  .page-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+    margin-bottom:8px;
+  }
+  .title-area h1{
+    margin:0;
+    font-size:18px;
+    font-weight:800;
+  }
+  .title-area p{
+    margin:8px 0 0;
+    font-size:12px;
+    color:var(--sub);
+  }
+  .backlink{
+    font-size:12px;
+    color:var(--link);
+    text-decoration:none;
+    white-space:nowrap;
+    margin-top:2px;
+  }
+  .backlink:hover{text-decoration:underline}
 
-    .print-btn{
-      display:inline-block;
-      margin:12px 0 10px auto;
-      padding:8px 12px;
-      background:#fff;
-      border:1px solid #cfc8bd;
-      border-radius:4px;
-      font-size:12px;
-      font-weight:700;
-      cursor:pointer;
-      text-decoration:none;
-      color:var(--text);
-    }
-    .print-btn:hover{background:#f3f3f3}
+  .print-btn{
+    display:inline-block;
+    margin:12px 0 10px auto;
+    padding:8px 12px;
+    background:#fff;
+    border:1px solid #cfc8bd;
+    border-radius:4px;
+    font-size:12px;
+    font-weight:700;
+    cursor:pointer;
+    text-decoration:none;
+    color:var(--text);
+  }
+  .print-btn:hover{background:#f3f3f3}
 
-    .section{
-      background:#fff;
-      border:1px solid var(--line);
-      margin-top:10px;
-    }
-    .section-head{
-      padding:10px 14px;
-      background:var(--head);
-      border-bottom:1px solid var(--line);
-      font-weight:800;
-      font-size:13px;
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    .caret{
-      width:0;height:0;
-      border-left:5px solid transparent;
-      border-right:5px solid transparent;
-      border-top:7px solid #333;
-      transform:translateY(1px);
-    }
+  .section{
+    background:#fff;
+    border:1px solid var(--line);
+    margin-top:10px;
+  }
+  .section-head{
+    padding:10px 14px;
+    background:var(--head);
+    border-bottom:1px solid var(--line);
+    font-weight:800;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .caret{
+    width:0;height:0;
+    border-left:5px solid transparent;
+    border-right:5px solid transparent;
+    border-top:7px solid #333;
+    transform:translateY(1px);
+  }
 
-    .row{
-      display:grid;
-      grid-template-columns: 220px 1fr;
-      border-bottom:1px solid var(--line);
-      min-height:46px;
-    }
-    .row:last-child{border-bottom:none}
-    .label{
-      background:var(--soft);
-      padding:10px 12px;
-      display:flex;
-      align-items:center;
-      font-size:13px;
-      font-weight:700;
-    }
-    .value{
-      padding:10px 12px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      font-size:13px;
-    }
-    .value a{
-      color:var(--link);
-      text-decoration:none;
-      font-weight:700;
-    }
-    .value a:hover{text-decoration:underline}
-    .subnote{
-      display:block;
-      margin-top:4px;
-      font-size:12px;
-      color:var(--sub);
-      line-height:1.5;
-    }
+  .row{
+    display:grid;
+    grid-template-columns: 220px 1fr;
+    border-bottom:1px solid var(--line);
+    min-height:46px;
+  }
+  .row:last-child{border-bottom:none}
+  .label{
+    background:var(--soft);
+    padding:10px 12px;
+    display:flex;
+    align-items:center;
+    font-size:13px;
+    font-weight:700;
+  }
+  .value{
+    padding:10px 12px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:13px;
+  }
+  .value a{
+    color:var(--link);
+    text-decoration:none;
+    font-weight:700;
+  }
+  .value a:hover{text-decoration:underline}
+  .subnote{
+    display:block;
+    margin-top:4px;
+    font-size:12px;
+    color:var(--sub);
+    line-height:1.5;
+  }
 
-    .actions{
-      background:#efefef;
-      border:1px solid var(--line);
-      border-top:none;
-      padding:16px;
-      display:flex;
-      justify-content:center;
-      gap:14px;
-      flex-wrap:wrap;
-    }
-    .btn{
-      min-width:260px;
-      height:44px;
-      border-radius:4px;
-      border:1px solid #cfc8bd;
-      background:#fff;
-      font-weight:800;
-      cursor:pointer;
-      font-size:13px;
-    }
-    .btn:hover{background:#f3f3f3}
-    .btn-green{
-      border:none;
-      background:var(--green);
-      color:#fff;
-    }
-    .btn-green:hover{background:var(--green-dark)}
+  .actions{
+    background:#efefef;
+    border:1px solid var(--line);
+    border-top:none;
+    padding:16px;
+    display:flex;
+    justify-content:center;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .btn{
+    min-width:260px;
+    height:44px;
+    border-radius:4px;
+    border:1px solid #cfc8bd;
+    background:#fff;
+    font-weight:800;
+    cursor:pointer;
+    font-size:13px;
+  }
+  .btn:hover{background:#f3f3f3}
+  .btn-green{
+    border:none;
+    background:var(--green);
+    color:#fff;
+  }
+  .btn-green:hover{background:var(--green-dark)}
 
-    @media (max-width: 720px){
-      .row{grid-template-columns: 1fr}
-      .label{border-bottom:1px solid var(--line)}
-      .actions{padding:12px}
-      .btn{min-width:100%}
-      .print-btn{float:none; display:block; width:max-content}
-    }
-  </style>
-</head>
+  /* ★ disabled時（押せないだけ・メッセージなし） */
+  .btn:disabled{
+    opacity:.55;
+    cursor:not-allowed;
+    background:#f7f7f7;
+  }
+  .btn-green:disabled{
+    background:var(--green);
+    opacity:.45;
+  }
 
-<body>
-  <div class="wrap">
+  .actions-note{
+    margin:8px 0 0;
+    font-size:11px;
+    color:var(--sub);
+    text-align:center;
+  }
 
-    <div class="page-head">
-      <div class="title-area">
-        <h1>ご予約内容の確認</h1>
-        <p><strong>{{ store.store_name }}</strong> でご予約済みの内容を確認できます。</p>
-      </div>
-      <a class="backlink" href="{% url 'reservations:store_reservation_history' %}">予約一覧へ戻る</a>
+  @media (max-width: 720px){
+    .row{grid-template-columns: 1fr}
+    .label{border-bottom:1px solid var(--line)}
+    .actions{padding:12px}
+    .btn{min-width:100%}
+    .print-btn{float:none; display:block; width:max-content}
+  }
+</style>
+
+<div class="wrap">
+
+  <div class="page-head">
+    <div class="title-area">
+      <h1>ご予約内容の確認</h1>
+      <p><strong>{{ store.store_name }}</strong> でご予約済みの内容を確認できます。</p>
     </div>
-
-    <a class="print-btn" href="javascript:window.print();">この画面を印刷する</a>
-    <div style="clear:both;"></div>
-
-    <div class="section">
-      <div class="section-head"><span class="caret"></span>ご予約情報</div>
-
-      <div class="row">
-        <div class="label">予約ステータス</div>
-        <div class="value">{{ reservation.booking_status }}</div>
-      </div>
-
-      <div class="row">
-        <div class="label">ご予約番号</div>
-        <div class="value">{{ reservation.id }}</div>
-      </div>
-
-      <div class="row">
-        <div class="label">レストラン名</div>
-        <div class="value">
-          <a href="{{ store_page_url }}">{{ store.store_name }}</a>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="label">来店人数</div>
-        <div class="value">{{ reservation.visit_count }}名</div>
-      </div>
-
-      <div class="row">
-        <div class="label">来店日</div>
-        <div class="value">{{ reservation.visit_date|date:'Y年n月j日(D)' }}</div>
-      </div>
-
-      <div class="row">
-        <div class="label">来店時刻</div>
-        <div class="value">{{ reservation.visit_time|time:'H:i' }}</div>
-      </div>
-
-      <div class="row">
-        <div class="label">コース</div>
-        <div class="value">
-          {{ reservation.course }}
-          <span class="subnote">お会計は当日</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="actions">
-      <button type="button" class="btn" onclick="location.href='{% url 'reservations:store_reservation_cancel' reservation.id %}';">
-        予約をキャンセルする
-      </button>
-      <button type="button" class="btn btn-green" onclick="location.href='{% url 'reservations:store_reservation_edit' reservation.id %}';">
-        ご予約内容を変更する
-      </button>
-    </div>
-
+    <a class="backlink" href="{% url 'reservations:store_reservation_history' %}">予約一覧へ戻る</a>
   </div>
-</body>
-</html>
+
+  <a class="print-btn" href="javascript:window.print();">この画面を印刷する</a>
+
+  <div class="section">
+    <div class="section-head"><span class="caret"></span>ご予約情報</div>
+
+    <div class="row">
+      <div class="label">予約ステータス</div>
+      <div class="value">{{ reservation.booking_status }}</div>
+    </div>
+
+    <div class="row">
+      <div class="label">ご予約番号</div>
+      <div class="value">{{ reservation.id }}</div>
+    </div>
+
+    <div class="row">
+      <div class="label">レストラン名</div>
+      <div class="value">{{ store.store_name }}</div> {# ← ここ、余計な </a> を削除 #}
+    </div>
+
+    <div class="row">
+      <div class="label">来店人数</div>
+      <div class="value">{{ reservation.visit_count }}名</div>
+    </div>
+
+    <div class="row">
+      <div class="label">来店日</div>
+      <div class="value">{{ reservation.visit_date|date:'Y年n月j日(D)' }}</div>
+    </div>
+
+    <div class="row">
+      <div class="label">来店時刻</div>
+      <div class="value">{{ reservation.visit_time|time:'H:i' }}</div>
+    </div>
+
+    <div class="row">
+      <div class="label">コース</div>
+      <div class="value">
+        {{ reservation.course }}
+        <span class="subnote">お会計は当日</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button
+      type="button"
+      class="btn"
+      {% if not can_modify %}disabled{% endif %}
+      onclick="location.href='{% url 'reservations:store_reservation_cancel' reservation.id %}';">
+      予約をキャンセルする
+    </button>
+
+    <button
+      type="button"
+      class="btn btn-green"
+      {% if not can_modify %}disabled{% endif %}
+      onclick="location.href='{% url 'reservations:store_reservation_edit' reservation.id %}';">
+      ご予約内容を変更する
+    </button>
+
+    <div class="actions-note">
+      ＊来店日時の3日前のキャンセル・変更は店舗にお問合せ下さい。
+    </div>
+  </div>
+
+</div>
 
 {% endblock %}

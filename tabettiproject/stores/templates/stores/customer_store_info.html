@@ -77,7 +77,7 @@
   .stars { color: #ffa500; font-size: 18px; }
   .score-number { color: #e44d26; font-size: 26px; font-weight: bold; }
 
-   .meta-info-text {
+  .meta-info-text {
     font-size: 13px;
     color: #666;
     margin-bottom: 10px;
@@ -168,28 +168,49 @@
   .cal-cell.is-disabled { color: #bbb; cursor: not-allowed; background: #fafafa; }
   .reserve-panel { margin-top: 12px; border-top: 1px solid #eee; padding-top: 12px; display: none; }
 
+  /* =========================
+     予約モーダル（追加）
+     ========================= */
   .modal-overlay {
     display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
     z-index: 1000; align-items: center; justify-content: center;
   }
   .modal-box { background: #fff; width: 450px; padding: 30px; border-radius: 8px; position: relative; }
+  .modal-title { font-size: 16px; font-weight: bold; margin: 0 0 8px; }
+  .modal-sub { font-size: 12px; color: #666; margin: 0 0 12px; line-height: 1.4; }
+  .modal-form { display: grid; gap: 10px; }
+  .mf-row { display: grid; gap: 6px; }
+  .mf-label { font-size: 12px; font-weight: bold; color: #333; }
+  .mf-input {
+    height: 38px; border: 1px solid #ccc; border-radius: 6px;
+    padding: 0 10px; font-size: 14px;
+  }
+  .mf-actions { display: flex; gap: 10px; margin-top: 10px; }
+  .btn-cancel {
+    flex: 1; height: 42px; border-radius: 6px; border: 1px solid #ccc; background: #fff;
+    font-weight: bold; cursor: pointer;
+  }
+  .btn-submit {
+    flex: 1; height: 42px; border-radius: 6px; border: none; background: #8fb134; color: #fff;
+    font-weight: bold; cursor: pointer;
+  }
+
+  @media (max-width: 720px){
+    .modal-box{width: 92vw;}
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="shop-main">
 
- 
-
   <header class="shop-header">
-    <!-- 🌟 ヘッダー：店名とアクションボタンを横並びに -->
     <div class="header-top-row">
       <h1 class="shop-name">{{ store.store_name }} {{ store.branch_name }}</h1>
-      
+
       <div class="action-group">
         <button class="btn-action-white" type="button"><span>📍</span>行った</button>
-        
-        <!-- ✅ 保存機能（口コミ画面と同じロジックへ飛ばす） -->
+
         <form method="post" action="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}" style="margin:0;">
           {% csrf_token %}
           <input type="hidden" name="action" value="save_store">
@@ -202,7 +223,7 @@
         <button class="btn-action-green" onclick="location.href='{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}#openPostModal'">投稿 ▼</button>
       </div>
     </div>
-    
+
     <div class="score-container">
       <span class="stars">★★★☆☆</span>
       <span class="score-number">3.00</span>
@@ -295,7 +316,7 @@
       </section>
     </main>
 
-    <!-- サイドバー（カレンダーロジック等、既存を維持） -->
+    <!-- サイドバー -->
     <aside class="right-sidebar">
       <div class="side-box">
         <p style="text-align:center; color:#666; font-size:11px; margin:0;">お問い合わせ番号</p>
@@ -322,12 +343,20 @@
             <div class="rp-row"><input id="pickedTime" type="time" value="19:00"></div>
             <div class="rp-row">
               <select id="pickedCount">
-                {% for i in "12345678910"|make_list %}
-                  <option value="{{ forloop.counter }}" {% if forloop.counter == 2 %}selected{% endif %}>{{ forloop.counter }}名</option>
-                {% endfor %}
+                <option value="1">1名</option>
+                <option value="2" selected>2名</option>
+                <option value="3">3名</option>
+                <option value="4">4名</option>
+                <option value="5">5名</option>
+                <option value="6">6名</option>
+                <option value="7">7名</option>
+                <option value="8">8名</option>
+                <option value="9">9名</option>
+                <option value="10">10名</option>
               </select>
               <select id="pickedCourse">
                 <option value="120" selected>2時間コース</option>
+                <option value="60">1時間コース</option>
               </select>
             </div>
             <button type="button" class="btn-primary" onclick="openReserveModal()">空席確認・予約する</button>
@@ -339,6 +368,47 @@
   </div>
 </div>
 
+{# ===== 予約モーダル（追加） ===== #}
+<div class="modal-overlay" id="reserveModal">
+  <div class="modal-box">
+    <h3 class="modal-title">ご予約内容の確認</h3>
+    <p class="modal-sub" id="modalSubText">-</p>
+
+    <form class="modal-form" method="post" action="{% url 'stores:customer_reserve_create' store.id %}">
+      {% csrf_token %}
+
+      <!-- JSで埋める予約情報 -->
+      <input type="hidden" name="visit_date" id="f_visit_date">
+      <input type="hidden" name="visit_time" id="f_visit_time">
+      <input type="hidden" name="visit_count" id="f_visit_count">
+      <input type="hidden" name="course_minutes" id="f_course_minutes">
+
+      <!-- 予約者情報（ログイン時は初期値自動入力） -->
+      <div class="mf-row">
+        <div class="mf-label">氏名</div>
+        <input class="mf-input" type="text" name="full_name" id="f_full_name" placeholder="例）山田 太郎">
+      </div>
+      <div class="mf-row">
+        <div class="mf-label">氏名（かな）</div>
+        <input class="mf-input" type="text" name="full_name_kana" id="f_full_name_kana" placeholder="例）やまだ たろう">
+      </div>
+      <div class="mf-row">
+        <div class="mf-label">メールアドレス</div>
+        <input class="mf-input" type="email" name="email" id="f_email" placeholder="example@example.com">
+      </div>
+      <div class="mf-row">
+        <div class="mf-label">電話番号</div>
+        <input class="mf-input" type="text" name="phone_number" id="f_phone_number" placeholder="09012345678">
+      </div>
+
+      <div class="mf-actions">
+        <button type="button" class="btn-cancel" onclick="closeReserveModal()">戻る</button>
+        <button type="submit" class="btn-submit">この内容で予約する</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
   // ---- 初期値（Djangoから） ----
   const STORE_ID = {{ store.id }};
@@ -347,11 +417,10 @@
   let openDays = new Set({{ open_days|safe }}); // ["YYYY-MM-DD", ...]
 
   // ★ 今日・現在時刻（サーバのローカル時間）
-  const TODAY_STR = "{{ today|date:'Y-m-d' }}";     // 例: "2026-01-23"
-  const NOW_HM = "{{ now_hm }}";                   // 例: "11:35"（viewで渡す）
+  const TODAY_STR = "{{ today|date:'Y-m-d' }}";
+  const NOW_HM = "{{ now_hm }}";
 
   const todayDate = new Date(TODAY_STR + "T00:00:00");
-  const nowDateTime = new Date(TODAY_STR + "T" + NOW_HM + ":00");
 
   let pickedDate = null;
 
@@ -373,15 +442,12 @@
     document.getElementById("calYmText").textContent = `${calYear}年 ${calMonth}月`;
 
     const grid = document.getElementById("calGrid");
-
-    // 曜日ヘッダ（7個）は残して、以降を全削除
     while (grid.children.length > 7) grid.removeChild(grid.lastChild);
 
     const first = new Date(calYear, calMonth - 1, 1);
-    const startDow = first.getDay(); // 0=Sun
+    const startDow = first.getDay();
     const lastDay = new Date(calYear, calMonth, 0).getDate();
 
-    // 空セル
     for(let i=0;i<startDow;i++){
       const cell = document.createElement("div");
       cell.className = "cal-cell is-empty";
@@ -396,7 +462,6 @@
       cell.className = "cal-cell";
       cell.textContent = d;
 
-      // ★ 昨日以前（今日より前）は触れない
       if (cellDate < todayDate){
         cell.classList.add("is-disabled");
         cell.style.pointerEvents = "none";
@@ -404,7 +469,6 @@
         continue;
       }
 
-      // 今日以降は openDays だけ○
       if(openDays.has(iso)){
         cell.classList.add("is-open");
         cell.addEventListener("click", () => pickDate(iso));
@@ -418,28 +482,24 @@
   }
 
   function pickDate(iso){
-    // ★ 念のため：過去日クリック不可
     if (parseIsoDate(iso) < todayDate) return;
 
     pickedDate = iso;
     document.getElementById("reservePanel").style.display = "block";
     document.getElementById("pickedDateText").textContent = iso;
 
-    // ★ 今日なら time を「いま以降」に制限
     const timeEl = document.getElementById("pickedTime");
     if (pickedDate === TODAY_STR){
       timeEl.min = NOW_HM;
-
-      // 選択中が過去なら、現在時刻に寄せる（分の端数で min を超えないように）
       if (timeEl.value && timeEl.value < NOW_HM){
         timeEl.value = NOW_HM;
       }
     } else {
-      timeEl.min = ""; // 今日以外は解除
+      timeEl.min = "";
     }
   }
 
-  // ---- 月移動：サーバからopen_daysを取得 ----
+  // ---- 月移動 ----
   async function moveMonth(delta){
     calMonth += delta;
     if(calMonth <= 0){ calMonth = 12; calYear -= 1; }
@@ -467,38 +527,42 @@
 
     const t = document.getElementById("pickedTime").value || "19:00";
 
-    // ★ 今日＆現在時刻より前ならNG（最終防衛）
     if (pickedDate === TODAY_STR && t < NOW_HM){
       alert("現在時刻より前は予約できません。");
       document.getElementById("pickedTime").value = NOW_HM;
       return;
     }
-    // ★ 念のため：過去日ならNG
     if (parseIsoDate(pickedDate) < todayDate){
       alert("過去の日付は予約できません。");
       return;
     }
 
-const p = document.getElementById("pickedCount").value || "2";
-const c = document.getElementById("pickedCourse").value || "120";
+    const p = document.getElementById("pickedCount").value || "2";
+    const c = document.getElementById("pickedCourse").value || "120";
 
-document.getElementById("f_visit_date").value = pickedDate;
-document.getElementById("f_visit_time").value = t;
-document.getElementById("f_visit_count").value = p;
-document.getElementById("f_course_minutes").value = c;
+    document.getElementById("f_visit_date").value = pickedDate;
+    document.getElementById("f_visit_time").value = t;
+    document.getElementById("f_visit_count").value = p;
+    document.getElementById("f_course_minutes").value = c;
 
-// 30分刻み〜150分（2時間30分）まで対応：表示は「○○分コース」に統一
-const courseText = `${c}分コース`;
+    const courseText = `${c}分コース`;
+    document.getElementById("modalSubText").textContent =
+      `${pickedDate} ${t} / ${p}名 / ${courseText}`;
 
-document.getElementById("modalSubText").textContent =
-  `${pickedDate} ${t} / ${p}名 / ${courseText}`;
+    // ★ログイン顧客なら初期値を流し込む（viewで login_customer を渡している前提）
+    {% if login_customer %}
+      document.getElementById("f_full_name").value = "{{ login_customer.nickname|default:''|escapejs }}";
+      document.getElementById("f_email").value = "{{ login_customer.sub_email|default:login_customer.email|default:''|escapejs }}";
+      document.getElementById("f_phone_number").value = "{{ login_customer.phone_number|default:''|escapejs }}";
+      // かなは無いので空のまま
+    {% endif %}
 
-document.getElementById("reserveModal").style.display = "flex";
-}
-function closeReserveModal(){
-  document.getElementById("reserveModal").style.display = "none";
-}
+    document.getElementById("reserveModal").style.display = "flex";
+  }
 
+  function closeReserveModal(){
+    document.getElementById("reserveModal").style.display = "none";
+  }
 
   // 初期描画
   renderCalendar();
