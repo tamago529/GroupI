@@ -163,6 +163,8 @@
     <form action="{% url 'reviews:customer_report_input' %}" method="post" enctype="multipart/form-data">
   {% csrf_token %}
 
+   <input type="hidden" name="review_id" value="{{ target_review.pk|default:'' }}">
+    <input type="hidden" name="store_id" value="{{ store.pk|default:'' }}">
   {% if store %}
     <input type="hidden" name="store_id" value="{{ store.id }}">
   {% endif %}

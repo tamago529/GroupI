@@ -258,6 +258,25 @@
     .text-area{ min-height: 120px; resize: vertical; }
     .modal-foot{ padding: 12px 14px; border-top: 1px solid #eee; display:flex; justify-content:flex-end; gap:10px; background:#fafafa; }
     .btn-primary{ background:#93c02d; color:#fff; border:none; padding: 8px 14px; border-radius: 6px; cursor:pointer; font-weight:bold; }
+
+    .report-link {
+    font-size: 12px;
+    color: #999;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.report-link:hover {
+    color: #d9534f; /* 通報っぽく赤色に */
+    background-color: #fff5f5;
+    text-decoration: underline;
+}
+
 </style>
 {% endblock %}
 
@@ -353,6 +372,14 @@
         <div id="review-container">
             {% for review in reviews %}
             <article class="review-card">
+                  <p style="font-size: 14px; line-height: 1.6; margin-top: 15px;">{{ review.review_text|linebreaksbr }}</p>
+
+    <!-- 🌟 通報ボタンを追加 -->
+    <div style="text-align: right; margin-top: 10px;">
+        <a href="{% url 'reviews:customer_report_input' %}?review_id={{ review.pk }}" class="report-link">
+            🚩 この口コミを通報する
+        </a>
+    </div>
                 <div class="review-user-info">
                     <div style="width:40px; height:40px; background:#ddd; border-radius:50%; display:inline-block;"></div>
                     <div>
