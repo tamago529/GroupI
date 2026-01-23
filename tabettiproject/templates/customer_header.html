@@ -255,10 +255,10 @@
         <input type="time" name="time" value="{{ request.GET.time }}">
 
         <select name="people">
-          <option value="1" {% if request.GET.people=="1" %}selected{% endif %}>1名</option>
-          <option value="2" {% if request.GET.people=="2" %}selected{% endif %}>2名</option>
-          <option value="3" {% if request.GET.people=="3" %}selected{% endif %}>3名</option>
-          <option value="4" {% if request.GET.people=="4" %}selected{% endif %}>4名</option>
+          <option value="1" {% if request.GET.people == "1" %}selected{% endif %}>1名</option>
+          <option value="2" {% if request.GET.people == "2" %}selected{% endif %}>2名</option>
+          <option value="3" {% if request.GET.people == "3" %}selected{% endif %}>3名</option>
+          <option value="4" {% if request.GET.people == "4" %}selected{% endif %}>4名</option>
 
 
         </select>
