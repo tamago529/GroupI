@@ -147,8 +147,19 @@ AUTH_USER_MODEL = "commons.Account"
 
 # セッションCookie名の設定
 SESSION_COOKIE_NAME = "site_sessionid"
-<<<<<<< HEAD
 ADMIN_SESSION_COOKIE_NAME = "admin_sessionid"
-=======
-ADMIN_SESSION_COOKIE_NAME = "admin_sessionid"
->>>>>>> 1d664c02c86f76e4c32d5e97e5b07d7cf04d97a5
+
+# --- メール送信（Gmail SMTP）---
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = "tabetti0123@gmail.com"
+EMAIL_HOST_PASSWORD = "kwqrxidhyjazllvj"
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+SERVER_EMAIL = DEFAULT_FROM_EMAIL  # 念のため（エラー通知など）
+
+LOGIN_URL = "accounts:customer_login"
