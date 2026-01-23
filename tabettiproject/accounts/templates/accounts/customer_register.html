@@ -4,7 +4,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>会員登録</title>
+  <title>会員登録 | 食べログ管理</title>
 
   <style>
     * {
@@ -13,7 +13,7 @@
 
     body {
       margin: 0;
-      font-family: Helvetica, Arial, sans-serif;
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
       background-color: #faf8f4;
       color: #333;
     }
@@ -25,7 +25,7 @@
     }
 
     .register-box {
-      width: 420px;
+      width: 480px; /* 少し余裕を持たせました */
       background: #fff;
       padding: 32px 28px;
       border-radius: 8px;
@@ -54,43 +54,49 @@
     label {
       display: block;
       font-size: 13px;
-      margin-bottom: 6px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #444;
     }
 
-    input,
-    select {
+    /* Djangoのformから出力されるinput/selectにスタイルを適用 */
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
       width: 100%;
-      padding: 10px 12px;
+      padding: 12px;
       font-size: 14px;
       border: 1px solid #ccc;
       border-radius: 4px;
+      background-color: #fff;
     }
 
-    input:focus,
-    select:focus {
+    .form-group input:focus {
       outline: none;
       border-color: #ff8a00;
+      box-shadow: 0 0 0 2px rgba(255, 138, 0, 0.1);
     }
 
     .btn-submit {
       width: 100%;
-      padding: 12px 0;
-      font-size: 15px;
+      padding: 16px 0;
+      font-size: 16px;
       font-weight: bold;
       color: #fff;
       background: #ff8a00;
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      margin-top: 8px;
+      margin-top: 10px;
+      transition: background 0.2s;
     }
 
     .btn-submit:hover {
-      opacity: 0.85;
+      background: #e67e00;
     }
 
     .back-link {
-      margin-top: 20px;
+      margin-top: 24px;
       font-size: 13px;
     }
 
@@ -102,12 +108,17 @@
     .back-link a:hover {
       text-decoration: underline;
     }
+
+    .error-text {
+      color: #e02020;
+      font-size: 12px;
+      margin-top: 5px;
+    }
   </style>
 </head>
 
 <body>
 
-  {# ★ 반드시 body 안에서 include #}
   {% include 'customer_header.html' %}
 
   <div class="register-wrapper">
@@ -117,16 +128,16 @@
 
       <p class="register-description">
         必要な情報を入力して、<br>
-        会員登録を行ってください。
+        確認画面へお進みください。
       </p>
 
-      <form method="post" action="">
+      <form method="post" action="{% url 'commons:customer_common_confirm' %}">
         {% csrf_token %}
 
         {% if form.non_field_errors %}
-        <div style="color: red; margin-bottom: 10px; text-align: left; font-size: 13px;">
+        <div style="background: #fff0f0; border: 1px solid #ffcccc; padding: 10px; border-radius: 4px; margin-bottom: 20px;">
           {% for error in form.non_field_errors %}
-          <p style="margin: 0;">{{ error }}</p>
+          <p class="error-text" style="margin: 0;">{{ error }}</p>
           {% endfor %}
         </div>
         {% endif %}
@@ -135,13 +146,15 @@
         <div class="form-group">
           <label for="{{ field.id_for_label }}">{{ field.label }}</label>
           {{ field }}
+          
           {% if field.help_text %}
-          <div style="font-size: 11px; color: #666; margin-top: 4px;">
+          <div style="font-size: 11px; color: #777; margin-top: 4px;">
             {{ field.help_text }}
           </div>
           {% endif %}
+          
           {% for error in field.errors %}
-          <div style="color: red; font-size: 12px; margin-top: 4px;">
+          <div class="error-text">
             {{ error }}
           </div>
           {% endfor %}
@@ -149,7 +162,7 @@
         {% endfor %}
 
         <button type="submit" class="btn-submit">
-          登録する
+          入力内容を確認する
         </button>
       </form>
 
@@ -165,5 +178,4 @@
   {% include 'customer_footer.html' %}
 
 </body>
-
 </html>
