@@ -32,6 +32,10 @@ def _pack_user_card(viewer: CustomerAccount, target: CustomerAccount):
 
     is_follower = Follow.objects.filter(follower=target, followee=viewer).exists()
 
+    # ✅ 追加：相手ユーザーのカバー/アイコン
+    cover_field = getattr(target, "cover_image", None)
+    icon_field = getattr(target, "icon_image", None)
+
     return {
         "id": target.pk,
         "user": target,
@@ -40,7 +44,12 @@ def _pack_user_card(viewer: CustomerAccount, target: CustomerAccount):
         "is_following": is_following,
         "is_follower": is_follower,
         "is_muted": is_muted,
+
+        # ✅ 追加（カードで使う）
+        "cover_image_url": cover_field.url if cover_field else "",
+        "user_icon_url": icon_field.url if icon_field else "",
     }
+
 
 
 class Customer_follower_listView(LoginRequiredMixin, TemplateView):

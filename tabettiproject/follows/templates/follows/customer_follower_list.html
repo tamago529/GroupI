@@ -174,6 +174,21 @@
       border-bottom: 1px solid #e7e7e1;
   }
 
+  .card-image{
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.card-user-icon{
+  overflow: hidden;
+}
+.card-user-icon img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
   .card-user-icon {
       position: absolute;
       top: 65px;
@@ -271,11 +286,11 @@
 
       {# ✅ アイコンを表示（なければ Tabecchi.png を仮フォールバック） #}
       <div class="profile-icon">
-        <img
-          src="{% if user_icon_url %}{{ user_icon_url }}{% else %}{% static 'images/Tabecchi.png' %}{% endif %}"
-          alt="{{ user_name }}さんのアイコン"
-        >
-      </div>
+    <img
+     src="{% if user_icon_url %}{{ user_icon_url }}{% else %}/media/customer/icon/default_cover.jpg{% endif %}"
+     alt="{{ user_name }}さんのアイコン"
+    >
+    </div>
 
       {# ✅ タイトル #}
       <div class="profile-title">{{ profile_title }}</div>
@@ -313,8 +328,14 @@
   <div class="card-list">
     {% for item in followers %}
     <div class="user-card">
-      <div class="card-image"></div>
-      <div class="card-user-icon"></div>
+  <div class="card-image"style="background-image:url('{% if item.cover_image_url %}{{ item.cover_image_url }}{% else %}{% static 'images/default_cover.jpg' %}{% endif %}');">
+  </div>
+
+  <div class="card-user-icon">
+   <img
+    src="{% if item.user_icon_url %}{{ item.user_icon_url }}{% else %}/media/customer/icon/default_cover.jpg{% endif %}"
+    alt="{{ item.user.username }}さんのアイコン">
+  </div>
 
       <div class="card-body">
 
