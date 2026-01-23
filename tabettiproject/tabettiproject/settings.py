@@ -144,8 +144,24 @@ STATICFILES_DIRS = [
 ]
 
 AUTH_USER_MODEL = "commons.Account"
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # セッションCookie名の設定
 SESSION_COOKIE_NAME = "site_sessionid"
 ADMIN_SESSION_COOKIE_NAME = "admin_sessionid"
+
+import os
+
+# --- メール送信（Gmail SMTP）---
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = "tabetti0123@gmail.com"
+EMAIL_HOST_PASSWORD = "kwqrxidhyjazllvj"
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+SERVER_EMAIL = DEFAULT_FROM_EMAIL  # 念のため（エラー通知など）
+
+SITE_DOMAIN = "127.0.0.1:8000"

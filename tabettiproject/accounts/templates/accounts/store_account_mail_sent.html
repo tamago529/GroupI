@@ -103,10 +103,11 @@
       <dt>メール</dt>
       <dd>{{ email|default:"-" }}</dd>
     </dl>
-
+    {% comment %}
     <div class="btn-area">
       <a class="btn-primary" href="{% url 'owner_info:entry_flow' %}">店舗検索へ戻る</a>
     </div>
+    {% endcomment %}
 
   </div>
 </div>

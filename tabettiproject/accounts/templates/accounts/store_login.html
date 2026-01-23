@@ -1,4 +1,5 @@
 {% extends "store_base.html" %}  
+{% load static %}
 {% block content %}
 <style>
 /* ページ全体 */
@@ -33,12 +34,14 @@
   gap:10px;
   margin-bottom:18px;
 }
-.brand__logo{
-  width:26px;height:26px;
-  display:inline-block;
+.brand__logo-img{
+  width:26px;
+  height:26px;
   border-radius:4px;
-  background:#f5a623; /* ロゴ代替色（画像なし前提） */
+  object-fit:cover;
+  display:block;
 }
+
 .brand__title{
   font-size:16px;
   font-weight:700;
@@ -127,9 +130,15 @@
     <div class="login-card__inner">
 
       <div class="brand">
-        <span class="brand__logo" aria-hidden="true"></span>
-        <div class="brand__title">タベッチ 店舗管理画面ログイン</div>
-      </div>
+  <img
+    class="brand__logo-img"
+    src="{% static 'images/Tabecchi_icon.png' %}"
+    alt="タベッチ"
+    width="26"
+    height="26"
+  >
+  <div class="brand__title">タベッチ 店舗管理画面ログイン</div>
+</div>
 
 {% if messages %}
   <div style="margin:10px 0; padding:10px; border:1px solid #f3c2c2; background:#fff5f5; color:#c53030; font-size:12px;">
@@ -152,32 +161,16 @@
     <label for="password">パスワード</label>
     <input id="password" name="password" type="password" placeholder="8〜20桁の半角英数">
   </div>
-
-        <div class="auto-login">
-          <input id="remember" name="remember" type="checkbox">
-          <label for="remember">次回から自動的にログインする</label>
-        </div>
-        <small style="display:block;margin-top:6px;color:#666;font-size:11px;">
-          ※共用のパソコンではチェックを外してください
-        </small>
-
         <button class="btn-login" type="submit">ログインする</button>
-
-        <div class="links">
-          <div><a href="#">ログインできない場合はこちら</a></div>
-          <div><a href="#">ログインID・パスワードを忘れた方はこちら</a></div>
-        </div>
       </form>
 
     </div>
 
     <div class="login-footer">
-      まだアカウントをお持ちでない方はこちら
+      <div><a href="{% url 'accounts:store_account_search' %}">まだアカウントをお持ちではない方はこちら</a></div>
+      <div><a href="{% url 'accounts:customer_mail_send' %}">パスワードを忘れた方はこちら</a></div>
     </div>
   </div>
 </div>
 
 {% endblock %}
-
-<a href="{% url 'stores:store_top' %}">店舗トップ画面へ</a>   
-<a href="{% url 'accounts:customer_password_reset' %}">パスワードリセット画面へ</a>   

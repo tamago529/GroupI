@@ -14,6 +14,7 @@ from django.contrib.auth.views import (
     PasswordResetView, PasswordResetDoneView,
     PasswordResetConfirmView, PasswordResetCompleteView
 )
+from django.conf import settings
 
 # =========================
 # 企業側
@@ -131,8 +132,13 @@ class customer_settingsView(TemplateView):
 class customermail_sendView(PasswordResetView):
     template_name = "accounts/customer_mail_send.html"
     email_template_name = "accounts/password_reset_email.html"
+    subject_template_name = "accounts/password_reset_subject.txt"
     success_url = reverse_lazy("accounts:customer_password_done")
-
+    from_email = settings.DEFAULT_FROM_EMAIL
+   
+    def dispatch(self, request, *args, **kwargs):
+        self.from_email = settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER
+        return super().dispatch(request, *args, **kwargs)
 
 class customer_password_reset_completeView(PasswordResetCompleteView):
     template_name = "accounts/customer_password_reset_complete.html"

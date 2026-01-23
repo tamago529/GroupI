@@ -2,7 +2,7 @@
 {% block content %}
 店舗アカウント作成店舗検索画面
 
-<a href="{% url 'search:customer_top' %}">顧客トップ画面へ</a>   
+<a href="{% url 'accounts:customer_top' %}">顧客トップ画面へ</a>   
 
 
 <style>
@@ -28,8 +28,10 @@
   <div class="title-bar">店舗会員（無料）のお申し込みの前に</div>
 
   <div class="search-box">
+    {% comment %}
     <form method="get" action="{% url 'owner_info:entry_flow' %}">
       <div class="field">
+    {% endcomment %}
         <label>店舗名</label>
         <input name="rst_name" value="{{ q_rst_name }}" placeholder="例）マクドナルド">
       </div>
