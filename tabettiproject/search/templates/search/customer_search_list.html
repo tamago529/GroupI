@@ -192,8 +192,16 @@
 
         {% for store in stores %}
         <article class="shop-card">
+            
             <div class="shop-photo">
-                <img src="https://via.placeholder.com/200x150" width="200" height="150" alt="店舗画像">
+                {% if store.thumb_path %}
+                    <img
+                        src="{{ MEDIA_URL }}{{ store.thumb_path }}"
+                        width="200"
+                        height="150"
+                        alt="店舗画像"
+                    >
+                {% endif %}
             </div>
 
             <div class="shop-info">

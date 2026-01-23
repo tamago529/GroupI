@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.core.paginator import Paginator
-from commons.models import Store
+from commons.models import Store, StoreImage
+from django.conf import settings
+
 
 def genre_list(request):
     # 構造化されたデータ（大分類名：{画像, 小分類リスト}）
@@ -76,8 +78,18 @@ def genre_list(request):
         "genre_data": genre_data
     })
 
+from django.shortcuts import render
+from django.core.paginator import Paginator
+from commons.models import Store, StoreImage
+from django.conf import settings
+
+
 def customer_search_listView(request):
-    store_qs = Store.objects.select_related("area", "scene").order_by("id")
+    store_qs = (
+        Store.objects
+        .select_related("area", "scene")
+        .order_by("id")
+    )
 
     area_name = request.GET.get("area")
     keyword = request.GET.get("keyword")
@@ -92,9 +104,32 @@ def customer_search_listView(request):
     page_number = request.GET.get("page")
     stores = paginator.get_page(page_number)
 
+    # ========= ★ ここから追加 ★ =========
+    store_ids = [s.id for s in stores]
+
+    images_qs = (
+        StoreImage.objects
+        .filter(store_id__in=store_ids)
+        .exclude(image_file="")
+        .order_by("store_id", "id")
+        .values("store_id", "image_file")
+    )
+
+    thumb_map = {}
+    for row in images_qs:
+        sid = row["store_id"]
+        if sid not in thumb_map:
+            thumb_map[sid] = row["image_file"]
+
+    for s in stores:
+        s.thumb_path = thumb_map.get(s.id)
+    # ========= ★ ここまで ★ =========
+
     context = {
         "stores": stores,
-        "area": area_name,        # ⭐ 追加
-        "keyword": keyword,       # ⭐ 追加
+        "area": area_name,
+        "keyword": keyword,
+        "MEDIA_URL": settings.MEDIA_URL,  # 念のため明示
     }
+
     return render(request, "search/customer_search_list.html", context)
