@@ -171,12 +171,14 @@ class CustomerAccount(Account):
         upload_to="customer/icon/",
         null=True,
         blank=True,
+        default="customer/icon/default_cover.jpg",
         verbose_name="アイコン画像",
     )
     cover_image = models.ImageField(
         upload_to="customer/cover/",
         null=True,
         blank=True,
+        default="customer/cover/default_cover.jpg",
         verbose_name="カバー画像",
     )
 
