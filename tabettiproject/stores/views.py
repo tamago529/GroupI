@@ -14,7 +14,7 @@ from datetime import date, datetime, timedelta
 import calendar
 from django.http import JsonResponse
 from django.db import models
-
+from django.views.generic import DetailView
 
 from commons.models import (
     Reservation,
@@ -372,13 +372,10 @@ class customer_store_new_register_confirmView(TemplateView):
 # =========================
 # company views
 # =========================
-class company_store_infoView(TemplateView):
+class company_store_infoView(DetailView):
+    model = Store
     template_name = "stores/company_store_info.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["store"] = get_object_or_404(Store, pk=self.kwargs["pk"])
-        return context
+    context_object_name = "store"
 
 
 class company_store_managementView(TemplateView):
