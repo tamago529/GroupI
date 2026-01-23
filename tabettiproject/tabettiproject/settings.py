@@ -147,4 +147,8 @@ AUTH_USER_MODEL = "commons.Account"
 
 # セッションCookie名の設定
 SESSION_COOKIE_NAME = "site_sessionid"
+<<<<<<< HEAD
 ADMIN_SESSION_COOKIE_NAME = "admin_sessionid"
+=======
+ADMIN_SESSION_COOKIE_NAME = "admin_sessionid"
+>>>>>>> 1d664c02c86f76e4c32d5e97e5b07d7cf04d97a5
