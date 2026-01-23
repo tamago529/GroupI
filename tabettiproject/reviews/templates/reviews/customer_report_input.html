@@ -153,10 +153,10 @@
 </style>
 
 <div class="report-container">
-    <h2 class="report-title">店舗情報に関する報告</h2>
+    <h2 class="report-title">不適切な口コミに関する報告</h2>
 
     <div class="report-intro">
-        <p>店舗情報について何かお気づきの点がございましたら、下記コメントよりご報告ください。<br>
+        <p>この口コミが不適切である理由を下記コメントよりご報告ください。<br>
         <span style="color: #666;">※ご返信は基本的に行っておりませんので、ご了承ください。</span></p>
     </div>
 
@@ -170,7 +170,7 @@
   {% endif %}
         
         <table class="report-table">
-            <caption>店舗情報報告用入力項目</caption>
+            <caption>口コミ報告用入力</caption>
             <tbody>
                 <tr>
                     <th scope="row">
@@ -179,21 +179,14 @@
                     </th>
                     <td>
                         <textarea id="comment" name="comment" class="input-textarea" rows="12" 
-                                    placeholder="[レストラン名]&#10;&#10;[レストランページURL、または、レストランを特定できる情報]&#10;&#10;[ご報告内容]&#10;&#10;[ご報告内容について確認できる情報（公式HP・SNSのURL等）]"></textarea>
+                                   placeholder="[ご報告内容]&#10;&#10;"></textarea>
                         <div class="counter">99 / 1000</div>
                     </td>
                 </tr>
 
                 <tr>
-                    <th scope="row">
-                        <label>写真</label>
-                    </th>
-                    <td>
-                        <p class="photo-info">張り紙や外観などで確認した場合、確認出来る写真があれば、添付してください（最大5枚まで写真を登録できます）。</p>
-                        <div class="photo-upload-area">
-                            <input type="file" name="files" multiple>
-                        </div>
-                    </td>
+                   
+                   
                 </tr>
             </tbody>
         </table>
