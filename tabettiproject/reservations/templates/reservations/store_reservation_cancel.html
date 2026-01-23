@@ -1,313 +1,292 @@
 {% extends "customer_base.html" %}
 {% block content %}
 
-<div style="max-width:980px;margin:0 auto;padding:18px 16px 40px;">
+<style>
+  :root{
+    --bg:#f6f6f6;
+    --line:#e6e0d7;
+    --head:#f2efe9;
+    --text:#333;
+    --sub:#666;
+    --accent:#2f8f2f;
+    --warn:#e85b2a;
+    --link:#1a73e8;
+    --card:#fff;
+    --soft:#faf8f4;
+  }
+  *{box-sizing:border-box}
+
+  /* extends 前提：body/html/head は書かない（崩れ防止） */
+  .wrap{
+    max-width:980px;
+    margin:0 auto;
+    padding:18px 16px 40px;
+    color:var(--text);
+  }
+
+  /* messages */
+  .msg-wrap{margin:10px 0 0}
+  .msg{
+    padding:10px 12px;
+    border:1px solid var(--line);
+    background:#fff;
+    margin-bottom:8px;
+    font-size:12px;
+    line-height:1.6;
+  }
+
+  .page-title{
+    background:#fff;
+    border:1px solid var(--line);
+    padding:14px 16px;
+    font-size:18px;
+    font-weight:800;
+  }
+  .desc{
+    background:#fff;
+    border:1px solid var(--line);
+    border-top:none;
+    padding:14px 16px;
+    color:#444;
+    font-size:13px;
+    line-height:1.7;
+  }
+
+  .section{
+    margin-top:14px;
+    background:#fff;
+    border:1px solid var(--line);
+  }
+  .section-head{
+    padding:10px 14px;
+    background:var(--head);
+    border-bottom:1px solid var(--line);
+    font-weight:900;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .caret{
+    width:0;height:0;
+    border-left:5px solid transparent;
+    border-right:5px solid transparent;
+    border-top:7px solid #333;
+    transform:translateY(1px);
+  }
+
+  .row{
+    display:grid;
+    grid-template-columns: 220px 1fr;
+    border-bottom:1px solid var(--line);
+    min-height:46px;
+  }
+  .row:last-child{border-bottom:none}
+  .cell-label{
+    background:var(--soft);
+    padding:10px 12px;
+    display:flex;
+    align-items:center;
+    font-size:13px;
+    color:#333;
+    font-weight:800;
+  }
+  .cell-value{
+    padding:8px 12px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  input[type="text"], select, textarea{
+    width:100%;
+    border:1px solid #d7d2c9;
+    border-radius:4px;
+    padding:9px 10px;
+    font-size:13px;
+    background:#fff;
+    outline:none;
+  }
+  input:focus, select:focus, textarea:focus{
+    border-color:#9aa7b5;
+    box-shadow:0 0 0 2px rgba(26,115,232,.12);
+  }
+  textarea{min-height:110px; resize:vertical;}
+
+  .required{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:11px;
+    font-weight:900;
+    color:#fff;
+    background:var(--warn);
+    border-radius:3px;
+    padding:2px 6px;
+    margin-left:8px;
+  }
+
+  .action-box{
+    background:#fff7d9;
+    border-top:1px solid var(--line);
+    padding:16px;
+    text-align:center;
+  }
+  .action-title{
+    color:#d14a1e;
+    font-weight:900;
+    font-size:16px;
+    margin-bottom:8px;
+  }
+  .action-desc{
+    font-size:12px;
+    color:#555;
+    line-height:1.7;
+    margin-bottom:12px;
+  }
+  .buttons{
+    display:flex;
+    justify-content:center;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .btn{
+    min-width:260px;
+    height:44px;
+    border-radius:4px;
+    border:1px solid #cfc8bd;
+    background:#fff;
+    font-weight:900;
+    cursor:pointer;
+    font-size:13px;
+  }
+  .btn:hover{background:#f3f3f3}
+  .btn-green{
+    border:none;
+    background:var(--accent);
+    color:#fff;
+  }
+  .btn-green:hover{filter:brightness(.95)}
+
+  @media (max-width: 720px){
+    .row{grid-template-columns: 1fr}
+    .cell-label{border-bottom:1px solid var(--line)}
+    .btn{min-width:100%}
+  }
+</style>
+
+<div class="wrap">
 
   {# Django messages #}
   {% if messages %}
-    <div style="margin:10px 0;">
+    <div class="msg-wrap">
       {% for message in messages %}
-        <div style="padding:10px 12px;border:1px solid #e6e0d7;background:#fff;margin-bottom:8px;font-size:12px;">
-          {{ message }}
-        </div>
+        <div class="msg">{{ message }}</div>
       {% endfor %}
     </div>
   {% endif %}
 
-</div>
-
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ご予約のキャンセル</title>
-  <style>
-    :root{
-      --bg:#f6f6f6;
-      --line:#e6e0d7;
-      --head:#f2efe9;
-      --text:#333;
-      --sub:#666;
-      --accent:#2f8f2f;
-      --warn:#e85b2a;
-      --link:#1a73e8;
-      --card:#fff;
-      --soft:#faf8f4;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: "Hiragino Kaku Gothic ProN","Meiryo",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-      background:var(--bg);
-      color:var(--text);
-    }
-
-    .wrap{
-      max-width:980px;
-      margin:0 auto;
-      padding:18px 16px 40px;
-    }
-    .breadcrumb{
-      font-size:12px;
-      color:#777;
-      margin:10px 0 14px;
-    }
-    .breadcrumb a{color:#777; text-decoration:none}
-    .breadcrumb a:hover{text-decoration:underline}
-
-    .page-title{
-      background:#fff;
-      border:1px solid var(--line);
-      padding:14px 16px;
-      font-size:18px;
-      font-weight:700;
-    }
-    .desc{
-      background:#fff;
-      border:1px solid var(--line);
-      border-top:none;
-      padding:14px 16px;
-      color:#444;
-      font-size:13px;
-      line-height:1.7;
-    }
-
-    .section{
-      margin-top:14px;
-      background:#fff;
-      border:1px solid var(--line);
-    }
-    .section-head{
-      padding:10px 14px;
-      background:var(--head);
-      border-bottom:1px solid var(--line);
-      font-weight:700;
-      font-size:14px;
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    .caret{
-      width:0;height:0;
-      border-left:5px solid transparent;
-      border-right:5px solid transparent;
-      border-top:7px solid #333;
-      transform:translateY(1px);
-    }
-
-    .row{
-      display:grid;
-      grid-template-columns: 220px 1fr;
-      border-bottom:1px solid var(--line);
-      min-height:46px;
-    }
-    .row:last-child{border-bottom:none}
-    .cell-label{
-      background:var(--soft);
-      padding:10px 12px;
-      display:flex;
-      align-items:center;
-      font-size:13px;
-      color:#333;
-      font-weight:600;
-    }
-    .cell-value{
-      padding:8px 12px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-
-    input[type="text"], select, textarea{
-      width:100%;
-      border:1px solid #d7d2c9;
-      border-radius:4px;
-      padding:9px 10px;
-      font-size:13px;
-      background:#fff;
-      outline:none;
-    }
-    input:focus, select:focus, textarea:focus{
-      border-color:#9aa7b5;
-      box-shadow:0 0 0 2px rgba(26,115,232,.12);
-    }
-    textarea{min-height:110px; resize:vertical;}
-
-    .linklike{
-      color:var(--link);
-      text-decoration:none;
-      font-weight:600;
-    }
-    .linklike:hover{text-decoration:underline}
-
-    .required{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      font-size:11px;
-      font-weight:700;
-      color:#fff;
-      background:var(--warn);
-      border-radius:3px;
-      padding:2px 6px;
-      margin-left:8px;
-    }
-
-    .action-box{
-      background:#fff7d9;
-      border-top:1px solid var(--line);
-      padding:16px;
-      text-align:center;
-    }
-    .action-title{
-      color:#d14a1e;
-      font-weight:800;
-      font-size:16px;
-      margin-bottom:8px;
-    }
-    .action-desc{
-      font-size:12px;
-      color:#555;
-      line-height:1.7;
-      margin-bottom:12px;
-    }
-    .buttons{
-      display:flex;
-      justify-content:center;
-      gap:14px;
-      flex-wrap:wrap;
-    }
-    .btn{
-      min-width:260px;
-      height:44px;
-      border-radius:4px;
-      border:1px solid #cfc8bd;
-      background:#fff;
-      font-weight:700;
-      cursor:pointer;
-      font-size:13px;
-    }
-    .btn:hover{background:#f3f3f3}
-    .btn-green{
-      border:none;
-      background:var(--accent);
-      color:#fff;
-    }
-    .btn-green:hover{filter:brightness(.95)}
-
-    @media (max-width: 720px){
-      .row{grid-template-columns: 1fr}
-      .cell-label{border-bottom:1px solid var(--line)}
-      .btn{min-width:100%}
-    }
-  </style>
-</head>
-
-<body>
-  <div class="wrap">
-
-    <div class="page-title">ご予約のキャンセル</div>
-    <div class="desc">
-      以下のご予約をキャンセルします。<br>
-      内容をご確認のうえ、よろしければ「この予約をキャンセルする」ボタンを押してください。
-    </div>
-
-    <form action="{% url 'reservations:store_reservation_cancel' reservation.id %}" method="post">
-      {% csrf_token %}
-
-      <div class="section">
-        <div class="section-head"><span class="caret"></span>ご予約情報</div>
-
-        <div class="row">
-          <div class="cell-label">予約ステータス</div>
-          <div class="cell-value">
-            <input type="text" value="{{ reservation.booking_status }}" readonly>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="cell-label">ご予約番号</div>
-          <div class="cell-value">
-            <input type="text" value="{{ reservation.id }}" readonly>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="cell-label">レストラン名</div>
-          <div class="cell-value">
-            <input type="text" value="{{ store.store_name }}" readonly>
-            <a class="linklike" href="{{ store_page_url }}">店舗ページ</a>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="cell-label">来店人数</div>
-          <div class="cell-value">
-            <input type="text" value="{{ reservation.visit_count }}名" readonly>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="cell-label">来店日</div>
-          <div class="cell-value">
-            <input type="text" value="{{ reservation.visit_date|date:'Y年n月j日(D)' }}" readonly>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="cell-label">来店時刻</div>
-          <div class="cell-value">
-            <input type="text" value="{{ reservation.visit_time|time:'H:i' }}" readonly>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="cell-label">コース</div>
-          <div class="cell-value">
-            <input type="text" value="{{ reservation.course }}" readonly>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="cell-label">キャンセル理由 <span class="required">必須</span></div>
-          <div class="cell-value">
-            <select name="cancel_reason" required>
-              <option selected>選択してください</option>
-              <option>予定が変わった</option>
-              <option>人数が変わった</option>
-              <option>時間に間に合わない</option>
-              <option>店都合（臨時休業など）</option>
-              <option>その他</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="cell-label">キャンセル理由について<br>詳しく教えてください</div>
-          <div class="cell-value">
-            <textarea name="cancel_detail" rows="5" placeholder="任意で入力してください"></textarea>
-          </div>
-        </div>
-
-        <div class="action-box">
-          <div class="action-title">この予約をキャンセルします</div>
-          <div class="action-desc">
-            一度キャンセルされた予約は、元に戻すことはできません。<br>
-            よろしければ「この予約をキャンセルする」ボタンを押してください。
-          </div>
-          <div class="buttons">
-            <button type="button" class="btn" onclick="location.href='{% url 'reservations:store_reservation_confirm' reservation.id %}';">
-              ご予約内容の確認へ戻る
-            </button>
-            <button type="submit" class="btn btn-green">この予約をキャンセルする</button>
-          </div>
-        </div>
-
-      </div>
-    </form>
+  <div class="page-title">ご予約のキャンセル</div>
+  <div class="desc">
+    以下のご予約をキャンセルします。<br>
+    内容をご確認のうえ、よろしければ「この予約をキャンセルする」ボタンを押してください。
   </div>
-</body>
-</html>
+
+  <form action="{% url 'reservations:store_reservation_cancel' reservation.id %}" method="post">
+    {% csrf_token %}
+
+    <div class="section">
+      <div class="section-head"><span class="caret"></span>ご予約情報</div>
+
+      <div class="row">
+        <div class="cell-label">予約ステータス</div>
+        <div class="cell-value">
+          <input type="text" value="{{ reservation.booking_status }}" readonly>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="cell-label">ご予約番号</div>
+        <div class="cell-value">
+          <input type="text" value="{{ reservation.id }}" readonly>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="cell-label">レストラン名</div>
+        <div class="cell-value">
+          <input type="text" value="{{ reservation.store.store_name }}" readonly>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="cell-label">来店人数</div>
+        <div class="cell-value">
+          <input type="text" value="{{ reservation.visit_count }}名" readonly>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="cell-label">来店日</div>
+        <div class="cell-value">
+          <input type="text" value="{{ reservation.visit_date|date:'Y年n月j日(D)' }}" readonly>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="cell-label">来店時刻</div>
+        <div class="cell-value">
+          <input type="text" value="{{ reservation.visit_time|time:'H:i' }}" readonly>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="cell-label">コース</div>
+        <div class="cell-value">
+          <input type="text" value="{{ reservation.course }}" readonly>
+        </div>
+      </div>
+
+      {# cancel_reason は Reservation.cancel_reason(TextField) に結合して保存する想定 #}
+      <div class="row">
+        <div class="cell-label">キャンセル理由 <span class="required">必須</span></div>
+        <div class="cell-value">
+          <select name="cancel_reason" required>
+            <option value="" selected>選択してください</option>
+            <option value="予定が変わった">予定が変わった</option>
+            <option value="人数が変わった">人数が変わった</option>
+            <option value="時間に間に合わない">時間に間に合わない</option>
+            <option value="店都合（臨時休業など）">店都合（臨時休業など）</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="cell-label">キャンセル理由について<br>詳しく教えてください</div>
+        <div class="cell-value">
+          <textarea name="cancel_detail" rows="5" placeholder="任意で入力してください"></textarea>
+        </div>
+      </div>
+
+      <div class="action-box">
+        <div class="action-title">この予約をキャンセルします</div>
+        <div class="action-desc">
+          一度キャンセルされた予約は、元に戻すことはできません。<br>
+          よろしければ「この予約をキャンセルする」ボタンを押してください。
+        </div>
+        <div class="buttons">
+          <button type="button" class="btn"
+                  onclick="location.href='{% url 'reservations:store_reservation_confirm' reservation.id %}';">
+            ご予約内容の確認へ戻る
+          </button>
+          <button type="submit" class="btn btn-green">この予約をキャンセルする</button>
+        </div>
+      </div>
+
+    </div>
+  </form>
+
+</div>
 
 {% endblock %}

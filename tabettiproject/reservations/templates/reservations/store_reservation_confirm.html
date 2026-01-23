@@ -14,6 +14,7 @@
     --green-dark:#4ea318;
   }
   *{box-sizing:border-box}
+
   /* extends前提なので body は触らない方が安全（崩れ防止） */
 
   .wrap{
@@ -150,7 +151,7 @@
   }
   .btn-green:hover{background:var(--green-dark)}
 
-  /* ★ disabled時（押せないだけ・メッセージなし） */
+  /* ★ disabled時（押せないだけ） */
   .btn:disabled{
     opacity:.55;
     cursor:not-allowed;
@@ -161,8 +162,10 @@
     opacity:.45;
   }
 
+  /* ★ 注記はボタン列の「下」に必ず来るようにする（flex崩れ防止） */
   .actions-note{
-    margin:8px 0 0;
+    flex-basis:100%;
+    margin:2px 0 0;
     font-size:11px;
     color:var(--sub);
     text-align:center;
@@ -204,7 +207,7 @@
 
     <div class="row">
       <div class="label">レストラン名</div>
-      <div class="value">{{ store.store_name }}</div> {# ← ここ、余計な </a> を削除 #}
+      <div class="value">{{ store.store_name }}</div>
     </div>
 
     <div class="row">
@@ -236,7 +239,7 @@
       type="button"
       class="btn"
       {% if not can_modify %}disabled{% endif %}
-      onclick="location.href='{% url 'reservations:store_reservation_cancel' reservation.id %}';">
+      {% if can_modify %}onclick="location.href='{% url 'reservations:store_reservation_cancel' reservation.id %}';"{% endif %}>
       予約をキャンセルする
     </button>
 
@@ -244,7 +247,7 @@
       type="button"
       class="btn btn-green"
       {% if not can_modify %}disabled{% endif %}
-      onclick="location.href='{% url 'reservations:store_reservation_edit' reservation.id %}';">
+      {% if can_modify %}onclick="location.href='{% url 'reservations:store_reservation_edit' reservation.id %}';"{% endif %}>
       ご予約内容を変更する
     </button>
 

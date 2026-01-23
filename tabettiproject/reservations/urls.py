@@ -23,8 +23,9 @@ urlpatterns = [
     path(
         "store_reservation_edit/<int:reservation_id>/",
         store_reservation_editView.as_view(),
-        name="store_reservation_edit",
-    ),
+        name="store_reservation_edit"
+        ),
+
 
     # 予約キャンセル
     path(

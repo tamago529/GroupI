@@ -25,13 +25,6 @@
     padding:18px 16px 40px;
     color:var(--text);
   }
-  .breadcrumb{
-    font-size:12px;
-    color:#777;
-    margin:10px 0 14px;
-  }
-  .breadcrumb a{color:#777; text-decoration:none}
-  .breadcrumb a:hover{text-decoration:underline}
 
   .page-title{
     background:var(--card);
@@ -153,47 +146,7 @@
   .w-date{width:170px}
   .w-time{width:120px}
   .w-people{width:110px}
-  .w-child{width:110px}
-
-  .seat-box{
-    margin-top:10px;
-    border:1px solid var(--line);
-    background:var(--soft);
-    padding:12px;
-    border-radius:4px;
-  }
-  .seat-title{
-    font-size:12px;
-    font-weight:900;
-    margin-bottom:6px;
-  }
-  .seat-note{
-    font-size:12px;
-    color:var(--sub);
-    margin-top:6px;
-  }
-
-  .grid2{
-    display:grid;
-    grid-template-columns: 220px 1fr;
-    border-top:1px solid var(--line);
-    margin-top:12px;
-  }
-  .grid2 .left{
-    background:var(--soft);
-    padding:12px;
-    font-size:12px;
-    font-weight:900;
-    border-right:1px solid var(--line);
-  }
-  .grid2 .right{
-    padding:12px;
-  }
-  textarea{
-    width:100%;
-    min-height:120px;
-    resize:vertical;
-  }
+  .w-course{min-width:220px}
 
   .warn{
     margin-top:14px;
@@ -231,30 +184,22 @@
   .btn-green:hover{background:var(--green-dark)}
 
   @media (max-width: 720px){
-    .grid2{grid-template-columns:1fr}
-    .grid2 .left{border-right:none; border-bottom:1px solid var(--line)}
     .btn{min-width:100%}
   }
 </style>
 
 <div class="wrap">
-  <div class="breadcrumb">
-    <a href="#">タベッチ</a> ＞ <a href="#">予約確認</a> ＞
-    <a href="{{ confirm_url }}">ご予約内容の確認</a> ＞ ご予約内容の変更
-  </div>
 
   <div class="page-title">ご予約内容の変更</div>
 
   <div class="shop-card">
-    <div class="thumb">
-      {# 画像は今は仮。store側に画像ができたら差し替え #}
-      <img alt="店舗画像" src="https://picsum.photos/200/200?random=12">
-    </div>
     <div class="shop-info">
-      <a class="shop-name" href="{{ store_url }}">{{ reservation.store.store_name }}</a>
+      <a class="shop-name" href="{{ store_page_url }}">{{ reservation.store.store_name }}</a>
       <div class="shop-meta">
-        {{ reservation.visit_date|date:"Y年 n月 j日(D)" }} {{ reservation.visit_count }}名 {{ reservation.visit_time|time:"H:i" }}<br>
-        ご予約のコース：{{ reservation.course }}
+        {{ reservation.visit_date|date:"Y年 n月 j日(D)" }}
+        {{ reservation.visit_time|time:"H:i" }}
+        ／ {{ reservation.visit_count }}名<br>
+        コース：{{ reservation.course }}
       </div>
     </div>
   </div>
@@ -266,7 +211,7 @@
       <div class="section-head"><span class="caret"></span>ご来店日時・人数の変更</div>
 
       <div class="section-body">
-        <p class="help">ご希望の日時・人数を選択してください</p>
+        <p class="help">ご希望の来店日・時間・人数を変更してください。</p>
 
         <div class="form-row">
           <label for="visit_date">来店日</label>
@@ -279,12 +224,6 @@
 
           <label for="visit_count">人数</label>
           <select id="visit_count" name="visit_count" class="w-people" required>
-            {% for n in "12345678910"|make_list %}
-              {# make_list は 1文字ずつになるので10が崩れる。なので下の方式に変更 #}
-            {% endfor %}
-            {% for n in people_choices %}
-            {% endfor %}
-            {# ↑ 上は使わない。下で固定 options を作る #}
             <option value="1" {% if reservation.visit_count == 1 %}selected{% endif %}>1名</option>
             <option value="2" {% if reservation.visit_count == 2 %}selected{% endif %}>2名</option>
             <option value="3" {% if reservation.visit_count == 3 %}selected{% endif %}>3名</option>
@@ -296,37 +235,27 @@
             <option value="9" {% if reservation.visit_count == 9 %}selected{% endif %}>9名</option>
             <option value="10" {% if reservation.visit_count == 10 %}selected{% endif %}>10名</option>
           </select>
+        </div>
 
-          <label for="child_count">うちお子様</label>
-          <select id="child_count" name="child_count" class="w-child">
-            <option value="0" selected>0名</option>
-            <option value="1">1名</option>
-            <option value="2">2名</option>
-            <option value="3">3名</option>
+        <div class="form-row" style="margin-top:6px;">
+          <label for="course_minutes">コース</label>
+          <select id="course_minutes" name="course_minutes" class="w-course" required>
+              <option value="30"  {% if reservation.course == "30分コース" %}selected{% endif %}>30分コース</option>
+              <option value="60"  {% if reservation.course == "1時間コース" %}selected{% endif %}>1時間コース</option>
+              <option value="90"  {% if reservation.course == "1時間30分コース" %}selected{% endif %}>1時間30分コース</option>
+              <option value="120" {% if reservation.course == "2時間コース" %}selected{% endif %}>2時間コース</option>
+              <option value="150" {% if reservation.course == "2時間30分コース" %}selected{% endif %}>2時間30分コース</option>
           </select>
         </div>
 
-        <div class="seat-box">
-          <div class="seat-title">お席</div>
-          <input type="text" name="seat_text" value="カウンター / 禁煙" />
-          <div class="seat-note">個室希望：なし</div>
+
+        <div class="actions" style="padding:14px;">
+          <button type="button" class="btn"
+                  onclick="location.href='{% url 'reservations:store_reservation_confirm' reservation.id %}';">
+            ご予約内容の確認へ戻る
+          </button>
+          <button type="submit" class="btn btn-green">この内容で変更する</button>
         </div>
-      </div>
-
-      <div class="grid2">
-        <div class="left">レストランへの<br>追加のご要望</div>
-        <div class="right">
-          <textarea name="request_note">窓際の席があれば希望します。</textarea>
-        </div>
-      </div>
-
-      <div class="warn">
-        直前のご予約内容の変更については店舗が受付できない場合があります。変更後、必ず店舗にお電話でご確認ください。
-      </div>
-
-      <div class="actions" style="padding:14px;">
-        <button type="button" class="btn" onclick="location.href='{{ confirm_url }}';">ご予約内容の確認へ戻る</button>
-        <button type="submit" class="btn btn-green">この内容で変更する</button>
       </div>
     </div>
   </form>

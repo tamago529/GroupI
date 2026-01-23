@@ -7,7 +7,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.views import View
+from django.shortcuts import render
 from django.views.generic import TemplateView
+from django.utils import timezone
+from datetime import timedelta, datetime
+
 
 from commons.models import CustomerAccount, Reservation, ReservationStatus
 
@@ -108,14 +113,12 @@ class store_reservation_historyView(LoginRequiredMixin, TemplateView):
         return ctx
 
 
-# ----------------------------
-# 予約確認（詳細）
-# ----------------------------
 class store_reservation_confirmView(LoginRequiredMixin, TemplateView):
     template_name = "reservations/store_reservation_confirm.html"
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+
         customer = _get_customer_user(self.request)
 
         reservation_id = int(kwargs.get("reservation_id"))
@@ -123,49 +126,73 @@ class store_reservation_confirmView(LoginRequiredMixin, TemplateView):
 
         store_page_url = _get_store_page_url(reservation.store_id)
 
+        # ----------------------------
+        # 3日前ルール（"日付単位"で判定）
+        # 来店日の3日前(0:00)になったら変更・キャンセル不可
+        # 例）来店日 1/28 → 1/25 になった瞬間から不可
+        # ----------------------------
+        today = timezone.localdate()  # ローカル日付（JST想定）
+        limit_date = reservation.visit_date - timedelta(days=3)
+        can_modify = today < limit_date
+
         ctx.update(
             {
                 "reservation": reservation,
                 "store": reservation.store,
                 "store_page_url": store_page_url,
+                "can_modify": can_modify,  # テンプレの disabled 判定用
+                "limit_date": limit_date,  # （表示したい時用：不要なら消してOK）
             }
         )
         return ctx
 
-
 # ----------------------------
-# 予約変更（GET/POST）
+# 予約変更（GET/POST）   
 # ----------------------------
-class store_reservation_editView(LoginRequiredMixin, TemplateView):
+class store_reservation_editView(LoginRequiredMixin, View):
     template_name = "reservations/store_reservation_edit.html"
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        customer = _get_customer_user(self.request)
+    def _can_modify(self, reservation: Reservation) -> bool:
+        """
+        来店日の3日前(0:00)になったら変更不可（＝日付単位）
+        例）来店日 1/28 → 1/25 になった瞬間から不可
+        """
+        today = timezone.localdate()
+        limit_date = reservation.visit_date - timedelta(days=3)
+        return today < limit_date
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        customer = _get_customer_user(request)
 
         reservation_id = int(kwargs.get("reservation_id"))
         reservation = _get_customer_reservation(customer, reservation_id)
 
         store_page_url = _get_store_page_url(reservation.store_id)
+        can_modify = self._can_modify(reservation)
 
-        ctx.update(
-            {
-                "reservation": reservation,
-                "store": reservation.store,
-                "store_page_url": store_page_url,
-            }
-        )
-        return ctx
+        ctx = {
+            "reservation": reservation,
+            "store": reservation.store,
+            "store_page_url": store_page_url,
+            "can_modify": can_modify,
+        }
+        return render(request, self.template_name, ctx)
 
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         customer = _get_customer_user(request)
         reservation_id = int(kwargs.get("reservation_id"))
         reservation = _get_customer_reservation(customer, reservation_id)
 
+        # ★ 3日前ルール：POSTでも必ず弾く（UIだけだと抜けられるため）
+        if not self._can_modify(reservation):
+            # メッセージ不要なら消してOK
+            messages.error(request, "来店日の3日前以降は変更できません。")
+            return redirect("reservations:store_reservation_confirm", reservation_id=reservation.id)
+
         visit_date_s = (request.POST.get("visit_date") or "").strip()
         visit_time_s = (request.POST.get("visit_time") or "").strip()
         visit_count_s = (request.POST.get("visit_count") or "").strip()
-        course = (request.POST.get("course") or "").strip()
+        course_minutes_s = (request.POST.get("course_minutes") or "").strip()
 
         errors = []
 
@@ -192,6 +219,21 @@ class store_reservation_editView(LoginRequiredMixin, TemplateView):
             errors.append("人数は1以上の数字で入力してください。")
             new_count = reservation.visit_count
 
+        # course_minutes -> course(文字列)
+        course_map = {
+            30: "30分コース",
+            60: "1時間コース",
+            90: "1時間30分コース",
+            120: "2時間コース",
+            150: "2時間30分コース",
+        }
+        try:
+            new_minutes = int(course_minutes_s)
+            new_course = course_map[new_minutes]
+        except Exception:
+            errors.append("コースが不正です。")
+            new_course = reservation.course
+
         if errors:
             for e in errors:
                 messages.error(request, e)
@@ -201,19 +243,31 @@ class store_reservation_editView(LoginRequiredMixin, TemplateView):
         reservation.visit_date = new_date
         reservation.visit_time = new_time
         reservation.visit_count = new_count
-        if course != "":
-            reservation.course = course
-
+        reservation.course = new_course
         reservation.save()
+
         messages.success(request, "ご予約内容を変更しました。")
         return redirect("reservations:store_reservation_confirm", reservation_id=reservation.id)
-
 
 # ----------------------------
 # 予約キャンセル（GET/POST）
 # ----------------------------
 class store_reservation_cancelView(LoginRequiredMixin, TemplateView):
     template_name = "reservations/store_reservation_cancel.html"
+
+    @staticmethod
+    def _can_modify(reservation: Reservation) -> bool:
+        """
+        来店日時の3日前より前なら True（変更・キャンセル可）
+        来店日時の3日前になった瞬間から False（変更・キャンセル不可）
+        """
+        # Djangoのtimezoneを使う（from django.utils import timezone が必要）
+        visit_dt_naive = datetime.combine(reservation.visit_date, reservation.visit_time)
+        tz = timezone.get_current_timezone()
+        visit_dt = timezone.make_aware(visit_dt_naive, tz)
+
+        limit_dt = visit_dt - timedelta(days=3)
+        return timezone.now() < limit_dt
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -224,11 +278,14 @@ class store_reservation_cancelView(LoginRequiredMixin, TemplateView):
 
         store_page_url = _get_store_page_url(reservation.store_id)
 
+        can_modify = self._can_modify(reservation)
+
         ctx.update(
             {
                 "reservation": reservation,
                 "store": reservation.store,
                 "store_page_url": store_page_url,
+                "can_modify": can_modify,  # ★テンプレでボタンdisabledに使う
             }
         )
         return ctx
@@ -238,10 +295,17 @@ class store_reservation_cancelView(LoginRequiredMixin, TemplateView):
         reservation_id = int(kwargs.get("reservation_id"))
         reservation = _get_customer_reservation(customer, reservation_id)
 
+        # ★ 3日前ルール：POSTでも必ず弾く（URL直叩き対策）
+        if not self._can_modify(reservation):
+            # メッセージ出したくない → そのまま確認画面へ戻すだけ
+            return redirect("reservations:store_reservation_confirm", reservation_id=reservation.id)
+
         cancel_reason = (request.POST.get("cancel_reason") or "").strip()
         cancel_detail = (request.POST.get("cancel_detail") or "").strip()
 
-        if not cancel_reason or cancel_reason == "選択してください":
+        # select の「選択してください」は value="" にしてる前提（テンプレ側）
+        if not cancel_reason:
+            # ここもメッセージ不要ならconfirmへ戻すだけでもOK
             messages.error(request, "キャンセル理由を選択してください。")
             return redirect("reservations:store_reservation_cancel", reservation_id=reservation.id)
 
@@ -253,10 +317,12 @@ class store_reservation_cancelView(LoginRequiredMixin, TemplateView):
 
         try:
             _set_reservation_status_cancelled(reservation)
-        except Exception as e:
-            messages.error(request, f"ステータス更新に失敗しました：{e}")
+        except Exception:
+            # ここも「だるい」ならメッセージ無しで戻すだけでもOK
+            messages.error(request, "ステータス更新に失敗しました。")
             return redirect("reservations:store_reservation_cancel", reservation_id=reservation.id)
 
         reservation.save()
+        # 成功は一応残す（いらなければ消してOK）
         messages.success(request, "予約をキャンセルしました。")
         return redirect("reservations:store_reservation_confirm", reservation_id=reservation.id)
