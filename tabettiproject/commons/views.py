@@ -5,55 +5,110 @@ from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme, urlencode
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from django.contrib.auth import login
 
 from commons.models import Review
+from commons.models import CustomerAccount, Gender, AccountType
 
+# 1. 【重要】NameErrorを防ぐため、先に完了画面のクラスを定義します
 class customer_common_completeView(TemplateView):
     template_name = "commons/customer_common_complete.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        # クエリパラメータ (?action=...&msg=...) を取得
-        action = self.request.GET.get('action', 'update')
-        msg = self.request.GET.get('msg', '完了しました。')
-
-        context['action_type'] = action
-        context['msg'] = msg
-        
-        # モードに応じたラベル設定
-        labels = {'create': '登録', 'update': '変更', 'delete': '削除'}
-        context['mode_label'] = labels.get(action, '処理')
-        
+        # URLパラメータからメッセージを取得して画面に渡す
+        context['msg'] = self.request.GET.get('msg', '完了しました。')
         return context
 
-class customer_common_confirmView(TemplateView):
-    template_name = "commons/customer_common_confirm.html"
+# 2. 確認と保存を行うメインのView
+class customer_common_confirmView(View):
+    def get(self, request, *args, **kwargs):
+        return redirect('accounts:customer_top')
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        
-        # 1. 操作種別の定義 (create / update / delete)
-        context['action_type'] = 'update' 
-        context['mode_label'] = '登録内容の変更'
-        
-        # 2. 表示用データ (辞書形式で渡すと自動でテーブル化されます)
-        context['display_data'] = [
-            ('店舗名', '牛角 渋谷店', False),
-            ('予約日時', '2024年12月24日 19:00', True), # 重要！
-            ('人数', '4名', False),
-            ('コース名', 'クリスマス限定食べ放題コース', True),
-            ('合計金額', '¥24,000 (税込)', True),
-        ]
-        
-        # 3. 実際にPOSTするデータ (hidden field用)
-        context['hidden_data'] = {
-            "customer_id": 101,
-            "status": "active"
+    def post(self, request, *args, **kwargs):
+        # 確定ボタン（is_final=true）から来た場合
+        if request.POST.get('is_final') == 'true':
+            return self.handle_final_save(request)
+
+        # 入力画面から来た場合：確認画面用のデータ作成
+        display_data = []
+        hidden_data = {}
+
+        for key, value in request.POST.items():
+            if key == 'csrfmiddlewaretoken': continue
+            hidden_data[key] = value
+            
+        field_labels = {
+            'username': 'ユーザー名', 'email': 'メールアドレス', 'password': 'パスワード',
+            'last_name': '姓', 'first_name': '名', 'nickname': 'ニックネーム',
+            'phone_number': '電話番号', 'gender': '性別', 'birth_date': '生年月日',
+            'age_group': '年代', 'address': '住所'
         }
-        
-        return context
 
+        for key, value in hidden_data.items():
+            if key in ['agree', 'is_final', 'store_id', 'review_id']: continue
+            label = field_labels.get(key, key)
+            display_val = value
+            if key == 'password': display_val = '********'
+            
+            if key == 'gender' and value:
+                try:
+                    gender_obj = Gender.objects.get(id=value)
+                    display_val = gender_obj.gender
+                except: pass
+
+            display_data.append((label, display_val, key in ['comment', 'address']))
+
+        hidden_data['is_final'] = 'true'
+
+        context = {
+            'mode_label': 'ご入力内容',
+            'display_data': display_data,
+            'hidden_data': hidden_data,
+            'action_type': 'update',
+            'submit_url': reverse('commons:customer_common_confirm')
+        }
+        return render(request, "commons/customer_common_confirm.html", context)
+
+    def handle_final_save(self, request):
+        """DBの必須制約（birth_date, age_group等）をforms.pyの仕様に合わせて保存します"""
+        p = request.POST
+        try:
+            # 顧客タイプの取得（forms.pyの仕様：'顧客'という文字列でマスタ検索）
+            try:
+                acc_type = AccountType.objects.get(account_type="顧客")
+            except AccountType.DoesNotExist:
+                # マスタにない場合は作成、またはエラーにする
+                acc_type, _ = AccountType.objects.get_or_create(account_type="顧客")
+
+            # 【最終解決】必須項目をすべて含めてユーザー作成
+            # username と sub_email に email を代入する forms.py の仕様を反映
+            new_user = CustomerAccount.objects.create_user(
+                username=p.get('email'), 
+                email=p.get('email'),
+                password=p.get('password'),
+                last_name=p.get('last_name', ''),
+                first_name=p.get('first_name', ''),
+                nickname=p.get('nickname', '新規ユーザー'),
+                phone_number=p.get('phone_number', ''),
+                birth_date=p.get('birth_date') if p.get('birth_date') else None,
+                gender_id=p.get('gender') if p.get('gender') else None,
+                age_group_id=p.get('age_group') if p.get('age_group') else None, # 年代必須エラー対策
+                account_type=acc_type
+            )
+            
+            # sub_emailの補完
+            new_user.sub_email = p.get('email')
+            new_user.save()
+            
+            login(request, new_user)
+            msg = "会員登録が完了しました！"
+
+        except Exception as e:
+            msg = f"保存失敗（モデルの項目を確認してください）: {str(e)}"
+
+        params = urlencode({'msg': msg})
+        return redirect(f"{reverse('commons:customer_common_complete')}?{params}")
 
 class errorView(TemplateView):
     template_name = "commons/error.html"
@@ -67,20 +122,15 @@ class store_common_completeView(TemplateView):
     template_name = "commons/store_common_complete.html"
 
 
-# ✅ インデント修正：汎用の企業確認（今回は削除では使わない想定）
 class company_common_confirmView(TemplateView):
     template_name = "commons/company_common_confirm.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         context["confirm_message"] = self.request.GET.get("message", "実行してよろしいですか？")
-
         referer = self.request.META.get("HTTP_REFERER")
         default_back_url = "/accounts/company/top/"
         context["cancel_url"] = referer if referer else default_back_url
-
-        # OKボタンの action を渡さないとPOSTできないので、汎用confirmではダミーにしておく
         context["ok_action"] = self.request.GET.get("ok_action", "#")
         context["next_url"] = self.request.GET.get("next", default_back_url)
         return context
@@ -96,11 +146,7 @@ class company_common_completeView(TemplateView):
         return context
 
 
-# ==========================================================
-# ✅ 口コミ削除フロー（これが本番）
-#   company_review_list → confirm → OK(POST) → complete
-# ==========================================================
-
+# ✅ 口コミ削除フロー
 @method_decorator(login_required, name="dispatch")
 class ReviewDeleteConfirmView(View):
     template_name = "commons/company_common_confirm.html"
@@ -110,7 +156,6 @@ class ReviewDeleteConfirmView(View):
             Review.objects.select_related("reviewer", "store"),
             pk=review_id
         )
-
         next_url = request.GET.get("next")
         if (not next_url) or (not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()})):
             next_url = reverse("reviews:company_review_list")
@@ -129,7 +174,7 @@ class ReviewDeleteConfirmView(View):
 class ReviewDeleteExecuteView(View):
     def post(self, request, review_id):
         review = get_object_or_404(Review, pk=review_id)
-        review.delete()  # ✅ DBから消えるのでadmin側も消える
+        review.delete() 
 
         next_url = request.POST.get("next_url") or reverse("reviews:company_review_list")
         if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):

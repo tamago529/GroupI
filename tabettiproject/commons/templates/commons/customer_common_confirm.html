@@ -126,11 +126,14 @@
         <a href="javascript:history.back();" class="btn btn-back">修正する</a>
         <form action="{{ submit_url }}" method="post" style="flex: 2; display: flex;">
             {% csrf_token %}
+
+            {# ★ここが最重要！入力データを隠し項目として次の処理へ「引き継ぐ」 #}
             {% for key, val in hidden_data.items %}
                 <input type="hidden" name="{{ key }}" value="{{ val }}">
             {% endfor %}
+
             <button type="submit" class="btn btn-submit">
-                {% if action_type == 'delete' %}削除を確定する{% else %}この内容で確定する{% endif %}
+                この内容で確定する
             </button>
         </form>
     </div>
