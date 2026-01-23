@@ -1,373 +1,430 @@
 {% extends "customer_base.html" %}
 
-{% block title %}{{ store.name }} - メニュー・コース{% endblock %}
+{% block title %}{{ store.store_name }} - メニュー・コース{% endblock %}
 
 {% block css %}
 <style>
-    /* =========================================
-       1. 全体背景とコンテナ設定
-       ========================================= */
-    body {
-        /* 背景色を食べログ特有のベージュ系に変更 */
-        background-color: #f3f2ed; 
-        margin: 0;
-        color: #333;
-        font-family: "Hiragino Kaku Gothic ProN", "メイリオ", sans-serif;
-    }
+  /* =========================================
+     1. 全体背景とコンテナ設定
+     ========================================= */
+  body {
+    background-color: #f3f2ed;
+    margin: 0;
+    color: #333;
+    font-family: "Hiragino Kaku Gothic ProN", "メイリオ", sans-serif;
+  }
 
-    .tabelog-wrapper {
-        width: 980px;
-        margin: 0 auto;
-        background-color: #fff;
-        padding-bottom: 50px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.05);
-    }
+  .tabelog-wrapper {
+    width: 980px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding-bottom: 50px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  }
 
-    /* アクセシビリティ用：視覚的に隠す設定 */
-    .visually-hidden {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
-    }
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
 
-    /* =========================================
-       2. 店舗ヘッダー
-       ========================================= */
-    .shop-header {
-        padding: 20px 20px 10px;
-    }
+  /* =========================================
+     2. 店舗ヘッダー
+     ========================================= */
+  .shop-header {
+    padding: 20px 20px 10px;
+  }
 
-    .label-official {
-        background-color: #bfa676;
-        color: #fff;
-        font-size: 10px;
-        padding: 2px 5px;
-        border-radius: 2px;
-        display: inline-block;
-        margin-bottom: 5px;
-    }
+  .label-official {
+    background-color: #bfa676;
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 5px;
+    border-radius: 2px;
+    display: inline-block;
+    margin-bottom: 5px;
+  }
 
-    .shop-name-title {
-        font-size: 26px;
-        font-weight: bold;
-        margin: 5px 0 10px 0;
-    }
+  .shop-name-title {
+    font-size: 26px;
+    font-weight: bold;
+    margin: 5px 0 10px 0;
+  }
 
-    .header-top-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-    }
+  .header-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
 
-    .action-group {
-        display: flex;
-        gap: 8px;
-    }
+  .action-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
 
-    .btn-action-white {
-        background: #fff;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        padding: 6px 14px;
-        font-size: 13px;
-        font-weight: bold;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
-    .btn-action-white span { color: #ff66a0; }
+  .btn-action-white {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .btn-action-white span { color: #ff66a0; }
 
-    .btn-action-green {
-        background-color: #8fb134;
-        color: #fff;
-        border: none;
-        border-radius: 4px;
-        padding: 6px 18px;
-        font-size: 13px;
-        font-weight: bold;
-    }
+  .btn-action-green {
+    background-color: #8fb134;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 18px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+  }
 
-    .rating-container {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin: 5px 0;
-    }
-    .stars { color: #ffa500; font-size: 18px; }
-    .score-value { color: #e60000; font-size: 26px; font-weight: bold; }
-    .review-count { color: #06c; font-size: 13px; text-decoration: none; }
+  .rating-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 5px 0;
+  }
+  .stars { color: #ffa500; font-size: 18px; }
+  .score-value { color: #e60000; font-size: 26px; font-weight: bold; }
+  .review-count { color: #06c; font-size: 13px; text-decoration: none; }
 
-    .meta-info-text {
-        font-size: 13px;
-        color: #666;
-        margin-top: 10px;
-    }
+  .meta-info-text {
+    font-size: 13px;
+    color: #666;
+    margin-top: 10px;
+    line-height: 1.6;
+  }
 
-    /* =========================================
-       3. タブメニュー（メイン ＆ サブ）
-       ========================================= */
-    .main-navigation {
-        display: flex;
-        list-style: none;
-        padding: 0;
-        margin: 20px 0 0;
-        border-bottom: 1px solid #e2e2e2;
-    }
-    .main-navigation li {
-        flex: 1;
-        text-align: center;
-        border: 1px solid #e2e2e2;
-        margin-right: -1px;
-        background: #fdfaf5;
-    }
-    .main-navigation li.active {
-        background-color: #7a6e54;
-        border-color: #7a6e54;
-    }
-    .main-navigation li.active a { color: #fff; }
-    .main-navigation a { display: block; padding: 14px 0; text-decoration: none; color: #333; font-weight: bold; }
+  /* =========================================
+     3. タブメニュー（メイン ＆ サブ）
+     ========================================= */
+  .main-navigation {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 20px 0 0;
+    border-bottom: 1px solid #e2e2e2;
+  }
+  .main-navigation li {
+    flex: 1;
+    text-align: center;
+    border: 1px solid #e2e2e2;
+    margin-right: -1px;
+    background: #fdfaf5;
+  }
+  .main-navigation li.active {
+    background-color: #7a6e54;
+    border-color: #7a6e54;
+  }
+  .main-navigation li.active a { color: #fff; }
+  .main-navigation a {
+    display: block;
+    padding: 14px 0;
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+  }
 
-    /* 【修正】サブナビゲーション：親要素いっぱいに均等配置 */
-    .sub-navigation {
-        display: flex;
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        background-color: #f9f9f9;
-        border-bottom: 2px solid #7a6e54;
-        width: 100%; /* 全幅に広げる */
-    }
-    .sub-navigation li {
-        flex: 1; /* 各要素を均等な幅にする */
-        text-align: center; /* テキストを中央寄せ */
-        padding: 12px 0;
-        font-size: 12px;
-        color: #666;
-        border-right: 1px solid #eee;
-        cursor: pointer;
-    }
-    .sub-navigation li:last-child {
-        border-right: none;
-    }
-    .sub-navigation li.active {
-        background-color: #fff;
-        color: #333;
-        font-weight: bold;
-        border-bottom: 2px solid #ff9900;
-        margin-bottom: -2px; /* 下線をメインの線と重ねる */
-    }
+  .sub-navigation {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background-color: #f9f9f9;
+    border-bottom: 2px solid #7a6e54;
+    width: 100%;
+  }
+  .sub-navigation li {
+    flex: 1;
+    text-align: center;
+    padding: 12px 0;
+    font-size: 12px;
+    color: #666;
+    border-right: 1px solid #eee;
+  }
+  .sub-navigation li:last-child { border-right: none; }
+  .sub-navigation li.active {
+    background-color: #fff;
+    color: #333;
+    font-weight: bold;
+    border-bottom: 2px solid #ff9900;
+    margin-bottom: -2px;
+  }
 
-    /* =========================================
-       4. コンテンツ配置（2カラム）
-       ========================================= */
-    .content-layout {
-        display: flex;
-        padding: 20px;
-    }
-    .left-column { width: 660px; }
-    .right-column { width: 260px; margin-left: 40px; }
+  /* =========================================
+     4. コンテンツ配置（2カラム）
+     ========================================= */
+  .content-layout {
+    display: flex;
+    padding: 20px;
+    gap: 40px;
+  }
+  .left-column { width: 660px; }
+  .right-column { width: 260px; }
 
-    .section-head {
-        border-left: 4px solid #f90;
-        padding-left: 10px;
-        font-size: 18px;
-        margin: 20px 0;
-        font-weight: bold;
-    }
+  .section-head {
+    border-left: 4px solid #f90;
+    padding-left: 10px;
+    font-size: 18px;
+    margin: 20px 0;
+    font-weight: bold;
+  }
 
-    /* 料理リストアイテム */
-    .menu-item-box {
-        display: flex;
-        justify-content: space-between;
-        padding: 20px 0;
-        border-bottom: 1px dotted #ccc;
-    }
-    .menu-item-left { display: flex; gap: 15px; }
-    .menu-photo-frame { width: 120px; height: 120px; background: #f0f0f0; flex-shrink: 0; }
-    
-    /* 【改善】画像属性を補完するスタイル */
-    .menu-photo-frame img { 
-        width: 100%; 
-        height: 100%; 
-        object-fit: cover; 
-    }
-    
-    .menu-name-link { color: #06c; font-weight: bold; font-size: 15px; margin: 0; }
-    .menu-item-price { color: #e60000; font-weight: bold; font-size: 16px; }
+  /* 料理リストアイテム */
+  .menu-item-box {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 20px 0;
+    border-bottom: 1px dotted #ccc;
+  }
+  .menu-item-left { display: flex; gap: 15px; }
 
-    /* 基本情報テーブル */
-    .info-table-tabelog {
-        width: 100%;
-        border-collapse: collapse;
-        border: 1px solid #e2e2e2;
-        font-size: 13px;
-    }
-    .info-table-tabelog th { background: #fafafa; border: 1px solid #e2e2e2; padding: 12px; text-align: left; width: 120px; }
-    .info-table-tabelog td { border: 1px solid #e2e2e2; padding: 12px; }
+  .menu-photo-frame {
+    width: 120px;
+    height: 120px;
+    background: #f0f0f0;
+    flex-shrink: 0;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .menu-photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
 
-    /* サイドバー予約 */
-    .sidebar-reserve-card { border: 1px solid #e2e2e2; padding: 20px; background: #fff; text-align: center; }
-    .btn-reserve-orange {
-        display: block;
-        background-color: #ff6600;
-        color: #fff;
-        padding: 14px;
-        text-decoration: none;
-        font-weight: bold;
-        border-radius: 4px;
-        margin-top: 10px;
+  .menu-name-link {
+    color: #06c;
+    font-weight: bold;
+    font-size: 15px;
+    margin: 0;
+  }
+  .menu-item-price {
+    color: #e60000;
+    font-weight: bold;
+    font-size: 16px;
+    white-space: nowrap;
+  }
 
+  /* 店舗基本情報テーブル */
+  .info-table-tabelog {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #e2e2e2;
+    font-size: 13px;
+  }
+  .info-table-tabelog th {
+    background: #fafafa;
+    border: 1px solid #e2e2e2;
+    padding: 12px;
+    text-align: left;
+    width: 120px;
+  }
+  .info-table-tabelog td {
+    border: 1px solid #e2e2e2;
+    padding: 12px;
+  }
 
-        .modal-overlay {
-        display: none; /* 初期は非表示 */
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(0,0,0,0.6);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-    }
-    .modal-box {
-        background: #fff;
-        width: 450px;
-        padding: 30px;
-        border-radius: 8px;
-        position: relative;
-        text-align: center;
-    }
-    .modal-close {
-        position: absolute;
-        top: 10px; right: 15px;
-        font-size: 24px;
-        cursor: pointer;
-        color: #999;
-    }
-    .modal-title {
-        font-size: 18px;
-        font-weight: bold;
-        margin-bottom: 20px;
-        color: #333;
-    }
-    .reserve-option-btn {
-        display: block;
-        width: 100%;
-        padding: 15px;
-        margin-bottom: 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        background: #f9f9f9;
-        text-decoration: none;
-        color: #333;
-        font-weight: bold;
-        transition: 0.2s;
-    }
-    .reserve-option-btn:hover {
-        background: #fff4e6;
-        border-color: #ff6600;
-    }
-    }
+  /* サイドバー */
+  .sidebar-card {
+    border: 1px solid #e2e2e2;
+    padding: 16px;
+    background: #fff;
+    margin-bottom: 16px;
+  }
+  .btn-reserve-orange {
+    display: block;
+    width: 100%;
+    background-color: #ff6600;
+    color: #fff;
+    padding: 14px;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 4px;
+    margin-top: 10px;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+  }
+  .sidebar-link {
+    color: #06c;
+    text-decoration: none;
+    font-size: 12px;
+  }
+
+  /* 予約モーダル */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+  }
+  .modal-box {
+    background: #fff;
+    width: 450px;
+    padding: 30px;
+    border-radius: 8px;
+    position: relative;
+    text-align: center;
+  }
+  .modal-close {
+    position: absolute;
+    top: 10px; right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+  }
+  .modal-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 18px;
+    color: #333;
+  }
+  .reserve-option-btn {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f9f9f9;
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    transition: 0.2s;
+  }
+  .reserve-option-btn:hover {
+    background: #fff4e6;
+    border-color: #ff6600;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="tabelog-wrapper">
-    <header class="shop-header">
-        <span class="label-official">公式</span>
-        <div class="header-top-row">
-            <!-- 🌟 店名を動的に変更 -->
-            <h1 class="shop-name-title">{{ store.store_name }} {{ store.branch_name }}</h1>
-            <div class="action-group">
-                <button class="btn-action-white"><span>📍</span>行った</button>
-                <button class="btn-action-white"><span>🔖</span>保存</button>
-                <button class="btn-action-green">投稿 ▼</button>
-            </div>
-        </div>
+  <header class="shop-header">
 
-        <div class="rating-container">
-            <span class="stars">★★★☆☆</span>
-            <span class="score-value">3.00</span>
-            <a href="{% url 'reviews:customer_review_list' %}" class="review-count">口コミを表示</a>
-        </div>
-
-        <div class="meta-info-text">
-            ジャンル：{{ store.scene.scene_name }}<br>
-            予算： ☀️ ￥{{ store.budget }}〜
-        </div>
-    </header>
-
-    <!-- 🌟 タブリンクに store.pk を追加 -->
-    <ul class="main-navigation">
-        <li><a href="{% url 'stores:customer_store_info' store.pk %}">トップ</a></li>
-        <li class="active"><a href="{% url 'stores:customer_menu_course' store.pk %}">メニュー・コース</a></li>
-        <li><a href="#">写真</a></li>
-        <li><a href="{% url 'reviews:customer_review_list' %}">口コミ</a></li>
-        <li><a href="{% url 'stores:customer_map' %}">地図</a></li>
-    </ul>
-
-    <ul class="sub-navigation">
-        <li>コース (0)</li>
-        <!-- 🌟 実際のメニュー数を表示 -->
-        <li class="active">料理 ({{ menu_items.count }})</li>
-        <li>ドリンク (0)</li>
-        <li>ランチ (0)</li>
-        <li>写真</li>
-    </ul>
-
-    <div class="content-layout">
-        <main class="left-column">
-            <h2 class="section-head">料理メニュー</h2>
-            
-            <!-- 🌟 データベースから取得したメニューをループで回す -->
-            {% for item in menu_items %}
-            <article class="menu-item-box">
-                <div class="menu-item-left">
-                    <div class="menu-photo-frame">
-                        <!-- 🌟 画像があれば表示（image_pathフィールドを想定） -->
-                        {% if item.image_path %}
-                            <img src="{{ item.image_path }}" alt="{{ item.menu_name }}">
-                        {% endif %}
-                    </div>
-                    <div>
-                        <!-- 🌟 メニュー名 -->
-                        <h3 class="menu-name-link">{{ item.menu_name }}</h3>
-                        <p style="font-size: 12px; color: #666; margin-top: 8px;">美味しい季節の料理をご堪能ください。</p>
-                    </div>
-                </div>
-                <!-- 🌟 価格 -->
-                <div class="menu-item-price">{{ item.price }}円</div>
-            </article>
-            {% empty %}
-                <p>現在、登録されているメニューはありません。</p>
-            {% endfor %}
-
-            <h2 class="section-head">店舗基本情報</h2>
-            <table class="info-table-tabelog">
-                <caption class="visually-hidden">{{ store.store_name }} の詳細情報テーブル</caption>
-                <tbody>
-                    <tr>
-                        <th scope="row">店名</th>
-                        <td>{{ store.store_name }} {{ store.branch_name }}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">住所</th>
-                        <td>{{ store.address }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </main>
-
-        
+    <div class="header-top-row">
+      <h1 class="shop-name-title">{{ store.store_name }} {{ store.branch_name }}</h1>
+      <div class="action-group">
+        <button type="button" class="btn-action-white"><span>📍</span>行った</button>
+        <button type="button" class="btn-action-white"><span>🔖</span>保存</button>
+        <button type="button" class="btn-action-green">投稿 ▼</button>
+      </div>
     </div>
-</div>
-{% endblock %}
 
-<a href = "{% url 'reservations:store_reservation_register' %}">ネット予約登録画面へ移動</a>
-<a href = "{% url 'stores:customer_map' %}">店舗基本情報（顧客）画面へ移動</a>
+    <div class="rating-container">
+      <span class="stars">★★★☆☆</span>
+      <span class="score-value">3.00</span>
+      <a href="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}" class="review-count">口コミを表示</a>
+    </div>
+
+    <div class="meta-info-text">
+      ジャンル：{{ store.scene.scene_name }}<br>
+      予算： ￥{{ store.budget }}〜
+    </div>
+  </header>
+
+  <ul class="main-navigation">
+    <li><a href="{% url 'stores:customer_store_info' store.pk %}">トップ</a></li>
+    <li class="active"><a href="{% url 'stores:customer_menu_course' store.pk %}">メニュー・コース</a></li>
+    <li><a href="#">写真</a></li>
+    <li><a href="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}">口コミ</a></li>
+    <li><a href="{% url 'stores:customer_map' %}">地図</a></li>
+  </ul>
+
+  <ul class="sub-navigation">
+    <li>コース (0)</li>
+    <li class="active">料理 ({{ menu_items.count }})</li>
+    <li>ドリンク (0)</li>
+    <li>ランチ (0)</li>
+    <li>写真</li>
+  </ul>
+
+  <div class="content-layout">
+    <main class="left-column">
+      <h2 class="section-head">料理メニュー</h2>
+
+      {% for item in menu_items %}
+        <article class="menu-item-box">
+          <div class="menu-item-left">
+            <div class="menu-photo-frame">
+              {% if item.image_file %}
+                <img src="{{ item.image_file.url }}" alt="{{ item.menu_name }}">
+              {% else %}
+                <img src="https://via.placeholder.com/120" alt="no image">
+              {% endif %}
+            </div>
+
+            <div>
+              <h3 class="menu-name-link">{{ item.menu_name }}</h3>
+              <p style="font-size: 12px; color: #666; margin-top: 8px;">
+                美味しい季節の料理をご堪能ください。
+              </p>
+            </div>
+          </div>
+
+          <div class="menu-item-price">{{ item.price }}円</div>
+        </article>
+      {% empty %}
+        <p>現在、登録されているメニューはありません。</p>
+      {% endfor %}
+
+      <h2 class="section-head">店舗基本情報</h2>
+      <table class="info-table-tabelog">
+        <caption class="visually-hidden">{{ store.store_name }} の詳細情報テーブル</caption>
+        <tbody>
+          <tr>
+            <th scope="row">店名</th>
+            <td>{{ store.store_name }} {{ store.branch_name }}</td>
+          </tr>
+          <tr>
+            <th scope="row">住所</th>
+            <td>{{ store.address }}</td>
+          </tr>
+          <tr>
+            <th scope="row">電話番号</th>
+            <td>{{ store.phone_number }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
+
+    </aside>
+  </div>
+</div>
+
+
+<script>
+  function openReserveModal() {
+    document.getElementById('reserveModal').style.display = 'flex';
+  }
+  function closeReserveModal() {
+    document.getElementById('reserveModal').style.display = 'none';
+  }
+</script>
+{% endblock %}

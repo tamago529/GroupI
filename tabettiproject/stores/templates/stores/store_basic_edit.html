@@ -11,6 +11,7 @@
   --text:#222;
   --muted:#6b7280;
   --primary:#2563eb;
+  --danger:#dc2626;
 }
 
 .page-wrap{
@@ -61,6 +62,7 @@ h2{
   font-size:12px;
   font-weight:900;
   color:#334155;
+  margin-bottom:4px;
 }
 
 input, select, textarea{
@@ -69,6 +71,7 @@ input, select, textarea{
   border-radius:8px;
   padding:9px 10px;
   font-size:13px;
+  background:#fff;
 }
 
 textarea{ resize:vertical; min-height:80px; }
@@ -100,6 +103,10 @@ textarea{ resize:vertical; min-height:80px; }
   border:1px solid var(--line);
   background:#fff;
   cursor:pointer;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
 }
 
 .btn.primary{
@@ -109,22 +116,110 @@ textarea{ resize:vertical; min-height:80px; }
 }
 
 .errors{
-  color:#dc2626;
+  color:var(--danger);
   font-size:11px;
-  margin-top:4px;
+  margin-top:6px;
+  font-weight:900;
+  white-space:pre-wrap;
+}
+
+/* ---------- 店舗画像 ---------- */
+.image-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:14px;
+}
+@media (max-width:900px){
+  .image-grid{ grid-template-columns: 1fr; }
+}
+
+.image-box{
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:12px;
+  background:#fff;
+}
+
+.thumb{
+  width:100%;
+  height:160px;
+  object-fit:cover;
+  border-radius:10px;
+  border:1px solid #e5e7eb;
+  margin-bottom:10px;
+  background:#f8fafc;
+}
+
+.thumb.placeholder{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#94a3b8;
   font-weight:900;
 }
 
+.badge{
+  display:inline-block;
+  font-size:11px;
+  font-weight:900;
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:#f8fafc;
+  margin-bottom:10px;
+}
+
+.badge.new{
+  border-color:#c7d2fe;
+  background:#eef2ff;
+  color:#3730a3;
+}
+
+.badge.exist{
+  border-color:#bbf7d0;
+  background:#f0fdf4;
+  color:#166534;
+}
+
+/* ---------- メニュー ---------- */
+.menu-row{
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:12px;
+  margin-bottom:12px;
+  background:#fff;
+}
+
+.menu-grid{
+  display:grid;
+  grid-template-columns: 160px 1fr;
+  gap:10px 12px;
+  align-items:center;
+}
+@media (max-width:720px){
+  .menu-grid{ grid-template-columns: 1fr; }
+}
+
+.menu-thumb{
+  width:140px;
+  height:90px;
+  object-fit:cover;
+  border-radius:10px;
+  border:1px solid #e5e7eb;
+  background:#f8fafc;
+  display:block;
+  margin-bottom:8px;
+}
 </style>
 
 <div class="page-wrap">
-
   <h2>店舗基本情報編集</h2>
 
-  <form method="post">
+  <!-- ★ ImageField があるので enctype 必須 -->
+  <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
 
-    <!-- 基本情報 -->
+    <!-- ========== 基本情報 ========== -->
     <section class="card">
       <div class="card-h">基本情報</div>
       <div class="card-b">
@@ -170,7 +265,7 @@ textarea{ resize:vertical; min-height:80px; }
       </div>
     </section>
 
-    <!-- 営業時間 -->
+    <!-- ========== 営業時間 ========== -->
     <section class="card">
       <div class="card-h">営業時間</div>
       <div class="card-b">
@@ -180,62 +275,181 @@ textarea{ resize:vertical; min-height:80px; }
           <div>
             {{ form.business_hours }}
             <div class="hint">例：月〜金 11:00-15:00</div>
+            <div class="errors">{{ form.business_hours.errors }}</div>
           </div>
 
           <div class="label">営業時間①</div>
-          <div class="row">
-            {{ form.open_time_1 }}
-            <span>〜</span>
-            {{ form.close_time_1 }}
+          <div>
+            <div class="row">
+              {{ form.open_time_1 }} <span>〜</span> {{ form.close_time_1 }}
+            </div>
+            <div class="errors">{{ form.open_time_1.errors }}{{ form.close_time_1.errors }}</div>
           </div>
 
           <div class="label">営業時間②</div>
-          <div class="row">
-            {{ form.open_time_2 }}
-            <span>〜</span>
-            {{ form.close_time_2 }}
+          <div>
+            <div class="row">
+              {{ form.open_time_2 }} <span>〜</span> {{ form.close_time_2 }}
+            </div>
+            <div class="errors">{{ form.open_time_2.errors }}{{ form.close_time_2.errors }}</div>
           </div>
 
         </div>
       </div>
     </section>
 
-    <!-- その他 -->
+    <!-- ========== その他（★ここが無いと seats/budget/scene がPOSTに入らず保存できない） ========== -->
     <section class="card">
       <div class="card-h">その他</div>
       <div class="card-b">
         <div class="grid">
 
           <div class="label">席数</div>
-          <div>{{ form.seats }}</div>
+          <div>
+            {{ form.seats }}
+            <div class="errors">{{ form.seats.errors }}</div>
+          </div>
 
           <div class="label">予算</div>
-          <div>{{ form.budget }}</div>
+          <div>
+            {{ form.budget }}
+            <div class="errors">{{ form.budget.errors }}</div>
+          </div>
 
           <div class="label">利用シーン</div>
           <div>
             {{ form.scene }}
             <div class="hint">マスタから選択</div>
+            <div class="errors">{{ form.scene.errors }}</div>
           </div>
 
           <div class="label">予約可</div>
           <div>
             {{ form.reservable }}
             <div class="hint">チェックあり：予約可</div>
+            <div class="errors">{{ form.reservable.errors }}</div>
           </div>
 
         </div>
+      </div>
+    </section>
 
-        <div class="actions">
-          <a class="btn" href="{% url 'stores:store_top' %}">戻る</a>
-          <button class="btn primary" type="submit">保存する</button>
+    <!-- ========== 店舗画像 ========== -->
+    <section class="card">
+      <div class="card-h">店舗画像（追加・変更・削除）</div>
+      <div class="card-b">
+
+        {{ image_formset.management_form }}
+        <div class="errors">{{ image_formset.non_form_errors }}</div>
+
+        <div class="image-grid">
+          {% for f in image_formset %}
+            <div class="image-box">
+
+              {% if f.instance.pk %}
+                <span class="badge exist">登録済み</span>
+              {% else %}
+                <span class="badge new">追加枠</span>
+              {% endif %}
+
+              {% if f.instance.pk and f.instance.image_file %}
+                <img class="thumb" src="{{ f.instance.image_file.url }}" alt="店舗画像">
+              {% else %}
+                <div class="thumb placeholder">プレビュー</div>
+              {% endif %}
+
+              <div class="label">画像</div>
+              {{ f.image_file }}
+              <div class="errors">{{ f.image_file.errors }}</div>
+
+              <div class="label" style="margin-top:10px;">ステータス</div>
+              {{ f.image_status }}
+              <div class="errors">{{ f.image_status.errors }}</div>
+
+              {% if f.instance.pk %}
+                <div style="margin-top:10px;">
+                  <label class="label" style="display:flex;gap:8px;align-items:center;">
+                    {{ f.DELETE }} <span style="color:var(--danger);font-weight:900;">削除</span>
+                  </label>
+                </div>
+              {% endif %}
+
+              {{ f.id }}
+
+              <!-- ★理由が見えるように -->
+              <div class="errors">{{ f.errors }}</div>
+            </div>
+          {% endfor %}
         </div>
 
       </div>
     </section>
 
-  </form>
+    <!-- ========== メニュー ========== -->
+    <section class="card">
+      <div class="card-h">メニュー（追加・変更・削除）</div>
+      <div class="card-b">
 
+        {{ menu_formset.management_form }}
+        <div class="errors">{{ menu_formset.non_form_errors }}</div>
+
+        {% for f in menu_formset %}
+          <div class="menu-row">
+
+            {% if f.instance.pk %}
+              <span class="badge exist">登録済み</span>
+            {% else %}
+              <span class="badge new">追加枠</span>
+            {% endif %}
+
+            <div class="menu-grid">
+
+              <div class="label">メニュー名</div>
+              <div>
+                {{ f.menu_name }}
+                <div class="errors">{{ f.menu_name.errors }}</div>
+              </div>
+
+              <div class="label">価格</div>
+              <div>
+                {{ f.price }}
+                <div class="errors">{{ f.price.errors }}</div>
+              </div>
+
+              <div class="label">画像</div>
+              <div>
+                {% if f.instance.pk and f.instance.image_file %}
+                  <img src="{{ f.instance.image_file.url }}" class="menu-thumb" alt="メニュー画像">
+                {% endif %}
+                {{ f.image_file }}
+                <div class="errors">{{ f.image_file.errors }}</div>
+              </div>
+
+              {% if f.instance.pk %}
+                <div class="label">削除</div>
+                <div>
+                  {{ f.DELETE }}
+                </div>
+              {% endif %}
+
+            </div>
+
+            {{ f.id }}
+
+            <div class="errors">{{ f.errors }}</div>
+          </div>
+        {% endfor %}
+
+      </div>
+    </section>
+
+    <!-- ========== 保存 ========== -->
+    <div class="actions">
+      <a class="btn" href="{% url 'stores:store_top' %}">戻る</a>
+      <button class="btn primary" type="submit">保存する</button>
+    </div>
+
+  </form>
 </div>
 
 {% endblock %}

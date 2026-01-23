@@ -1,6 +1,7 @@
 # stores/forms.py
 from django import forms
-from commons.models import Store
+from commons.models import Store, StoreImage, StoreMenu
+from django.forms import inlineformset_factory
 
 
 class StoreBasicForm(forms.ModelForm):
@@ -31,3 +32,31 @@ class StoreBasicForm(forms.ModelForm):
             "open_time_2": forms.TimeInput(attrs={"type": "time"}),
             "close_time_2": forms.TimeInput(attrs={"type": "time"}),
         }
+
+class StoreImageForm(forms.ModelForm):
+    class Meta:
+        model = StoreImage
+        fields = ["image_file", "image_status"]
+
+
+class StoreMenuForm(forms.ModelForm):
+    class Meta:
+        model = StoreMenu
+        fields = ["menu_name", "price", "image_file"]
+
+
+StoreImageFormSet = inlineformset_factory(
+    Store,
+    StoreImage,
+    form=StoreImageForm,
+    extra=3,
+    can_delete=True,
+)
+
+StoreMenuFormSet = inlineformset_factory(
+    Store,
+    StoreMenu,
+    form=StoreMenuForm,
+    extra=5,
+    can_delete=True,
+)
