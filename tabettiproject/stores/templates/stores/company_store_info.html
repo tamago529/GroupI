@@ -2,82 +2,94 @@
 
 {% block content %}
 <style>
-    .admin-info-wrapper { max-width: 950px; margin: 40px auto; padding: 0 20px; font-family: sans-serif; }
+    .admin-info-wrapper { max-width: 950px; margin: 40px auto; padding: 0 -20px 40px; font-family: sans-serif; }
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
     .admin-title { font-size: 24px; font-weight: bold; color: #333; border-left: 5px solid #ff9600; padding-left: 15px; margin: 0; }
 
-    /* 🌟 画像ギャラリーのスタイル */
+    /* 成功メッセージ */
+    .msg-success { background-color: #e6fffa; color: #2c7a7b; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #b2f5ea; font-weight: bold; }
+
+    /* 画像ギャラリー */
     .image-section { margin-bottom: 30px; }
     .image-gallery { display: flex; gap: 15px; flex-wrap: wrap; padding: 10px 0; }
-    .store-image-item { width: 220px; height: 160px; object-fit: cover; border: 2px solid #333; border-radius: 8px; background-color: #f0f0f0; }
-    .no-image-box { width: 220px; height: 160px; display: flex; align-items: center; justify-content: center; border: 2px dashed #ccc; color: #999; font-size: 14px; border-radius: 8px; }
+    .store-image-item { width: 200px; height: 150px; object-fit: cover; border: 1px solid #ccc; border-radius: 8px; background-color: #f0f0f0; }
 
-    /* 情報表示用テーブル */
+    /* 情報編集テーブル */
     .info-table { width: 100%; border-collapse: collapse; background: #fff; border: 2px solid #333; }
     .info-table th { width: 200px; background-color: #f9f9f9; border: 1px solid #333; padding: 15px; text-align: left; font-size: 14px; color: #666; }
-    .info-table td { border: 1px solid #333; padding: 15px; font-size: 16px; color: #333; font-weight: bold; }
+    .info-table td { border: 1px solid #333; padding: 10px; }
 
-    .status-badge { padding: 4px 10px; border-radius: 4px; font-size: 12px; color: #fff; }
-    .bg-success { background-color: #28a745; }
-    .bg-secondary { background-color: #6c757d; }
+    /* 🌟 テーブル内の入力欄を綺麗に見せるスタイル */
+    .info-table input, .info-table select, .info-table textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+    .info-table input:focus { border-color: #ff9600; outline: none; background-color: #fffaf0; }
 
     .footer-actions { margin-top: 40px; display: flex; justify-content: flex-end; gap: 15px; }
-    .btn-back { padding: 10px 30px; border: 2px solid #333; border-radius: 15px; background-color: #fff; color: #333; text-decoration: none; font-weight: bold; }
+    
+    .btn-base { padding: 12px 40px; border: 2px solid #333; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; text-decoration: none; }
+    .btn-save { background-color: #ff9600; color: #fff; border-color: #ff9600; }
+    .btn-save:hover { background-color: #e68700; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .btn-back { background-color: #fff; color: #333; }
 </style>
 
 <div class="admin-info-wrapper">
     <div class="page-header">
-        <h1 class="admin-title">店舗詳細情報（管理用）</h1>
+        <h1 class="admin-title">店舗詳細情報（管理用・編集モード）</h1>
     </div>
 
-    <!-- 🌟 店舗画像セクション（related_name="images" を使用） -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="msg-success">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- 店舗画像セクション（表示のみ） -->
     <div class="image-section">
-        <h2 style="font-size: 18px; font-weight: bold; margin-bottom: 10px; color: #666;">登録されている画像</h2>
+        <h2 style="font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #666;">登録されている画像</h2>
         <div class="image-gallery">
             {% for img in store.images.all %}
-                <!-- 新しい image_file があれば表示、なければ旧 image_path を表示 -->
                 <img src="{% if img.image_file %}{{ img.image_file.url }}{% else %}{{ img.image_path }}{% endif %}" class="store-image-item" alt="店舗写真">
-            {% empty %}
-                <div class="no-image-box">画像なし</div>
             {% endfor %}
         </div>
     </div>
 
-    <table class="info-table">
-        <tbody>
-            <tr><th>店舗ID</th><td>{{ store.id }}</td></tr>
-            <tr><th>店舗名</th><td>{{ store.store_name }} {{ store.branch_name }}</td></tr>
-            <tr><th>エリア / ジャンル</th><td>{{ store.area.area_name }} / {{ store.genre }}</td></tr>
-            <tr><th>住所</th><td>{{ store.address }}</td></tr>
-            <tr><th>電話番号</th><td>{{ store.phone_number }}</td></tr>
-            <tr><th>メールアドレス</th><td>{{ store.email }}</td></tr>
-            <tr><th>営業時間 (詳細)</th><td>{{ store.business_hours|linebreaksbr }}</td></tr>
-            <tr>
-                <th>営業時間 (システム)</th>
-                <td>
-                    ① {{ store.open_time_1|time:"H:i" }} 〜 {{ store.close_time_1|time:"H:i" }}<br>
-                    {% if store.open_time_2 %}
-                    ② {{ store.open_time_2|time:"H:i" }} 〜 {{ store.close_time_2|time:"H:i" }}
-                    {% endif %}
-                </td>
-            </tr>
-            <tr><th>席数</th><td>{{ store.seats }} 席</td></tr>
-            <tr><th>予算 / シーン</th><td>￥{{ store.budget }} 〜 / {{ store.scene.scene_name }}</td></tr>
-            <tr>
-                <th>ネット予約受付</th>
-                <td>
-                    {% if store.reservable %}
-                        <span class="status-badge bg-success">受付中</span>
-                    {% else %}
-                        <span class="status-badge bg-secondary">停止中</span>
-                    {% endif %}
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <!-- 🌟 保存を可能にするためにformタグで囲む -->
+    <form method="post">
+        {% csrf_token %}
+        <table class="info-table">
+            <tbody>
+                <tr><th>店舗ID (変更不可)</th><td>{{ store.id }}</td></tr>
+                <tr><th>店舗名</th><td>{{ form.store_name }}</td></tr>
+                <tr><th>支店名</th><td>{{ form.branch_name }}</td></tr>
+                <tr><th>エリア</th><td>{{ form.area }}</td></tr>
+                <tr><th>ジャンル (直接入力)</th><td>{{ form.genre }}</td></tr>
+                <tr><th>住所</th><td>{{ form.address }}</td></tr>
+                <tr><th>電話番号</th><td>{{ form.phone_number }}</td></tr>
+                <tr><th>メールアドレス</th><td>{{ form.email }}</td></tr>
+                <tr><th>営業時間 (詳細)</th><td>{{ form.business_hours }}</td></tr>
+                <tr><th>開店時間①</th><td>{{ form.open_time_1 }}</td></tr>
+                <tr><th>閉店時間①</th><td>{{ form.close_time_1 }}</td></tr>
+                <tr><th>席数</th><td>{{ form.seats }}</td></tr>
+                <tr><th>予算</th><td>￥ {{ form.budget }} 〜</td></tr>
+                <tr><th>利用シーン</th><td>{{ form.scene }}</td></tr>
+                <tr>
+                    <th>ネット予約受付</th>
+                    <td>{{ form.reservable }} <span style="font-size:12px; color:#666; margin-left:10px;">(チェックを入れると受付中)</span></td>
+                </tr>
+            </tbody>
+        </table>
 
-    <div class="footer-actions">
-        <a href="{% url 'stores:company_store_management' %}" class="btn-back">店舗一覧に戻る</a>
-    </div>
+        <div class="footer-actions">
+            <a href="{% url 'stores:company_store_management' %}" class="btn-base btn-back">店舗一覧に戻る</a>
+            <!-- 🌟 保存ボタン -->
+            <button type="submit" class="btn-base btn-save">変更を保存する</button>
+        </div>
+    </form>
 </div>
 {% endblock %}

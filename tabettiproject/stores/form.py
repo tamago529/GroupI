@@ -100,3 +100,31 @@ class CustomerReserveForm(forms.Form):
         required=False,
         widget=forms.Textarea(attrs={"rows": 3})
     )
+class CompanyStoreEditForm(forms.ModelForm):
+    """
+    運用管理側が店舗情報を編集するためのフォーム
+    """
+    class Meta:
+        model = Store
+        # 編集を許可する項目をすべて並べる
+        fields = [
+            'store_name', 'branch_name', 'area', 'genre', 'address', 
+            'phone_number', 'email', 'business_hours', 
+            'open_time_1', 'close_time_1', 'seats', 'budget', 'scene', 'reservable'
+        ]
+        
+        # HTMLタグの見た目を調整
+        widgets = {
+            'store_name': forms.TextInput(attrs={'placeholder': '店舗名を入力'}),
+            'branch_name': forms.TextInput(attrs={'placeholder': '支店名を入力'}),
+            'address': forms.TextInput(attrs={'placeholder': '住所を入力'}),
+            'phone_number': forms.TextInput(attrs={'placeholder': '電話番号を入力'}),
+            'email': forms.EmailInput(attrs={'placeholder': 'メールアドレスを入力'}),
+            'business_hours': forms.Textarea(attrs={'rows': 2, 'placeholder': '営業時間（自由記述）'}),
+            'open_time_1': forms.TimeInput(attrs={'type': 'time'}),
+            'close_time_1': forms.TimeInput(attrs={'type': 'time'}),
+            'seats': forms.NumberInput(attrs={'min': 0}),
+            'budget': forms.NumberInput(attrs={'min': 0, 'placeholder': '￥'}),
+            'genre': forms.TextInput(attrs={'placeholder': 'カフェ、焼肉など'}),
+            'reservable': forms.CheckboxInput(attrs={'style': 'width: auto;'}),
+        }

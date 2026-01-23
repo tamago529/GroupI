@@ -13,9 +13,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views import View
-from django.views.generic import DetailView
+from django.views.generic import DetailView, UpdateView
 from django.views.generic.base import TemplateView
-
+from.form import CompanyStoreEditForm
 from commons.models import (
     CustomerAccount,
     Reservation,
@@ -347,10 +347,16 @@ class customer_store_new_register_confirmView(TemplateView):
 # =========================
 # company views
 # =========================
-class company_store_infoView(DetailView):
+class company_store_infoView(UpdateView):
     model = Store
+    form_class = CompanyStoreEditForm
     template_name = "stores/company_store_info.html"
     context_object_name = "store"
+
+    def get_success_url(self):
+        # 保存したら、また同じ画面（自分自身）を表示する
+        messages.success(self.request, "店舗情報を更新しました。")
+        return reverse('stores:company_store_info', kwargs={'pk': self.object.pk})
 
 
 class company_store_managementView(TemplateView):
