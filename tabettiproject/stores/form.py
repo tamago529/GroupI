@@ -1,6 +1,6 @@
 # stores/forms.py
 from django import forms
-from commons.models import Store, StoreImage, StoreMenu
+from commons.models import Store, StoreImage, StoreMenu, StoreOnlineReservation
 from django.forms import inlineformset_factory
 
 
@@ -60,3 +60,43 @@ StoreMenuFormSet = inlineformset_factory(
     extra=5,
     can_delete=True,
 )
+
+COURSE_CHOICES = (
+    ("60", "1時間コース"),
+    ("120", "2時間コース"),
+)
+
+VISIT_COUNT_CHOICES = [(str(i), f"{i}名") for i in range(1, 11)]
+
+
+class CustomerReserveForm(forms.Form):
+    """
+    顧客側 予約フォーム（customer_store_info.html のモーダル送信に対応）
+    """
+    visit_date = forms.DateField(
+        required=True,
+        widget=forms.DateInput(attrs={"type": "date"})
+    )
+    visit_time = forms.TimeField(
+        required=True,
+        widget=forms.TimeInput(attrs={"type": "time"})
+    )
+    visit_count = forms.ChoiceField(
+        required=True,
+        choices=VISIT_COUNT_CHOICES
+    )
+    course_minutes = forms.ChoiceField(
+        required=True,
+        choices=COURSE_CHOICES
+    )
+
+    # 予約者情報（ログイン状況により必須化する）
+    full_name = forms.CharField(required=False, max_length=100)
+    full_name_kana = forms.CharField(required=False, max_length=100)
+    email = forms.EmailField(required=False)
+    phone_number = forms.CharField(required=False, max_length=20)
+
+    note = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={"rows": 3})
+    )

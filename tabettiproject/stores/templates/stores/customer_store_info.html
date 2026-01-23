@@ -4,382 +4,567 @@
 
 {% block css %}
 <style>
-    /* --------------------------------------------------------------------------
-        全体レイアウト：食べログの基本配色とフォント
-       -------------------------------------------------------------------------- */
-    .shop-main {
-        max-width: 1000px;
-        margin: 0 auto;
-        background-color: #fff;
-        border: 1px solid #e6e6e6;
-        color: #333;
-        font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
-    }
+  /* =========================================
+     1. 全体背景とコンテナ設定
+     ========================================= */
+  .shop-main {
+    max-width: 1000px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding-bottom: 50px;
+    border: 1px solid #e6e6e6;
+    color: #333;
+    font-family: "Hiragino Kaku Gothic ProN", "メイリオ", sans-serif;
+  }
 
-    /* 戻るボタンのエリア */
-    .back-nav {
-        padding: 10px 20px;
-        background-color: #f4f4f2;
-        border-bottom: 1px solid #e6e6e6;
-    }
-    .back-link {
-        font-size: 12px;
-        color: #06c;
-        text-decoration: none;
-    }
+  /* 戻るナビ */
+  .back-nav { padding: 10px 20px; background: #f4f4f2; border-bottom: 1px solid #e6e6e6; }
+  .back-link { font-size: 12px; color: #06c; text-decoration: none; }
 
-    /* --------------------------------------------------------------------------
-        店舗ヘッダー：店名、スコア、タブナビ
-       -------------------------------------------------------------------------- */
-    .shop-header {
-        padding: 20px 20px 0 20px;
-    }
+  /* =========================================
+     2. 店舗ヘッダー（ボタン追加対応）
+     ========================================= */
+  .shop-header { padding: 20px 20px 0; }
 
-    /* 公式バッジ */
-    .official-label {
-        background-color: #bfa37d;
-        color: #fff;
-        font-size: 11px;
-        padding: 2px 4px;
-        margin-right: 8px;
-        vertical-align: middle;
-    }
+  /* 🌟 店名とボタンを横並びにするための設定 */
+  .header-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
 
-    .shop-name {
-        display: inline;
-        font-size: 24px;
-        font-weight: bold;
-        vertical-align: middle;
-    }
+  .shop-name { font-size: 26px; font-weight: bold; margin: 0; }
 
-    /* スコア表示 */
-    .score-container {
-        display: flex;
-        align-items: baseline;
-        margin-top: 10px;
-        color: #e44d26;
-    }
-    .score-number {
-        font-size: 24px;
-        font-weight: bold;
-        margin-right: 10px;
-    }
+  /* 🌟 アクションボタンのスタイル（移植） */
+  .action-group {
+    display: flex;
+    gap: 8px;
+    white-space: nowrap;
+  }
 
-    /* タブメニュー（茶色の下線） */
-    .tab-menu {
-        display: flex;
-        list-style: none;
-        padding: 0;
-        margin: 20px 0 0 0;
-        border-bottom: 2px solid #9c8e71;
-    }
-    .tab-menu li {
-        padding: 8px 16px;
-        border: 1px solid #e6e6e6;
-        border-bottom: none;
-        margin-right: 2px;
-        font-size: 14px;
-        font-weight: bold;
-        background: #fff;
-    }
-    .tab-menu li a {
-        text-decoration: none;
-        color: #333;
-    }
-    .tab-menu li.active {
-        background-color: #9c8e71;
-        color: #fff;
-        border-color: #9c8e71;
-    }
+  .btn-action-white {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 7px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #333;
+    text-decoration: none;
+  }
+  .btn-action-white span { color: #e91e63; font-size: 16px; }
 
-    /* --------------------------------------------------------------------------
-        メインコンテンツ（2カラム）
-       -------------------------------------------------------------------------- */
-    .flex-body {
-        display: flex;
-        padding: 20px;
-    }
-    .left-content {
-        width: 650px;
-        margin-right: 20px;
-    }
-    .right-sidebar {
-        width: 300px;
-    }
+  .btn-action-green {
+    background-color: #8fb134;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 7px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
 
-    /* --------------------------------------------------------------------------
-        左側：写真ギャラリー・店舗詳細
-       -------------------------------------------------------------------------- */
-    .photo-preview {
-        display: flex;
-        gap: 5px;
-        margin-bottom: 20px;
-    }
-    .photo-preview img {
-        width: 125px;
-        height: 125px;
-        object-fit: cover;
-        border: 1px solid #eee;
-    }
+  /* スコア部分 */
+  .score-container { display: flex; align-items: center; gap: 12px; margin: 10px 0; }
+  .stars { color: #ffa500; font-size: 18px; }
+  .score-number { color: #e44d26; font-size: 26px; font-weight: bold; }
 
-    .info-title {
-        font-size: 18px;
-        border-left: 4px solid #9c8e71;
-        padding-left: 10px;
-        margin: 30px 0 15px 0;
-    }
+  .meta-info-text {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
 
-    /* 詳細テーブル */
-    .detail-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 13px;
-        border-top: 2px solid #eee;
-    }
-    .detail-table caption {
-        clip: rect(1px, 1px, 1px, 1px);
-        height: 1px;
-        overflow: hidden;
-        position: absolute;
-        width: 1px;
-    }
-    .detail-table th {
-        width: 180px;
-        background-color: #fafaf8;
-        border: 1px solid #e6e6e6;
-        padding: 12px;
-        text-align: left;
-    }
-    .detail-table td {
-        border: 1px solid #e6e6e6;
-        padding: 12px;
-    }
+  /* =========================================
+     3. タブメニュー（メイン ＆ サブ）
+     ========================================= */
+  .main-navigation {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 20px 0 0;
+    border-bottom: 1px solid #e2e2e2;
+  }
+  .main-navigation li {
+    flex: 1;
+    text-align: center;
+    border: 1px solid #e2e2e2;
+    margin-right: -1px;
+    background: #fdfaf5;
+  }
+  .main-navigation li.active {
+    background-color: #7a6e54;
+    border-color: #7a6e54;
+  }
+  .main-navigation li.active a, .main-navigation li.active span { color: #fff; }
+  .main-navigation a, .main-navigation span {
+    display: block;
+    padding: 14px 0;
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    font-size: 14px;
+  }
 
-    /* 編集・報告リンク */
-    .footer-links {
-        margin-top: 20px;
-        padding-top: 15px;
-        border-top: 1px solid #eee;
-        font-size: 12px;
-    }
-    .footer-links a {
-        color: #06c;
-        margin-right: 15px;
-        text-decoration: none;
-    }
+  .sub-navigation {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background-color: #f9f9f9;
+    border-bottom: 2px solid #7a6e54;
+    width: 100%;
+  }
+  .sub-navigation li {
+    flex: 1;
+    text-align: center;
+    padding: 12px 0;
+    font-size: 12px;
+    color: #666;
+    border-right: 1px solid #eee;
+  }
+  .sub-navigation li.active {
+    background-color: #fff;
+    color: #333;
+    font-weight: bold;
+    border-bottom: 2px solid #ff9900;
+    margin-bottom: -2px;
+  }
 
-    /* --------------------------------------------------------------------------
-        右側：サイドバー（予約）
-       -------------------------------------------------------------------------- */
-    .side-box {
-        border: 1px solid #e6e6e6;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-    .btn-reserve {
-        display: block;
-        width: 100%;
-        background-color: #00a0e9;
-        color: #fff;
-        padding: 12px;
-        font-size: 16px;
-        font-weight: bold;
-        border-radius: 4px;
-        text-decoration: none;
-        text-align: center;
-        margin-top: 10px;
-        border: none;
-        cursor: pointer;
-    }
+  /* =========================================
+     4. コンテンツ・カレンダー（既存維持）
+     ========================================= */
+  .flex-body { display: flex; padding: 20px; gap: 40px; }
+  .left-content { width: 650px; }
+  .right-sidebar { width: 300px; }
 
-    /* 🌟 追加：予約モーダルのスタイル */
-    .modal-overlay {
-        display: none;
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(0,0,0,0.6);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-    }
-    .modal-box {
-        background: #fff;
-        width: 400px;
-        padding: 30px;
-        border-radius: 8px;
-        text-align: center;
-        position: relative;
-    }
-    .modal-close {
-        position: absolute;
-        top: 10px; right: 15px;
-        font-size: 24px;
-        cursor: pointer;
-        color: #999;
-    }
-    .reserve-option-btn {
-        display: block;
-        width: 100%;
-        padding: 15px;
-        margin-bottom: 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        background: #f9f9f9;
-        text-decoration: none;
-        color: #333;
-        font-weight: bold;
-    }
-    .reserve-option-btn:hover {
-        background: #e6f7ff;
-        border-color: #00a0e9;
-    }
+  .photo-preview { display: flex; gap: 5px; margin-bottom: 20px; flex-wrap: wrap; }
+  .photo-preview img { width: 120px; height: 120px; object-fit: cover; border: 1px solid #eee; border-radius: 4px; }
+
+  .info-title { border-left: 4px solid #f90; padding-left: 10px; font-size: 18px; margin: 30px 0 15px; font-weight: bold; }
+  .detail-table { width: 100%; border-collapse: collapse; font-size: 13px; border: 1px solid #e2e2e2; }
+  .detail-table th { width: 150px; background: #fafafa; border: 1px solid #e2e2e2; padding: 12px; text-align: left; }
+  .detail-table td { border: 1px solid #e2e2e2; padding: 12px; }
+
+  .side-box { border: 1px solid #e2e2e2; padding: 16px; margin-bottom: 16px; background: #fff; }
+  .btn-primary {
+    display: block; width: 100%; background: #ff6600; color: #fff;
+    padding: 14px; font-size: 16px; font-weight: bold;
+    border-radius: 4px; border: none; cursor: pointer; text-align: center;
+  }
+  .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; font-size: 11px; }
+  .cal-cell { text-align: center; padding: 8px 0; border: 1px solid #eee; border-radius: 4px; cursor: pointer; }
+  .cal-cell.is-open { border-color: #ff8c00; font-weight: bold; color: #ff8c00; }
+  .cal-cell.is-disabled { color: #bbb; cursor: not-allowed; background: #fafafa; }
+  .reserve-panel { margin-top: 12px; border-top: 1px solid #eee; padding-top: 12px; display: none; }
+
+  /* =========================
+     予約モーダル（追加）
+     ========================= */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    z-index: 1000; align-items: center; justify-content: center;
+  }
+  .modal-box { background: #fff; width: 450px; padding: 30px; border-radius: 8px; position: relative; }
+  .modal-title { font-size: 16px; font-weight: bold; margin: 0 0 8px; }
+  .modal-sub { font-size: 12px; color: #666; margin: 0 0 12px; line-height: 1.4; }
+  .modal-form { display: grid; gap: 10px; }
+  .mf-row { display: grid; gap: 6px; }
+  .mf-label { font-size: 12px; font-weight: bold; color: #333; }
+  .mf-input {
+    height: 38px; border: 1px solid #ccc; border-radius: 6px;
+    padding: 0 10px; font-size: 14px;
+  }
+  .mf-actions { display: flex; gap: 10px; margin-top: 10px; }
+  .btn-cancel {
+    flex: 1; height: 42px; border-radius: 6px; border: 1px solid #ccc; background: #fff;
+    font-weight: bold; cursor: pointer;
+  }
+  .btn-submit {
+    flex: 1; height: 42px; border-radius: 6px; border: none; background: #8fb134; color: #fff;
+    font-weight: bold; cursor: pointer;
+  }
+
+  @media (max-width: 720px){
+    .modal-box{width: 92vw;}
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="shop-main">
-    
-    <nav class="back-nav">
-        <!-- 顧客トップ画面へ戻る -->
-        <a href="{% url 'accounts:customer_top' %}" class="back-link">« 検索結果へ戻る</a>
+
+  <header class="shop-header">
+    <div class="header-top-row">
+      <h1 class="shop-name">{{ store.store_name }} {{ store.branch_name }}</h1>
+
+      <div class="action-group">
+        <button class="btn-action-white" type="button"><span>📍</span>行った</button>
+
+        <form method="post" action="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}" style="margin:0;">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="save_store">
+          <input type="hidden" name="store_id" value="{{ store.id }}">
+          <button class="btn-action-white" type="submit">
+            <span class="icon-pink">🔖</span>{% if is_saved %}保存済み{% else %}保存{% endif %}
+          </button>
+        </form>
+
+        <button class="btn-action-green" onclick="location.href='{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}#openPostModal'">投稿 ▼</button>
+      </div>
+    </div>
+
+    <div class="score-container">
+      <span class="stars">★★★☆☆</span>
+      <span class="score-number">3.00</span>
+      <a href="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}"
+         style="color:#06c; font-size:12px; text-decoration:none;">口コミを表示</a>
+    </div>
+
+    <div class="meta-info-text">
+        ジャンル：{{ store.scene.scene_name}}<br>
+        予算： ￥{{ store.budget }} 〜
+    </div>
+
+    <nav>
+      <ul class="main-navigation">
+        <li class="active"><span>トップ</span></li>
+        <li><a href="{% url 'stores:customer_menu_course' store.pk %}">メニュー・コース</a></li>
+        <li><span>写真</span></li>
+        <li><a href="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}">口コミ</a></li>
+        <li><a href="{% url 'stores:customer_map' %}">地図</a></li>
+      </ul>
+      <ul class="sub-navigation">
+        <li class="active">トップ</li>
+        <li>コンセプト</li>
+        <li>座席</li>
+        <li>こだわり</li>
+      </ul>
     </nav>
+  </header>
 
-    <header class="shop-header">
-        <div class="title-area">
-            <!-- 🌟 店名を動的に表示 -->
-            <h1 class="shop-name">{{ store.store_name }} {{ store.branch_name }}</h1>
-        </div>
-        
-        <div class="score-container">
-            <span class="stars">★★★☆☆</span>
-            <span class="score-number">3.00</span>
-            <a href="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}" style="color: #06c; font-size: 12px; text-decoration: none;">
-                口コミを表示
-            </a>
-        </div>
+  <div class="flex-body">
 
-        <nav>
-            <ul class="tab-menu">
-                <li class="active">トップ</li>
-                <!-- 🌟 リンクに store.pk を追加 -->
-                <li><a href="{% url 'stores:customer_menu_course' store.pk %}">メニュー・コース</a></li>
-                <li>写真</li>
-                <li><a href="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}">口コミ</a></li>
-                <li><a href="{% url 'stores:customer_map' %}">地図</a></li>
-            </ul>
-        </nav>
-    </header>
+    <main class="left-content">
+      <section class="photo-preview">
+        {% for img in store_images|slice:":5" %}
+          {% if img.image_file %}
+            <img src="{{ img.image_file.url }}" alt="{{ store.store_name }} 画像">
+          {% endif %}
+        {% endfor %}
+      </section>
 
-    <div class="flex-body">
-        
-        <main class="left-content">
-            <section class="photo-preview">
-                {% if store_images %}
-                    {% for img in store_images %}
-                        {% if img.image_file %}
-                            <img
-                                src="{{ img.image_file.url }}"
-                                alt="{{ store.store_name }} 画像">
-                        {% endif %}
-                    {% endfor %}
+      <section>
+        <h2 class="info-title">店舗情報（詳細）</h2>
+        <table class="detail-table">
+          <tbody>
+            <tr>
+              <th scope="row">店名</th>
+              <td>{{ store.store_name }} {{ store.branch_name }}</td>
+            </tr>
+            <tr>
+              <th scope="row">地図</th>
+              <td>
+                {% if store.address %}
+                <iframe width="100%" height="250" frameborder="0" style="border:0;"
+                    src="https://maps.google.com/maps?q={{ store.address }}&output=embed&z=15"
+                    allowfullscreen>
+                </iframe>
+                <br>
+                <a href="https://www.google.com/maps?q={{ store.address }}" target="_blank"
+                    style="font-size: 12px; color: #06c;">
+                    Googleマップで大きく見る
+                </a>
                 {% else %}
-                    <!-- 画像が1枚もないとき -->
-                    <img src="https://via.placeholder.com/150" alt="no image">
+                <span style="color: #999;">住所情報がありません</span>
                 {% endif %}
-            </section>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">ジャンル</th>
+              <td>{{ store.scene.scene_name }}</td>
+            </tr>
+            <tr>
+              <th scope="row">住所</th>
+              <td>{{ store.address }}</td>
+            </tr>
+            <tr>
+              <th scope="row">営業時間</th>
+              <td>{{ store.business_hours|linebreaksbr }}</td>
+            </tr>
+            <tr>
+              <th scope="row">支払い方法</th>
+              <td>店舗にご確認ください。</td>
+            </tr>
+          </tbody>
+        </table>
 
-            <section>
-                <h2 class="info-title">店舗情報（詳細）</h2>
-                <table class="detail-table">
-                    <caption>{{ store.store_name }}の詳細情報一覧</caption>
-                    <tbody>
-                        <tr>
-                            <th scope="row">店名</th>
-                            <!-- 🌟 店名 -->
-                            <td>{{ store.store_name }} {{ store.branch_name }}</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">地図</th>
-                            <td><a href="{% url 'stores:customer_map' %}" style="color: #06c; text-decoration: none;">地図を見る</a></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">ジャンル</th>
-                            <!-- 🌟 モデルの scene を表示 -->
-                            <td>{{ store.scene.scene_name }}</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">住所</th>
-                            <!-- 🌟 住所 -->
-                            <td>{{ store.address }}</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">営業時間</th>
-                            <td>
-                                <!-- 🌟 営業時間（改行対応） -->
-                                {{ store.business_hours|linebreaksbr }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">支払い方法</th>
-                            <td>店舗にご確認ください。</td>
-                        </tr>
-                    </tbody>
-                </table>
+        <div class="footer-links">
+          <a href="{% url 'stores:store_basic_edit' %}">店舗基本情報編集</a>
+          <a href="{% url 'reviews:customer_report_input' %}">店舗の誤りなどを報告する</a>
+        </div>
+      </section>
+    </main>
 
-                <div class="footer-links">
-                    <a href="{% url 'stores:store_basic_edit' %}">店舗基本情報編集</a>
-                    <a href="{% url 'reviews:customer_report_input' %}">店舗の誤りなどを報告する</a>
-                </div>
-            </section>
-        </main>
-
-        <aside class="right-sidebar">
-            <div class="side-box">
-                <p style="text-align: center; color: #666; font-size: 11px; margin: 0;">お問い合わせ番号</p>
-                <!-- 🌟 電話番号 -->
-                <p style="text-align: center; font-size: 22px; font-weight: bold; margin: 5px 0;">{{ store.phone_number }}</p>
-                
-                <!-- 🌟 リンクの代わりにボタンにして JS を呼び出す -->
-                <button type="button" class="btn-reserve" onclick="openReserveModal()">
-                    空席確認・予約する
-                </button>
-            </div>
-
-            <div class="side-box">
-                <p style="font-size: 14px; font-weight: bold;">メニュー・コース</p>
-                <p style="font-size: 12px; margin-top: 10px;">
-                    <a href="{% url 'stores:customer_menu_course' store.pk %}" style="color: #06c; text-decoration: none;">メニュー・コースを見る</a>
-                </p>
-            </div>
-        </aside>
-    </div>
-</div>
-
-<!-- 🌟 追加：予約用モーダルHTML -->
-<div class="modal-overlay" id="reserveModal" onclick="closeReserveModal()">
-    <div class="modal-box" onclick="event.stopPropagation()">
-        <span class="modal-close" onclick="closeReserveModal()">&times;</span>
-        <h3 style="margin-bottom:20px;">ご予約方法の選択</h3>
-        <p style="margin-bottom:20px; font-size:14px; color:#666;">{{ store.store_name }}</p>
-        
-        <!-- 予約機能へ繋げるためのダミーリンク -->
-        <a href="#" class="reserve-option-btn">日付・時間を選んで予約</a>
-        <a href="#" class="reserve-option-btn">コースを選んで予約</a>
-        
-        <p style="font-size: 12px; color: #999; margin-top: 15px;">
-            ※ネット予約不可の日はお電話にて承ります。
+    <!-- サイドバー -->
+    <aside class="right-sidebar">
+      <div class="side-box">
+        <p style="text-align:center; color:#666; font-size:11px; margin:0;">お問い合わせ番号</p>
+        <p style="text-align:center; font-size:22px; font-weight:bold; margin:5px 0;">
+          {{ store.phone_number }}
         </p>
-    </div>
+
+        <div style="margin-top:12px;">
+          <div class="cal-head">
+            <div class="cal-nav">
+              <button type="button" class="cal-btn" onclick="moveMonth(-1)">◀</button>
+              <button type="button" class="cal-btn" onclick="moveMonth(1)">▶</button>
+            </div>
+            <div class="cal-ym" id="calYmText">{{ cal_year }}年 {{ cal_month }}月</div>
+          </div>
+
+          <div class="cal-grid" id="calGrid">
+            <div class="cal-dow">日</div><div class="cal-dow">月</div><div class="cal-dow">火</div>
+            <div class="cal-dow">水</div><div class="cal-dow">木</div><div class="cal-dow">金</div><div class="cal-dow">土</div>
+          </div>
+
+          <div class="reserve-panel" id="reservePanel">
+            <div style="font-weight:bold; margin-bottom:8px;">選択日：<span id="pickedDateText">-</span></div>
+            <div class="rp-row"><input id="pickedTime" type="time" value="19:00"></div>
+            <div class="rp-row">
+              <select id="pickedCount">
+                <option value="1">1名</option>
+                <option value="2" selected>2名</option>
+                <option value="3">3名</option>
+                <option value="4">4名</option>
+                <option value="5">5名</option>
+                <option value="6">6名</option>
+                <option value="7">7名</option>
+                <option value="8">8名</option>
+                <option value="9">9名</option>
+                <option value="10">10名</option>
+              </select>
+              <select id="pickedCourse">
+                <option value="120" selected>2時間コース</option>
+                <option value="60">1時間コース</option>
+              </select>
+            </div>
+            <button type="button" class="btn-primary" onclick="openReserveModal()">空席確認・予約する</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
 </div>
 
-<!-- 🌟 追加：JavaScript -->
+{# ===== 予約モーダル（追加） ===== #}
+<div class="modal-overlay" id="reserveModal">
+  <div class="modal-box">
+    <h3 class="modal-title">ご予約内容の確認</h3>
+    <p class="modal-sub" id="modalSubText">-</p>
+
+    <form class="modal-form" method="post" action="{% url 'stores:customer_reserve_create' store.id %}">
+      {% csrf_token %}
+
+      <!-- JSで埋める予約情報 -->
+      <input type="hidden" name="visit_date" id="f_visit_date">
+      <input type="hidden" name="visit_time" id="f_visit_time">
+      <input type="hidden" name="visit_count" id="f_visit_count">
+      <input type="hidden" name="course_minutes" id="f_course_minutes">
+
+      <!-- 予約者情報（ログイン時は初期値自動入力） -->
+      <div class="mf-row">
+        <div class="mf-label">氏名</div>
+        <input class="mf-input" type="text" name="full_name" id="f_full_name" placeholder="例）山田 太郎">
+      </div>
+      <div class="mf-row">
+        <div class="mf-label">氏名（かな）</div>
+        <input class="mf-input" type="text" name="full_name_kana" id="f_full_name_kana" placeholder="例）やまだ たろう">
+      </div>
+      <div class="mf-row">
+        <div class="mf-label">メールアドレス</div>
+        <input class="mf-input" type="email" name="email" id="f_email" placeholder="example@example.com">
+      </div>
+      <div class="mf-row">
+        <div class="mf-label">電話番号</div>
+        <input class="mf-input" type="text" name="phone_number" id="f_phone_number" placeholder="09012345678">
+      </div>
+
+      <div class="mf-actions">
+        <button type="button" class="btn-cancel" onclick="closeReserveModal()">戻る</button>
+        <button type="submit" class="btn-submit">この内容で予約する</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
-    function openReserveModal() {
-        document.getElementById('reserveModal').style.display = 'flex';
+  // ---- 初期値（Djangoから） ----
+  const STORE_ID = {{ store.id }};
+  let calYear = {{ cal_year }};
+  let calMonth = {{ cal_month }};
+  let openDays = new Set({{ open_days|safe }}); // ["YYYY-MM-DD", ...]
+
+  // ★ 今日・現在時刻（サーバのローカル時間）
+  const TODAY_STR = "{{ today|date:'Y-m-d' }}";
+  const NOW_HM = "{{ now_hm }}";
+
+  const todayDate = new Date(TODAY_STR + "T00:00:00");
+
+  let pickedDate = null;
+
+  function ymString(y, m){
+    const mm = String(m).padStart(2, "0");
+    return `${y}-${mm}`;
+  }
+  function isoDate(y, m, d){
+    const mm = String(m).padStart(2, "0");
+    const dd = String(d).padStart(2, "0");
+    return `${y}-${mm}-${dd}`;
+  }
+  function parseIsoDate(iso){
+    return new Date(iso + "T00:00:00");
+  }
+
+  // ---- カレンダー描画 ----
+  function renderCalendar(){
+    document.getElementById("calYmText").textContent = `${calYear}年 ${calMonth}月`;
+
+    const grid = document.getElementById("calGrid");
+    while (grid.children.length > 7) grid.removeChild(grid.lastChild);
+
+    const first = new Date(calYear, calMonth - 1, 1);
+    const startDow = first.getDay();
+    const lastDay = new Date(calYear, calMonth, 0).getDate();
+
+    for(let i=0;i<startDow;i++){
+      const cell = document.createElement("div");
+      cell.className = "cal-cell is-empty";
+      grid.appendChild(cell);
     }
-    function closeReserveModal() {
-        document.getElementById('reserveModal').style.display = 'none';
+
+    for(let d=1; d<=lastDay; d++){
+      const cell = document.createElement("div");
+      const iso = isoDate(calYear, calMonth, d);
+      const cellDate = parseIsoDate(iso);
+
+      cell.className = "cal-cell";
+      cell.textContent = d;
+
+      if (cellDate < todayDate){
+        cell.classList.add("is-disabled");
+        cell.style.pointerEvents = "none";
+        grid.appendChild(cell);
+        continue;
+      }
+
+      if(openDays.has(iso)){
+        cell.classList.add("is-open");
+        cell.addEventListener("click", () => pickDate(iso));
+      }else{
+        cell.classList.add("is-disabled");
+        cell.style.pointerEvents = "none";
+      }
+
+      grid.appendChild(cell);
     }
+  }
+
+  function pickDate(iso){
+    if (parseIsoDate(iso) < todayDate) return;
+
+    pickedDate = iso;
+    document.getElementById("reservePanel").style.display = "block";
+    document.getElementById("pickedDateText").textContent = iso;
+
+    const timeEl = document.getElementById("pickedTime");
+    if (pickedDate === TODAY_STR){
+      timeEl.min = NOW_HM;
+      if (timeEl.value && timeEl.value < NOW_HM){
+        timeEl.value = NOW_HM;
+      }
+    } else {
+      timeEl.min = "";
+    }
+  }
+
+  // ---- 月移動 ----
+  async function moveMonth(delta){
+    calMonth += delta;
+    if(calMonth <= 0){ calMonth = 12; calYear -= 1; }
+    if(calMonth >= 13){ calMonth = 1; calYear += 1; }
+
+    pickedDate = null;
+    document.getElementById("reservePanel").style.display = "none";
+
+    const ym = ymString(calYear, calMonth);
+    const url = "{% url 'stores:availability_json' 0 %}".replace("/0/", `/${STORE_ID}/`) + `?ym=${ym}`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    openDays = new Set(data.open_days);
+    calYear = data.year;
+    calMonth = data.month;
+
+    renderCalendar();
+  }
+
+  // ---- モーダル ----
+  function openReserveModal(){
+    if(!pickedDate) return;
+
+    const t = document.getElementById("pickedTime").value || "19:00";
+
+    if (pickedDate === TODAY_STR && t < NOW_HM){
+      alert("現在時刻より前は予約できません。");
+      document.getElementById("pickedTime").value = NOW_HM;
+      return;
+    }
+    if (parseIsoDate(pickedDate) < todayDate){
+      alert("過去の日付は予約できません。");
+      return;
+    }
+
+    const p = document.getElementById("pickedCount").value || "2";
+    const c = document.getElementById("pickedCourse").value || "120";
+
+    document.getElementById("f_visit_date").value = pickedDate;
+    document.getElementById("f_visit_time").value = t;
+    document.getElementById("f_visit_count").value = p;
+    document.getElementById("f_course_minutes").value = c;
+
+    const courseText = `${c}分コース`;
+    document.getElementById("modalSubText").textContent =
+      `${pickedDate} ${t} / ${p}名 / ${courseText}`;
+
+    // ★ログイン顧客なら初期値を流し込む（viewで login_customer を渡している前提）
+    {% if login_customer %}
+      document.getElementById("f_full_name").value = "{{ login_customer.nickname|default:''|escapejs }}";
+      document.getElementById("f_email").value = "{{ login_customer.sub_email|default:login_customer.email|default:''|escapejs }}";
+      document.getElementById("f_phone_number").value = "{{ login_customer.phone_number|default:''|escapejs }}";
+      // かなは無いので空のまま
+    {% endif %}
+
+    document.getElementById("reserveModal").style.display = "flex";
+  }
+
+  function closeReserveModal(){
+    document.getElementById("reserveModal").style.display = "none";
+  }
+
+  // 初期描画
+  renderCalendar();
 </script>
 {% endblock %}

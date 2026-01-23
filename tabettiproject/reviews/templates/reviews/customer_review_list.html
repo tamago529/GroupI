@@ -372,8 +372,7 @@
         <div id="review-container">
             {% for review in reviews %}
             <article class="review-card">
-                  <p style="font-size: 14px; line-height: 1.6; margin-top: 15px;">{{ review.review_text|linebreaksbr }}</p>
-
+                
     <!-- 🌟 通報ボタンを追加 -->
     <div style="text-align: right; margin-top: 10px;">
         <a href="{% url 'reviews:customer_report_input' %}?review_id={{ review.pk }}" class="report-link">

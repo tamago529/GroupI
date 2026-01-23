@@ -1,113 +1,83 @@
-店舗基本情報（企業）画面
-{% extends "company_base.html" %}
+{% extends 'company_base.html' %}
+
 {% block content %}
-<a href = "{% url 'reservations:store_reservation_history' %}">ネット予約履歴画面へ移動</a>
-<a href="{% url 'reviews:customer_reviewer_detail' %}">レビュアー詳細画面</a>
+<style>
+    .admin-info-wrapper { max-width: 950px; margin: 40px auto; padding: 0 20px; font-family: sans-serif; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+    .admin-title { font-size: 24px; font-weight: bold; color: #333; border-left: 5px solid #ff9600; padding-left: 15px; margin: 0; }
 
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <title>店舗ページ（口コミ本文空白）</title>
-  <style>
-    body { margin:0; font-family:"Noto Sans JP", sans-serif; background:#f5f5f5; }
-    .container { max-width:1100px; margin:20px auto; background:#fff; padding:16px; }
-    .header { border-bottom:1px solid #ddd; padding-bottom:12px; }
-    .shop-name { font-size:22px; font-weight:bold; }
-    .rating { color:#e53935; font-weight:bold; margin-top:4px; }
-    .tabs { display:flex; gap:16px; border-bottom:1px solid #eee; margin:16px 0; }
-    .tabs div { padding:8px 0; color:#666; }
-    .tabs .active { color:#000; font-weight:bold; border-bottom:2px solid #ff8a00; }
+    /* 🌟 画像ギャラリーのスタイル */
+    .image-section { margin-bottom: 30px; }
+    .image-gallery { display: flex; gap: 15px; flex-wrap: wrap; padding: 10px 0; }
+    .store-image-item { width: 220px; height: 160px; object-fit: cover; border: 2px solid #333; border-radius: 8px; background-color: #f0f0f0; }
+    .no-image-box { width: 220px; height: 160px; display: flex; align-items: center; justify-content: center; border: 2px dashed #ccc; color: #999; font-size: 14px; border-radius: 8px; }
 
-    .main { display:flex; gap:24px; }
-    .left { flex:2.5; }
-    .right { flex:1; border-left:1px solid #eee; padding-left:16px; }
+    /* 情報表示用テーブル */
+    .info-table { width: 100%; border-collapse: collapse; background: #fff; border: 2px solid #333; }
+    .info-table th { width: 200px; background-color: #f9f9f9; border: 1px solid #333; padding: 15px; text-align: left; font-size: 14px; color: #666; }
+    .info-table td { border: 1px solid #333; padding: 15px; font-size: 16px; color: #333; font-weight: bold; }
 
-    .photo-main { width:100%; height:260px; background:#ddd; margin-bottom:16px; }
-    .photo-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:16px; }
-    .photo-grid div { background:#ccc; height:80px; }
+    .status-badge { padding: 4px 10px; border-radius: 4px; font-size: 12px; color: #fff; }
+    .bg-success { background-color: #28a745; }
+    .bg-secondary { background-color: #6c757d; }
 
-    .section { margin-bottom:24px; }
-    .section h3 { font-size:16px; margin-bottom:8px; }
+    .footer-actions { margin-top: 40px; display: flex; justify-content: flex-end; gap: 15px; }
+    .btn-back { padding: 10px 30px; border: 2px solid #333; border-radius: 15px; background-color: #fff; color: #333; text-decoration: none; font-weight: bold; }
+</style>
 
-    .reserve-box { border:1px solid #ddd; padding:12px; }
-    .reserve-box .phone { font-weight:bold; margin-bottom:8px; }
-    .calendar { background:#fafafa; height:220px; margin:8px 0; }
-    .reserve-btn { width:100%; background:#ff8a00; color:#fff; border:none; padding:10px; font-size:14px; cursor:pointer; }
-
-    .review { border-bottom:1px solid #eee; padding:12px 0; }
-    .review:last-child { border-bottom:none; }
-    .review .user { font-weight:bold; margin-bottom:6px; }
-    .review .text { height:48px; background:#f0f0f0; }
-  </style>
-</head>
-<body>
-
-<div class="container">
-
-  <div class="header">
-    <div class="shop-name">宇都宮餃子 宇都宮駅前店</div>
-    <div class="rating">★★★☆☆ 3.25</div>
-  </div>
-
-  <div class="tabs">
-    <div>トップ</div>
-    <div>座席</div>
-    <div>メニュー・コース</div>
-    <div>写真</div>
-    <div class="active">口コミ</div>
-    <div>クーポン・地図</div>
-  </div>
-
-  <div class="main">
-
-    <div class="left">
-      <div class="photo-main"></div>
-
-      <div class="photo-grid">
-        <div></div><div></div><div></div><div></div><div></div>
-      </div>
-
-      <div class="section">
-        <h3>お店のこだわり</h3>
-        <p>※ ここは店舗紹介文エリア（省略）</p>
-      </div>
-
-      <div class="section">
-        <h3>口コミ</h3>
-
-        <div class="review">
-          <div class="user">ユーザーA</div>
-          <div class="text"></div>
-        </div>
-
-        <div class="review">
-          <div class="user">ユーザーB</div>
-          <div class="text"></div>
-        </div>
-
-        <div class="review">
-          <div class="user">ユーザーC</div>
-          <div class="text"></div>
-        </div>
-
-      </div>
+<div class="admin-info-wrapper">
+    <div class="page-header">
+        <h1 class="admin-title">店舗詳細情報（管理用）</h1>
     </div>
 
-    <div class="right">
-      <div class="reserve-box">
-        <div class="phone">050-5593-2957</div>
-        <div class="calendar"></div>
-        <button class="reserve-btn">予約する</button>
-      </div>
+    <!-- 🌟 店舗画像セクション（related_name="images" を使用） -->
+    <div class="image-section">
+        <h2 style="font-size: 18px; font-weight: bold; margin-bottom: 10px; color: #666;">登録されている画像</h2>
+        <div class="image-gallery">
+            {% for img in store.images.all %}
+                <!-- 新しい image_file があれば表示、なければ旧 image_path を表示 -->
+                <img src="{% if img.image_file %}{{ img.image_file.url }}{% else %}{{ img.image_path }}{% endif %}" class="store-image-item" alt="店舗写真">
+            {% empty %}
+                <div class="no-image-box">画像なし</div>
+            {% endfor %}
+        </div>
     </div>
 
-  </div>
+    <table class="info-table">
+        <tbody>
+            <tr><th>店舗ID</th><td>{{ store.id }}</td></tr>
+            <tr><th>店舗名</th><td>{{ store.store_name }} {{ store.branch_name }}</td></tr>
+            <tr><th>エリア / ジャンル</th><td>{{ store.area.area_name }} / {{ store.genre }}</td></tr>
+            <tr><th>住所</th><td>{{ store.address }}</td></tr>
+            <tr><th>電話番号</th><td>{{ store.phone_number }}</td></tr>
+            <tr><th>メールアドレス</th><td>{{ store.email }}</td></tr>
+            <tr><th>営業時間 (詳細)</th><td>{{ store.business_hours|linebreaksbr }}</td></tr>
+            <tr>
+                <th>営業時間 (システム)</th>
+                <td>
+                    ① {{ store.open_time_1|time:"H:i" }} 〜 {{ store.close_time_1|time:"H:i" }}<br>
+                    {% if store.open_time_2 %}
+                    ② {{ store.open_time_2|time:"H:i" }} 〜 {{ store.close_time_2|time:"H:i" }}
+                    {% endif %}
+                </td>
+            </tr>
+            <tr><th>席数</th><td>{{ store.seats }} 席</td></tr>
+            <tr><th>予算 / シーン</th><td>￥{{ store.budget }} 〜 / {{ store.scene.scene_name }}</td></tr>
+            <tr>
+                <th>ネット予約受付</th>
+                <td>
+                    {% if store.reservable %}
+                        <span class="status-badge bg-success">受付中</span>
+                    {% else %}
+                        <span class="status-badge bg-secondary">停止中</span>
+                    {% endif %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
+    <div class="footer-actions">
+        <a href="{% url 'stores:company_store_management' %}" class="btn-back">店舗一覧に戻る</a>
+    </div>
 </div>
-
-</body>
-</html>
-
-
 {% endblock %}

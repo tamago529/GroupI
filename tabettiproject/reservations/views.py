@@ -18,9 +18,16 @@ from commons.models import CustomerAccount, Reservation, ReservationStatus
 def _get_customer_user(request: HttpRequest) -> CustomerAccount:
     if not request.user.is_authenticated:
         raise Http404("ログインしてください。")
-    if not isinstance(request.user, CustomerAccount):
+
+    # すでにCustomerAccountならそのまま返す
+    if isinstance(request.user, CustomerAccount):
+        return request.user
+
+    # Accountとしてログインしていても、同じpkのCustomerAccountがあれば顧客扱いにする
+    try:
+        return CustomerAccount.objects.get(pk=request.user.pk)
+    except CustomerAccount.DoesNotExist:
         raise Http404("顧客アカウントではありません。")
-    return request.user
 
 
 def _get_customer_reservation(customer: CustomerAccount, reservation_id: int) -> Reservation:
@@ -80,6 +87,8 @@ def _set_reservation_status_cancelled(reservation: Reservation) -> None:
 # ----------------------------
 # 予約履歴
 # ----------------------------
+from django.db.models import Prefetch
+
 class store_reservation_historyView(LoginRequiredMixin, TemplateView):
     template_name = "reservations/store_reservation_history.html"
 
@@ -88,16 +97,14 @@ class store_reservation_historyView(LoginRequiredMixin, TemplateView):
         customer = _get_customer_user(self.request)
 
         reservations = (
-            Reservation.objects.select_related("store", "booking_user", "booking_status")
+            Reservation.objects
+            .select_related("store", "booking_user", "booking_status")
+            .prefetch_related("store__images")  # 追加
             .filter(booking_user__customer_account=customer)
             .order_by("-visit_date", "-visit_time", "-id")
         )
 
-        ctx.update(
-            {
-                "reservations": reservations,
-            }
-        )
+        ctx["reservations"] = reservations
         return ctx
 
 

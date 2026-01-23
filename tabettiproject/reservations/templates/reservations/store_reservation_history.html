@@ -1,265 +1,112 @@
-{% extends "scustomer_base.html" %}
+{% extends "customer_base.html" %}
 {% block content %}
 
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>予約履歴</title>
-  <style>
-    :root{
-      --bg:#f6f6f6;
-      --card:#fff;
-      --line:#e6e0d7;
-      --text:#333;
-      --sub:#666;
-      --link:#1a73e8;
-      --brand:#d86b00;
-      --head:#f2efe9;
-      --soft:#faf8f4;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:"Hiragino Kaku Gothic ProN","Meiryo",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-      background:var(--bg);
-      color:var(--text);
-    }
+<style>
+  /* ★ 色合い・デザインは一切変更していません（そのまま） */
+  :root{
+    --bg:#f6f6f6;
+    --card:#fff;
+    --line:#e6e0d7;
+    --text:#333;
+    --sub:#666;
+    --link:#1a73e8;
+    --brand:#d86b00;
+    --head:#f2efe9;
+    --soft:#faf8f4;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:"Hiragino Kaku Gothic ProN","Meiryo",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:14px 16px 40px;}
+  .breadcrumb{font-size:12px;color:#777;margin:10px 0 12px;}
+  .breadcrumb a{color:#777;text-decoration:none;}
+  .page-title{background:var(--card);border:1px solid var(--line);padding:14px 16px;font-size:18px;font-weight:900;}
+  .info-link{margin:10px 0 0;text-align:right;font-size:12px;color:var(--sub);}
+  .info-link a{color:var(--link);text-decoration:none;font-weight:800;}
+  .section{margin-top:14px;background:var(--card);border:1px solid var(--line);}
+  .section-head{background:var(--head);border-bottom:1px solid var(--line);padding:10px 14px;font-weight:900;font-size:13px;}
+  .section-body{padding:16px 14px;}
+  .empty-box{background:var(--soft);border:1px solid var(--line);padding:14px;text-align:center;color:var(--sub);font-size:12px;}
+  .list{display:flex;flex-direction:column;gap:10px;}
+  .item{border:1px solid var(--line);border-radius:6px;background:#fff;padding:12px;display:flex;gap:12px;}
+  .thumb{width:70px;height:70px;border-radius:6px;background:#ddd;flex:0 0 70px;}
+  .main{flex:1;min-width:0;}
+  .title{font-weight:900;font-size:14px;margin-bottom:6px;color:#0b63d1;}
+  .meta{font-size:12px;color:var(--sub);line-height:1.7;}
+  .badges{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;}
+  .badge{border:1px solid #cfc8bd;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:900;}
+  .actions{margin-left:auto;display:flex;flex-direction:column;gap:8px;}
+  .btn{height:36px;min-width:170px;border-radius:4px;border:1px solid #cfc8bd;background:#fff;font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center;text-decoration:none;color:#333;}
+  .btn-primary{border:none;background:var(--brand);color:#fff;}
+</style>
 
-    .wrap{
-      max-width:980px;
-      margin:0 auto;
-      padding:14px 16px 40px;
-    }
+<div class="wrap">
 
-    .breadcrumb{
-      font-size:12px;
-      color:#777;
-      margin:10px 0 12px;
-    }
-    .breadcrumb a{
-      color:#777;
-      text-decoration:none;
-    }
-    .breadcrumb a:hover{text-decoration:underline}
+  <div class="page-title">予約履歴</div>
 
-    .page-title{
-      background:var(--card);
-      border:1px solid var(--line);
-      padding:14px 16px;
-      font-size:18px;
-      font-weight:900;
-      position:relative;
-    }
-    .page-title:after{
-      content:"";
-      position:absolute;
-      left:16px;
-      right:16px;
-      bottom:-1px;
-      height:1px;
-      background:var(--line);
-    }
+  <div class="info-link">
+    <span>予約中・来店済みなどのステータスについては</span>
+    <a href="#">こちら</a>
+    <span>をご確認ください。</span>
+  </div>
 
-    .info-link{
-      margin:10px 0 0;
-      text-align:right;
-      font-size:12px;
-      color:var(--sub);
-    }
-    .info-link a{
-      color:var(--link);
-      text-decoration:none;
-      font-weight:800;
-    }
-    .info-link a:hover{text-decoration:underline}
+  <div class="section">
+    
+    <div class="section-body">
 
-    .section{
-      margin-top:12px;
-      background:var(--card);
-      border:1px solid var(--line);
-    }
-    .section-head{
-      background:var(--head);
-      border-bottom:1px solid var(--line);
-      padding:10px 14px;
-      font-weight:900;
-      font-size:13px;
-    }
-    .section-body{
-      padding:16px 14px;
-      background:#fff;
-    }
+      {% if reservations %}
+        <div class="list">
+          {% for r in reservations %}
+            <div class="item">
 
-    .empty-box{
-      background:var(--soft);
-      border:1px solid var(--line);
-      padding:14px;
-      text-align:center;
-      color:var(--sub);
-      font-size:12px;
-    }
+              <!-- サムネ（未設定時はグレー） -->
+              {% with img=r.store.images.all.0 %}
+                {% if img and img.image_file %}
+                  <img class="thumb" src="{{ img.image_file.url }}" alt="{{ r.store.store_name }}">
+                {% else %}
+                  <div class="thumb"></div>
+                {% endif %}
+              {% endwith %}
 
-    /* list */
-    .list{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-    .item{
-      border:1px solid var(--line);
-      border-radius:6px;
-      background:#fff;
-      padding:12px;
-      display:flex;
-      gap:12px;
-      align-items:flex-start;
-    }
-    .thumb{
-      width:70px;
-      height:70px;
-      border-radius:6px;
-      background:#ddd;
-      flex:0 0 70px;
-    }
-    .main{
-      flex:1;
-      min-width:0;
-    }
-    .title{
-      font-weight:900;
-      font-size:14px;
-      margin:0 0 6px;
-      color:#0b63d1;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .meta{
-      font-size:12px;
-      color:var(--sub);
-      line-height:1.7;
-    }
-    .badges{
-      margin-top:8px;
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      border:1px solid #cfc8bd;
-      background:#fff;
-      padding:4px 8px;
-      border-radius:999px;
-      font-size:11px;
-      font-weight:900;
-      color:#333;
-    }
-    .actions{
-      margin-left:auto;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      flex:0 0 auto;
-    }
-    .btn{
-      height:36px;
-      min-width:170px;
-      border-radius:4px;
-      border:1px solid #cfc8bd;
-      background:#fff;
-      font-weight:900;
-      cursor:pointer;
-      font-size:12px;
-      color:#333;
-      text-decoration:none;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      white-space:nowrap;
-    }
-    .btn:hover{background:#f3f3f3}
-    .btn-primary{
-      border:none;
-      background:var(--brand);
-      color:#fff;
-    }
-    .btn-primary:hover{filter:brightness(.95)}
+              <div class="main">
+                <div class="title">{{ r.store.store_name }}</div>
 
-    @media (max-width: 720px){
-      .item{flex-direction:column}
-      .actions{margin-left:0; width:100%}
-      .btn{min-width:100%}
-    }
-  </style>
-</head>
-
-<body>
-  <div class="wrap">
-    <div class="breadcrumb">
-      <a href="#">タベッチ</a> ＞ <a href="#">予約確認</a> ＞ 予約履歴
-    </div>
-
-    <div class="page-title">予約履歴</div>
-
-    <div class="info-link">
-      <span>予約中・来店済みなどのステータスについては</span>
-      <a href="#">こちら</a>
-      <span>をご確認ください。</span>
-    </div>
-
-    <div class="section" style="margin-top:14px;">
-      <div class="section-head">即予約</div>
-
-      <div class="section-body">
-
-        {% if reservations %}
-          <div class="list">
-            {% for r in reservations %}
-              <div class="item">
-                <div class="thumb"></div>
-
-                <div class="main">
-                  <div class="title">{{ r.store.store_name }}</div>
-
-                  <div class="meta">
-                    来店日：{{ r.visit_date|date:"Y年n月j日(D)" }}<br>
-                    来店時刻：{{ r.visit_time|time:"H:i" }} ／ 人数：{{ r.visit_count }}名<br>
-                    コース：{{ r.course }}
-                  </div>
-
-                  <div class="badges">
-                    <span class="badge">ステータス：{{ r.booking_status }}</span>
-                    <span class="badge">予約ID：{{ r.id }}</span>
-                  </div>
+                <div class="meta">
+                  来店日：{{ r.visit_date|date:"Y年n月j日(D)" }}<br>
+                  来店時刻：{{ r.visit_time|time:"H:i" }} ／ 人数：{{ r.visit_count }}名<br>
+                  コース：{{ r.course }}
                 </div>
 
-                <div class="actions">
-                  <a class="btn btn-primary" href="{% url 'reservations:store_reservation_confirm' r.id %}">
-                    予約内容を確認
-                  </a>
-                  <a class="btn" href="{% url 'reservations:store_page' r.store_id %}">
-                    店舗ページ
-                  </a>
+                <div class="badges">
+                  <span class="badge">ステータス：{{ r.booking_status.status }}</span>
+                  <span class="badge">予約ID：{{ r.id }}</span>
                 </div>
               </div>
-            {% endfor %}
-          </div>
-        {% else %}
-          <div class="empty-box">
-            現在、ご予約中のレストランはありません。
-          </div>
-        {% endif %}
 
-      </div>
+              <div class="actions">
+                <a class="btn btn-primary" href="{% url 'reservations:store_reservation_confirm' r.id %}">
+                  予約内容を確認
+                </a>
+                <a class="btn" href="{% url 'stores:customer_store_info' r.store_id %}">
+                  店舗ページ
+                </a>
+              </div>
+
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-box">
+          現在、ご予約中のレストランはありません。
+        </div>
+      {% endif %}
+
     </div>
-
   </div>
-</body>
-</html>
+</div>
 
 {% endblock %}

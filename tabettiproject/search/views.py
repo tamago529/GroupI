@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.core.paginator import Paginator
 from commons.models import Store, StoreImage
 from django.conf import settings
+from django.db.models import Q, F
+from datetime import datetime
 
 
 def genre_list(request):
@@ -98,7 +100,33 @@ def customer_search_listView(request):
         store_qs = store_qs.filter(area__area_name__icontains=area_name)
 
     if keyword:
-        store_qs = store_qs.filter(store_name__icontains=keyword)
+        store_qs = store_qs.filter(
+             Q(store_name__icontains=keyword) |
+             Q(genre__icontains=keyword) |
+             Q(address__icontains=keyword)
+        )
+
+    # 時間検索
+    search_time_str = request.GET.get("time")
+    if search_time_str:
+        try:
+             search_time = datetime.strptime(search_time_str, "%H:%M").time()
+             
+             # 営業時間枠1の判定 (日跨ぎ対応)
+             # パターンA: close >= open (通常) -> open <= search <= close
+             # パターンB: close < open (日跨ぎ) -> search >= open OR search <= close
+             q_time1_normal = Q(open_time_1__lte=F('close_time_1')) & Q(open_time_1__lte=search_time) & Q(close_time_1__gte=search_time)
+             q_time1_cross  = Q(open_time_1__gt=F('close_time_1')) & (Q(open_time_1__lte=search_time) | Q(close_time_1__gte=search_time))
+             
+             # 営業時間枠2の判定
+             q_time2_normal = Q(open_time_2__lte=F('close_time_2')) & Q(open_time_2__lte=search_time) & Q(close_time_2__gte=search_time)
+             q_time2_cross  = Q(open_time_2__gt=F('close_time_2')) & (Q(open_time_2__lte=search_time) | Q(close_time_2__gte=search_time))
+             
+             store_qs = store_qs.filter(
+                 q_time1_normal | q_time1_cross | q_time2_normal | q_time2_cross
+             )
+        except ValueError:
+             pass # 時間形式不正時は無視
 
     paginator = Paginator(store_qs, 5)
     page_number = request.GET.get("page")
