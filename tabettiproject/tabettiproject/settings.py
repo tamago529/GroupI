@@ -149,4 +149,3 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # セッションCookie名の設定
 SESSION_COOKIE_NAME = "site_sessionid"
 ADMIN_SESSION_COOKIE_NAME = "admin_sessionid"
-LOGIN_URL = 'accounts:customer_login'
