@@ -1,26 +1,29 @@
+# C:\GroupI\tabettiproject\stores\views.py
 from __future__ import annotations
 
 import calendar
 import urllib.parse
-from datetime import date, datetime, timedelta
+from dataclasses import dataclass
+from datetime import date, datetime, time, timedelta
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db import models
-from django.db.models import Q
-from django.http import JsonResponse
+from django.db.models import Q, Avg, Count
+from django.http import HttpRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views import View
-from django.views.generic import DetailView, UpdateView
+from django.views.generic import UpdateView
 from django.views.generic.base import TemplateView
-from.form import CompanyStoreEditForm
+
 from commons.models import (
     CustomerAccount,
     Reservation,
     Reservator,
     ReservationStatus,
+    Review,
     Store,
     StoreAccount,
     StoreImage,
@@ -28,12 +31,142 @@ from commons.models import (
     StoreOnlineReservation,
 )
 
-from .form import StoreBasicForm, StoreImageFormSet, StoreMenuFormSet, CustomerReserveForm
+from .form import (
+    CompanyStoreEditForm,
+    CustomerReserveForm,
+    StoreBasicForm,
+    StoreImageFormSet,
+    StoreMenuFormSet,
+)
+
+# ============================================================
+# 営業時間ヘルパ（Store.open/close 1・2枠）
+# ============================================================
+@dataclass(frozen=True)
+class TimeInterval:
+    start: time
+    end: time
 
 
-# =========================
+def _time_to_minutes(t: time) -> int:
+    return t.hour * 60 + t.minute
+
+
+def _minutes_to_time(m: int) -> time:
+    m = max(0, min(24 * 60 - 1, m))
+    return time(m // 60, m % 60)
+
+
+def _get_store_intervals(store: Store) -> list[TimeInterval]:
+    """
+    Store の open/close から営業時間区間を返す（最大2区間）
+    - start>=end は無効として捨てる
+    """
+    intervals: list[TimeInterval] = []
+
+    def push(a: time | None, b: time | None) -> None:
+        if isinstance(a, time) and isinstance(b, time) and _time_to_minutes(b) > _time_to_minutes(a):
+            intervals.append(TimeInterval(a, b))
+
+    push(getattr(store, "open_time_1", None), getattr(store, "close_time_1", None))
+    push(getattr(store, "open_time_2", None), getattr(store, "close_time_2", None))
+
+    intervals.sort(key=lambda x: _time_to_minutes(x.start))
+    return intervals
+
+
+def _build_closed_ranges(intervals: list[TimeInterval]) -> list[TimeInterval]:
+    """
+    営業時間レンジ内の「中休み」区間を返す
+    例: (11-15),(17-22) -> (15-17)
+    """
+    if len(intervals) < 2:
+        return []
+    closed: list[TimeInterval] = []
+    for i in range(len(intervals) - 1):
+        a_end = intervals[i].end
+        b_start = intervals[i + 1].start
+        if _time_to_minutes(b_start) > _time_to_minutes(a_end):
+            closed.append(TimeInterval(a_end, b_start))
+    return closed
+
+
+def _is_inside_one_interval(start: time, end: time, intervals: list[TimeInterval]) -> bool:
+    """
+    予約の開始〜終了が「どれか1つの営業時間区間」に完全に収まるか
+    中休みをまたぐのはNG
+    """
+    s = _time_to_minutes(start)
+    e = _time_to_minutes(end)
+
+    # 日跨ぎ（end <= start）はNG
+    if e <= s:
+        return False
+
+    for itv in intervals:
+        a = _time_to_minutes(itv.start)
+        b = _time_to_minutes(itv.end)
+        if a <= s and e <= b:
+            return True
+    return False
+
+
+def _format_intervals_for_js(intervals: list[TimeInterval]) -> list[dict[str, str]]:
+    return [{"start": itv.start.strftime("%H:%M"), "end": itv.end.strftime("%H:%M")} for itv in intervals]
+
+
+def _course_name(course_minutes: int) -> str:
+    course_map = {
+        30: "30分コース",
+        60: "1時間コース",
+        90: "1時間30分コース",
+        120: "2時間コース",
+        150: "2時間30分コース",
+    }
+    return course_map.get(course_minutes, f"{course_minutes}分コース")
+
+
+def _validate_customer_reservation_time(
+    *,
+    store: Store,
+    visit_date: date,
+    visit_time: time,
+    course_minutes: int,
+) -> tuple[bool, str, time | None]:
+    """
+    顧客予約の「営業時間」検証：
+    - 店舗の営業時間が未設定ならNG
+    - コース終了が営業時間超え / 中休み跨ぎ はNG
+    - 日跨ぎはNG
+
+    戻り値: (ok, reason, end_time)
+    """
+    intervals = _get_store_intervals(store)
+    if not intervals:
+        return False, "営業時間が未設定のため予約できません。店舗へお問い合わせください。", None
+
+    if course_minutes not in (30, 60, 90, 120, 150):
+        return False, "コースが不正です。", None
+
+    start_dt = datetime.combine(visit_date, visit_time)
+    end_dt = start_dt + timedelta(minutes=course_minutes)
+
+    # 日跨ぎNG
+    if end_dt.date() != visit_date:
+        return False, "営業時間外の予約はできません（終了時刻が翌日になります）。", None
+
+    end_time = end_dt.time()
+
+    # 1区間内に収まる（中休み跨ぎもNG）
+    if not _is_inside_one_interval(visit_time, end_time, intervals):
+        return False, "営業時間外、または中休みをまたぐ時間帯は予約できません。", None
+
+    return True, "", end_time
+
+
+# ============================================================
 # helper
-# =========================
+# ============================================================
 def get_store_from_user(user) -> Store | None:
     if not user or not user.is_authenticated:
         return None
@@ -67,6 +200,81 @@ def _get_customer_from_user(user) -> CustomerAccount | None:
     return CustomerAccount.objects.filter(pk=user.pk).first()
 
 
+# ============================================================
+# ★星評価 共通（Storeにavg_rating等が無い前提）
+# ============================================================
+def build_star_states(avg_rating: float) -> list[str]:
+    """
+    星のルール（確定）:
+    - 2.0 -> ★★☆☆☆
+    - 2.5〜2.9 -> ★★☆½☆
+    - 2.9以上 -> 繰り上げ（★★★☆☆）
+    """
+    rating = float(avg_rating or 0.0)
+    full = int(rating)
+    frac = rating - full
+
+    if frac >= 0.9:
+        full += 1
+        half = 0
+    elif frac >= 0.5:
+        half = 1
+    else:
+        half = 0
+
+    if full >= 5:
+        full = 5
+        half = 0
+
+    empty = 5 - full - half
+    return (["full"] * full) + (["half"] * half) + (["empty"] * empty)
+
+
+def _get_store_rating_context(store: Store) -> dict[str, object]:
+    """
+    Reviewから毎回集計してテンプレ用の値を返す
+    """
+    agg = Review.objects.filter(store=store).aggregate(
+        avg=Avg("score"),
+        cnt=Count("id"),
+    )
+    avg_rating = float(agg["avg"] or 0.0)
+    review_count = int(agg["cnt"] or 0)
+    return {
+        "avg_rating": avg_rating,
+        "review_count": review_count,
+        "star_states": build_star_states(avg_rating),
+    }
+
+
+def _get_is_saved_for_customer(*, customer: CustomerAccount | None, store: Store) -> bool:
+    """
+    共通ヘッダー用：保存済み判定（ログイン顧客のみ）
+    """
+    if not customer:
+        return False
+    saved_status = ReservationStatus.objects.filter(status="保存済み").first()
+    if not saved_status:
+        return False
+    reservator = Reservator.objects.filter(customer_account=customer).first()
+    if not reservator:
+        return False
+    return Reservation.objects.filter(
+        booking_user=reservator,
+        store=store,
+        booking_status=saved_status,
+    ).exists()
+
+
+def _get_next_ym(year: int, month: int) -> str:
+    """
+    来月リンク用 YYYY-MM
+    """
+    if month == 12:
+        return f"{year + 1}-01"
+    return f"{year}-{month + 1:02d}"
+
+
 # =========================
 # customer views
 # =========================
@@ -94,6 +302,24 @@ class customer_menu_courseView(TemplateView):
             .select_related("store")
             .order_by("id")
         )
+
+        # ★営業時間情報（UIで使う）
+        intervals = _get_store_intervals(store)
+        closed_ranges = _build_closed_ranges(intervals)
+        context["store_intervals_json"] = _format_intervals_for_js(intervals)
+        context["closed_ranges_json"] = _format_intervals_for_js(closed_ranges)
+        context["has_business_hours"] = bool(intervals)
+
+        # ★ネット予約対応（テンプレが has_account を見てるので渡す）
+        context["has_account"] = StoreAccount.objects.filter(store=store).exists()
+
+        # ★星評価（共通ヘッダー用）
+        context.update(_get_store_rating_context(store))
+
+        # ★保存判定（共通ヘッダー用）
+        customer = _get_customer_from_user(self.request.user)
+        context["is_saved"] = _get_is_saved_for_customer(customer=customer, store=store)
+
         return context
 
 
@@ -116,6 +342,9 @@ class customer_store_infoView(TemplateView):
         # 店舗画像
         context["store_images"] = StoreImage.objects.filter(store=store).order_by("id")
 
+        # ★ネット予約対応（テンプレが has_account を見てるので渡す）
+        context["has_account"] = StoreAccount.objects.filter(store=store).exists()
+
         # 表示月（?ym=YYYY-MM）
         ym = self.request.GET.get("ym")
         today = timezone.localdate()
@@ -131,6 +360,9 @@ class customer_store_infoView(TemplateView):
 
         context["cal_year"] = year
         context["cal_month"] = month
+
+        # ★「来月を見る→」ボタン用
+        context["next_ym"] = _get_next_ym(year, month)
 
         start = date(year, month, 1)
         last_day = calendar.monthrange(year, month)[1]
@@ -148,11 +380,25 @@ class customer_store_infoView(TemplateView):
         context["open_days"] = [d.isoformat() for d in sorted(open_days)]
 
         # ログイン顧客（初期値用）
-        context["login_customer"] = _get_customer_from_user(self.request.user)
+        customer = _get_customer_from_user(self.request.user)
+        context["login_customer"] = customer
+
+        # ★保存判定（共通ヘッダー用）
+        context["is_saved"] = _get_is_saved_for_customer(customer=customer, store=store)
 
         # JS側で使う
         context["today"] = today
         context["now_hm"] = timezone.localtime().strftime("%H:%M")
+
+        # ★営業時間情報（UIが「営業時間外を選べない」ために使う）
+        intervals = _get_store_intervals(store)
+        closed_ranges = _build_closed_ranges(intervals)
+        context["store_intervals_json"] = _format_intervals_for_js(intervals)
+        context["closed_ranges_json"] = _format_intervals_for_js(closed_ranges)
+        context["has_business_hours"] = bool(intervals)
+
+        # ★星評価（共通ヘッダー用）
+        context.update(_get_store_rating_context(store))
 
         return context
 
@@ -197,6 +443,87 @@ class StoreAvailabilityJsonView(View):
 
 
 # -----------------------------
+# ★ 予約：選択可能な時間候補 JSON（任意でUIで使える）
+# -----------------------------
+class StoreTimeSlotsJsonView(View):
+    """
+    GET /stores/time-slots/<store_id>/?date=YYYY-MM-DD&course_minutes=60
+    - 営業時間外 / 中休み跨ぎ / コース終了はみ出し を除外した開始時刻候補を返す
+    """
+    def get(self, request: HttpRequest, store_id: int):
+        store = get_object_or_404(Store, pk=store_id)
+
+        date_s = (request.GET.get("date") or "").strip()
+        course_s = (request.GET.get("course_minutes") or "").strip()
+
+        try:
+            target_date = date.fromisoformat(date_s)
+        except Exception:
+            return JsonResponse({"ok": False, "error": "date が不正です。"}, status=400)
+
+        try:
+            course_minutes = int(course_s)
+        except Exception:
+            return JsonResponse({"ok": False, "error": "course_minutes が不正です。"}, status=400)
+
+        if course_minutes not in (30, 60, 90, 120, 150):
+            return JsonResponse({"ok": False, "error": "course_minutes が不正です。"}, status=400)
+
+        intervals = _get_store_intervals(store)
+        if not intervals:
+            return JsonResponse({"ok": True, "slots": [], "reason": "営業時間未設定"})
+
+        # 受付日チェック
+        setting = StoreOnlineReservation.objects.filter(store=store, date=target_date).first()
+        if not setting or not setting.booking_status:
+            return JsonResponse({"ok": True, "slots": [], "reason": "この日は受付していません"})
+
+        step = 15  # 15分刻み
+
+        today = timezone.localdate()
+        now_t = timezone.localtime().time()
+
+        slots: list[str] = []
+        for itv in intervals:
+            start_m = _time_to_minutes(itv.start)
+            end_m = _time_to_minutes(itv.end)
+
+            last_start_m = end_m - course_minutes
+            if last_start_m < start_m:
+                continue
+
+            m = start_m
+            while m <= last_start_m:
+                t = _minutes_to_time(m)
+
+                if target_date == today and t < now_t:
+                    m += step
+                    continue
+
+                ok, _, _end_t = _validate_customer_reservation_time(
+                    store=store,
+                    visit_date=target_date,
+                    visit_time=t,
+                    course_minutes=course_minutes,
+                )
+                if ok:
+                    slots.append(t.strftime("%H:%M"))
+
+                m += step
+
+        return JsonResponse(
+            {
+                "ok": True,
+                "date": target_date.isoformat(),
+                "course_minutes": course_minutes,
+                "slots": slots,
+                "intervals": _format_intervals_for_js(intervals),
+                "closed_ranges": _format_intervals_for_js(_build_closed_ranges(intervals)),
+            }
+        )
+
+
+# -----------------------------
 # 予約：作成（Reservator/Reservation を作る）
 # -----------------------------
 class CustomerReservationCreateView(View):
@@ -213,9 +540,7 @@ class CustomerReservationCreateView(View):
         visit_count = int(form.cleaned_data["visit_count"])
         course_minutes = int(form.cleaned_data["course_minutes"])
 
-        # -------------------------
         # 過去・現在時刻チェック
-        # -------------------------
         today = timezone.localdate()
         now = timezone.localtime()
 
@@ -227,17 +552,24 @@ class CustomerReservationCreateView(View):
             messages.error(request, "現在時刻より前の時刻は予約できません。")
             return redirect("stores:customer_store_info", pk=store.id)
 
-        # -------------------------
         # 受付チェック
-        # -------------------------
         setting = StoreOnlineReservation.objects.filter(store=store, date=visit_date).first()
         if not setting or not setting.booking_status:
             messages.error(request, "この日はネット予約を受け付けていません。")
             return redirect("stores:customer_store_info", pk=store.id)
 
-        # -------------------------
+        # ★営業時間チェック
+        ok, reason, end_time = _validate_customer_reservation_time(
+            store=store,
+            visit_date=visit_date,
+            visit_time=visit_time,
+            course_minutes=course_minutes,
+        )
+        if not ok or end_time is None:
+            messages.error(request, reason or "営業時間チェックに失敗しました。")
+            return redirect("stores:customer_store_info", pk=store.id)
+
         # 席数チェック（日単位合計）
-        # -------------------------
         used = (
             Reservation.objects
             .filter(store=store, visit_date=visit_date)
@@ -247,21 +579,10 @@ class CustomerReservationCreateView(View):
             messages.error(request, "空席が不足しています。人数を減らすか別日をご選択ください。")
             return redirect("stores:customer_store_info", pk=store.id)
 
-        # -------------------------
         # コース名
-        # -------------------------
-        course_name = "1時間コース" if course_minutes == 60 else "2時間コース"
+        course_name = _course_name(course_minutes)
 
-        start_dt = datetime.combine(visit_date, visit_time)
-        end_dt = start_dt + timedelta(minutes=course_minutes)
-
-        if end_dt.date() != visit_date:
-            messages.error(request, "営業時間外の予約はできません（終了時刻が翌日になります）。")
-            return redirect("stores:customer_store_info", pk=store.id)
-
-        # -------------------------
-        # 予約者（Reservator）を決める
-        # -------------------------
+        # 予約者（Reservator）
         customer = _get_customer_from_user(request.user)
         reservator = None
 
@@ -274,7 +595,6 @@ class CustomerReservationCreateView(View):
                 email = form.cleaned_data.get("email") or (customer.sub_email or customer.email or "")
                 phone = form.cleaned_data.get("phone_number") or (customer.phone_number or "")
 
-                # ログインでも補完できないなら入力必須
                 if not full_name or not email or not phone:
                     messages.error(request, "予約者情報（氏名/メール/電話）が不足しています。")
                     return redirect("stores:customer_store_info", pk=store.id)
@@ -287,7 +607,6 @@ class CustomerReservationCreateView(View):
                     phone_number=phone,
                 )
             else:
-                # 空欄だけ補完
                 changed = False
                 if not reservator.full_name and form.cleaned_data.get("full_name"):
                     reservator.full_name = form.cleaned_data["full_name"]; changed = True
@@ -300,7 +619,6 @@ class CustomerReservationCreateView(View):
                 if changed:
                     reservator.save()
         else:
-            # 未ログイン → 全部必須
             required = ["full_name", "full_name_kana", "email", "phone_number"]
             for f in required:
                 if not form.cleaned_data.get(f):
@@ -315,9 +633,7 @@ class CustomerReservationCreateView(View):
                 phone_number=form.cleaned_data["phone_number"],
             )
 
-        # -------------------------
         # 予約ステータス
-        # -------------------------
         status = ReservationStatus.objects.get_or_create(status="予約確定")[0]
 
         Reservation.objects.create(
@@ -326,7 +642,7 @@ class CustomerReservationCreateView(View):
             visit_date=visit_date,
             visit_time=visit_time,
             start_time=visit_time,
-            end_time=end_dt.time(),
+            end_time=end_time,
             visit_count=visit_count,
             course=course_name,
             booking_status=status,
@@ -354,9 +670,8 @@ class company_store_infoView(UpdateView):
     context_object_name = "store"
 
     def get_success_url(self):
-        # 保存したら、また同じ画面（自分自身）を表示する
         messages.success(self.request, "店舗情報を更新しました。")
-        return reverse('stores:company_store_info', kwargs={'pk': self.object.pk})
+        return reverse("stores:company_store_info", kwargs={"pk": self.object.pk})
 
 
 class company_store_managementView(TemplateView):
@@ -377,7 +692,7 @@ class company_store_managementView(TemplateView):
 
 
 # =========================
-# store views
+# store views（店舗側）
 # =========================
 class store_basic_editView(LoginRequiredMixin, UserPassesTestMixin, View):
     """
@@ -396,7 +711,6 @@ class store_basic_editView(LoginRequiredMixin, UserPassesTestMixin, View):
             return redirect(self.login_url)
 
         form = StoreBasicForm(instance=store)
-
         image_formset = StoreImageFormSet(instance=store, prefix="images")
         menu_formset = StoreMenuFormSet(instance=store, prefix="menus")
 
@@ -456,6 +770,8 @@ class store_basic_editView(LoginRequiredMixin, UserPassesTestMixin, View):
             return redirect(reverse("stores:store_basic_edit"))
 
         messages.error(request, "入力内容にエラーがあります。")
+
+        # デバッグ表示（必要なら残す）
         print("FORM ERRORS:", form.errors)
         print("IMAGE NON_FORM_ERRORS:", image_formset.non_form_errors())
         print("MENU NON_FORM_ERRORS:", menu_formset.non_form_errors())

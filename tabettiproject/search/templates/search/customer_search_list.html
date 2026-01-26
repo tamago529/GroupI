@@ -1,267 +1,345 @@
 {% extends "customer_base.html" %}
-
 {% block title %}検索結果一覧 - タベッチ{% endblock %}
 
 {% block content %}
-
 <style>
-.search-result-container {
-    display: flex;
-    max-width: 90vw;
-    padding: 0 24px;
-    margin: 24px auto;
-    gap: 24px;
-    font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
-    color: #222;
-    background: #fff;
+/* ===============================
+  レイアウト
+================================ */
+.search-wrap{
+  max-width:1100px;
+  margin:24px auto;
+  padding:0 16px;
 }
 
-/* 左 */
-.search-result-container aside {
-    width: 260px;
+.shop-card{
+  display:flex;
+  gap:16px;
+  background:#fff;
+  border-radius:12px;
+  box-shadow:0 3px 12px rgba(0,0,0,.08);
+  padding:16px;
+  margin-bottom:20px;
 }
 
-.filter-box {
-    background: #fff;
-    border-radius: 8px;
-    padding: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    font-size: 13px;
+/* 左：画像（固定サイズ） */
+.shop-thumb{
+  width:240px;
+  min-width:240px;
+  height:180px;
+  border-radius:8px;
+  overflow:hidden;
+  background:#f2f2f2;
+}
+.shop-thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
 }
 
-.filter-title {
-    font-size: 15px;
-    font-weight: bold;
-    margin-bottom: 12px;
+/* 右：情報 */
+.shop-info{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width:0; /* 文字折返し安定 */
 }
 
-/* 右 */
-.search-result-container main {
-    flex: 1;
+.shop-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
 }
 
-.result-count-bar {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    margin-bottom: 16px;
+.shop-name{
+  font-size:18px;
+  font-weight:bold;
+  margin:0;
+  line-height:1.25;
+  min-width:0;
+}
+.shop-name a{
+  text-decoration:none;
+  color:#06c;
+  word-break:break-word;
+}
+.shop-name a:hover{ text-decoration:underline; }
+
+/* 右上に予算を寄せる */
+.budget{
+  font-size:13px;
+  color:#333;
+  white-space:nowrap;
+  margin-top:2px;
 }
 
-.count-text {
-    font-size: 20px;
-    font-weight: bold;
-    margin: 0;
+/* ===============================
+  星評価（SVG / 半星）
+================================ */
+.rating{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.stars{
+  display:flex;
+  gap:2px;
+}
+.star{
+  width:18px;
+  height:18px;
+  fill:#ddd;
+}
+.star.full{ fill:#ff8c00; }
+.star.half{ fill:url(#halfGrad); }
+
+.rating-text{
+  font-size:13px;
+  color:#666;
 }
 
-.count-sub {
-    font-size: 13px;
-    color: #666;
+/* ===============================
+  メタ情報
+================================ */
+.shop-meta{
+  font-size:13px;
+  color:#555;
 }
 
-/* 店舗カード */
-.shop-card {
-    display: flex;
-    gap: 18px;
-    padding: 18px;
-    margin-bottom: 16px;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+/* ===============================
+  ネット予約カレンダー（12日）
+================================ */
+.netcal{
+  display:flex;
+  align-items:stretch;
+  border:1px solid rgba(0,0,0,.10);
+  border-radius:6px;
+  overflow:hidden;
+  margin-top:10px;
+  background:#fff;
+  max-width:100%;
+}
+.netcal-left{
+  width:160px;
+  border-right:1px solid rgba(0,0,0,.10);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:10px 8px;
+  background:#fff;
+  flex:0 0 auto;
+}
+.netcal-left-title{
+  font-weight:700;
+  font-size:13px;
+  line-height:1.1;
+}
+.netcal-left-sub{
+  font-weight:700;
+  font-size:13px;
+  line-height:1.1;
+  margin-top:4px;
 }
 
-.shop-photo img {
-    border-radius: 6px;
-    object-fit: cover;
+/* 横はみ出し対策：カレンダー部分はスクロール可 */
+.netcal-scroll{
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.netcal-grid{
+  display:grid;
+  grid-template-columns: repeat(12, 44px);
+  background:#fff;
+  min-width: calc(44px * 12);
+}
+.netcal-cell{
+  border-left:1px solid rgba(0,0,0,.10);
+  padding:6px 2px 8px;
+  text-align:center;
+}
+.netcal-cell:first-child{ border-left:none; }
+
+.netcal-cell .dow{
+  font-size:12px;
+  color:#777;
+  margin-bottom:2px;
+  line-height:1;
+}
+.netcal-cell .daynum{
+  font-size:14px;
+  font-weight:700;
+  color:#333;
+  line-height:1.1;
+  margin-bottom:6px;
 }
 
-.shop-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
+/* 土日色 */
+.netcal-cell.sat .dow,
+.netcal-cell.sat .daynum{ color:#1e6fff; }
+.netcal-cell.sun .dow,
+.netcal-cell.sun .daynum{ color:#e84b3c; }
 
-/* 店舗名 */
-.shop-name {
-    margin: 0;
+/* ○ × */
+.circle{
+  display:inline-block;
+  font-size:18px;
+  font-weight:800;
+  line-height:1;
+  transform:translateY(1px);
 }
-
-/* ✅ 店舗名リンク（枠なし） */
-.shop-name-btn {
-    display: inline;
-    font-size: 17px;
-    font-weight: bold;
-    color:#06c;
-    text-decoration: none; /* 通常は下線なし */
-}
-
-.shop-name-btn:hover {
-    text-decoration: underline; /* hoverだけ下線 */
-}
-
-.shop-name-btn:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(255, 122, 0, 0.18);
-    border-radius: 4px; /* 文字周りのフォーカスを少し丸く */
-}
-
-.rating-section {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.rating-num {
-    font-size: 20px;
-    font-weight: bold;
-    color: #ff8c00;
-}
-
-.shop-meta {
-    font-size: 13px;
-    color: #555;
-}
-
-.budget-bar {
-    margin-top: auto;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    font-size: 13px;
-    color: #333;
-}
+.circle.open{ color:#ff7a00; }
+.circle.closed{ color:#bbb; }
 
 /* ページネーション */
-.pagination {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin: 32px 0;
+.pagination{
+  text-align:center;
+  margin:32px 0;
 }
-
-.pagination a,
-.pagination span {
-    padding: 6px 12px;
-    border-radius: 20px;
-    border: 1px solid #ff7a00;
-    color: #ff7a00;
-    text-decoration: none;
+.pagination a{
+  margin:0 6px;
+  color:#ff7a00;
+  text-decoration:none;
 }
-
-.pagination .current {
-    background: #ff7a00;
-    color: #fff;
+.pagination a:hover{ text-decoration:underline; }
+.pagination .current{
+  margin:0 6px;
+  font-weight:bold;
+  color:#fff;
+  background:#ff7a00;
+  padding:4px 10px;
+  border-radius:20px;
+  display:inline-block;
 }
 </style>
 
-<div class="search-result-container">
+<!-- SVG（half star 用） -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="halfGrad">
+      <stop offset="50%" stop-color="#ff8c00"/>
+      <stop offset="50%" stop-color="#ddd"/>
+    </linearGradient>
+  </defs>
+</svg>
 
-    <!-- 左：検索条件 -->
-    <aside>
-        <div class="filter-box">
-            <div class="filter-title">検索条件</div>
+<div class="search-wrap">
 
-            <p>
-                エリア：
-                {% if area %}
-                    {{ area }}
-                {% else %}
-                    指定なし
-                {% endif %}
-            </p>
+  {% for store in stores %}
+  <article class="shop-card">
 
-            <p>
-                キーワード：
-                {% if keyword %}
-                    {{ keyword }}
-                {% else %}
-                    指定なし
-                {% endif %}
-            </p>
+    <!-- 左：画像 -->
+    <div class="shop-thumb">
+      {% if store.thumb_path %}
+        <img src="{{ MEDIA_URL }}{{ store.thumb_path }}" alt="店舗画像">
+      {% endif %}
+    </div>
+
+    <!-- 右：情報 -->
+    <div class="shop-info">
+
+      <div class="shop-head">
+        <h2 class="shop-name">
+          <a href="{% url 'stores:customer_store_info' store.pk %}">
+            {{ store.store_name }}{% if store.branch_name %}（{{ store.branch_name }}）{% endif %}
+          </a>
+        </h2>
+
+        <div class="budget">
+          予算：¥{{ store.budget }}
         </div>
-    </aside>
+      </div>
 
-    <!-- 右：検索結果 -->
-    <main>
-        <div class="result-count-bar">
-            <h1 class="count-text">店舗一覧</h1>
-            <span class="count-sub">
-                全 {{ stores.paginator.count }} 件
-            </span>
-        </div>
-
-        {% for store in stores %}
-        <article class="shop-card">
-            
-            <div class="shop-photo">
-                {% if store.thumb_path %}
-                    <img
-                        src="{{ MEDIA_URL }}{{ store.thumb_path }}"
-                        width="200"
-                        height="150"
-                        alt="店舗画像"
-                    >
-                {% endif %}
-            </div>
-
-            <div class="shop-info">
-                <h2 class="shop-name">
-                    <a
-                      class="shop-name-btn"
-                      href="{% url 'stores:customer_store_info' store.pk %}"
-                    >
-                      {{ stores.start_index|add:forloop.counter0 }}.
-                      {{ store.store_name }}{% if store.branch_name %}（{{ store.branch_name }}）{% endif %}
-                    </a>
-                </h2>
-
-                <div class="rating-section">
-                    <span class="rating-num">3.5</span>
-                    <span>口コミ準備中</span>
-                </div>
-
-                <div class="shop-meta">
-                    {{ store.area.area_name }} /
-                    {{ store.scene.scene_name }} /
-                    {{ store.genre.genre_name }}
-                </div>
-
-                <!-- ✅ 予約するボタン削除 → 予算だけ表示 -->
-                <div class="budget-bar">
-                    <span>予算：¥{{ store.budget }}</span>
-                </div>
-            </div>
-        </article>
-        {% empty %}
-            <p>店舗がありません。</p>
-        {% endfor %}
-
-        <!-- ページネーション -->
-        <div class="pagination">
-            {% if stores.has_previous %}
-                <a href="?page={{ stores.previous_page_number }}{% if area %}&area={{ area }}{% endif %}{% if keyword %}&keyword={{ keyword }}{% endif %}">
-                    前へ
-                </a>
+      <!-- 星（views側の star_states を使う） -->
+      <div class="rating">
+        <div class="stars">
+          {% for st in store.star_states %}
+            {% if st == "full" %}
+              <svg class="star full"><use href="#star"/></svg>
+            {% elif st == "half" %}
+              <svg class="star half"><use href="#star"/></svg>
+            {% else %}
+              <svg class="star"><use href="#star"/></svg>
             {% endif %}
-
-            {% for num in stores.paginator.page_range %}
-                {% if stores.number == num %}
-                    <span class="current">{{ num }}</span>
-                {% else %}
-                    <a href="?page={{ num }}{% if area %}&area={{ area }}{% endif %}{% if keyword %}&keyword={{ keyword }}{% endif %}">
-                        {{ num }}
-                    </a>
-                {% endif %}
-            {% endfor %}
-
-            {% if stores.has_next %}
-                <a href="?page={{ stores.next_page_number }}{% if area %}&area={{ area }}{% endif %}{% if keyword %}&keyword={{ keyword }}{% endif %}">
-                    次へ
-                </a>
-            {% endif %}
+          {% endfor %}
         </div>
+        <span class="rating-text">
+          {{ store.display_rating|default:"-"|floatformat:1 }}（{{ store.review_count|default:0 }}件）
+        </span>
+      </div>
 
-    </main>
+      <div class="shop-meta">
+        {{ store.area.area_name }} /
+        {{ store.scene.scene_name }} /
+        {{ store.genre }}
+      </div>
+
+      <!-- ネット予約カレンダー（店舗アカウント紐づきのみ） -->
+      {% if store.has_account %}
+        <div class="netcal" aria-label="ネット予約 空席情報">
+          <div class="netcal-left">
+            <div class="netcal-left-title">ネット予約</div>
+            <div class="netcal-left-sub">空席情報</div>
+          </div>
+
+          <div class="netcal-scroll">
+            <div class="netcal-grid">
+              {% for c in store.calendar_12 %}
+                <div class="netcal-cell {% if c.is_sat %}sat{% elif c.is_sun %}sun{% endif %}">
+                  <div class="dow">{{ c.dow_ja }}</div>
+                  <div class="daynum">{{ c.month_day }}</div>
+                  <div class="mark">
+                    {% if c.is_open %}
+                      <span class="circle open" aria-label="予約受付中">○</span>
+                    {% else %}
+                      <span class="circle closed" aria-label="受付なし">×</span>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+    </div>
+  </article>
+
+  {% empty %}
+    <p>店舗がありません。</p>
+  {% endfor %}
+
+  {# ページネーション（検索条件を引き継ぐ） #}
+  {% if stores.paginator.num_pages > 1 %}
+    <div class="pagination">
+      {% if stores.has_previous %}
+        <a href="?page={{ stores.previous_page_number }}{% if area %}&area={{ area|urlencode }}{% endif %}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}">前へ</a>
+      {% endif %}
+
+      {% for num in stores.paginator.page_range %}
+        {% if stores.number == num %}
+          <span class="current">{{ num }}</span>
+        {% else %}
+          <a href="?page={{ num }}{% if area %}&area={{ area|urlencode }}{% endif %}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}">{{ num }}</a>
+        {% endif %}
+      {% endfor %}
+
+      {% if stores.has_next %}
+        <a href="?page={{ stores.next_page_number }}{% if area %}&area={{ area|urlencode }}{% endif %}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}">次へ</a>
+      {% endif %}
+    </div>
+  {% endif %}
 
 </div>
+
+<!-- star shape -->
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="star" viewBox="0 0 24 24">
+    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01z"/>
+  </symbol>
+</svg>
+
 {% endblock %}

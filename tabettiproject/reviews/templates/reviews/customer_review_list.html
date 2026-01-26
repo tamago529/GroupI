@@ -4,511 +4,190 @@
 
 {% block css %}
 <style>
-    /* --- 1. 全体レイアウト --- */
-    .shop-container {
-        max-width: 980px;
-        margin: 20px auto;
-        font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
-        color: #333;
-        line-height: 1.6;
-    }
-
-    /* --- 2. ヘッダー：公式バッジ・アクションボタン --- */
-    .header-upper-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-    }
-
-    .official-label {
-        background-color: #bfa67b;
-        color: #fff;
-        padding: 2px 8px;
-        font-size: 12px;
-        border-radius: 2px;
-        font-weight: bold;
-    }
-
-    .action-buttons {
-        display: flex;
-        gap: 8px;
-    }
-
-    .btn-action {
-        border: 1px solid #ccc;
-        background: #fff;
-        padding: 6px 14px;
-        font-size: 13px;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    .btn-post {
-        background-color: #93c02d;
-        color: #fff;
-        border: none;
-        font-weight: bold;
-    }
-
-    /* --- 3. 店舗メイン情報（店名・評価） --- */
-    .shop-main-info {
-        margin-bottom: 20px;
-    }
-
-    .catchphrase {
-        font-size: 13px;
-        color: #666;
-        margin-bottom: 5px;
-    }
-
-    .shop-title {
-        font-size: 26px;
-        font-weight: bold;
-        margin: 0 0 10px 0;
-    }
-
-    .rating-flex {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .star-rating {
-        position: relative;
-        display: inline-block;
-        font-size: 22px;
-        line-height: 1;
-    }
-
-    .star-rating-back { color: #ccc; }
-    .star-rating-front {
-        position: absolute;
-        top: 0; left: 0;
-        overflow: hidden;
-        white-space: nowrap;
-        color: #ff9800;
-        width: var(--rating-percent, 0%);
-    }
-
-    .score-red {
-        font-size: 28px;
-        font-weight: bold;
-        color: #e60012;
-    }
-
-    /* --- 4. スペック情報 --- */
-    .spec-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-    }
-
-    .spec-item { margin-bottom: 5px; }
-    .spec-label { color: #666; width: 80px; display: inline-block; }
-
-    .detail-link {
-        color: #06c;
-        text-decoration: none;
-        font-size: 11px;
-    }
-
-    /* --- 5. タブメニュー --- */
-    .shop-tabs {
-        display: flex;
-        border: 1px solid #ddd;
-        background-color: #fff;
-        margin-bottom: 20px;
-    }
-
-    .tab-item {
-        flex: 1;
-        text-align: center;
-        padding: 15px 0;
-        border-right: 1px solid #ddd;
-        font-size: 15px;
-        font-weight: bold;
-        text-decoration: none;
-        color: #333;
-    }
-
-    .tab-item:last-child { border-right: none; }
-    .tab-item.active {
-        background-color: #8c8366;
-        color: #fff;
-    }
-
-    /* --- 6. 口コミ検索・フィルタエリア --- */
-    .review-filter-section {
-        background-color: #f9f9f7;
-        padding: 20px;
-        border: 1px solid #ddd;
-        margin-bottom: 20px;
-    }
-
-    .search-box-container {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        background: #fff;
-        padding: 15px;
-        border: 1px solid #ccc;
-        margin-bottom: 20px;
-    }
-
-    .search-input {
-        flex: 1;
-        padding: 8px;
-        border: 1px solid #ccc;
-    }
-
-    .search-button {
-        background-color: #93c02d;
-        color: #fff;
-        border: none;
-        padding: 8px 25px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-
-    .filter-tabs {
-        display: flex;
-        border-bottom: 1px solid #ddd;
-        margin-bottom: 15px;
-    }
-
-    .filter-tab-item {
-        flex: 1;
-        text-align: center;
-        padding: 12px;
-        background: #fff;
-        border: 1px solid #ddd;
-        border-bottom: none;
-        font-size: 14px;
-        text-decoration: none;
-        color: #333;
-    }
-
-    .filter-tab-item.active {
-        border-top: 2px solid #ff9800;
-        color: #ff9800;
-        font-weight: bold;
-    }
-
-    /* --- 7. 並び替え・件数表示 --- */
-    .list-header-info {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 12px;
-        color: #666;
-        padding: 10px 0;
-        border-bottom: 1px solid #eee;
-    }
-
-    /* --- 8. 口コミカード --- */
-    .review-card {
-        border: 1px solid #ddd;
-        padding: 20px;
-        border-radius: 8px;
-        background-color: #fff;
-        margin-bottom: 20px;
-    }
-
-    .review-user-info {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 15px;
-    }
-
-    .user-avatar { border-radius: 50%; object-fit: cover; background-color: #eee; }
-    .review-title { font-weight: bold; font-size: 17px; margin: 12px 0; }
-
-    /* モーダル */
-    .modal-backdrop{
-        position: fixed; inset: 0; background: rgba(0,0,0,.45);
-        display:none; align-items:center; justify-content:center;
-        z-index: 2000; padding: 18px;
-    }
-    .modal-backdrop.active{ display:flex; }
-    .modal-card{
-        width: 100%; max-width: 560px; background:#fff;
-        border-radius: 10px; border:1px solid #e5e5e5;
-        box-shadow: 0 12px 30px rgba(0,0,0,.18); overflow:hidden;
-    }
-    .modal-head{
-        display:flex; justify-content: space-between; align-items:center;
-        padding: 12px 14px; border-bottom: 1px solid #eee; background: #fafafa;
-    }
-    .modal-body{ padding: 14px; }
-    .field{ margin-bottom: 12px; }
-    .label{ font-size: 12px; color:#666; margin-bottom: 6px; display:block; }
-    .time-slot{ display:flex; gap:10px; }
-    .slot-btn{
-        flex: 1; border: 1px solid #ddd; background:#fff; border-radius: 8px;
-        padding: 10px 12px; cursor:pointer; display:flex; align-items:center;
-        justify-content:center; gap:8px; font-weight:bold;
-    }
-    .slot-btn.active{ border-color:#93c02d; box-shadow: 0 0 0 2px rgba(147,192,45,.18); }
-    .stars{ display:flex; gap:6px; align-items:center; font-size: 22px; }
-    .star{ cursor:pointer; color:#ccc; }
-    .star.filled{ color:#ff9800; }
-    .text-input, .text-area{ width: 100%; border: 1px solid #ccc; border-radius: 6px; padding: 10px; font-size: 13px; box-sizing: border-box; }
-    .text-area{ min-height: 120px; resize: vertical; }
-    .modal-foot{ padding: 12px 14px; border-top: 1px solid #eee; display:flex; justify-content:flex-end; gap:10px; background:#fafafa; }
-    .btn-primary{ background:#93c02d; color:#fff; border:none; padding: 8px 14px; border-radius: 6px; cursor:pointer; font-weight:bold; }
-
-    .report-link {
-    font-size: 12px;
-    color: #999;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 8px;
-    border-radius: 4px;
-    transition: all 0.2s;
+/* ===============================
+   レビュー一覧ページ専用
+================================ */
+.shop-main{
+  max-width:1000px;
+  margin:0 auto;
+  background:#fff;
+  border:1px solid #e6e6e6;
+  color:#333;
+  font-family:"Hiragino Kaku Gothic ProN","メイリオ",sans-serif;
 }
 
-.report-link:hover {
-    color: #d9534f; /* 通報っぽく赤色に */
-    background-color: #fff5f5;
-    text-decoration: underline;
+/* ---- レビュー部分ラッパ ---- */
+.review-wrapper{
+  padding: 20px;
+  margin:0 auto 40px;
 }
 
+/* ---------- 検索・フィルタ ---------- */
+.review-filter{
+  background:#f9f9f7;
+  border:1px solid #ddd;
+  padding:20px;
+  margin-bottom:20px;
+}
+
+.review-search{
+  display:flex;
+  gap:10px;
+  margin-bottom:16px;
+}
+
+.review-search input{
+  flex:1;
+  padding:8px;
+  border:1px solid #ccc;
+  border-radius:4px;
+}
+
+.review-search button{
+  background:#8fb134;
+  color:#fff;
+  border:none;
+  padding:8px 24px;
+  border-radius:4px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* ---------- 件数 ---------- */
+.review-count-row{
+  font-size:12px;
+  color:#666;
+  margin-bottom:12px;
+}
+
+/* ---------- レビューカード ---------- */
+.review-card{
+  background:#fff;
+  border:1px solid #ddd;
+  border-radius:8px;
+  padding:20px;
+  margin-bottom:20px;
+}
+
+.review-user{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.review-avatar{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:#ddd;
+}
+
+.review-user-name{
+  font-weight:bold;
+}
+
+.review-date{
+  font-size:12px;
+  color:#666;
+}
+
+/* --- 点数表示 --- */
+.review-score{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+}
+.review-score .value{
+  font-weight:bold;
+  color:#e60012;
+}
+
+/* --- 本文 --- */
+.review-text{
+  font-size:14px;
+  line-height:1.7;
+}
+
+/* ---------- 通報 ---------- */
+.report-wrap{
+  text-align:right;
+  margin-top:10px;
+}
+
+.report-link{
+  font-size:12px;
+  color:#999;
+  text-decoration:none;
+}
+.report-link:hover{
+  color:#d9534f;
+  text-decoration:underline;
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<article class="shop-container">
+<div class="shop-main">
 
-    <div class="header-upper-row">
-        <div><span class="official-label">公式</span></div>
-        <div class="action-buttons">
-            <button class="btn-action" type="button">行った</button>
 
-            <!-- 保存機能 -->
-            <form method="post" action="." style="margin:0;">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="save_store">
-                <input type="hidden" name="store_id" value="{{ shop.id }}">
-                <button class="btn-action" type="submit">
-                    {% if is_saved %}★ 保存済み{% else %}☆ 保存{% endif %}
-                </button>
-            </form>
+  {% include "stores/_customer_store_common.html" with store=store is_saved=is_saved star_states=star_states avg_rating=avg_rating review_count=review_count active_main="reviews" active_sub="top" %}
 
-            <button id="openPostModal" class="btn-action btn-post" type="button">投稿</button>
-        </div>
-    </div>
 
-    <div class="shop-main-info">
-        <!-- 🌟 キャッチフレーズ（エリアとシーンを表示） -->
-        <p class="catchphrase">{{ shop.area.area_name }} ／ 利用シーン：{{ shop.scene.scene_name }}</p>
-        <!-- 🌟 店名 -->
-        <h1 class="shop-title">{{ shop.store_name }} {{ shop.branch_name }}</h1>
+  <div class="review-wrapper">
 
-        <div class="rating-flex">
-            
-            <div class="star-rating" style="--rating-percent: {% widthratio review.score|default:0 5 100 %}%">
-                <div class="star-rating-front">★★★★★</div>
-                <div class="star-rating-back">★★★★★</div>
-            </div>
-            <span class="score-red">3.00</span>
-            <span style="color: #06c; font-size: 13px;">{{ reviews.count }}人</span>
-            <span style="color: #666; font-size: 13px;">登録数：{{ shop.save_count|default:0 }}人</span>
-        </div>
-    </div>
 
-    <div class="shop-specs">
-        <div class="spec-item">
-            <span class="spec-label">住所：</span>
-            <span>{{ shop.address }}</span>
-        </div>
-        <div class="spec-item">
-            <span class="spec-label">ジャンル：</span>
-            <span>{{ shop.scene.scene_name }}</span>
-        </div>
-        <div class="spec-row">
-            <div>
-                <span class="spec-label">予算：</span>
-                <span>￥{{ shop.budget|default:"-" }} 〜</span>
-            </div>
-            <a href="{% url 'stores:customer_store_info' shop.id %}" class="detail-link">店舗情報（詳細）</a>
-        </div>
-    </div>
+    <section class="review-filter">
+      <div class="review-search">
+        <input type="text" placeholder="口コミを検索（未実装）">
+        <button type="button">検索</button>
+      </div>
 
-    <nav class="shop-tabs">
-        <a href="{% url 'stores:customer_store_info' shop.id %}" class="tab-item">トップ</a>
-        <a href="#" class="tab-item">座席</a>
-        <a href="{% url 'stores:customer_menu_course' shop.id %}" class="tab-item">メニュー・コース</a>
-        <a href="#" class="tab-item">写真</a>
-        <a href="{% url 'reviews:customer_review_list' %}?store_id={{ shop.id }}" class="tab-item active">
-    口コミ <span class="count-badge">{{ reviews.count }}</span>
-</a>
-        <a href="{% url 'stores:customer_map' %}" class="tab-item" style="color: #e60012;">クーポン・地図</a>
-    </nav>
-
-    <section class="review-filter-section">
-        <div class="search-box-container">
-            <label for="review-search" class="search-label">口コミ検索</label>
-            <input type="text" id="review-search" class="search-input" placeholder="キーワード">
-            <button class="search-button">検索</button>
-        </div>
-
-        <div class="filter-tabs">
-            <a href="#" class="filter-tab-item active">💬 すべての口コミ</a>
-            <a href="#" class="filter-tab-item">🌙 夜の口コミ</a>
-            <a href="#" class="filter-tab-item">☀️ 昼の口コミ</a>
-        </div>
-
-        <div class="list-header-info">
-            <div>全 <strong>{{ reviews.count }}</strong> 件を表示</div>
-        </div>
+      <div class="review-count-row">
+        全 <strong>{{ reviews.count }}</strong> 件の口コミ
+      </div>
     </section>
 
-    <!-- 🌟 口コミ一覧のループ -->
-    <section class="review-section">
-        <div id="review-container">
-            {% for review in reviews %}
-            <article class="review-card">
-                
-    <!-- 🌟 通報ボタンを追加 -->
-    <div style="text-align: right; margin-top: 10px;">
-        <a href="{% url 'reviews:customer_report_input' %}?review_id={{ review.pk }}" class="report-link">
+
+    {% for review in reviews %}
+      <article class="review-card">
+
+        <div class="review-user">
+          <div class="review-avatar"></div>
+          <div>
+            <div class="review-user-name">
+              {{ review.reviewer.nickname }} さん
+            </div>
+            <div class="review-date">
+              投稿日：{{ review.posted_at|date:"Y/m/d" }}
+            </div>
+          </div>
+        </div>
+
+        <div class="review-score">
+          <div class="value">{{ review.score|floatformat:1 }}</div>
+          <div>/ 5.0</div>
+        </div>
+
+        <div class="review-text">
+          {{ review.review_text|linebreaksbr }}
+        </div>
+
+        <div class="report-wrap">
+          <a href="{% url 'reviews:customer_report_input' %}?review_id={{ review.pk }}"
+             class="report-link">
             🚩 この口コミを通報する
-        </a>
-    </div>
-                <div class="review-user-info">
-                    <div style="width:40px; height:40px; background:#ddd; border-radius:50%; display:inline-block;"></div>
-                    <div>
-                        <div style="font-weight: bold;">{{ review.reviewer.nickname }} さん</div>
-                        <div style="font-size: 12px; color: #666;">投稿日：{{ review.posted_at|date:"Y/m/d" }}</div>
-                    </div>
-                </div>
-                <div class="star-rating" style="--rating-percent: {% widthratio review.score 5 100 %}%">
-                    <div class="star-rating-front">★★★★★</div>
-                    <div class="star-rating-back">★★★★★</div>
-                    <span style="color: #e60012; font-weight: bold; font-size: 16px; margin-left: 10px;">{{ review.score|floatformat:1 }}</span>
-                </div>
-                <!-- 🌟 口コミ本文 -->
-                <p style="font-size: 14px; line-height: 1.6; margin-top: 15px;">{{ review.review_text|linebreaksbr }}</p>
-            </article>
-            {% empty %}
-            <p style="text-align:center; padding: 40px; color:#999;">現在、投稿されている口コミはありません。</p>
-            {% endfor %}
-        </div>
-    </section>
-
-</article>
-
-<!-- 投稿モーダル -->
-<div id="postModal" class="modal-backdrop">
-  <div class="modal-card">
-    <div class="modal-head">
-      <div class="modal-title">口コミを投稿</div>
-      <button id="closePostModal" class="modal-close" type="button">×</button>
-    </div>
-
-    <form id="reviewPostForm" method="post" action=".">
-      {% csrf_token %}
-      <input type="hidden" name="action" value="create_review">
-      <input type="hidden" name="store_id" value="{{ shop.id }}">
-      <input type="hidden" name="time_slot" id="timeSlotInput" value="">
-      <input type="hidden" name="score" id="scoreInput" value="">
-
-      <div class="modal-body">
-        <div class="field">
-          <span class="label">時間帯</span>
-          <div class="time-slot">
-            <button type="button" class="slot-btn" data-slot="昼">☀ 昼</button>
-            <button type="button" class="slot-btn" data-slot="夜">🌙 夜</button>
-          </div>
+          </a>
         </div>
 
-        <div class="field">
-          <span class="label">評価</span>
-          <div class="stars" id="stars">
-            <span class="star" data-v="1">★</span>
-            <span class="star" data-v="2">★</span>
-            <span class="star" data-v="3">★</span>
-            <span class="star" data-v="4">★</span>
-            <span class="star" data-v="5">★</span>
-            <span class="score-badge" id="scoreBadge">未選択</span>
-          </div>
-        </div>
+      </article>
+    {% empty %}
+      <p style="text-align:center; color:#999; padding:40px;">
+        まだ口コミは投稿されていません。
+      </p>
+    {% endfor %}
 
-        <div class="field">
-          <label class="label">タイトル</label>
-          <input class="text-input" type="text" name="title" maxlength="100" placeholder="例）また行きたい！">
-        </div>
-
-        <div class="field">
-          <label class="label">本文</label>
-          <textarea class="text-area" name="body" placeholder="料理・雰囲気・接客など"></textarea>
-        </div>
-
-        <div class="agree-row">
-          <input id="agreeCheck" type="checkbox" name="agree">
-          <label for="agreeCheck">内容に同意して投稿します</label>
-        </div>
-      </div>
-
-      <div class="modal-foot">
-        <button id="cancelBtn" class="btn" type="button">キャンセル</button>
-        <button id="submitBtn" class="btn btn-primary" type="submit" disabled>同意して投稿</button>
-      </div>
-    </form>
   </div>
 </div>
-
-<script>
-(function(){
-  const modal = document.getElementById("postModal");
-  const openBtn = document.getElementById("openPostModal");
-  const closeBtn = document.getElementById("closePostModal");
-  const cancelBtn = document.getElementById("cancelBtn");
-  const slotBtns = modal.querySelectorAll(".slot-btn");
-  const timeSlotInput = document.getElementById("timeSlotInput");
-  const starsWrap = document.getElementById("stars");
-  const stars = starsWrap.querySelectorAll(".star");
-  const scoreInput = document.getElementById("scoreInput");
-  const scoreBadge = document.getElementById("scoreBadge");
-  const agree = document.getElementById("agreeCheck");
-  const submitBtn = document.getElementById("submitBtn");
-
-  function openModal(){ modal.classList.add("active"); }
-  function closeModal(){ modal.classList.remove("active"); }
-  function updateSubmitState(){
-    submitBtn.disabled = !(agree.checked && timeSlotInput.value && scoreInput.value);
-  }
-
-  openBtn.addEventListener("click", openModal);
-  closeBtn.addEventListener("click", closeModal);
-  cancelBtn.addEventListener("click", closeModal);
-
-  slotBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      slotBtns.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      timeSlotInput.value = btn.dataset.slot;
-      updateSubmitState();
-    });
-  });
-
-  stars.forEach(s => {
-    s.addEventListener("click", () => {
-      const v = s.dataset.v;
-      scoreInput.value = v;
-      stars.forEach(star => {
-          star.classList.toggle("filled", star.dataset.v <= v);
-      });
-      scoreBadge.textContent = v + " / 5";
-      updateSubmitState();
-    });
-  });
-
-  agree.addEventListener("change", updateSubmitState);
-})();
-</script>
 {% endblock %}

@@ -1,0 +1,581 @@
+{# stores/templates/stores/_customer_store_common.html #}
+
+<style>
+/* ===============================
+  ヘッダー共通
+================================ */
+.shop-header{
+  padding:20px 20px 0;
+}
+
+.header-top-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+
+.shop-name{
+  font-size:26px;
+  font-weight:bold;
+  margin:0;
+  line-height:1.3;
+}
+
+.action-group{
+  display:flex;
+  gap:8px;
+  white-space:nowrap;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.btn-action-white{
+  background:#fff;
+  border:1px solid #ccc;
+  border-radius:4px;
+  padding:7px 15px;
+  font-size:14px;
+  font-weight:bold;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  color:#333;
+  text-decoration:none;
+}
+
+.btn-action-white span{
+  color:#e91e63;
+  font-size:16px;
+}
+
+.btn-action-green{
+  background:#8fb134;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  padding:7px 18px;
+  font-size:14px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* ===============================
+  評価（SVG / 半星）
+  ※モーダルの星と衝突しないようにクラスを分離
+================================ */
+.score-container{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:10px 0;
+  flex-wrap:wrap;
+}
+
+.rating-wrap{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.stars-svg{
+  display:flex;
+  gap:2px;
+  line-height:0;
+}
+
+.svgstar{
+  width:18px;
+  height:18px;
+  display:inline-flex;
+}
+.svgstar svg{ width:100%; height:100%; display:block; }
+
+.svgstar.full use{ fill:#ffa500; }
+.svgstar.empty use{ fill:#ddd; }
+.svgstar.half  use{ fill:url(#halfGrad); }
+
+.score-number{
+  color:#e44d26;
+  font-size:26px;
+  font-weight:bold;
+}
+
+.review-link{
+  font-size:12px;
+  color:#06c;
+  text-decoration:none;
+  white-space:nowrap;
+}
+
+.meta-info-text{
+  font-size:13px;
+  color:#666;
+  margin-bottom:10px;
+  line-height:1.5;
+}
+
+/* ===============================
+  タブ（メイン）
+================================ */
+.main-navigation{
+  display:flex;
+  list-style:none;
+  padding:0;
+  margin:20px 0 0;
+  border-bottom:1px solid #e2e2e2;
+}
+
+.main-navigation li{
+  flex:1;
+  text-align:center;
+  border:1px solid #e2e2e2;
+  margin-right:-1px;
+  background:#fdfaf5;
+}
+
+.main-navigation li.active{
+  background:#7a6e54;
+  border-color:#7a6e54;
+}
+
+.main-navigation li.active a,
+.main-navigation li.active span{
+  color:#fff;
+}
+
+.main-navigation a,
+.main-navigation span{
+  display:block;
+  padding:14px 0;
+  text-decoration:none;
+  color:#333;
+  font-weight:bold;
+  font-size:14px;
+}
+
+/* ===============================
+  サブタブ
+================================ */
+.sub-navigation{
+  display:flex;
+  list-style:none;
+  padding:0;
+  margin:0;
+  background:#f9f9f9;
+  border-bottom:2px solid #7a6e54;
+}
+
+.sub-navigation li{
+  flex:1;
+  text-align:center;
+  padding:12px 0;
+  font-size:12px;
+  color:#666;
+  border-right:1px solid #eee;
+}
+.sub-navigation li:last-child{ border-right:none; }
+
+.sub-navigation li.active{
+  background:#fff;
+  color:#333;
+  font-weight:bold;
+  border-bottom:2px solid #ff9900;
+  margin-bottom:-2px;
+}
+
+/* ===============================
+  投稿モーダル（共通）
+================================ */
+.review-modal-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:2000;
+  padding:18px;
+}
+.review-modal-backdrop.active{ display:flex; }
+
+.review-modal-card{
+  width:100%;
+  max-width:560px;
+  background:#fff;
+  border-radius:10px;
+  border:1px solid #e5e5e5;
+  box-shadow:0 12px 30px rgba(0,0,0,.18);
+  overflow:hidden;
+}
+
+.review-modal-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 14px;
+  border-bottom:1px solid #eee;
+  background:#fafafa;
+}
+.review-modal-title{
+  font-weight:bold;
+  font-size:15px;
+}
+.review-modal-close{
+  border:none;
+  background:transparent;
+  font-size:22px;
+  cursor:pointer;
+  color:#777;
+  line-height:1;
+}
+
+.review-modal-body{ padding:14px; }
+.review-field{ margin-bottom:12px; }
+.review-label{
+  font-size:12px;
+  color:#666;
+  margin-bottom:6px;
+  display:block;
+}
+
+.review-timeslot{
+  display:flex;
+  gap:10px;
+}
+.review-slot-btn{
+  flex:1;
+  border:1px solid #ddd;
+  background:#fff;
+  border-radius:8px;
+  padding:10px 12px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  font-weight:bold;
+}
+.review-slot-btn.active{
+  border-color:#93c02d;
+  box-shadow:0 0 0 2px rgba(147,192,45,.18);
+}
+
+.review-stars{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  font-size:22px;
+  flex-wrap:wrap;
+}
+.mstar{
+  cursor:pointer;
+  color:#ccc;
+  user-select:none;
+}
+.mstar.filled{ color:#ff9800; }
+.review-score-badge{
+  font-size:12px;
+  color:#666;
+  padding:2px 8px;
+  border:1px solid #ddd;
+  border-radius:999px;
+  margin-left:6px;
+}
+
+.review-text-input,
+.review-text-area{
+  width:100%;
+  border:1px solid #ccc;
+  border-radius:6px;
+  padding:10px;
+  font-size:13px;
+  box-sizing:border-box;
+}
+.review-text-area{
+  min-height:120px;
+  resize:vertical;
+}
+
+.review-agree{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  font-size:12px;
+  color:#333;
+  margin-top:6px;
+}
+
+.review-modal-foot{
+  padding:12px 14px;
+  border-top:1px solid #eee;
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  background:#fafafa;
+}
+.review-btn{
+  border:1px solid #ccc;
+  background:#fff;
+  padding:8px 14px;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:bold;
+}
+.review-btn-primary{
+  background:#93c02d;
+  color:#fff;
+  border:none;
+}
+.review-btn[disabled]{
+  opacity:.5;
+  cursor:not-allowed;
+}
+</style>
+
+{# ===== SVG定義（半星グラデ + 星形） ===== #}
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="halfGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="50%" stop-color="#ffa500"/>
+      <stop offset="50%" stop-color="#ddd"/>
+    </linearGradient>
+
+    <symbol id="icon-star" viewBox="0 0 24 24">
+      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01z"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="shop-header">
+
+  <div class="header-top-row">
+    <h1 class="shop-name">
+      {{ store.store_name }}{% if store.branch_name %} {{ store.branch_name }}{% endif %}
+    </h1>
+
+    <div class="action-group">
+      <button class="btn-action-white" type="button">
+        <span>📍</span>行った
+      </button>
+
+      <form method="post"
+            action="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}"
+            style="margin:0;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_store">
+        <input type="hidden" name="store_id" value="{{ store.id }}">
+        <button class="btn-action-white" type="submit">
+          <span>🔖</span>{% if is_saved %}保存済み{% else %}保存{% endif %}
+        </button>
+      </form>
+
+      {# storesでもreviewsでも「投稿モーダル」を開く #}
+      <button class="btn-action-green" type="button" id="openPostModal">
+        投稿 ▼
+      </button>
+    </div>
+  </div>
+
+  <div class="score-container">
+    <div class="rating-wrap">
+
+      <div class="stars-svg" aria-label="店舗評価">
+        {# star_states は View で build_star_states(avg_rating) して渡す #}
+        {% if star_states %}
+          {% for s in star_states %}
+            <span class="svgstar {{ s }}">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="#icon-star"></use>
+              </svg>
+            </span>
+          {% endfor %}
+        {% else %}
+          {% for _ in "12345" %}
+            <span class="svgstar empty">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="#icon-star"></use>
+              </svg>
+            </span>
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      {# ★重要：store.avg_rating は使わない #}
+      <span class="score-number">{{ avg_rating|default:0|floatformat:1 }}</span>
+
+      {# ★重要：store.review_count は使わない #}
+      <a href="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}"
+         class="review-link">
+        口コミ {{ review_count|default:0 }}件
+      </a>
+
+    </div>
+  </div>
+
+  <div class="meta-info-text">
+    ジャンル：{{ store.scene.scene_name }}<br>
+    予算：￥{{ store.budget }}〜
+  </div>
+
+  <nav>
+    <ul class="main-navigation">
+      <li class="{% if active_main == 'top' %}active{% endif %}">
+        <a href="{% url 'stores:customer_store_info' store.pk %}">トップ</a>
+      </li>
+      <li class="{% if active_main == 'menu' %}active{% endif %}">
+        <a href="{% url 'stores:customer_menu_course' store.pk %}">メニュー・コース</a>
+      </li>
+      <li><span>写真</span></li>
+
+      {# active_main は 'reviews' に統一（include でもそう渡す） #}
+      <li class="{% if active_main == 'reviews' %}active{% endif %}">
+        <a href="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}">口コミ</a>
+      </li>
+
+      <li class="{% if active_main == 'map' %}active{% endif %}">
+        <a href="{% url 'stores:customer_map' %}">地図</a>
+      </li>
+    </ul>
+  </nav>
+
+</header>
+
+<div id="postModal" class="review-modal-backdrop" aria-hidden="true">
+  <div class="review-modal-card" role="dialog" aria-modal="true" aria-label="口コミ投稿">
+    <div class="review-modal-head">
+      <div class="review-modal-title">口コミを投稿</div>
+      <button id="closePostModal" class="review-modal-close" type="button" aria-label="閉じる">×</button>
+    </div>
+
+    <form id="reviewPostForm"
+          method="post"
+          action="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="create_review">
+      <input type="hidden" name="store_id" value="{{ store.id }}">
+      <input type="hidden" name="time_slot" id="timeSlotInput" value="">
+      <input type="hidden" name="score" id="scoreInput" value="">
+
+      <div class="review-modal-body">
+
+        <div class="review-field">
+          <span class="review-label">時間帯</span>
+          <div class="review-timeslot">
+            <button type="button" class="review-slot-btn" data-slot="昼">☀ 昼</button>
+            <button type="button" class="review-slot-btn" data-slot="夜">🌙 夜</button>
+          </div>
+        </div>
+
+        <div class="review-field">
+          <span class="review-label">評価</span>
+          <div class="review-stars" id="modalStars">
+            {% for i in "12345" %}
+              <span class="mstar" data-v="{{ forloop.counter }}">★</span>
+            {% endfor %}
+            <span class="review-score-badge" id="scoreBadge">未選択</span>
+          </div>
+        </div>
+
+        <div class="review-field">
+          <label class="review-label">タイトル</label>
+          <input class="review-text-input" type="text" name="title" maxlength="100" placeholder="例）また行きたい！" required>
+        </div>
+
+        <div class="review-field">
+          <label class="review-label">本文</label>
+          <textarea class="review-text-area" name="body" placeholder="料理・雰囲気・接客など" required></textarea>
+        </div>
+
+        <div class="review-agree">
+          <input id="agreeCheck" type="checkbox" name="agree" value="1">
+          <label for="agreeCheck">内容に同意して投稿します</label>
+        </div>
+
+      </div>
+
+      <div class="review-modal-foot">
+        <button id="cancelPost" class="review-btn" type="button">キャンセル</button>
+        <button id="submitPost" class="review-btn review-btn-primary" type="submit" disabled>同意して投稿</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function(){
+  const modal = document.getElementById("postModal");
+  const openBtn = document.getElementById("openPostModal");
+  const closeBtn = document.getElementById("closePostModal");
+  const cancelBtn = document.getElementById("cancelPost");
+
+  if (!modal || !openBtn || !closeBtn || !cancelBtn) return;
+
+  const slotBtns = modal.querySelectorAll(".review-slot-btn");
+  const timeSlotInput = document.getElementById("timeSlotInput");
+
+  const starsWrap = document.getElementById("modalStars");
+  const stars = starsWrap ? starsWrap.querySelectorAll(".mstar") : [];
+  const scoreInput = document.getElementById("scoreInput");
+  const scoreBadge = document.getElementById("scoreBadge");
+
+  const agree = document.getElementById("agreeCheck");
+  const submitBtn = document.getElementById("submitPost");
+
+  function openModal(){
+    modal.classList.add("active");
+    modal.setAttribute("aria-hidden", "false");
+  }
+  function closeModal(){
+    modal.classList.remove("active");
+    modal.setAttribute("aria-hidden", "true");
+  }
+  function updateSubmitState(){
+    const ok =
+      (agree && agree.checked) &&
+      (timeSlotInput && timeSlotInput.value) &&
+      (scoreInput && scoreInput.value);
+    if (submitBtn) submitBtn.disabled = !ok;
+  }
+
+  openBtn.addEventListener("click", openModal);
+  closeBtn.addEventListener("click", closeModal);
+  cancelBtn.addEventListener("click", closeModal);
+
+  // 背景クリックで閉じる
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  // ESCで閉じる
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal.classList.contains("active")) closeModal();
+  });
+
+  slotBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      slotBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      if (timeSlotInput) timeSlotInput.value = btn.dataset.slot || "";
+      updateSubmitState();
+    });
+  });
+
+  stars.forEach(s => {
+    s.addEventListener("click", () => {
+      const v = s.dataset.v;
+      if (scoreInput) scoreInput.value = v;
+
+      stars.forEach(star => {
+        star.classList.toggle("filled", Number(star.dataset.v) <= Number(v));
+      });
+
+      if (scoreBadge) scoreBadge.textContent = v + " / 5";
+      updateSubmitState();
+    });
+  });
+
+  if (agree) agree.addEventListener("change", updateSubmitState);
+})();
+</script>

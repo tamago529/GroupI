@@ -1,13 +1,19 @@
+# reviews/views.py（コピペ用：整理済み完全版）
+
+from __future__ import annotations
+
+import urllib.parse
 from datetime import date, time
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Max, Count
+from django.db.models import Avg, Max, Count
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from django.views.generic import View , ListView
+from django.utils import timezone
+from django.views import View
+from django.views.generic import ListView
 from django.views.generic.base import TemplateView
-import urllib.parse
 
 from commons.models import (
     CustomerAccount,
@@ -22,45 +28,85 @@ from commons.models import (
     StoreInfoReportPhoto,
     Follow,
 )
-from django.utils import timezone
 
 
-class customer_review_listView(View): # 🌟 LoginRequiredMixinを外して誰でも見れるように変更
+class customer_review_listView(View):
+    """
+    口コミ一覧（誰でも閲覧OK）
+    - 保存・投稿はログイン必須
+    - 共通ヘッダー（_customer_store_common.html）対応：
+      context に store / is_saved / avg_rating / review_count / star_states を入れる
+    """
     template_name = "reviews/customer_review_list.html"
 
+    # ---------------------------------
+    # ログイン顧客取得（継承モデル対策：pkで引き直し）
+    # ---------------------------------
     def _get_login_customer(self, request):
-        """ログイン中の顧客アカウントを取得。未ログインならNoneを返す"""
         if not request.user.is_authenticated:
             return None
-        # Account(親)からCustomerAccount(子)を特定
         return CustomerAccount.objects.filter(pk=request.user.pk).first()
 
+    # ---------------------------------
+    # 表示対象店舗取得
+    # ---------------------------------
     def _get_store(self, request):
-        """表示対象の店舗を取得"""
-        # URL引数（pk）やGET/POSTパラメータ（store_id）から取得を試みる
         sid = request.GET.get("store_id") or request.POST.get("store_id")
-        
-        # もしURLに直接 <int:pk> が含まれている場合（kwargs経由）
-        if not sid and 'pk' in self.kwargs:
-            sid = self.kwargs['pk']
+
+        # pk ルートにも対応（保険）
+        if not sid and "pk" in self.kwargs:
+            sid = self.kwargs["pk"]
 
         if sid:
             store = Store.objects.filter(pk=sid).first()
             if store:
                 return store
-        
-        # 何も指定がない場合はIDが一番若い店を出す（エラー防止）
+
+        # フェイルセーフ（とりあえず1件）
         return Store.objects.order_by("pk").first()
 
+    # ---------------------------------
+    # 星状態生成（★/半★/☆）
+    # ---------------------------------
+    def _build_star_states(self, avg_rating: float) -> list[str]:
+        """
+        星のルール（確定）:
+        - 2.0 -> ★★☆☆☆
+        - 2.5〜2.9 -> ★★☆½☆
+        - 2.9以上 -> 繰り上げ（★★★☆☆）
+        """
+        rating = float(avg_rating or 0.0)
+
+        full = int(rating)
+        frac = rating - full
+
+        if frac >= 0.9:
+            full += 1
+            half = 0
+        elif frac >= 0.5:
+            half = 1
+        else:
+            half = 0
+
+        if full >= 5:
+            full = 5
+            half = 0
+
+        empty = max(0, 5 - full - half)
+        return (["full"] * full) + (["half"] * half) + (["empty"] * empty)
+
+    # =================================
+    # GET：口コミ一覧表示
+    # =================================
     def get(self, request, *args, **kwargs):
-        # 1. ログインユーザーの確認（いなくてもOK）
         customer = self._get_login_customer(request)
-        
-        # 2. 対象店舗の取得
         store = self._get_store(request)
 
-        # 3. 口コミ一覧の取得（未ログインでも見れる）
-        store_reviews = []
+        store_reviews = Review.objects.none()
+        avg_rating = 0.0
+        review_count = 0
+        star_states = ["empty"] * 5
+
         if store:
             store_reviews = (
                 Review.objects
@@ -69,11 +115,18 @@ class customer_review_listView(View): # 🌟 LoginRequiredMixinを外して誰�
                 .order_by("-posted_at")
             )
 
-        # 4. 「保存済み」かどうかの判定（ログインしている場合のみチェック）
+            agg = store_reviews.aggregate(avg=Avg("score"))
+            avg_rating = float(agg["avg"] or 0.0)
+
+            # ★件数（メモ通り）
+            review_count = store_reviews.count()
+
+            star_states = self._build_star_states(avg_rating)
+
+        # 保存済み判定（ログイン時のみ）
         is_saved = False
         if customer and store:
             saved_status = ReservationStatus.objects.filter(status="保存済み").first()
-            # ログインユーザーが予約者名簿（Reservator）にいるか確認
             reservator = Reservator.objects.filter(customer_account=customer).first()
             if saved_status and reservator:
                 is_saved = Reservation.objects.filter(
@@ -82,34 +135,46 @@ class customer_review_listView(View): # 🌟 LoginRequiredMixinを外して誰�
                     booking_status=saved_status,
                 ).exists()
 
-        # 5. 画面へ渡す荷物
         context = {
-            "shop": store,
-            "customer": customer, # 未ログインならNone
-            "store_id": store.pk if store else "",
-            "reviews": store_reviews,
+            # 共通ヘッダー用（★ここが重要）
+            "store": store,
             "is_saved": is_saved,
+            "avg_rating": avg_rating,
+            "review_count": review_count,
+            "star_states": star_states,
+
+            # 一覧用
+            "reviews": store_reviews,
+            "customer": customer,
+            "store_id": store.pk if store else "",
+            # 共通ヘッダーのタブ制御を使っているなら渡す
+            "active_main": "reviews",
+            "active_sub": "top",
         }
         return render(request, self.template_name, context)
 
+    # =================================
+    # POST：保存 / 口コミ投稿
+    # =================================
     def post(self, request, *args, **kwargs):
-        """保存や投稿はログインが必須"""
         action = request.POST.get("action")
         customer = self._get_login_customer(request)
 
-        # 🌟 投稿や保存をしようとした時だけログインチェックを行う
+        # ログイン必須
         if customer is None:
             messages.error(request, "その機能を利用するには顧客アカウントでログインしてください。")
             return redirect(reverse("accounts:customer_login"))
 
         store_id = request.POST.get("store_id")
-        store = Store.objects.filter(pk=store_id).first()
+        store = Store.objects.filter(pk=store_id).first() if store_id else None
 
         if store is None:
             messages.error(request, "店舗情報が取得できませんでした。")
             return redirect(reverse("reviews:customer_review_list"))
 
-        # --- 保存処理 (save_store) ---
+        # -----------------------------
+        # 保存処理
+        # -----------------------------
         if action == "save_store":
             saved_status, _ = ReservationStatus.objects.get_or_create(status="保存済み")
             reservator, _ = Reservator.objects.get_or_create(
@@ -121,19 +186,32 @@ class customer_review_listView(View): # 🌟 LoginRequiredMixinを外して誰�
                     "phone_number": customer.phone_number,
                 }
             )
-            exists = Reservation.objects.filter(booking_user=reservator, store=store, booking_status=saved_status).exists()
+
+            exists = Reservation.objects.filter(
+                booking_user=reservator,
+                store=store,
+                booking_status=saved_status,
+            ).exists()
 
             if exists:
                 messages.info(request, "すでに保存済みです。")
             else:
                 Reservation.objects.create(
-                    booking_user=reservator, store=store, booking_status=saved_status,
-                    visit_date=date.today(), visit_time=time(0, 0), visit_count=1, course="保存"
+                    booking_user=reservator,
+                    store=store,
+                    booking_status=saved_status,
+                    visit_date=date.today(),
+                    visit_time=time(0, 0),
+                    visit_count=1,
+                    course="保存",
                 )
                 messages.success(request, "保存しました。")
+
             return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
 
-        # --- 口コミ投稿処理 (create_review) ---
+        # -----------------------------
+        # 口コミ投稿処理
+        # -----------------------------
         if action == "create_review":
             time_slot = (request.POST.get("time_slot") or "").strip()
             score_raw = (request.POST.get("score") or "").strip()
@@ -146,34 +224,38 @@ class customer_review_listView(View): # 🌟 LoginRequiredMixinを外して誰�
             except ValueError:
                 score = 0
 
-            # バリデーション（入力チェック）
-            if time_slot not in ("昼", "夜") or score < 1 or not title or not body or not agree:
+            if (
+                time_slot not in ("昼", "夜")
+                or score < 1
+                or not title
+                or not body
+                or not agree
+            ):
                 messages.error(request, "入力内容に不備があります。")
                 return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
 
-            # データベースに保存
             Review.objects.create(
                 reviewer=customer,
                 store=store,
                 score=score,
-                review_text=f"【{time_slot}】{title}\n{body}"
+                review_text=f"【{time_slot}】{title}\n{body}",
             )
             messages.success(request, "口コミを投稿しました。")
+
             return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
 
         return redirect(reverse("reviews:customer_review_list"))
+
 
 class customer_store_preserveView(LoginRequiredMixin, View):
     template_name = "reviews/customer_store_preserve.html"
 
     def _get_login_customer(self, request):
-        # CustomerAccount を pk で引き直す（継承モデル対策）
         return CustomerAccount.objects.filter(pk=request.user.pk).first()
 
     def get(self, request, *args, **kwargs):
         customer = self._get_login_customer(request)
 
-        # 顧客ログインじゃない場合
         if customer is None:
             messages.error(request, "顧客アカウントでログインしてください。")
             return redirect(reverse("accounts:customer_login"))
@@ -193,18 +275,9 @@ class customer_store_preserveView(LoginRequiredMixin, View):
             .order_by("-created_at")
         )
 
-        context = {
-            "customer": customer,
-            "saved_list": saved_list,
-        }
-        return render(request, self.template_name, context)
+        return render(request, self.template_name, {"customer": customer, "saved_list": saved_list})
 
     def post(self, request, *args, **kwargs):
-        """
-        保存解除：
-        - テンプレが action=remove_store を送ってくるケース
-        - 送ってこなくても reservation_id があれば削除扱いにする（保険）
-        """
         action = request.POST.get("action") or ""
         reservation_id = request.POST.get("reservation_id")
 
@@ -213,7 +286,6 @@ class customer_store_preserveView(LoginRequiredMixin, View):
             messages.error(request, "顧客アカウントでログインしてください。")
             return redirect(reverse("accounts:customer_login"))
 
-        # ✅ action が無くても reservation_id が来ていれば保存解除とみなす
         if action == "remove_store" or reservation_id:
             if not reservation_id:
                 messages.warning(request, "保存解除に必要な情報が不足しています。")
@@ -223,8 +295,8 @@ class customer_store_preserveView(LoginRequiredMixin, View):
 
             deleted, _ = Reservation.objects.filter(
                 id=reservation_id,
-                booking_user__customer_account=customer,  # ✅ 本人の保存のみ
-                booking_status=saved_status,              # ✅ GETと同じ条件で安全に
+                booking_user__customer_account=customer,
+                booking_status=saved_status,
             ).delete()
 
             if deleted > 0:
@@ -234,7 +306,6 @@ class customer_store_preserveView(LoginRequiredMixin, View):
 
             return redirect(reverse("reviews:customer_store_preserve"))
 
-        # 想定外POSTはGETへ
         return redirect(reverse("reviews:customer_store_preserve"))
 
 
@@ -242,13 +313,11 @@ class customer_reviewer_detailView(LoginRequiredMixin, View):
     template_name = "reviews/customer_reviewer_detail.html"
 
     def _get_login_customer(self, request):
-        # マルチテーブル継承対策：CustomerAccountをpkで引き直す
         return CustomerAccount.objects.filter(pk=request.user.pk).first()
 
     def get(self, request, *args, **kwargs):
         customer = self._get_login_customer(request)
 
-        # CustomerAccount でログインしてない場合
         if customer is None:
             messages.error(request, "顧客アカウントでログインしてください。")
             return redirect(reverse("accounts:customer_login"))
@@ -256,10 +325,9 @@ class customer_reviewer_detailView(LoginRequiredMixin, View):
         cover_field = getattr(customer, "cover_image", None)
         icon_field = getattr(customer, "icon_image", None)
 
-        # ✅ ここで毎回DBから最新の数を取得する
         count_reviews = Review.objects.filter(reviewer=customer).count()
-        count_following = Follow.objects.filter(follower=customer).count()   # ✅ フォロー中
-        count_followers = Follow.objects.filter(followee=customer).count()  # ✅ フォロワー
+        count_following = Follow.objects.filter(follower=customer).count()
+        count_followers = Follow.objects.filter(followee=customer).count()
 
         context = {
             "customer": customer,
@@ -273,30 +341,26 @@ class customer_reviewer_detailView(LoginRequiredMixin, View):
             "stats_likes": getattr(customer, "total_likes", 0),
 
             "count_reviews": count_reviews,
-            "count_following": count_following,  # ✅ 0固定をやめる
-            "count_followers": count_followers,  # ✅ 0固定をやめる
+            "count_following": count_following,
+            "count_followers": count_followers,
         }
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
-        # ✅ hidden の customer_id は使わず、必ずログインユーザー本人を更新
         customer = self._get_login_customer(request)
         if customer is None:
             messages.error(request, "顧客アカウントでログインしてください。")
             return redirect(reverse("accounts:customer_login"))
 
-        # ✅ カバー更新
         if request.FILES.get("cover_image") and hasattr(customer, "cover_image"):
             customer.cover_image = request.FILES["cover_image"]
             customer.save(update_fields=["cover_image"])
 
-        # ✅ アイコン更新
         if request.FILES.get("icon_image") and hasattr(customer, "icon_image"):
             customer.icon_image = request.FILES["icon_image"]
             customer.save(update_fields=["icon_image"])
 
         return redirect(reverse("reviews:customer_reviewer_detail"))
-
 
 
 class customer_reviewer_detail_selfView(LoginRequiredMixin, View):
@@ -363,7 +427,6 @@ class customer_reviewer_review_listView(LoginRequiredMixin, View):
 
         action = request.POST.get("action")
 
-        # 1) 口コミ追加
         if action == "create_review":
             store_id = request.POST.get("store_id")
             store = Store.objects.filter(pk=store_id).first() if store_id else None
@@ -414,7 +477,6 @@ class customer_reviewer_review_listView(LoginRequiredMixin, View):
             messages.success(request, "口コミを投稿しました。")
             return redirect(reverse("reviews:customer_reviewer_review_list"))
 
-        # 2) 口コミ削除（自分の口コミのみ）
         if action == "delete_review":
             review_id = request.POST.get("review_id")
             if not review_id:
@@ -466,8 +528,8 @@ class customer_review_reportView(LoginRequiredMixin, View):
             return redirect(reverse("reviews:customer_review_report"))
 
         message = (request.POST.get("message") or "").strip()
-        user_type = (request.POST.get("user_type") or "").strip()  # 1/2/3
-        agree = request.POST.get("agree")  # on/None
+        user_type = (request.POST.get("user_type") or "").strip()
+        agree = request.POST.get("agree")
 
         if not message:
             messages.error(request, "お問い合わせ内容をご記入ください。")
@@ -495,53 +557,52 @@ class customer_review_reportView(LoginRequiredMixin, View):
         customer.inquiry_log = entry + (customer.inquiry_log or "")
         customer.save(update_fields=["inquiry_log"])
 
-        return redirect(f"{reverse('reviews:customer_common_complete')}?msg=問い合わせが完了しました。")
+        return redirect(f"{reverse('reviews:customer_common_completeView')}?msg={urllib.parse.quote('問い合わせが完了しました。')}")
 
 
 class store_review_reportView(TemplateView):
     template_name = "reviews/store_review_report.html"
+
     def get(self, request, pk):
-        # 1. 通報対象の口コミを1件取得
         review = get_object_or_404(Review, pk=pk)
-        return render(request, self.template_name, {'review': review})
+        return render(request, self.template_name, {"review": review})
 
     def post(self, request, pk):
-        # 2. 投稿ボタンが押された時の処理
         review = get_object_or_404(Review, pk=pk)
-        report_text = request.POST.get('report_text')
+        report_text = request.POST.get("report_text")
 
         if not report_text:
             messages.error(request, "通報理由を入力してください。")
-            return render(request, self.template_name, {'review': review})
+            return render(request, self.template_name, {"review": review})
 
-        # 3. ReviewReportモデルに保存
         ReviewReport.objects.create(
             review=review,
-            reporter=request.user,  # 今ログインしている店舗ユーザー
+            reporter=request.user,
             report_text=report_text,
-            report_status=False      # 未対応状態
+            report_status=False
         )
 
         messages.success(request, "口コミを通報しました。運営にて内容を確認いたします。")
-        # 一覧画面に戻る
-        return redirect('reviews:store_review_list')
+        return redirect("reviews:store_review_list")
+
 
 class store_review_listView(LoginRequiredMixin, ListView):
-    template_name = "reviews/store_review_list.html"
     model = Review
     template_name = "reviews/store_review_list.html"
     context_object_name = "reviews"
 
     def get_queryset(self):
-        # 1. ログイン中のユーザーが紐づいている店舗を取得
-        # (request.user は Account だが、.storeaccount で子テーブルを引ける)
         try:
             user_store = self.request.user.storeaccount.store
-            # 2. その店舗の口コミだけを新しい順に取得
-            return Review.objects.filter(store=user_store).select_related('reviewer').order_by('-posted_at')
+            return (
+                Review.objects
+                .filter(store=user_store)
+                .select_related("reviewer")
+                .order_by("-posted_at")
+            )
         except AttributeError:
-            # 店舗アカウントではない場合（念のためのエラー回避）
             return Review.objects.none()
+
 
 class company_review_listView(TemplateView):
     template_name = "reviews/company_review_list.html"
@@ -563,9 +624,7 @@ class company_review_listView(TemplateView):
         if only_reported:
             qs = qs.filter(reviewreport__report_status=True).distinct()
 
-        reviews = qs.order_by("-posted_at")
-
-        context["reviews"] = reviews
+        context["reviews"] = qs.order_by("-posted_at")
         context["reported_review_ids"] = reported_review_ids
         context["only_reported"] = only_reported
         return context
@@ -593,7 +652,7 @@ class customer_report_input(LoginRequiredMixin, View):
             store = target_review.store
 
         return render(request, self.template_name, {
-            "customer": customer, 
+            "customer": customer,
             "store": store,
             "target_review": target_review
         })
@@ -613,7 +672,6 @@ class customer_report_input(LoginRequiredMixin, View):
             return redirect(request.path + f"?review_id={review_id or ''}&store_id={store_id or ''}")
 
         if review_id:
-            # 口コミ通報の保存
             review = get_object_or_404(Review, pk=review_id)
             ReviewReport.objects.create(
                 review=review,
@@ -623,13 +681,9 @@ class customer_report_input(LoginRequiredMixin, View):
             )
             msg = "口コミの通報が完了しました。"
         else:
-            # 店舗情報報告の保存（既存ロジック）
-            # ...ここに既存の保存処理...
             msg = "店舗情報の報告が完了しました。"
 
-        # ✅ urllib.parse.quote を使って安全にリダイレクト
         return redirect(f"{reverse('commons:customer_common_complete')}?msg={urllib.parse.quote(msg)}&action=create")
-
 
 
 class reportView(TemplateView):

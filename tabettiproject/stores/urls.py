@@ -1,18 +1,27 @@
 from django.urls import path
+
 from .views import (
+    # --- 顧客側 ---
     customer_mapView,
     customer_menu_courseView,
     customer_store_infoView,
     customer_store_basic_editView,
     customer_store_new_registerView,
     customer_store_new_register_confirmView,
+
+    # --- 店舗側 ---
     store_basic_editView,
     store_topView,
     store_logoutView,
+
+    # --- 企業側 ---
     company_store_infoView,
     company_store_managementView,
     store_delete_execute,
+
+    # --- 予約 ---
     StoreAvailabilityJsonView,
+    StoreTimeSlotsJsonView,
     CustomerReservationCreateView,
 )
 
@@ -39,5 +48,6 @@ urlpatterns = [
 
     # --- 予約 ---
     path("availability/<int:store_id>/", StoreAvailabilityJsonView.as_view(), name="availability_json"),
+    path("time-slots/<int:store_id>/", StoreTimeSlotsJsonView.as_view(), name="time_slots_json"),  # ★追加
     path("reserve/<int:store_id>/", CustomerReservationCreateView.as_view(), name="customer_reserve_create"),
 ]
