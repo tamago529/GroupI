@@ -46,7 +46,7 @@ class CustomerRegisterForm(forms.ModelForm):
         from commons.models import CustomerAccount
         model = CustomerAccount
         fields = [
-            'email', 'password', 'nickname', 'phone_number', 
+            'email', 'username', 'password', 'nickname', 'phone_number', 
             'age_group', 'gender', 'address', 'title', 'location', 'birth_date'
         ]
         # sub_email は email をコピーして使う方針で除外、あるいは入力させるか。
@@ -74,7 +74,7 @@ class CustomerRegisterForm(forms.ModelForm):
         # AbstractUserのモデルフォームを使わない場合、set_passwordを自分で呼ぶ必要がある。
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password"])
-        user.username = user.email # usernameをemailと同じにする
+        # user.username = user.email  # 👈 ここを削除：フォームの入力値をそのまま使う
         user.sub_email = user.email # sub_emailもemailと同じにする
         
         # AccountTypeを「顧客」に設定
