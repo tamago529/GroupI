@@ -4,189 +4,117 @@
 
 {% block css %}
 <style>
-/* ===============================
-  ページ全体
-================================ */
-.shop-main{
-  max-width:1000px;
-  margin:0 auto;
-  background:#fff;
-  border:1px solid #e6e6e6;
-  color:#333;
-  font-family:"Hiragino Kaku Gothic ProN","メイリオ",sans-serif;
-}
+.shop-main{max-width:1000px;margin:0 auto;background:#fff;border:1px solid #e6e6e6;color:#333;font-family:"Hiragino Kaku Gothic ProN","メイリオ",sans-serif;}
+.flex-body{display:flex;gap:40px;padding:20px;}
+.left-content{width:650px;}
+.right-sidebar{width:300px;}
+@media (max-width:720px){.flex-body{flex-direction:column;}.left-content,.right-sidebar{width:100%;}}
 
-/* ===============================
-  レイアウト
-================================ */
-.flex-body{
-  display:flex;
-  gap:40px;
-  padding:20px;
-}
-.left-content{ width:650px; }
-.right-sidebar{ width:300px; }
+.photo-preview{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;}
+.photo-preview img{width:120px;height:120px;object-fit:cover;border-radius:6px;border:1px solid #eee;}
 
-@media (max-width:720px){
-  .flex-body{ flex-direction:column; }
-  .left-content,.right-sidebar{ width:100%; }
-}
+.info-title{border-left:4px solid #ff9900;padding-left:10px;font-size:18px;font-weight:bold;margin:30px 0 15px;}
+.detail-table{width:100%;border-collapse:collapse;border:1px solid #e2e2e2;font-size:13px;}
+.detail-table th{width:150px;background:#fafafa;border:1px solid #e2e2e2;padding:12px;text-align:left;}
+.detail-table td{border:1px solid #e2e2e2;padding:12px;}
 
-/* ===============================
-  写真
-================================ */
-.photo-preview{
-  display:flex;
-  flex-wrap:wrap;
-  gap:6px;
-  margin-bottom:20px;
-}
-.photo-preview img{
-  width:120px;
-  height:120px;
-  object-fit:cover;
-  border-radius:4px;
-  border:1px solid #eee;
-}
+.side-box{border:1px solid #e2e2e2;background:#fff;padding:16px;margin-bottom:16px;border-radius:10px;}
+.phone-number{text-align:center;font-size:22px;font-weight:bold;margin:6px 0 16px;}
 
-/* ===============================
-  見出し・テーブル
-================================ */
-.info-title{
-  border-left:4px solid #ff9900;
-  padding-left:10px;
-  font-size:18px;
-  font-weight:bold;
-  margin:30px 0 15px;
-}
-.detail-table{
-  width:100%;
-  border-collapse:collapse;
-  border:1px solid #e2e2e2;
-  font-size:13px;
-}
-.detail-table th{
-  width:150px;
-  background:#fafafa;
-  border:1px solid #e2e2e2;
-  padding:12px;
-  text-align:left;
-}
-.detail-table td{
-  border:1px solid #e2e2e2;
-  padding:12px;
-}
+.no-reserve-box{margin:10px 0 12px;padding:12px;border:1px solid #eee;background:#fafafa;border-radius:10px;}
+.no-reserve-text{margin:0 0 8px;color:#666;font-size:12px;line-height:1.4;}
+.next-month-btn{display:inline-block;padding:8px 12px;border-radius:8px;background:#7a6e54;color:#fff;text-decoration:none;font-weight:bold;font-size:12px;}
+.next-month-btn:hover{opacity:.9;}
 
-/* ===============================
-  サイドバー
-================================ */
-.side-box{
-  border:1px solid #e2e2e2;
-  background:#fff;
-  padding:16px;
-  margin-bottom:16px;
-}
-.phone-number{
-  text-align:center;
-  font-size:22px;
-  font-weight:bold;
-  margin:6px 0 16px;
-}
+.reserve-panel{display:none;border-top:1px solid #eee;margin-top:12px;padding-top:12px;}
+.btn-primary{width:100%;background:#ff6600;color:#fff;border:none;border-radius:8px;font-weight:bold;padding:14px;margin-top:10px;cursor:pointer;}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;}
 
-/* ===============================
-  カレンダー
-================================ */
-.cal-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:10px;
+.form-row{margin:10px 0;}
+.label{font-size:12px;color:#555;margin-bottom:6px;}
+.select, .input{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;background:#fff;}
+.hint{font-size:11px;color:#888;margin-top:6px;line-height:1.4;}
+.badge{display:inline-block;font-size:11px;padding:4px 8px;border-radius:999px;background:#f5f5f5;border:1px solid #eee;color:#666;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media (max-width:720px){.row2{grid-template-columns:1fr;}}
+
+/* ===== 月カレンダー（スクショ寄せ） ===== */
+.cal-wrap{margin-top:10px;}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin:8px 0 10px;}
+.cal-month{font-weight:bold;font-size:14px;}
+.cal-nav{display:flex;gap:8px;}
+.cal-nav a, .cal-nav span{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:34px;height:34px;border-radius:10px;border:1px solid #eee;
+  background:#fff;color:#333;text-decoration:none;font-weight:bold;
 }
-.cal-grid{
-  display:grid;
-  grid-template-columns:repeat(7,1fr);
-  gap:4px;
-  font-size:11px;
-}
+.cal-nav span{opacity:.35;cursor:not-allowed;}
+.cal-week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;}
+.cal-week div{font-size:11px;color:#777;text-align:center;}
+
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
 .cal-cell{
-  text-align:center;
-  padding:8px 0;
-  border:1px solid #eee;
-  border-radius:4px;
+  border:1px solid #eee;border-radius:12px;
+  height:44px;display:flex;align-items:center;justify-content:center;
+  font-size:13px;user-select:none;
+  position:relative; /* ドット用 */
 }
+.cal-cell.is-out{background:#fafafa;color:#bbb;}
+.cal-cell.is-disabled{background:#fafafa;color:#bbb;}
 .cal-cell.is-open{
-  border-color:#ff8c00;
-  color:#ff8c00;
-  font-weight:bold;
-  cursor:pointer;
+  background:#fffaf2;color:#ff8c00;border-color:#ffcf9c;
+  font-weight:bold;cursor:pointer;
 }
-.cal-cell.is-disabled{
-  background:#fafafa;
+.cal-cell.is-selected{outline:2px solid #ff6600;}
+
+/* ===== 土日カラー ===== */
+.cal-cell.is-sat{ color:#2a6cdf; } /* 青 */
+.cal-cell.is-sun{ color:#d83a2e; } /* 赤 */
+
+/* open のときはオレンジが勝つ（数字はオレンジ） */
+.cal-cell.is-open.is-sat,
+.cal-cell.is-open.is-sun{
+  color:#ff8c00;
+}
+
+/* 無効日は薄く */
+.cal-cell.is-disabled.is-sat,
+.cal-cell.is-disabled.is-sun{
   color:#bbb;
 }
 
-/* ===============================
-  予約パネル
-================================ */
-.reserve-panel{
-  display:none;
-  border-top:1px solid #eee;
-  margin-top:12px;
-  padding-top:12px;
+/* ===== 受付日オレンジ○ ===== */
+.open-dot{
+  position:absolute;
+  bottom:6px;
+  left:50%;
+  transform:translateX(-50%);
+  width:6px;height:6px;border-radius:50%;
+  background:#ff8c00;
 }
-.btn-primary{
-  width:100%;
-  background:#ff6600;
-  color:#fff;
-  border:none;
-  border-radius:4px;
-  font-weight:bold;
-  padding:14px;
-  margin-top:10px;
-  cursor:pointer;
-}
+.cal-cell.is-selected .open-dot{ background:#ff6600; }
 
-/* ===============================
-  今月0件案内（追加）
-================================ */
-.no-reserve-box{
-  margin:10px 0 12px;
-  padding:12px;
-  border:1px solid #eee;
-  background:#fafafa;
-  border-radius:10px;
-}
-.no-reserve-text{
-  margin:0 0 8px;
-  color:#666;
-  font-size:12px;
-  line-height:1.4;
-}
-.next-month-btn{
-  display:inline-block;
-  padding:8px 12px;
-  border-radius:8px;
-  background:#7a6e54;
-  color:#fff;
-  text-decoration:none;
-  font-weight:bold;
-  font-size:12px;
-}
-.next-month-btn:hover{ opacity:.9; }
+/* ===== modal ===== */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9998;}
+.modal{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,92vw);background:#fff;border-radius:14px;z-index:9999;border:1px solid #eee;box-shadow:0 10px 30px rgba(0,0,0,.25);}
+.modal-head{padding:14px 16px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;}
+.modal-title{font-weight:bold;}
+.modal-close{border:none;background:transparent;font-size:18px;cursor:pointer;}
+.modal-body{padding:14px 16px;}
+.modal-foot{padding:14px 16px;border-top:1px solid #eee;}
+.btn-sub{width:100%;background:#222;color:#fff;border:none;border-radius:10px;font-weight:bold;padding:14px;cursor:pointer;}
+.btn-sub:disabled{opacity:.5;cursor:not-allowed;}
 </style>
 {% endblock %}
 
 {% block content %}
-
 <div class="shop-main">
 
-  {# ★ includeは1行。共通ヘッダーに必要な値を必ず渡す #}
   {% include "stores/_customer_store_common.html" with store=store is_saved=is_saved star_states=star_states avg_rating=avg_rating review_count=review_count active_main="top" active_sub="top" %}
 
   <div class="flex-body">
 
     <main class="left-content">
-
       <section class="photo-preview">
         {% for img in store_images|slice:":5" %}
           {% if img.image_file %}
@@ -199,71 +127,345 @@
         <h2 class="info-title">店舗情報（詳細）</h2>
         <table class="detail-table">
           <tbody>
-            <tr>
-              <th>店名</th>
-              <td>{{ store.store_name }}{% if store.branch_name %} {{ store.branch_name }}{% endif %}</td>
-            </tr>
-            <tr>
-              <th>住所</th>
-              <td>{{ store.address }}</td>
-            </tr>
-            <tr>
-              <th>ジャンル</th>
-              <td>{{ store.scene.scene_name }}</td>
-            </tr>
-            <tr>
-              <th>営業時間</th>
-              <td>{{ store.business_hours|linebreaksbr }}</td>
-            </tr>
+            <tr><th>店名</th><td>{{ store.store_name }}{% if store.branch_name %} {{ store.branch_name }}{% endif %}</td></tr>
+            <tr><th>住所</th><td>{{ store.address }}</td></tr>
+            <tr><th>ジャンル</th><td>{{ store.scene.scene_name }}</td></tr>
+            <tr><th>営業時間</th><td>{{ store.business_hours|linebreaksbr }}</td></tr>
           </tbody>
         </table>
       </section>
-
     </main>
 
     <aside class="right-sidebar">
-
       <div class="side-box">
         <div style="text-align:center;font-size:11px;color:#666;">お問い合わせ番号</div>
         <div class="phone-number">{{ store.phone_number }}</div>
 
         {% if has_account %}
-          <div class="cal-head">
-            <strong>ネット予約</strong>
-          </div>
 
-          {# ★ 今月 open_days が0件なら、案内＋来月ボタンを出す #}
-          {% if open_days|length == 0 %}
-            <div class="no-reserve-box">
-              <p class="no-reserve-text">今月は予約受付がありません。</p>
-              {# next_ym はViewで作って context に入れる #}
-              <a class="next-month-btn" href="{% url 'stores:customer_store_info' store.pk %}?ym={{ next_ym }}">
-                来月を見る →
-              </a>
-            </div>
-          {% endif %}
-
-          <div class="cal-grid">
-            {% for d in calendar_12 %}
-              <div class="cal-cell {% if d.is_open %}is-open{% else %}is-disabled{% endif %}">
-                {{ d.day }}<br>{{ d.dow_ja }}
+          <div class="cal-wrap">
+            <div class="cal-head">
+              <div>
+                <div style="font-weight:bold;">ネット予約</div>
+                <div class="badge">{{ cal_year }}年{{ cal_month }}月</div>
               </div>
-            {% endfor %}
+
+              <div class="cal-nav">
+                {% if cal_prev_allowed %}
+                  <a href="{% url 'stores:customer_store_info' store.pk %}?ym={{ cal_prev_ym }}">‹</a>
+                {% else %}
+                  <span>‹</span>
+                {% endif %}
+                <a href="{% url 'stores:customer_store_info' store.pk %}?ym={{ cal_next_ym }}">›</a>
+              </div>
+            </div>
+
+            {% if open_days|length == 0 %}
+              <div class="no-reserve-box">
+                <p class="no-reserve-text">今月は予約受付がありません。</p>
+                <a class="next-month-btn" href="{% url 'stores:customer_store_info' store.pk %}?ym={{ cal_next_ym }}">
+                  来月を見る →
+                </a>
+              </div>
+            {% endif %}
+
+            <div class="cal-week">
+              {% for w in weekdays_ja %}
+                <div>{{ w }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="cal-grid" id="calGrid">
+              {% for c in calendar_cells %}
+                <div
+                  class="cal-cell
+                    {% if not c.in_month %}is-out{% endif %}
+                    {% if c.weekday == 5 %}is-sat{% endif %}
+                    {% if c.weekday == 6 %}is-sun{% endif %}
+                    {% if c.is_disabled %}is-disabled{% endif %}
+                    {% if c.is_open %}is-open{% endif %}
+                  "
+                  data-iso="{{ c.iso }}"
+                  data-in-month="{% if c.in_month %}1{% else %}0{% endif %}"
+                >
+                  <span class="day-num">{{ c.day }}</span>
+                  {% if c.is_open %}
+                    <span class="open-dot"></span>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+
+            <!-- 予約パネル（選択後に表示） -->
+            <div class="reserve-panel" id="reservePanel">
+              <div class="form-row">
+                <div class="label">選択日</div>
+                <div class="input" id="selectedDateLabel" style="background:#fafafa;"></div>
+              </div>
+
+              <div class="form-row">
+                <div class="label">コース</div>
+                <select class="select" id="courseSelect">
+                  <option value="30">30分コース</option>
+                  <option value="60" selected>1時間コース</option>
+                  <option value="90">1時間30分コース</option>
+                  <option value="120">2時間コース</option>
+                  <option value="150">2時間30分コース</option>
+                </select>
+              </div>
+
+              <div class="form-row">
+                <div class="label">時間</div>
+                <select class="select" id="timeSelect" disabled>
+                  <option value="">日付を選択してください</option>
+                </select>
+                <div class="hint" id="timeHint"></div>
+              </div>
+
+              <div class="form-row">
+                <div class="label">人数</div>
+                <select class="select" id="countSelect">
+                  <option value="1">1名</option><option value="2" selected>2名</option><option value="3">3名</option>
+                  <option value="4">4名</option><option value="5">5名</option><option value="6">6名</option>
+                  <option value="7">7名</option><option value="8">8名</option><option value="9">9名</option>
+                  <option value="10">10名</option>
+                </select>
+              </div>
+
+              <button class="btn-primary" type="button" id="openReserveBtn" disabled>
+                空席確認・予約する
+              </button>
+            </div>
           </div>
 
-          <div class="reserve-panel" id="reservePanel">
-            <button class="btn-primary">空席確認・予約する</button>
+          <!-- ====== モーダル + フォーム（POST）====== -->
+          <div class="modal-backdrop" id="modalBackdrop"></div>
+          <div class="modal" id="reserveModal" role="dialog" aria-modal="true">
+            <div class="modal-head">
+              <div class="modal-title">予約内容の入力</div>
+              <button class="modal-close" type="button" id="modalCloseBtn">×</button>
+            </div>
+
+            <form method="post" action="{% url 'stores:customer_reserve_create' store.pk %}" id="reserveForm">
+              {% csrf_token %}
+              <div class="modal-body">
+                <input type="hidden" name="visit_date" id="visitDateInput">
+                <input type="hidden" name="visit_time" id="visitTimeInput">
+                <input type="hidden" name="visit_count" id="visitCountInput" value="2">
+                <input type="hidden" name="course_minutes" id="courseMinutesInput" value="60">
+
+                <div class="row2">
+                  <div class="form-row">
+                    <div class="label">日付</div>
+                    <div class="input" id="confirmDate" style="background:#fafafa;"></div>
+                  </div>
+                  <div class="form-row">
+                    <div class="label">時間</div>
+                    <div class="input" id="confirmTime" style="background:#fafafa;"></div>
+                  </div>
+                </div>
+
+                <div class="row2">
+                  <div class="form-row">
+                    <div class="label">コース</div>
+                    <div class="input" id="confirmCourse" style="background:#fafafa;"></div>
+                  </div>
+                  <div class="form-row">
+                    <div class="label">人数</div>
+                    <div class="input" id="confirmCount" style="background:#fafafa;"></div>
+                  </div>
+                </div>
+
+                <div style="margin:14px 0 8px;font-weight:bold;">予約者情報</div>
+
+                <div class="form-row">
+                  <div class="label">氏名</div>
+                  <input class="input" name="full_name" value="{{ reservator_initial.full_name|default:'' }}" placeholder="例）山田 太郎">
+                </div>
+
+                <div class="form-row">
+                  <div class="label">氏名（かな）</div>
+                  <input class="input" name="full_name_kana" value="{{ reservator_initial.full_name_kana|default:'' }}" placeholder="例）やまだ たろう">
+                </div>
+
+                <div class="row2">
+                  <div class="form-row">
+                    <div class="label">メール</div>
+                    <input class="input" name="email" value="{{ reservator_initial.email|default:'' }}" placeholder="example@mail.com">
+                  </div>
+                  <div class="form-row">
+                    <div class="label">電話番号</div>
+                    <input class="input" name="phone_number" value="{{ reservator_initial.phone_number|default:'' }}" placeholder="090-xxxx-xxxx">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="label">備考（任意）</div>
+                  <textarea class="input" name="note" rows="3" placeholder="アレルギーなど"></textarea>
+                </div>
+
+                <div class="hint">
+                  ※ 営業時間外・営業時間を跨ぐ予約は表示されない／送信してもサーバ側でブロックされます。
+                </div>
+              </div>
+
+              <div class="modal-foot">
+                <button class="btn-sub" type="submit" id="submitBtn">この内容で予約する</button>
+              </div>
+            </form>
           </div>
+
+          <script>
+          (function(){
+            const grid = document.getElementById("calGrid");
+            const panel = document.getElementById("reservePanel");
+
+            const selectedDateLabel = document.getElementById("selectedDateLabel");
+            const courseSelect = document.getElementById("courseSelect");
+            const timeSelect = document.getElementById("timeSelect");
+            const timeHint = document.getElementById("timeHint");
+            const countSelect = document.getElementById("countSelect");
+            const openReserveBtn = document.getElementById("openReserveBtn");
+
+            const visitDateInput = document.getElementById("visitDateInput");
+            const visitTimeInput = document.getElementById("visitTimeInput");
+            const visitCountInput = document.getElementById("visitCountInput");
+            const courseMinutesInput = document.getElementById("courseMinutesInput");
+
+            const backdrop = document.getElementById("modalBackdrop");
+            const modal = document.getElementById("reserveModal");
+            const modalCloseBtn = document.getElementById("modalCloseBtn");
+
+            const confirmDate = document.getElementById("confirmDate");
+            const confirmTime = document.getElementById("confirmTime");
+            const confirmCourse = document.getElementById("confirmCourse");
+            const confirmCount = document.getElementById("confirmCount");
+
+            const timeSlotsUrlBase = "{% url 'stores:time_slots_json' store.pk %}";
+
+            let selectedDateIso = "";
+
+            function clearSelected(){
+              grid.querySelectorAll(".cal-cell.is-selected").forEach(el => el.classList.remove("is-selected"));
+            }
+
+            function setTimeSelectLoading(msg){
+              timeSelect.innerHTML = `<option value="">${msg}</option>`;
+              timeSelect.disabled = true;
+              openReserveBtn.disabled = true;
+            }
+
+            function setTimeSelectOptions(slots){
+              timeSelect.innerHTML =
+                `<option value="">時間を選択</option>` +
+                slots.map(s => `<option value="${s}">${s}</option>`).join("");
+              timeSelect.disabled = false;
+            }
+
+            async function loadSlots(){
+              if(!selectedDateIso) return;
+
+              const courseMinutes = courseSelect.value;
+              setTimeSelectLoading("読み込み中...");
+
+              const url = `${timeSlotsUrlBase}?date=${encodeURIComponent(selectedDateIso)}&course_minutes=${encodeURIComponent(courseMinutes)}`;
+
+              try{
+                const res = await fetch(url, {headers: {"X-Requested-With":"XMLHttpRequest"}});
+                const data = await res.json();
+
+                if(!data.ok){
+                  setTimeSelectLoading(data.error || "取得に失敗しました");
+                  timeHint.textContent = "";
+                  return;
+                }
+
+                const slots = data.slots || [];
+                if(slots.length === 0){
+                  setTimeSelectLoading("候補なし");
+                  timeHint.textContent = data.reason ? `理由: ${data.reason}` : "予約できる時間がありません。";
+                  return;
+                }
+
+                setTimeSelectOptions(slots);
+                timeHint.textContent = "";
+              }catch(e){
+                setTimeSelectLoading("通信エラー");
+                timeHint.textContent = "通信に失敗しました。";
+              }
+            }
+
+            function openModal(){
+              visitDateInput.value = selectedDateIso;
+              visitTimeInput.value = timeSelect.value;
+              visitCountInput.value = countSelect.value;
+              courseMinutesInput.value = courseSelect.value;
+
+              confirmDate.textContent = selectedDateIso;
+              confirmTime.textContent = timeSelect.value;
+              confirmCount.textContent = `${countSelect.value}名`;
+              confirmCourse.textContent = courseSelect.options[courseSelect.selectedIndex].textContent;
+
+              backdrop.style.display = "block";
+              modal.style.display = "block";
+            }
+
+            function closeModal(){
+              backdrop.style.display = "none";
+              modal.style.display = "none";
+            }
+
+            grid.addEventListener("click", (e) => {
+              const cell = e.target.closest(".cal-cell");
+              if(!cell) return;
+
+              // 当月外は無効
+              if(cell.dataset.inMonth === "0") return;
+
+              // open日以外は無効（disabled扱い）
+              if(!cell.classList.contains("is-open")) return;
+              if(cell.classList.contains("is-disabled")) return;
+
+              clearSelected();
+              cell.classList.add("is-selected");
+
+              selectedDateIso = cell.dataset.iso || "";
+              selectedDateLabel.textContent = selectedDateIso;
+
+              panel.style.display = "block";
+              setTimeSelectLoading("時間候補を取得します...");
+              loadSlots();
+            });
+
+            courseSelect.addEventListener("change", () => loadSlots());
+
+            timeSelect.addEventListener("change", () => {
+              openReserveBtn.disabled = !timeSelect.value;
+            });
+
+            openReserveBtn.addEventListener("click", () => {
+              if(!selectedDateIso) return;
+              if(!timeSelect.value) return;
+              openModal();
+            });
+
+            backdrop.addEventListener("click", closeModal);
+            modalCloseBtn.addEventListener("click", closeModal);
+            document.addEventListener("keydown", (e) => {
+              if(e.key === "Escape") closeModal();
+            });
+          })();
+          </script>
+
         {% else %}
           <p style="font-size:12px;color:#999;">
             ※ この店舗はネット予約に対応していません
           </p>
         {% endif %}
-      </div>
 
+      </div>
     </aside>
 
   </div>
 </div>
-
 {% endblock %}

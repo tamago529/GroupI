@@ -1,4 +1,3 @@
-# C:\GroupI\tabettiproject\stores\views.py
 from __future__ import annotations
 
 import calendar
@@ -138,7 +137,6 @@ def _validate_customer_reservation_time(
     - 店舗の営業時間が未設定ならNG
     - コース終了が営業時間超え / 中休み跨ぎ はNG
     - 日跨ぎはNG
-
     戻り値: (ok, reason, end_time)
     """
     intervals = _get_store_intervals(store)
@@ -275,6 +273,32 @@ def _get_next_ym(year: int, month: int) -> str:
     return f"{year}-{month + 1:02d}"
 
 
+def _get_reservator_initial(customer: CustomerAccount | None) -> dict[str, str]:
+    """
+    予約モーダルの初期値用：
+    - ログイン顧客に紐づく Reservator があればその値
+    - なければ CustomerAccount の値（あれば）をベースに返す
+    """
+    if not customer:
+        return {"full_name": "", "full_name_kana": "", "email": "", "phone_number": ""}
+
+    r = Reservator.objects.filter(customer_account=customer).first()
+    if r:
+        return {
+            "full_name": r.full_name or (customer.nickname or ""),
+            "full_name_kana": r.full_name_kana or "",
+            "email": r.email or (customer.sub_email or customer.email or ""),
+            "phone_number": r.phone_number or (customer.phone_number or ""),
+        }
+
+    return {
+        "full_name": customer.nickname or "",
+        "full_name_kana": "",
+        "email": (customer.sub_email or customer.email or ""),
+        "phone_number": (customer.phone_number or ""),
+    }
+
+
 # =========================
 # customer views
 # =========================
@@ -310,13 +334,13 @@ class customer_menu_courseView(TemplateView):
         context["closed_ranges_json"] = _format_intervals_for_js(closed_ranges)
         context["has_business_hours"] = bool(intervals)
 
-        # ★ネット予約対応（テンプレが has_account を見てるので渡す）
+        # ★ネット予約対応
         context["has_account"] = StoreAccount.objects.filter(store=store).exists()
 
-        # ★星評価（共通ヘッダー用）
+        # ★星評価
         context.update(_get_store_rating_context(store))
 
-        # ★保存判定（共通ヘッダー用）
+        # ★保存判定
         customer = _get_customer_from_user(self.request.user)
         context["is_saved"] = _get_is_saved_for_customer(customer=customer, store=store)
 
@@ -342,7 +366,7 @@ class customer_store_infoView(TemplateView):
         # 店舗画像
         context["store_images"] = StoreImage.objects.filter(store=store).order_by("id")
 
-        # ★ネット予約対応（テンプレが has_account を見てるので渡す）
+        # ★ネット予約対応
         context["has_account"] = StoreAccount.objects.filter(store=store).exists()
 
         # 表示月（?ym=YYYY-MM）
@@ -368,7 +392,7 @@ class customer_store_infoView(TemplateView):
         last_day = calendar.monthrange(year, month)[1]
         end = date(year, month, last_day)
 
-        # 受付中の日（過去日は除外） ※ここは date 型のまま持っておく
+        # 受付中の日（過去日は除外）※ date型のまま保持
         open_days_dates = list(
             StoreOnlineReservation.objects.filter(
                 store=store,
@@ -381,25 +405,70 @@ class customer_store_infoView(TemplateView):
         # ★テンプレの「今月0件判定」用（文字列）
         context["open_days"] = [d.isoformat() for d in sorted(open_days_dates)]
 
-        # ★★★★★ カレンダー表示用（12日分）を追加 ★★★★★
+        # ★カレンダー表示用（当月：6週×7日=42マス）を追加
+        # --- ここから置き換え ---
         open_set = set(open_days_dates)
-        dow_ja = ["月", "火", "水", "木", "金", "土", "日"]
 
-        calendar_12 = []
-        for i in range(12):
-            d = today + timedelta(days=i)
-            calendar_12.append({
+# 月カレンダーの開始日（当月1日の「月曜始まり」の週の先頭）
+        first = date(year, month, 1)
+# weekday(): 月0..日6
+        offset = first.weekday()  # 月曜始まりなのでそのまま
+        grid_start = first - timedelta(days=offset)
+
+        calendar_cells = []
+        for i in range(42):  # 6週ぶん
+            d = grid_start + timedelta(days=i)
+            in_month = (d.month == month and d.year == year)
+
+    # 当月以外は無効
+            if not in_month:
+                is_open = False
+                is_disabled = True
+            else:
+        # 過去日は無効
+                if d < today:
+                    is_open = False
+                    is_disabled = True
+                else:
+            # 受付日のみ open
+                    is_open = (d in open_set)
+                    is_disabled = (not is_open)
+
+            calendar_cells.append({
                 "date": d,
+                "iso": d.isoformat(),
                 "day": d.day,
-                "dow_ja": dow_ja[d.weekday()],
-                "is_open": (d in open_set),
+                "in_month": in_month,
+                "is_open": is_open,
+                "is_disabled": is_disabled,
             })
-        context["calendar_12"] = calendar_12
-        # ★★★★★ ここまで ★★★★★
+
+        context["calendar_cells"] = calendar_cells
+        context["weekdays_ja"] = ["月", "火", "水", "木", "金", "土", "日"]
+
+# 月送りリンク
+        def _ym(y: int, m: int) -> str:
+            return f"{y}-{m:02d}"
+
+# 次月
+        ny, nm = (year + 1, 1) if month == 12 else (year, month + 1)
+        context["cal_next_ym"] = _ym(ny, nm)
+
+# 前月（ただし過去月は出さない＝リンク無効化用）
+        py, pm = (year - 1, 12) if month == 1 else (year, month - 1)
+        prev_ym = _ym(py, pm)
+# 「今月より前」はリンク無しにしたい
+        is_prev_allowed = (py, pm) >= (today.year, today.month)
+        context["cal_prev_ym"] = prev_ym
+        context["cal_prev_allowed"] = is_prev_allowed
+# --- ここまで置き換え ---
 
         # ログイン顧客（初期値用）
         customer = _get_customer_from_user(self.request.user)
         context["login_customer"] = customer
+
+        # ★予約モーダル初期値（ここが今回の追加点）
+        context["reservator_initial"] = _get_reservator_initial(customer)
 
         # ★保存判定（共通ヘッダー用）
         context["is_saved"] = _get_is_saved_for_customer(customer=customer, store=store)
@@ -408,7 +477,7 @@ class customer_store_infoView(TemplateView):
         context["today"] = today
         context["now_hm"] = timezone.localtime().strftime("%H:%M")
 
-        # ★営業時間情報（UIが「営業時間外を選べない」ために使う）
+        # ★営業時間情報
         intervals = _get_store_intervals(store)
         closed_ranges = _build_closed_ranges(intervals)
         context["store_intervals_json"] = _format_intervals_for_js(intervals)
@@ -461,7 +530,7 @@ class StoreAvailabilityJsonView(View):
 
 
 # -----------------------------
-# ★ 予約：選択可能な時間候補 JSON（任意でUIで使える）
+# ★ 予約：選択可能な時間候補 JSON（UIで使う）
 # -----------------------------
 class StoreTimeSlotsJsonView(View):
     """
@@ -514,6 +583,7 @@ class StoreTimeSlotsJsonView(View):
             while m <= last_start_m:
                 t = _minutes_to_time(m)
 
+                # 当日の過去時刻は除外
                 if target_date == today and t < now_t:
                     m += step
                     continue
