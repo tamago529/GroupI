@@ -81,7 +81,7 @@
         </div>
 
         <div class="btns">
-            <a href="{% url 'reviews:store_review_list' %}" class="btn btn-white">キャンセル</a>
+            <a href="{% url 'reviews:store_review_list' pk=review.store.pk %}" class="btn btn-white">キャンセル</a>
             <button type="submit" class="btn btn-danger">この内容で通報する</button>
         </div>
     </form>

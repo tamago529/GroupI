@@ -60,7 +60,7 @@
         <a href="{{ cancel_url }}" class="btn-base btn-cancel">キャンセル</a>
 
         <!-- OK：POSTで実処理（削除） -->
-        <form method="post" action="{{ ok_action }}" style="margin:0;">
+        <form method="post" action="{% url 'commons:company_common_complete' %}" style="margin:0;">
             {% csrf_token %}
             <input type="hidden" name="next_url" value="{{ next_url }}">
             <button type="submit" class="btn-base btn-ok">OK</button>

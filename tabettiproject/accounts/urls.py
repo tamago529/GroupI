@@ -27,8 +27,6 @@ urlpatterns = [
     path('password_reset/done/', views.customer_password_doneView.as_view(), name='customer_password_done'),
     path('reset/<uidb64>/<token>/', views.customer_password_resetView.as_view(), name='password_reset_confirm'),
     path('reset/done/', views.customer_password_reset_completeView.as_view(), name='customer_password_reset_complete'),
-
-    path("customer_password_reset/", customer_password_resetView.as_view(), name="customer_password_reset"),
     path("store_account_edit/", store_account_editView.as_view(), name="store_account_edit"),
     path("store_login/", store_loginView.as_view(), name="store_login"),
     path("store_logout/", store_logout_view, name="store_logout"),
