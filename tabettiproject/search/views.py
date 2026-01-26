@@ -117,8 +117,15 @@ def customer_search_listView(request):
             avg_rating=models.Avg("review__score"),
             review_count=models.Count("review", distinct=True),
         )
-        .order_by("id")
     )
+
+    # ソート順
+    sort_key = request.GET.get("sort")
+    if sort_key == "rating":
+        # 評価が高い順（同じ評価ならID順）
+        store_qs = store_qs.order_by("-avg_rating", "id")
+    else:
+        store_qs = store_qs.order_by("id")
 
     if area_name:
         store_qs = store_qs.filter(area__area_name__icontains=area_name)
@@ -248,6 +255,7 @@ def customer_search_listView(request):
         "stores": stores,
         "area": area_name,
         "keyword": keyword,
+        "sort": sort_key,          # ★ページング引き継ぎ用
         "time": search_time_str,   # ★ページング引き継ぎ
         "date": date_str,          # ★ページング引き継ぎ
         "MEDIA_URL": settings.MEDIA_URL,

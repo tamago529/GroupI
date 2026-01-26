@@ -5,178 +5,215 @@
 
 {% block css %}
 <style>
-/* =========================
+  /* =========================
    ヒーロー
 ========================= */
-.hero {
-  position: relative;
-  width: 100%;
-  height: 690px;
-  overflow: hidden;
-  background-color: #000;
-}
+  .hero {
+    position: relative;
+    width: 100%;
+    height: 690px;
+    overflow: hidden;
+    background-color: #000;
+  }
 
-.hero-image {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  animation: hero-fade 15s infinite;
-}
+  .hero-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    animation: hero-fade 15s infinite;
+  }
 
-.hero-image:nth-of-type(1) { animation-delay: 0s; }
-.hero-image:nth-of-type(2) { animation-delay: 5s; }
-.hero-image:nth-of-type(3) { animation-delay: 10s; }
+  .hero-image:nth-of-type(1) {
+    animation-delay: 0s;
+  }
 
-@keyframes hero-fade {
-  0%   { opacity: 0; }
-  10%  { opacity: 1; }
-  33%  { opacity: 1; }
-  43%  { opacity: 0; }
-  100% { opacity: 0; }
-}
+  .hero-image:nth-of-type(2) {
+    animation-delay: 5s;
+  }
 
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  color: #fff;
-  background: rgba(0,0,0,0.25);
-}
+  .hero-image:nth-of-type(3) {
+    animation-delay: 10s;
+  }
 
-.hero-overlay h1 {
-  font-size: 36px;
-  font-weight: bold;
-  margin-bottom: 12px;
-}
+  @keyframes hero-fade {
+    0% {
+      opacity: 0;
+    }
 
-.hero-overlay p {
-  font-size: 18px;
-}
+    10% {
+      opacity: 1;
+    }
 
-/* =========================
+    33% {
+      opacity: 1;
+    }
+
+    43% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.25);
+  }
+
+  .hero-overlay h1 {
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 12px;
+  }
+
+  .hero-overlay p {
+    font-size: 18px;
+  }
+
+  /* =========================
    メイン
 ========================= */
-.main-container {
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 32px 16px;
-}
+  .main-container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 32px 16px;
+  }
 
-.section {
-  margin-bottom: 48px;
-}
+  .section {
+    margin-bottom: 48px;
+  }
 
-.section-title {
-  font-size: 22px;
-  font-weight: bold;
-  margin-bottom: 16px;
-  padding-left: 8px;
-  border-left: 6px solid #ff8a00;
-}
+  .section-title {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    padding-left: 8px;
+    border-left: 6px solid #ff8a00;
+  }
 
-/* ===== カード ===== */
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 18px;
-}
+  /* ===== カード ===== */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 18px;
+  }
 
-.card {
-  background: #fff;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  overflow: hidden;
-}
+  .card {
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+  }
 
-.card img {
-  width: 100%;
-  height: 130px;
-  object-fit: cover;
-}
+  .card img {
+    width: 100%;
+    height: 130px;
+    object-fit: cover;
+  }
 
-.card-body {
-  padding: 12px;
-  text-align: center;
-}
+  .card-body {
+    padding: 12px;
+    text-align: center;
+  }
 
-.card-title {
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 6px;
-}
+  .card-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 6px;
+  }
 
-.card-sub {
-  font-size: 14px;
-  color: #666;
-}
+  .card-sub {
+    font-size: 14px;
+    color: #666;
+  }
 
-/* ===== ジャンル ===== */
-.genres {
-  display: flex;
-  gap: 16px;
-  width: 100%;
-  flex-wrap: wrap;
-}
+  /* ===== ジャンル ===== */
+  .genres {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    flex-wrap: wrap;
+  }
 
-.genre-card {
-  flex: 1;
-  min-width: 150px;
+  .genre-card {
+    flex: 1;
+    min-width: 150px;
 
-  background: #fff;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  text-align: center;
-  padding: 12px 6px;
-}
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    padding: 12px 6px;
 
-.genre-card img {
-  width: 100%;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 4px;
-  margin-bottom: 8px;
-}
+    /* Link Reset */
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    transition: opacity 0.2s;
+  }
 
-.genre-card span {
-  font-size: 14px;
-  font-weight: bold;
-}
+  .genre-card:hover {
+    opacity: 0.8;
+  }
 
-/* ✅ 追加：ジャンル一覧へ（枠なし・青） */
-.genre-actions{
-  display:flex;
-  justify-content:flex-end;
-  margin: 12px 0 0 0;
-}
+  .genre-card img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
 
-.genre-list-btn{
-  display:inline-block;
-  padding: 0;                 /* 枠がないので余白は最低限でOK */
-  border: none;               /* ✅ 枠なし */
-  background: transparent;    /* ✅ 背景なし */
-  color: #1e73c9;             /* ✅ 青 */
-  font-size: 14px;
-  font-weight: 700;
-  text-decoration: none;
-  cursor: pointer;
-}
+  .genre-card span {
+    font-size: 14px;
+    font-weight: bold;
+  }
 
-.genre-list-btn:hover{
-  text-decoration: underline; /* hoverだけ下線 */
-}
+  /* ✅ 追加：ジャンル一覧へ（枠なし・青） */
+  .genre-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin: 12px 0 0 0;
+  }
 
-.genre-list-btn:focus-visible{
-  outline: none;
-  text-decoration: underline;
-}
+  .genre-list-btn {
+    display: inline-block;
+    padding: 0;
+    /* 枠がないので余白は最低限でOK */
+    border: none;
+    /* ✅ 枠なし */
+    background: transparent;
+    /* ✅ 背景なし */
+    color: #1e73c9;
+    /* ✅ 青 */
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .genre-list-btn:hover {
+    text-decoration: underline;
+    /* hoverだけ下線 */
+  }
+
+  .genre-list-btn:focus-visible {
+    outline: none;
+    text-decoration: underline;
+  }
 </style>
 {% endblock %}
 
@@ -200,13 +237,14 @@
   <section class="section">
     <div class="section-title">特集・注目コンテンツ</div>
     <div class="cards">
-      <div class="card">
+      <a href="{% url 'search:customer_search_list' %}?sort=rating" class="card"
+        style="text-decoration:none; color:inherit; display:block;">
         <img src="{% static 'images/award.jpg' %}">
         <div class="card-body">
           <div class="card-title">The Tabecchi Award 2026</div>
           <div class="card-sub">ユーザー評価の高い受賞店</div>
         </div>
-      </div>
+      </a>
 
       <div class="card">
         <img src="{% static 'images/hot_restaurants.jpg' %}">
@@ -231,11 +269,21 @@
     <div class="section-title">料理ジャンルから探す</div>
 
     <div class="genres">
-      <div class="genre-card"><img src="{% static 'images/sushi.jpg' %}"><span>寿司</span></div>
-      <div class="genre-card"><img src="{% static 'images/ramen.jpg' %}"><span>ラーメン</span></div>
-      <div class="genre-card"><img src="{% static 'images/yakiniku.jpg' %}"><span>焼肉</span></div>
-      <div class="genre-card"><img src="{% static 'images/cafe.jpg' %}"><span>カフェ</span></div>
-      <div class="genre-card"><img src="{% static 'images/izakaya.jpg' %}"><span>居酒屋</span></div>
+      <a href="{% url 'search:customer_search_list' %}?keyword=寿司" class="genre-card">
+        <img src="{% static 'images/sushi.jpg' %}"><span>寿司</span>
+      </a>
+      <a href="{% url 'search:customer_search_list' %}?keyword=ラーメン" class="genre-card">
+        <img src="{% static 'images/ramen.jpg' %}"><span>ラーメン</span>
+      </a>
+      <a href="{% url 'search:customer_search_list' %}?keyword=焼肉" class="genre-card">
+        <img src="{% static 'images/yakiniku.jpg' %}"><span>焼肉</span>
+      </a>
+      <a href="{% url 'search:customer_search_list' %}?keyword=カフェ" class="genre-card">
+        <img src="{% static 'images/cafe.jpg' %}"><span>カフェ</span>
+      </a>
+      <a href="{% url 'search:customer_search_list' %}?keyword=居酒屋" class="genre-card">
+        <img src="{% static 'images/izakaya.jpg' %}"><span>居酒屋</span>
+      </a>
     </div>
 
     <!-- ✅ 追加：ジャンル一覧へ（枠なし・青） -->
