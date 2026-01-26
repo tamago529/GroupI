@@ -82,9 +82,9 @@ class customer_common_confirmView(View):
                 acc_type, _ = AccountType.objects.get_or_create(account_type="顧客")
 
             # 【最終解決】必須項目をすべて含めてユーザー作成
-            # username と sub_email に email を代入する forms.py の仕様を反映
+            # フォームで入力された username を尊重するように修正
             new_user = CustomerAccount.objects.create_user(
-                username=p.get('email'), 
+                username=p.get('username'), 
                 email=p.get('email'),
                 password=p.get('password'),
                 last_name=p.get('last_name', ''),
@@ -97,7 +97,7 @@ class customer_common_confirmView(View):
                 account_type=acc_type
             )
             
-            # sub_emailの補完
+            # sub_emailの補完（こちらは email と同じで維持）
             new_user.sub_email = p.get('email')
             new_user.save()
             
