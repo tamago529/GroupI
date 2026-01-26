@@ -34,6 +34,12 @@ class CustomerRegisterForm(forms.ModelForm):
         min_length=8,
         help_text="8文字以上で入力してください。"
     )
+    # ユーザーネーム（ログインID）フィールドをカスタマイズ
+    username = forms.CharField(
+        label="ユーザーネーム",
+        help_text="※ログイン時に使用するため、忘れないよう必ず保存してください。この項目は必須です。<br>半角アルファベット、半角数字、および記号（@/./+/-/_）のみ使用可能です（150文字以下）。"
+    )
+
     confirm_password = forms.CharField(
         label="パスワード（確認）",
         widget=forms.PasswordInput()
