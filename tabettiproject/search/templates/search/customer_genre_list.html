@@ -2,105 +2,122 @@
 
 {% block title %}ジャンル一覧{% endblock %}
 
+{% block breadcrumb %}
+<nav class="breadcrumbs">
+  <ol>
+    <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
+    <li><span>料理ジャンル一覧</span></li>
+  </ol>
+</nav>
+{% endblock %}
+
 {% block content %}
 <style>
-    .genre-container { 
-      max-width: 1000px; 
-      margin: 0 auto; 
-      font-family: sans-serif; 
-    }
+  .genre-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    font-family: sans-serif;
+  }
 
-    h2 { 
-      font-size: 1.2rem; 
-      border-bottom: 2px solid #eee; 
-      padding-bottom: 10px; 
-      margin-bottom: 20px; 
-    }
-    
-    .genre-group { 
-      display: flex; 
-      padding: 20px 0; 
-      border-bottom: 1px solid #eee; 
-    }
+  h2 {
+    font-size: 1.2rem;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
 
-    .main-category { 
-      width: 180px; 
-      flex-shrink: 0; 
-    }
+  .genre-group {
+    display: flex;
+    padding: 20px 0;
+    border-bottom: 1px solid #eee;
+  }
 
-    .main-category h3 { 
-      font-size: 16px; 
-      font-weight: bold; 
-      margin: 0; color: #333; 
-    }
-    
-    .sub-categories { 
-      flex-grow: 1; 
-      display: grid; 
-      grid-template-columns: 1fr 1fr; 
-      gap: 20px; 
-    }
-    
-    .genre-link { 
-      display: flex; 
-      text-decoration: none; 
-      color: inherit; 
-    }
+  .main-category {
+    width: 180px;
+    flex-shrink: 0;
+  }
 
-    .genre-link:hover .genre-name { 
-      color: #06c; 
-      text-decoration: underline; 
-    }
-    
-    .genre-img {
+  .main-category h3 {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0;
+    color: #333;
+  }
+
+  .sub-categories {
+    flex-grow: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .genre-link {
+    display: flex;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .genre-link:hover .genre-name {
+    color: #06c;
+    text-decoration: underline;
+  }
+
+  .genre-img {
     width: 60px;
     height: 60px;
-    object-fit: cover; /* これにより画像が歪まずに収まります */
+    object-fit: cover;
+    /* これにより画像が歪まずに収まります */
     border: 1px solid #ddd;
     margin-right: 12px;
-    }
-    
-    .genre-name { 
-      color: #06c; 
-      font-weight: bold; 
-      font-size: 14px; 
-      display: block; 
-    }
-    
-    .genre-tags { 
-      font-size: 11px; 
-      color: #777; 
-      margin-top: 4px; 
-      display: block; 
+  }
+
+  .genre-name {
+    color: #06c;
+    font-weight: bold;
+    font-size: 14px;
+    display: block;
+  }
+
+  .genre-tags {
+    font-size: 11px;
+    color: #777;
+    margin-top: 4px;
+    display: block;
+  }
+
+  @media (max-width: 768px) {
+    .genre-group {
+      flex-direction: column;
     }
 
-    @media (max-width: 768px) {
-        .genre-group { flex-direction: column; }
-        .sub-categories { grid-template-columns: 1fr; margin-top: 15px; }
+    .sub-categories {
+      grid-template-columns: 1fr;
+      margin-top: 15px;
     }
+  }
 </style>
 
 <div class="genre-container">
-    <h2>全国のお店、レストランを料理ジャンルから探す</h2>
+  <h2>全国のお店、レストランを料理ジャンルから探す</h2>
 
-    {% for group in genre_data %}
-    <section class="genre-group">
-        <div class="main-category">
-            <h3>{{ group.category }}</h3>
+  {% for group in genre_data %}
+  <section class="genre-group">
+    <div class="main-category">
+      <h3>{{ group.category }}</h3>
+    </div>
+
+    <div class="sub-categories">
+      {% for item in group.items %}
+      <a href="{% url 'search:customer_search_list' %}?keyword={{ item.name }}" class="genre-link">
+        <img src="/static/images/{{ item.image }}" alt="{{ item.name }}" class="genre-img" width="60" height="60">
+        <div class="genre-info">
+          <span class="genre-name">{{ item.name }}</span>
+          <span class="genre-tags">{{ item.tags }}</span>
         </div>
-        
-        <div class="sub-categories">
-            {% for item in group.items %}
-            <a href="{% url 'search:customer_search_list' %}?keyword={{ item.name }}" class="genre-link">
-                <img src="/static/images/{{ item.image }}" alt="{{ item.name }}" class="genre-img" width="60" height="60">
-                <div class="genre-info">
-                    <span class="genre-name">{{ item.name }}</span>
-                    <span class="genre-tags">{{ item.tags }}</span>
-                </div>
-            </a>
-            {% endfor %}
-        </div>
-    </section>
-    {% endfor %}
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
 </div>
 {% endblock %}

@@ -4,176 +4,214 @@
 
 {% block css %}
 <style>
-/* ===============================
+  /* ===============================
   ページ全体
 ================================ */
-.shop-main{
-  max-width:1000px;
-  margin:0 auto;
-  background:#fff;
-  border:1px solid #e6e6e6;
-  color:#333;
-  font-family:"Hiragino Kaku Gothic ProN","メイリオ",sans-serif;
-}
+  .shop-main {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid #e6e6e6;
+    color: #333;
+    font-family: "Hiragino Kaku Gothic ProN", "メイリオ", sans-serif;
+  }
 
-/* ===============================
+  /* ===============================
   レイアウト
 ================================ */
-.flex-body{
-  display:flex;
-  gap:40px;
-  padding:20px;
-}
-.left-content{ width:650px; }
-.right-sidebar{ width:300px; }
+  .flex-body {
+    display: flex;
+    gap: 40px;
+    padding: 20px;
+  }
 
-@media (max-width:720px){
-  .flex-body{ flex-direction:column; }
-  .left-content,.right-sidebar{ width:100%; }
-}
+  .left-content {
+    width: 650px;
+  }
 
-/* ===============================
+  .right-sidebar {
+    width: 300px;
+  }
+
+  @media (max-width:720px) {
+    .flex-body {
+      flex-direction: column;
+    }
+
+    .left-content,
+    .right-sidebar {
+      width: 100%;
+    }
+  }
+
+  /* ===============================
   写真
 ================================ */
-.photo-preview{
-  display:flex;
-  flex-wrap:wrap;
-  gap:6px;
-  margin-bottom:20px;
-}
-.photo-preview img{
-  width:120px;
-  height:120px;
-  object-fit:cover;
-  border-radius:4px;
-  border:1px solid #eee;
-}
+  .photo-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 20px;
+  }
 
-/* ===============================
+  .photo-preview img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #eee;
+  }
+
+  /* ===============================
   見出し・テーブル
 ================================ */
-.info-title{
-  border-left:4px solid #ff9900;
-  padding-left:10px;
-  font-size:18px;
-  font-weight:bold;
-  margin:30px 0 15px;
-}
-.detail-table{
-  width:100%;
-  border-collapse:collapse;
-  border:1px solid #e2e2e2;
-  font-size:13px;
-}
-.detail-table th{
-  width:150px;
-  background:#fafafa;
-  border:1px solid #e2e2e2;
-  padding:12px;
-  text-align:left;
-}
-.detail-table td{
-  border:1px solid #e2e2e2;
-  padding:12px;
-}
+  .info-title {
+    border-left: 4px solid #ff9900;
+    padding-left: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 30px 0 15px;
+  }
 
-/* ===============================
+  .detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #e2e2e2;
+    font-size: 13px;
+  }
+
+  .detail-table th {
+    width: 150px;
+    background: #fafafa;
+    border: 1px solid #e2e2e2;
+    padding: 12px;
+    text-align: left;
+  }
+
+  .detail-table td {
+    border: 1px solid #e2e2e2;
+    padding: 12px;
+  }
+
+  /* ===============================
   サイドバー
 ================================ */
-.side-box{
-  border:1px solid #e2e2e2;
-  background:#fff;
-  padding:16px;
-  margin-bottom:16px;
-}
-.phone-number{
-  text-align:center;
-  font-size:22px;
-  font-weight:bold;
-  margin:6px 0 16px;
-}
+  .side-box {
+    border: 1px solid #e2e2e2;
+    background: #fff;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
 
-/* ===============================
+  .phone-number {
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+    margin: 6px 0 16px;
+  }
+
+  /* ===============================
   カレンダー
 ================================ */
-.cal-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:10px;
-}
-.cal-grid{
-  display:grid;
-  grid-template-columns:repeat(7,1fr);
-  gap:4px;
-  font-size:11px;
-}
-.cal-cell{
-  text-align:center;
-  padding:8px 0;
-  border:1px solid #eee;
-  border-radius:4px;
-}
-.cal-cell.is-open{
-  border-color:#ff8c00;
-  color:#ff8c00;
-  font-weight:bold;
-  cursor:pointer;
-}
-.cal-cell.is-disabled{
-  background:#fafafa;
-  color:#bbb;
-}
+  .cal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
 
-/* ===============================
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    font-size: 11px;
+  }
+
+  .cal-cell {
+    text-align: center;
+    padding: 8px 0;
+    border: 1px solid #eee;
+    border-radius: 4px;
+  }
+
+  .cal-cell.is-open {
+    border-color: #ff8c00;
+    color: #ff8c00;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .cal-cell.is-disabled {
+    background: #fafafa;
+    color: #bbb;
+  }
+
+  /* ===============================
   予約パネル
 ================================ */
-.reserve-panel{
-  display:none;
-  border-top:1px solid #eee;
-  margin-top:12px;
-  padding-top:12px;
-}
-.btn-primary{
-  width:100%;
-  background:#ff6600;
-  color:#fff;
-  border:none;
-  border-radius:4px;
-  font-weight:bold;
-  padding:14px;
-  margin-top:10px;
-  cursor:pointer;
-}
+  .reserve-panel {
+    display: none;
+    border-top: 1px solid #eee;
+    margin-top: 12px;
+    padding-top: 12px;
+  }
 
-/* ===============================
+  .btn-primary {
+    width: 100%;
+    background: #ff6600;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    padding: 14px;
+    margin-top: 10px;
+    cursor: pointer;
+  }
+
+  /* ===============================
   今月0件案内（追加）
 ================================ */
-.no-reserve-box{
-  margin:10px 0 12px;
-  padding:12px;
-  border:1px solid #eee;
-  background:#fafafa;
-  border-radius:10px;
-}
-.no-reserve-text{
-  margin:0 0 8px;
-  color:#666;
-  font-size:12px;
-  line-height:1.4;
-}
-.next-month-btn{
-  display:inline-block;
-  padding:8px 12px;
-  border-radius:8px;
-  background:#7a6e54;
-  color:#fff;
-  text-decoration:none;
-  font-weight:bold;
-  font-size:12px;
-}
-.next-month-btn:hover{ opacity:.9; }
+  .no-reserve-box {
+    margin: 10px 0 12px;
+    padding: 12px;
+    border: 1px solid #eee;
+    background: #fafafa;
+    border-radius: 10px;
+  }
+
+  .no-reserve-text {
+    margin: 0 0 8px;
+    color: #666;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .next-month-btn {
+    display: inline-block;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: #7a6e54;
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 12px;
+  }
+
+  .next-month-btn:hover {
+    opacity: .9;
+  }
 </style>
+{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumbs">
+  <ol>
+    <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
+    <li><a href="{% url 'search:customer_search_list' %}?keyword={{ store.scene.scene_name }}">{{ store.scene.scene_name
+        }}</a></li>
+    <li><span>{{ store.store_name }}</span></li>
+  </ol>
+</nav>
 {% endblock %}
 
 {% block content %}
@@ -181,7 +219,8 @@
 <div class="shop-main">
 
   {# ★ includeは1行。共通ヘッダーに必要な値を必ず渡す #}
-  {% include "stores/_customer_store_common.html" with store=store is_saved=is_saved star_states=star_states avg_rating=avg_rating review_count=review_count active_main="top" active_sub="top" %}
+  {% include "stores/_customer_store_common.html" with store=store is_saved=is_saved star_states=star_states
+  avg_rating=avg_rating review_count=review_count active_main="top" active_sub="top" %}
 
   <div class="flex-body">
 
@@ -189,9 +228,9 @@
 
       <section class="photo-preview">
         {% for img in store_images|slice:":5" %}
-          {% if img.image_file %}
-            <img src="{{ img.image_file.url }}" alt="{{ store.store_name }}">
-          {% endif %}
+        {% if img.image_file %}
+        <img src="{{ img.image_file.url }}" alt="{{ store.store_name }}">
+        {% endif %}
         {% endfor %}
       </section>
 
@@ -228,36 +267,36 @@
         <div class="phone-number">{{ store.phone_number }}</div>
 
         {% if has_account %}
-          <div class="cal-head">
-            <strong>ネット予約</strong>
-          </div>
+        <div class="cal-head">
+          <strong>ネット予約</strong>
+        </div>
 
-          {# ★ 今月 open_days が0件なら、案内＋来月ボタンを出す #}
-          {% if open_days|length == 0 %}
-            <div class="no-reserve-box">
-              <p class="no-reserve-text">今月は予約受付がありません。</p>
-              {# next_ym はViewで作って context に入れる #}
-              <a class="next-month-btn" href="{% url 'stores:customer_store_info' store.pk %}?ym={{ next_ym }}">
-                来月を見る →
-              </a>
-            </div>
-          {% endif %}
+        {# ★ 今月 open_days が0件なら、案内＋来月ボタンを出す #}
+        {% if open_days|length == 0 %}
+        <div class="no-reserve-box">
+          <p class="no-reserve-text">今月は予約受付がありません。</p>
+          {# next_ym はViewで作って context に入れる #}
+          <a class="next-month-btn" href="{% url 'stores:customer_store_info' store.pk %}?ym={{ next_ym }}">
+            来月を見る →
+          </a>
+        </div>
+        {% endif %}
 
-          <div class="cal-grid">
-            {% for d in calendar_12 %}
-              <div class="cal-cell {% if d.is_open %}is-open{% else %}is-disabled{% endif %}">
-                {{ d.day }}<br>{{ d.dow_ja }}
-              </div>
-            {% endfor %}
+        <div class="cal-grid">
+          {% for d in calendar_12 %}
+          <div class="cal-cell {% if d.is_open %}is-open{% else %}is-disabled{% endif %}">
+            {{ d.day }}<br>{{ d.dow_ja }}
           </div>
+          {% endfor %}
+        </div>
 
-          <div class="reserve-panel" id="reservePanel">
-            <button class="btn-primary">空席確認・予約する</button>
-          </div>
+        <div class="reserve-panel" id="reservePanel">
+          <button class="btn-primary">空席確認・予約する</button>
+        </div>
         {% else %}
-          <p style="font-size:12px;color:#999;">
-            ※ この店舗はネット予約に対応していません
-          </p>
+        <p style="font-size:12px;color:#999;">
+          ※ この店舗はネット予約に対応していません
+        </p>
         {% endif %}
       </div>
 

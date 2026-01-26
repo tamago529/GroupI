@@ -14,19 +14,24 @@
         font-size: 13px;
         line-height: 1.5;
     }
+
     .ranking-container {
         max-width: 980px;
         margin: 0 auto;
         padding-bottom: 50px;
     }
-    
+
     /* パンくずリスト */
     .breadcrumb {
         font-size: 11px;
         margin: 10px 0;
         color: #06c;
     }
-    .breadcrumb a { color: #06c; text-decoration: none; }
+
+    .breadcrumb a {
+        color: #06c;
+        text-decoration: none;
+    }
 
     /* メインとサイドバーの横並び */
     .ranking-wrapper {
@@ -53,6 +58,7 @@
         margin-bottom: 25px;
         display: flex;
     }
+
     .search-section input {
         flex: 1;
         border: 1px solid #ccc;
@@ -60,6 +66,7 @@
         font-size: 14px;
         outline: none;
     }
+
     .search-section button {
         background-color: #83a700;
         color: #fff;
@@ -77,6 +84,7 @@
         margin-bottom: 10px;
         border-radius: 4px;
     }
+
     .summary-item {
         flex: 1;
         padding: 15px;
@@ -84,15 +92,18 @@
         align-items: center;
         justify-content: center;
     }
+
     .summary-item:first-child {
         border-right: 1px solid #e6e6e2;
     }
+
     .summary-date {
         font-size: 18px;
         font-weight: bold;
         margin-right: 20px;
         min-width: 80px;
     }
+
     .summary-details {
         flex: 1;
         text-align: center;
@@ -100,9 +111,23 @@
         border: 1px solid #f0f0ed;
         padding: 10px;
     }
-    .summary-rank-text { font-size: 10px; color: #999; }
-    .summary-rank-val { font-size: 20px; font-weight: bold; margin: 2px 0; }
-    .summary-hint { font-size: 11px; color: #83a700; margin-top: 5px; }
+
+    .summary-rank-text {
+        font-size: 10px;
+        color: #999;
+    }
+
+    .summary-rank-val {
+        font-size: 20px;
+        font-weight: bold;
+        margin: 2px 0;
+    }
+
+    .summary-hint {
+        font-size: 11px;
+        color: #83a700;
+        margin-top: 5px;
+    }
 
     /* セクション見出し（オレンジの縦線） */
     .section-headline {
@@ -122,10 +147,12 @@
         gap: 20px 10px;
         margin-bottom: 15px;
     }
+
     .reviewer-item {
         text-align: center;
         position: relative;
     }
+
     .reviewer-img {
         border: 1px solid #e6e6e2;
         object-fit: cover;
@@ -133,17 +160,23 @@
         width: 90px;
         height: 90px;
     }
+
     .rank-badge {
         position: absolute;
         top: -4px;
         left: 5px;
-        background-color: #bfa541; /* 金色 */
+        background-color: #bfa541;
+        /* 金色 */
         color: #fff;
         font-size: 10px;
         font-weight: bold;
         padding: 1px 5px;
     }
-    .rank-badge.silver { background-color: #a8a8a8; }
+
+    .rank-badge.silver {
+        background-color: #a8a8a8;
+    }
+
     .reviewer-name {
         color: #06c;
         font-weight: bold;
@@ -152,18 +185,24 @@
         margin-top: 5px;
         text-decoration: none;
     }
-    .count-val { font-weight: bold; font-size: 13px; }
+
+    .count-val {
+        font-weight: bold;
+        font-size: 13px;
+    }
 
     /* 地域・ジャンルリンク集（テーブル） */
     .link-section {
         margin-top: 40px;
     }
+
     .link-table {
         width: 100%;
         border-collapse: collapse;
         font-size: 12px;
         border-top: 1px solid #e6e6e2;
     }
+
     /* エラー対策：アクセシブルな名前の提供 */
     .link-table caption {
         clip: rect(1px, 1px, 1px, 1px);
@@ -172,6 +211,7 @@
         position: absolute;
         width: 1px;
     }
+
     .link-table th {
         width: 130px;
         text-align: left;
@@ -181,17 +221,22 @@
         vertical-align: top;
         border-bottom: 1px dotted #ccc;
     }
+
     .link-table td {
         padding: 12px 10px;
         border-bottom: 1px dotted #ccc;
         line-height: 1.8;
     }
+
     .link-table a {
         color: #06c;
         margin-right: 12px;
         text-decoration: none;
     }
-    .link-table a:hover { text-decoration: underline; }
+
+    .link-table a:hover {
+        text-decoration: underline;
+    }
 
     /* ============================================================
        サイドバー（右側）
@@ -199,17 +244,20 @@
     .ranking-sidebar {
         width: 240px;
     }
+
     .sidebar-box {
         background-color: #fff;
         border: 1px solid #e6e6e2;
         padding: 15px;
         margin-bottom: 20px;
     }
+
     .user-profile {
         display: flex;
         align-items: center;
         margin-bottom: 15px;
     }
+
     .profile-img-placeholder {
         width: 40px;
         height: 40px;
@@ -217,22 +265,26 @@
         border: 1px solid #ccc;
         margin-right: 10px;
     }
+
     .sidebar-nav-list {
         list-style: none;
         padding: 0;
         margin: 0;
     }
+
     .sidebar-nav-list li {
         border-bottom: 1px dotted #ccc;
         padding: 10px 0;
         display: flex;
         justify-content: space-between;
     }
+
     .sidebar-nav-list a {
         color: #06c;
         text-decoration: none;
         font-size: 13px;
     }
+
     .premium-card {
         background-color: #fffce6;
         border: 1px solid #f2e699;
@@ -240,6 +292,7 @@
         margin-top: 15px;
         text-align: center;
     }
+
     .premium-btn {
         background-color: #b50044;
         color: #fff;
@@ -254,12 +307,17 @@
 </style>
 {% endblock %}
 
+{% block breadcrumb %}
+<nav class="breadcrumbs">
+    <ol>
+        <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
+        <li><span>レビュアー検索</span></li>
+    </ol>
+</nav>
+{% endblock %}
+
 {% block content %}
 <div class="ranking-container">
-    <nav class="breadcrumb">
-        <a href="#">🏠 タベッチ</a> &gt; レビュアーランキング
-    </nav>
-
     <div class="ranking-wrapper">
         <main class="ranking-main">
             <section class="search-section">
@@ -303,7 +361,8 @@
                 </div>
                 <div class="reviewer-item">
                     <span class="rank-badge silver">2</span>
-                    <img src="https://via.placeholder.com/90" alt="chikaaa220" class="reviewer-img" width="90" height="90">
+                    <img src="https://via.placeholder.com/90" alt="chikaaa220" class="reviewer-img" width="90"
+                        height="90">
                     <a href="#" class="reviewer-name">chikaaa220</a>
                     <div class="count-val">12件</div>
                 </div>
@@ -314,7 +373,8 @@
                     <div class="count-val">12件</div>
                 </div>
             </div>
-            <div style="text-align: right;"><a href="#" style="color: #06c; font-size: 11px;">▶ 大宮・与野周辺のランキングをもっと見る</a></div>
+            <div style="text-align: right;"><a href="#" style="color: #06c; font-size: 11px;">▶ 大宮・与野周辺のランキングをもっと見る</a>
+            </div>
 
             <section class="link-section">
                 <h3 id="region-list-title" style="font-size: 16px; margin-bottom: 10px;">地域ランキング</h3>
@@ -322,11 +382,13 @@
                     <caption>都道府県別のレビュアーランキングリンク一覧</caption>
                     <tr>
                         <th>北海道・東北</th>
-                        <td><a href="#">北海道</a> <a href="#">青森</a> <a href="#">秋田</a> <a href="#">山形</a> <a href="#">岩手</a> <a href="#">宮城</a> <a href="#">福島</a></td>
+                        <td><a href="#">北海道</a> <a href="#">青森</a> <a href="#">秋田</a> <a href="#">山形</a> <a
+                                href="#">岩手</a> <a href="#">宮城</a> <a href="#">福島</a></td>
                     </tr>
                     <tr>
                         <th>関東</th>
-                        <td><a href="#">東京</a> <a href="#">神奈川</a> <a href="#">埼玉</a> <a href="#">千葉</a> <a href="#">栃木</a> <a href="#">茨城</a> <a href="#">群馬</a></td>
+                        <td><a href="#">東京</a> <a href="#">神奈川</a> <a href="#">埼玉</a> <a href="#">千葉</a> <a
+                                href="#">栃木</a> <a href="#">茨城</a> <a href="#">群馬</a></td>
                     </tr>
                 </table>
             </section>
@@ -339,7 +401,8 @@
                     <div style="font-weight: bold;">noconeco <span>さん</span></div>
                 </div>
 
-                <div style="background-color: #fffce6; border: 1px solid #f2e699; padding: 8px; font-size: 11px; margin-bottom: 15px; text-align: center;">
+                <div
+                    style="background-color: #fffce6; border: 1px solid #f2e699; padding: 8px; font-size: 11px; margin-bottom: 15px; text-align: center;">
                     <a href="#" style="color:#06c; text-decoration:none;">携帯電話番号認証にご協力ください</a>
                 </div>
 

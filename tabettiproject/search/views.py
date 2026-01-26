@@ -124,6 +124,9 @@ def customer_search_listView(request):
     if sort_key == "rating":
         # 評価が高い順（同じ評価ならID順）
         store_qs = store_qs.order_by("-avg_rating", "id")
+    elif sort_key == "reviews":
+        # 口コミ数が多い順
+        store_qs = store_qs.order_by("-review_count", "id")
     else:
         store_qs = store_qs.order_by("id")
 

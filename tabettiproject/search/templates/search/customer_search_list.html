@@ -1,6 +1,15 @@
 {% extends "customer_base.html" %}
 {% block title %}検索結果一覧 - タベッチ{% endblock %}
 
+{% block breadcrumb %}
+<nav class="breadcrumbs">
+  <ol>
+    <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
+    <li><span>検索結果一覧</span></li>
+  </ol>
+</nav>
+{% endblock %}
+
 {% block content %}
 <style>
   /* ===============================
@@ -313,7 +322,7 @@
 
     <!-- 左：画像 -->
     <div class="shop-thumb">
-      {% if sort == 'rating' %}
+      {% if sort == 'rating' or sort == 'reviews' %}
       {% with rank=stores.start_index|add:forloop.counter0 %}
       {% if rank == 1 %}
       <div class="rank-badge rank-1">1位</div>

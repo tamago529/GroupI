@@ -5,620 +5,713 @@
 
 {% block css %}
 <style>
-    /* -----------------------------------------------------------
+  /* -----------------------------------------------------------
        1. 全体背景と基本レイアウト
     ----------------------------------------------------------- */
-    body {
-        background-color: #f4f4f2 !important;
-        margin: 0;
-        color: #333;
-        font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
-    }
+  body {
+    background-color: #f4f4f2 !important;
+    margin: 0;
+    color: #333;
+    font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+  }
 
-    .tabelog-container {
-        max-width: 980px;
-        margin: 0 auto;
-        padding-top: 15px;
-    }
+  .tabelog-container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding-top: 15px;
+  }
 
-    .columns-flex {
-        display: flex;
-        gap: 20px;
-        align-items: flex-start;
-    }
+  .columns-flex {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
 
-    /* -----------------------------------------------------------
+  /* -----------------------------------------------------------
        2. プロフィールヘッダー
     ----------------------------------------------------------- */
-    .user-header-unit {
-        background: #fff;
-        border: 1px solid #e6e6e2;
-        margin-bottom: 15px;
-        position: relative;
-    }
+  .user-header-unit {
+    background: #fff;
+    border: 1px solid #e6e6e2;
+    margin-bottom: 15px;
+    position: relative;
+  }
 
-    .cover-wallpaper {
-        height: 145px;
-        background: #ccc url('https://placehold.jp/980x145.png?text=User%20Cover%20Image') no-repeat center;
-        background-size: cover;
-        position: relative;
-    }
+  .cover-wallpaper {
+    height: 145px;
+    background: #ccc url('https://placehold.jp/980x145.png?text=User%20Cover%20Image') no-repeat center;
+    background-size: cover;
+    position: relative;
+  }
 
-    .sub-id-in-cover {
-        position: absolute;
-        left: 145px;
-        bottom: 15px;
-        color: #fff;
-        font-size: 15px;
-        font-weight: bold;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-    }
+  .sub-id-in-cover {
+    position: absolute;
+    left: 145px;
+    bottom: 15px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  }
 
-    .btn-action {
-        background: #fff;
-        border: 1px solid #ccc;
-        padding: 5px 15px;
-        font-size: 12px;
-        font-weight: bold;
-        border-radius: 2px;
-        cursor: pointer;
-    }
+  .btn-action {
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 5px 15px;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 2px;
+    cursor: pointer;
+  }
 
-    /* 口コミ投稿ボタンを緑 */
-    .btn-action.btn-green{
-      background: #82c00e;
-      border-color: #6a9c0b;
-      color: #fff;
-      box-shadow: 0 2px 0 #6a9c0b;
-    }
-    .btn-action.btn-green:hover{
-      filter: brightness(0.98);
-    }
+  /* 口コミ投稿ボタンを緑 */
+  .btn-action.btn-green {
+    background: #82c00e;
+    border-color: #6a9c0b;
+    color: #fff;
+    box-shadow: 0 2px 0 #6a9c0b;
+  }
 
-    /* 投稿コメントを左揃えで整える */
-   .review-text{
-  font-size: 13px;
-  margin-top: 8px;
-  white-space: normal;   /* 連続スペースは潰す */
-  text-align: left;
-  line-height: 1.6;
-}
+  .btn-action.btn-green:hover {
+    filter: brightness(0.98);
+  }
+
+  /* 投稿コメントを左揃えで整える */
+  .review-text {
+    font-size: 13px;
+    margin-top: 8px;
+    white-space: normal;
+    /* 連続スペースは潰す */
+    text-align: left;
+    line-height: 1.6;
+  }
 
 
-    .user-icon-box {
-        position: absolute;
-        left: 20px;
-        bottom: 15px; 
-        width: 110px;
-        height: 110px;
-        background: #fff;
-        border: 1px solid #e6e6e2;
-        padding: 4px;
-        border-radius: 4px;
-        z-index: 10;
-    }
+  .user-icon-box {
+    position: absolute;
+    left: 20px;
+    bottom: 15px;
+    width: 110px;
+    height: 110px;
+    background: #fff;
+    border: 1px solid #e6e6e2;
+    padding: 4px;
+    border-radius: 4px;
+    z-index: 10;
+  }
 
-    .profile-info-nav-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-left: 145px;
-        padding-right: 15px;
-        min-height: 60px;
-    }
+  .profile-info-nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 145px;
+    padding-right: 15px;
+    min-height: 60px;
+  }
 
-    .main-nick { font-size: 20px; font-weight: bold; margin: 0; }
+  .main-nick {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0;
+  }
 
-    .mypage-tabs { display: flex; list-style: none; padding: 0; margin: 0; }
-    .mypage-tabs li a {
-        display: block;
-        padding: 20px 15px;
-        font-size: 13px;
-        font-weight: bold;
-        color: #06c;
-        text-decoration: none;
-        border-bottom: 3px solid transparent;
-    }
-    .mypage-tabs li a.active { color: #333 !important; border-bottom: 3px solid #66635c; }
+  .mypage-tabs {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
 
-    /* -----------------------------------------------------------
+  .mypage-tabs li a {
+    display: block;
+    padding: 20px 15px;
+    font-size: 13px;
+    font-weight: bold;
+    color: #06c;
+    text-decoration: none;
+    border-bottom: 3px solid transparent;
+  }
+
+  .mypage-tabs li a.active {
+    color: #333 !important;
+    border-bottom: 3px solid #66635c;
+  }
+
+  /* -----------------------------------------------------------
        3. サイドバー（エリア・ジャンル・詳細検索）
     ----------------------------------------------------------- */
-    .side-col { width: 210px; flex-shrink: 0; }
+  .side-col {
+    width: 210px;
+    flex-shrink: 0;
+  }
 
-    /* 選択ボックス共通 */
-    .selection-box {
-        background: #fff;
-        border: 1px solid #e6e6e2;
-        border-radius: 4px;
-        margin-bottom: 10px;
-        font-size: 13px;
-    }
+  /* 選択ボックス共通 */
+  .selection-box {
+    background: #fff;
+    border: 1px solid #e6e6e2;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
 
-    .selection-box-head {
-        padding: 10px;
-        font-weight: bold;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #eee;
-        background: #f9f9f7;
-    }
+  .selection-box-head {
+    padding: 10px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    background: #f9f9f7;
+  }
 
-    .selection-item-active {
-        background: #fff9e6;
-        border-left: 3px solid #ffa500;
-        padding: 8px 10px;
-        display: flex;
-        justify-content: space-between;
-        text-decoration: none;
-        color: #333;
-        font-weight: bold;
-    }
+  .selection-item-active {
+    background: #fff9e6;
+    border-left: 3px solid #ffa500;
+    padding: 8px 10px;
+    display: flex;
+    justify-content: space-between;
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+  }
 
-    .map-view-link {
-        display: block;
-        padding: 8px 10px;
-        color: #06c;
-        font-size: 11px;
-        text-decoration: none;
-        border-top: 1px dotted #e6e6e2;
-    }
+  .map-view-link {
+    display: block;
+    padding: 8px 10px;
+    color: #06c;
+    font-size: 11px;
+    text-decoration: none;
+    border-top: 1px dotted #e6e6e2;
+  }
 
-    /* 絞り込み枠 */
-    .filter-box {
-        background: #fff;
-        border: 1px solid #e6e6e2;
-        border-radius: 4px;
-        font-size: 12px;
-        overflow: hidden;
-    }
+  /* 絞り込み枠 */
+  .filter-box {
+    background: #fff;
+    border: 1px solid #e6e6e2;
+    border-radius: 4px;
+    font-size: 12px;
+    overflow: hidden;
+  }
 
-    .filter-section-label {
-        background: #f9f9f7;
-        padding: 5px 10px;
-        font-weight: bold;
-        border-bottom: 1px solid #e6e6e2;
-        border-top: 1px solid #e6e6e2;
-    }
-    .filter-section-label:first-child { border-top: none; }
+  .filter-section-label {
+    background: #f9f9f7;
+    padding: 5px 10px;
+    font-weight: bold;
+    border-bottom: 1px solid #e6e6e2;
+    border-top: 1px solid #e6e6e2;
+  }
 
-    .filter-group { padding: 10px; }
-    .filter-group label { display: block; margin-bottom: 5px; cursor: pointer; }
+  .filter-section-label:first-child {
+    border-top: none;
+  }
 
-    .btn-submit-green {
-        width: 100%;
-        background: #82c00e;
-        color: #fff;
-        border: none;
-        padding: 8px;
-        font-weight: bold;
-        border-radius: 3px;
-        cursor: pointer;
-        box-shadow: 0 2px 0 #6a9c0b;
-        margin-bottom: 10px;
-    }
+  .filter-group {
+    padding: 10px;
+  }
 
-    /* 変更箇所：詳細検索ボタンのスタイル */
-    .btn-detailed-search {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        width: 100%;
-        background: linear-gradient(#ffffff, #f2f2f2);
-        border: 1px solid #ccc;
-        padding: 6px 0;
-        font-size: 11px;
-        font-weight: bold;
-        color: #333;
-        border-radius: 3px;
-        text-decoration: none;
-        box-sizing: border-box;
-    }
+  .filter-group label {
+    display: block;
+    margin-bottom: 5px;
+    cursor: pointer;
+  }
 
-    .btn-detailed-search:hover {
-        background: #f9f9f9;
-        border-color: #bbb;
-    }
+  .btn-submit-green {
+    width: 100%;
+    background: #82c00e;
+    color: #fff;
+    border: none;
+    padding: 8px;
+    font-weight: bold;
+    border-radius: 3px;
+    cursor: pointer;
+    box-shadow: 0 2px 0 #6a9c0b;
+    margin-bottom: 10px;
+  }
 
-    .icon-paper {
-        display: inline-block;
-        width: 12px;
-        height: 12px;
-        background: #fff;
-        border: 1px solid #bbb;
-        position: relative;
-        flex-shrink: 0;
-    }
+  /* 変更箇所：詳細検索ボタンのスタイル */
+  .btn-detailed-search {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 100%;
+    background: linear-gradient(#ffffff, #f2f2f2);
+    border: 1px solid #ccc;
+    padding: 6px 0;
+    font-size: 11px;
+    font-weight: bold;
+    color: #333;
+    border-radius: 3px;
+    text-decoration: none;
+    box-sizing: border-box;
+  }
 
-    .icon-paper::after {
-        content: "";
-        position: absolute;
-        top: 3px; left: 2px;
-        width: 8px; height: 1px;
-        background: #ccc;
-        box-shadow: 0 3px 0 #ccc, 0 6px 0 #ccc;
-    }
+  .btn-detailed-search:hover {
+    background: #f9f9f9;
+    border-color: #bbb;
+  }
 
-    /* -----------------------------------------------------------
+  .icon-paper {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border: 1px solid #bbb;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .icon-paper::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 2px;
+    width: 8px;
+    height: 1px;
+    background: #ccc;
+    box-shadow: 0 3px 0 #ccc, 0 6px 0 #ccc;
+  }
+
+  /* -----------------------------------------------------------
        4. メインコンテンツ（並び替え・注意書き）
     ----------------------------------------------------------- */
-    .main-col { flex-grow: 1; }
+  .main-col {
+    flex-grow: 1;
+  }
 
-    .main-content-card {
-        background: #fff;
-        border: 1px solid #e6e6e2;
-        padding: 20px;
-    }
+  .main-content-card {
+    background: #fff;
+    border: 1px solid #e6e6e2;
+    padding: 20px;
+  }
 
-    .content-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-    }
+  .content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
 
-    .sort-nav {
-        border-bottom: 1px solid #e6e6e2;
-        padding: 8px 0;
-        margin-bottom: 15px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 12px;
-    }
+  .sort-nav {
+    border-bottom: 1px solid #e6e6e2;
+    padding: 8px 0;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+  }
 
-    .sort-list { display: flex; gap: 10px; list-style: none; padding: 0; margin: 0; }
-    .sort-list a { color: #06c; text-decoration: none; }
-    .sort-list .active { color: #333; font-weight: bold; text-decoration: none; }
+  .sort-list {
+    display: flex;
+    gap: 10px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
 
-    .disclaimer-box {
-        background: #f9f9f7;
-        border: 1px solid #e6e6e2;
-        padding: 12px;
-        font-size: 11px;
-        line-height: 1.6;
-        color: #666;
-        margin-bottom: 20px;
-    }
+  .sort-list a {
+    color: #06c;
+    text-decoration: none;
+  }
 
-    .icon-inline { vertical-align: middle; }
-    .select-sm { width: 75px; padding: 2px; border: 1px solid #ccc; font-size: 12px; }
+  .sort-list .active {
+    color: #333;
+    font-weight: bold;
+    text-decoration: none;
+  }
 
-    /* ==========================
+  .disclaimer-box {
+    background: #f9f9f7;
+    border: 1px solid #e6e6e2;
+    padding: 12px;
+    font-size: 11px;
+    line-height: 1.6;
+    color: #666;
+    margin-bottom: 20px;
+  }
+
+  .icon-inline {
+    vertical-align: middle;
+  }
+
+  .select-sm {
+    width: 75px;
+    padding: 2px;
+    border: 1px solid #ccc;
+    font-size: 12px;
+  }
+
+  /* ==========================
        口コミ投稿モーダル
     ========================== */
-    .modal-backdrop{
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.45);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      z-index: 9999;
-    }
-    .modal-backdrop.active{ display:flex; }
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 9999;
+  }
 
-    .modal-card{
-      width: 100%;
-      max-width: 560px;
-      background: #fff;
-      border: 1px solid #e6e6e2;
-      border-radius: 6px;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0,0,0,.2);
-    }
+  .modal-backdrop.active {
+    display: flex;
+  }
 
-    .modal-head{
-      display:flex;
-      justify-content: space-between;
-      align-items:center;
-      padding: 12px 14px;
-      background: #f9f9f7;
-      border-bottom: 1px solid #e6e6e2;
-    }
-    .modal-title{ font-weight: bold; font-size: 14px; }
-    .modal-close{
-      border: none;
-      background: transparent;
-      font-size: 20px;
-      line-height: 1;
-      cursor: pointer;
-      color: #666;
-    }
+  .modal-card {
+    width: 100%;
+    max-width: 560px;
+    background: #fff;
+    border: 1px solid #e6e6e2;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .2);
+  }
 
-    .modal-body{ padding: 14px; }
+  .modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    background: #f9f9f7;
+    border-bottom: 1px solid #e6e6e2;
+  }
 
-    .field{ margin-bottom: 12px; }
-    .label{
-      display:block;
-      font-size: 12px;
-      font-weight: bold;
-      color: #444;
-      margin-bottom: 6px;
-    }
+  .modal-title {
+    font-weight: bold;
+    font-size: 14px;
+  }
 
-    .text-input{
-      width: 100%;
-      padding: 8px 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 13px;
-      box-sizing: border-box;
-    }
-    .text-area{
-      width: 100%;
-      min-height: 120px;
-      padding: 8px 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 13px;
-      box-sizing: border-box;
-      resize: vertical;
-    }
+  .modal-close {
+    border: none;
+    background: transparent;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    color: #666;
+  }
 
-    .time-slot{
-      display:flex;
-      gap: 8px;
-    }
-    .slot-btn{
-      border: 1px solid #ccc;
-      background: #fff;
-      padding: 6px 10px;
-      font-size: 12px;
-      font-weight: bold;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .slot-btn.active{
-      border-color: #66635c;
-      background: #f4f4f2;
-    }
+  .modal-body {
+    padding: 14px;
+  }
 
-    .stars{
-      display:flex;
-      align-items:center;
-      gap: 4px;
-      user-select:none;
-    }
-    .star{
-      font-size: 20px;
-      color: #ccc;
-      cursor: pointer;
-    }
-    .star.filled{ color: #f2b01e; }
-    .score-badge{
-      margin-left: 8px;
-      font-size: 12px;
-      color: #666;
-      border: 1px solid #e6e6e2;
-      padding: 2px 6px;
-      border-radius: 999px;
-      background: #fafafa;
-    }
+  .field {
+    margin-bottom: 12px;
+  }
 
-    .agree-row{
-      display:flex;
-      gap: 8px;
-      align-items:flex-start;
-      font-size: 12px;
-      color:#444;
-      line-height: 1.5;
-    }
-    .agree-row input{ margin-top: 2px; }
+  .label {
+    display: block;
+    font-size: 12px;
+    font-weight: bold;
+    color: #444;
+    margin-bottom: 6px;
+  }
 
-    .modal-foot{
-      display:flex;
-      justify-content: flex-end;
-      gap: 8px;
-      padding: 12px 14px;
-      border-top: 1px solid #e6e6e2;
-      background: #fff;
-    }
+  .text-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 13px;
+    box-sizing: border-box;
+  }
 
-    .btn{
-      border: 1px solid #ccc;
-      background: #fff;
-      padding: 6px 12px;
-      border-radius: 4px;
-      font-weight: bold;
-      font-size: 12px;
-      cursor: pointer;
-    }
-    .btn-primary{
-      border-color: #6a9c0b;
-      background: #82c00e;
-      color: #fff;
-    }
-    .btn-primary:disabled{
-      opacity: .5;
-      cursor: not-allowed;
-    }
+  .text-area {
+    width: 100%;
+    min-height: 120px;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 13px;
+    box-sizing: border-box;
+    resize: vertical;
+  }
 
-    /* 口コミカード左側を全部左揃えに（強制） */
-    .review-left{
-      text-align: left !important;
-    }
-    .review-title{
-      text-align: left !important;
-    }
-    .review-meta{
-      text-align: left !important;
-    }
+  .time-slot {
+    display: flex;
+    gap: 8px;
+  }
+
+  .slot-btn {
+    border: 1px solid #ccc;
+    background: #fff;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .slot-btn.active {
+    border-color: #66635c;
+    background: #f4f4f2;
+  }
+
+  .stars {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    user-select: none;
+  }
+
+  .star {
+    font-size: 20px;
+    color: #ccc;
+    cursor: pointer;
+  }
+
+  .star.filled {
+    color: #f2b01e;
+  }
+
+  .score-badge {
+    margin-left: 8px;
+    font-size: 12px;
+    color: #666;
+    border: 1px solid #e6e6e2;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: #fafafa;
+  }
+
+  .agree-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: 12px;
+    color: #444;
+    line-height: 1.5;
+  }
+
+  .agree-row input {
+    margin-top: 2px;
+  }
+
+  .modal-foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 14px;
+    border-top: 1px solid #e6e6e2;
+    background: #fff;
+  }
+
+  .btn {
+    border: 1px solid #ccc;
+    background: #fff;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    border-color: #6a9c0b;
+    background: #82c00e;
+    color: #fff;
+  }
+
+  .btn-primary:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+  }
+
+  /* 口コミカード左側を全部左揃えに（強制） */
+  .review-left {
+    text-align: left !important;
+  }
+
+  .review-title {
+    text-align: left !important;
+  }
+
+  .review-meta {
+    text-align: left !important;
+  }
 </style>
+{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumbs">
+  <ol>
+    <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
+    <li><a href="{% url 'reviews:customer_reviewer_detail' %}">{{ user_name }}さんのページ</a></li>
+    <li><span>口コミ投稿一覧</span></li>
+  </ol>
+</nav>
 {% endblock %}
 
 {% block content %}
 <div class="tabelog-container">
 
-    <header class="user-header-unit">
-        <div class="cover-wallpaper"style="background-image:url('{% if cover_image_url %}{{ cover_image_url }}{% else %}{% static "images/default_cover.jpg" %}{% endif %}');">
-        
+  <header class="user-header-unit">
+    <div class="cover-wallpaper"
+      style="background-image:url('{% if cover_image_url %}{{ cover_image_url }}{% else %}{% static "
+      images/default_cover.jpg" %}{% endif %}');">
 
-            <div class="sub-id-in-cover">{{ user_name }}のレストランガイド</div>
-        </div>
-        <div class="user-icon-box">
-            <img src="{% if user_icon_url %}{{ user_icon_url }}{% else %}{% static 'images/default_icon.png' %}{% endif %}"
-                 alt="ユーザーアイコン"
-                 width="110"
-                 height="110">
-        </div>
-        <div class="profile-info-nav-bar">
-            <div class="name-set"><h1 class="main-nick">{{ user_name }}</h1></div>
-            <nav>
-                <ul class="mypage-tabs">
-                    <li><a href="{% url 'reviews:customer_reviewer_detail' %}">トップ</a></li>
-                    <li><a href="#" class="active">口コミ</a></li>
-                    <li><a href="{% url 'follows:customer_follow_list' %}">フォロー中</a></li>
-                    <li><a href="{% url 'follows:customer_follower_list' %}">フォロワー</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
 
-    <div class="columns-flex">
-        
-        <aside class="side-col">
-            <section class="selection-box">
-                <div class="selection-box-head">エリア<span>📍</span></div>
-                <a href="#" class="selection-item-active">
-                    <span>すべて</span> <span>&gt;</span>
-                </a>
-                <a href="#" class="map-view-link">📍 このエリアを地図で見る</a>
-            </section>
-
-            <section class="selection-box">
-                <div class="selection-box-head">ジャンル<span>🍴</span></div>
-                <a href="#" class="selection-item-active">
-                    <span>すべて</span> <span>&gt;</span>
-                </a>
-            </section>
-
-            <div class="filter-box">
-                <form action="" method="get">
-                    <div class="filter-section-label">口コミ対象</div>
-                    <div class="filter-group">
-                        <label><input type="radio" name="target" checked> すべて</label>
-                        <label><input type="radio" name="target"> 夜の口コミ</label>
-                        <label><input type="radio" name="target"> 昼の口コミ</label>
-                    </div>
-
-                    <div class="filter-section-label">予算</div>
-                    <div class="filter-group">
-                        <div style="display:flex; gap:10px; margin-bottom:8px;">
-                            <label><input type="radio" name="b_type" checked> 🌙</label>
-                            <label><input type="radio" name="b_type"> ☀️</label>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:3px;">
-                            <select name="min" class="select-sm" aria-label="予算の下限">
-                                <option>下限なし</option>
-                            </select>
-                            <span>〜</span>
-                            <select name="max" class="select-sm" aria-label="予算の上限">
-                                <option>上限なし</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="filter-group">
-                        <button type="submit" class="btn-submit-green">絞り込む</button>
-                        <a href="#" class="btn-detailed-search">
-                            <span class="icon-paper" aria-hidden="true"></span>
-                                もっと詳しい条件で検索
-                        </a>
-                    </div>
-                </form>
-            </div>
-        </aside>
-
-        <main class="main-col">
-            <div class="main-content-card">
-                <div class="content-header">
-                    <h2 style="font-size: 18px; margin: 0;">口コミ一覧</h2>
-                    <a href="#" style="font-size: 12px; color: #06c; text-decoration: none;">
-                        検索条件を変更 <img src="..." alt="..." width="12" height="12" class="icon-inline">
-                    </a>
-                </div>
-
-                <div style="font-size: 12px; color: #999; margin-bottom: 10px;">
-                    🔍 検索条件が指定されていません。
-                </div>
-
-                <nav class="sort-nav">
-                    <ul class="sort-list">
-                        <li><a href="#" class="active">更新日順</a></li>
-                        <li style="color:#ccc;">|</li>
-                        <li><a href="#">訪問月順</a></li>
-                        <li style="color:#ccc;">|</li>
-                        <li><a href="#">評価順</a></li>
-                        <li style="color:#ccc;">|</li>
-                        <li><a href="#">行った回数順</a></li>
-                        <li style="color:#ccc;">|</li>
-                        <li><a href="#">タベッチ総合ランキング</a></li>
-                    </ul>
-                    <a href="#" style="color:#06c; text-decoration:none; font-weight:bold;">地図表示</a>
-                </nav>
-
-                <div style="font-size: 13px; margin: 15px 0 10px;">
-                    <strong>全 {{ my_reviews_total }}</strong> 件
-                </div>
-
-                {% if my_reviews_total > 0 %}
-                  {% for rv in my_reviews %}
-                    <article style="border-top:1px dotted #ccc; padding: 16px 0;">
-                      <div style="display:flex; justify-content:space-between; gap:12px;">
-
-                        <!-- 左側：タイトル/時間帯/本文（全部左揃え） -->
-                        <div class="review-left" style="min-width:0;">
-                          <div class="review-title" style="font-weight:bold; font-size:15px;">
-                            {{ rv.store.store_name }}{% if rv.store.branch_name %} {{ rv.store.branch_name }}{% endif %}
-                          </div>
-
-                          <div class="review-meta" style="font-size:12px; color:#666; margin-top:4px;">
-                            投稿日：{{ rv.posted_at|date:"Y/m/d H:i" }} ／ 評価：{{ rv.score }}
-                          </div>
-
-                          <div class="review-text">
-                            {{ rv.review_text|linebreaksbr }}
-                          </div>
-                        </div>
-
-                        <!-- 右側：ボタン群 -->
-                        <div style="display:flex; gap:8px; align-items:flex-start; flex-shrink:0;">
-
-                          <!-- 口コミを投稿（モーダル起動） -->
-                          <button type="button"
-                                  class="btn-action btn-green openPostModal"
-                                  style="white-space:nowrap;">
-                            口コミを投稿
-                          </button>
-
-                          <!-- 削除 -->
-                          <form method="post" action="{% url 'reviews:customer_reviewer_review_list' %}" style="margin:0;">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="delete_review">
-                            <input type="hidden" name="review_id" value="{{ rv.id }}">
-                            <button type="submit" class="btn-action"
-                                    style="white-space:nowrap;"
-                                    onclick="return confirm('削除してもよろしいですか？');">
-                              削除
-                            </button>
-                          </form>
-
-                        </div>
-                      </div>
-                    </article>
-                  {% endfor %}
-                {% else %}
-                  <div style="padding:20px; color:#666;">
-                    まだ口コミがありません。
-                  </div>
-                {% endif %}
-            </div>    
-        </main>
+      <div class="sub-id-in-cover">{{ user_name }}のレストランガイド</div>
     </div>
+    <div class="user-icon-box">
+      <img src="{% if user_icon_url %}{{ user_icon_url }}{% else %}{% static 'images/default_icon.png' %}{% endif %}"
+        alt="ユーザーアイコン" width="110" height="110">
+    </div>
+    <div class="profile-info-nav-bar">
+      <div class="name-set">
+        <h1 class="main-nick">{{ user_name }}</h1>
+      </div>
+      <nav>
+        <ul class="mypage-tabs">
+          <li><a href="{% url 'reviews:customer_reviewer_detail' %}">トップ</a></li>
+          <li><a href="#" class="active">口コミ</a></li>
+          <li><a href="{% url 'follows:customer_follow_list' %}">フォロー中</a></li>
+          <li><a href="{% url 'follows:customer_follower_list' %}">フォロワー</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <div class="columns-flex">
+
+    <aside class="side-col">
+      <section class="selection-box">
+        <div class="selection-box-head">エリア<span>📍</span></div>
+        <a href="#" class="selection-item-active">
+          <span>すべて</span> <span>&gt;</span>
+        </a>
+        <a href="#" class="map-view-link">📍 このエリアを地図で見る</a>
+      </section>
+
+      <section class="selection-box">
+        <div class="selection-box-head">ジャンル<span>🍴</span></div>
+        <a href="#" class="selection-item-active">
+          <span>すべて</span> <span>&gt;</span>
+        </a>
+      </section>
+
+      <div class="filter-box">
+        <form action="" method="get">
+          <div class="filter-section-label">口コミ対象</div>
+          <div class="filter-group">
+            <label><input type="radio" name="target" checked> すべて</label>
+            <label><input type="radio" name="target"> 夜の口コミ</label>
+            <label><input type="radio" name="target"> 昼の口コミ</label>
+          </div>
+
+          <div class="filter-section-label">予算</div>
+          <div class="filter-group">
+            <div style="display:flex; gap:10px; margin-bottom:8px;">
+              <label><input type="radio" name="b_type" checked> 🌙</label>
+              <label><input type="radio" name="b_type"> ☀️</label>
+            </div>
+            <div style="display:flex; align-items:center; gap:3px;">
+              <select name="min" class="select-sm" aria-label="予算の下限">
+                <option>下限なし</option>
+              </select>
+              <span>〜</span>
+              <select name="max" class="select-sm" aria-label="予算の上限">
+                <option>上限なし</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <button type="submit" class="btn-submit-green">絞り込む</button>
+            <a href="#" class="btn-detailed-search">
+              <span class="icon-paper" aria-hidden="true"></span>
+              もっと詳しい条件で検索
+            </a>
+          </div>
+        </form>
+      </div>
+    </aside>
+
+    <main class="main-col">
+      <div class="main-content-card">
+        <div class="content-header">
+          <h2 style="font-size: 18px; margin: 0;">口コミ一覧</h2>
+          <a href="#" style="font-size: 12px; color: #06c; text-decoration: none;">
+            検索条件を変更 <img src="..." alt="..." width="12" height="12" class="icon-inline">
+          </a>
+        </div>
+
+        <div style="font-size: 12px; color: #999; margin-bottom: 10px;">
+          🔍 検索条件が指定されていません。
+        </div>
+
+        <nav class="sort-nav">
+          <ul class="sort-list">
+            <li><a href="#" class="active">更新日順</a></li>
+            <li style="color:#ccc;">|</li>
+            <li><a href="#">訪問月順</a></li>
+            <li style="color:#ccc;">|</li>
+            <li><a href="#">評価順</a></li>
+            <li style="color:#ccc;">|</li>
+            <li><a href="#">行った回数順</a></li>
+            <li style="color:#ccc;">|</li>
+            <li><a href="#">タベッチ総合ランキング</a></li>
+          </ul>
+          <a href="#" style="color:#06c; text-decoration:none; font-weight:bold;">地図表示</a>
+        </nav>
+
+        <div style="font-size: 13px; margin: 15px 0 10px;">
+          <strong>全 {{ my_reviews_total }}</strong> 件
+        </div>
+
+        {% if my_reviews_total > 0 %}
+        {% for rv in my_reviews %}
+        <article style="border-top:1px dotted #ccc; padding: 16px 0;">
+          <div style="display:flex; justify-content:space-between; gap:12px;">
+
+            <!-- 左側：タイトル/時間帯/本文（全部左揃え） -->
+            <div class="review-left" style="min-width:0;">
+              <div class="review-title" style="font-weight:bold; font-size:15px;">
+                {{ rv.store.store_name }}{% if rv.store.branch_name %} {{ rv.store.branch_name }}{% endif %}
+              </div>
+
+              <div class="review-meta" style="font-size:12px; color:#666; margin-top:4px;">
+                投稿日：{{ rv.posted_at|date:"Y/m/d H:i" }} ／ 評価：{{ rv.score }}
+              </div>
+
+              <div class="review-text">
+                {{ rv.review_text|linebreaksbr }}
+              </div>
+            </div>
+
+            <!-- 右側：ボタン群 -->
+            <div style="display:flex; gap:8px; align-items:flex-start; flex-shrink:0;">
+
+              <!-- 口コミを投稿（モーダル起動） -->
+              <button type="button" class="btn-action btn-green openPostModal" style="white-space:nowrap;">
+                口コミを投稿
+              </button>
+
+              <!-- 削除 -->
+              <form method="post" action="{% url 'reviews:customer_reviewer_review_list' %}" style="margin:0;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete_review">
+                <input type="hidden" name="review_id" value="{{ rv.id }}">
+                <button type="submit" class="btn-action" style="white-space:nowrap;"
+                  onclick="return confirm('削除してもよろしいですか？');">
+                  削除
+                </button>
+              </form>
+
+            </div>
+          </div>
+        </article>
+        {% endfor %}
+        {% else %}
+        <div style="padding:20px; color:#666;">
+          まだ口コミがありません。
+        </div>
+        {% endif %}
+      </div>
+    </main>
+  </div>
 </div>
 
 <!-- ==========================
@@ -645,7 +738,7 @@
           <select id="storeSelect" name="store_id" class="text-input">
             <option value="">選択してください</option>
             {% for s in store_choices %}
-              <option value="{{ s.id }}">{{ s.store_name }}{% if s.branch_name %} {{ s.branch_name }}{% endif %}</option>
+            <option value="{{ s.id }}">{{ s.store_name }}{% if s.branch_name %} {{ s.branch_name }}{% endif %}</option>
             {% endfor %}
           </select>
         </div>
@@ -697,96 +790,96 @@
 </div>
 
 <script>
-(function(){
-  const modal = document.getElementById("postModal");
-  const closeBtn = document.getElementById("closePostModal");
-  const cancelBtn = document.getElementById("cancelBtn");
+  (function () {
+    const modal = document.getElementById("postModal");
+    const closeBtn = document.getElementById("closePostModal");
+    const cancelBtn = document.getElementById("cancelBtn");
 
-  const storeSelect = document.getElementById("storeSelect");
-  const slotBtns = modal.querySelectorAll(".slot-btn");
-  const timeSlotInput = document.getElementById("timeSlotInput");
+    const storeSelect = document.getElementById("storeSelect");
+    const slotBtns = modal.querySelectorAll(".slot-btn");
+    const timeSlotInput = document.getElementById("timeSlotInput");
 
-  const starsWrap = document.getElementById("stars");
-  const stars = starsWrap.querySelectorAll(".star");
-  const scoreInput = document.getElementById("scoreInput");
-  const scoreBadge = document.getElementById("scoreBadge");
+    const starsWrap = document.getElementById("stars");
+    const stars = starsWrap.querySelectorAll(".star");
+    const scoreInput = document.getElementById("scoreInput");
+    const scoreBadge = document.getElementById("scoreBadge");
 
-  const agree = document.getElementById("agreeCheck");
-  const submitBtn = document.getElementById("submitBtn");
+    const agree = document.getElementById("agreeCheck");
+    const submitBtn = document.getElementById("submitBtn");
 
-  function openModal(){
-    modal.classList.add("active");
-    modal.setAttribute("aria-hidden", "false");
-  }
-  function closeModal(){
-    modal.classList.remove("active");
-    modal.setAttribute("aria-hidden", "true");
-  }
+    function openModal() {
+      modal.classList.add("active");
+      modal.setAttribute("aria-hidden", "false");
+    }
+    function closeModal() {
+      modal.classList.remove("active");
+      modal.setAttribute("aria-hidden", "true");
+    }
 
-  function updateSubmitState(){
-    const okStore = !!(storeSelect && storeSelect.value);
-    const okAgree = agree.checked;
-    const okSlot = timeSlotInput.value === "昼" || timeSlotInput.value === "夜";
-    const okScore = Number(scoreInput.value || "0") >= 1;
-    submitBtn.disabled = !(okStore && okAgree && okSlot && okScore);
-  }
+    function updateSubmitState() {
+      const okStore = !!(storeSelect && storeSelect.value);
+      const okAgree = agree.checked;
+      const okSlot = timeSlotInput.value === "昼" || timeSlotInput.value === "夜";
+      const okScore = Number(scoreInput.value || "0") >= 1;
+      submitBtn.disabled = !(okStore && okAgree && okSlot && okScore);
+    }
 
-  // 複数の「口コミを投稿」ボタンに対応
-  document.querySelectorAll(".openPostModal").forEach(btn => {
-    btn.addEventListener("click", openModal);
-  });
-
-  closeBtn.addEventListener("click", closeModal);
-  cancelBtn.addEventListener("click", closeModal);
-
-  modal.addEventListener("click", (e) => {
-    if(e.target === modal) closeModal();
-  });
-
-  if(storeSelect){
-    storeSelect.addEventListener("change", updateSubmitState);
-  }
-
-  slotBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      slotBtns.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      timeSlotInput.value = btn.dataset.slot;
-      updateSubmitState();
+    // 複数の「口コミを投稿」ボタンに対応
+    document.querySelectorAll(".openPostModal").forEach(btn => {
+      btn.addEventListener("click", openModal);
     });
-  });
 
-  function paintStars(v){
+    closeBtn.addEventListener("click", closeModal);
+    cancelBtn.addEventListener("click", closeModal);
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    if (storeSelect) {
+      storeSelect.addEventListener("change", updateSubmitState);
+    }
+
+    slotBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        slotBtns.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        timeSlotInput.value = btn.dataset.slot;
+        updateSubmitState();
+      });
+    });
+
+    function paintStars(v) {
+      stars.forEach(s => {
+        const sv = Number(s.dataset.v);
+        s.classList.toggle("filled", sv <= v);
+      });
+      scoreBadge.textContent = v ? (v + " / 5") : "未選択";
+    }
+
     stars.forEach(s => {
-      const sv = Number(s.dataset.v);
-      s.classList.toggle("filled", sv <= v);
+      s.addEventListener("click", () => {
+        const v = Number(s.dataset.v);
+        scoreInput.value = String(v);
+        paintStars(v);
+        updateSubmitState();
+      });
+      s.addEventListener("mouseenter", () => {
+        const v = Number(s.dataset.v);
+        paintStars(v);
+      });
     });
-    scoreBadge.textContent = v ? (v + " / 5") : "未選択";
-  }
 
-  stars.forEach(s => {
-    s.addEventListener("click", () => {
-      const v = Number(s.dataset.v);
-      scoreInput.value = String(v);
+    starsWrap.addEventListener("mouseleave", () => {
+      const v = Number(scoreInput.value || "0");
       paintStars(v);
-      updateSubmitState();
     });
-    s.addEventListener("mouseenter", () => {
-      const v = Number(s.dataset.v);
-      paintStars(v);
-    });
-  });
 
-  starsWrap.addEventListener("mouseleave", () => {
-    const v = Number(scoreInput.value || "0");
-    paintStars(v);
-  });
+    agree.addEventListener("change", updateSubmitState);
 
-  agree.addEventListener("change", updateSubmitState);
-
-  paintStars(0);
-  updateSubmitState();
-})();
+    paintStars(0);
+    updateSubmitState();
+  })();
 </script>
 
 {% endblock %}

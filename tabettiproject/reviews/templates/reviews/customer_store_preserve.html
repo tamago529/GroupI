@@ -5,196 +5,212 @@
 
 {% block css %}
 <style>
-  .page-wrap{
+  .page-wrap {
     max-width: 980px;
     margin: 0 auto;
     padding: 18px 12px 60px;
     font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
-    color:#333;
+    color: #333;
   }
 
-  .content-grid{
-    display:flex;
-    gap:18px;
+  .content-grid {
+    display: flex;
+    gap: 18px;
   }
 
   /* 左カラム */
-  .side{
-    width:260px;
-    flex:0 0 260px;
+  .side {
+    width: 260px;
+    flex: 0 0 260px;
   }
 
-  .side-box{
-    background:#fff;
-    border:1px solid #e5e5e5;
-    border-radius:4px;
-    margin-bottom:14px;
-    overflow:hidden;
+  .side-box {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    margin-bottom: 14px;
+    overflow: hidden;
   }
 
-  .side-box h3{
-    margin:0;
-    font-size:13px;
-    font-weight:bold;
-    padding:10px 12px;
-    background:#f7f3ea;
-    border-bottom:1px solid #e5e5e5;
+  .side-box h3 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 10px 12px;
+    background: #f7f3ea;
+    border-bottom: 1px solid #e5e5e5;
   }
 
-  .side-link{
-    display:block;
-    padding:10px 12px;
-    font-size:12px;
-    color:#06c;
-    text-decoration:none;
-    border-top:1px solid #eee;
-  }
-  .side-link:hover{ background:#fafafa; }
-
-  .side-box .inner{
-    padding:12px;
-    font-size:12px;
-    color:#555;
+  .side-link {
+    display: block;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: #06c;
+    text-decoration: none;
+    border-top: 1px solid #eee;
   }
 
-  .side-row{
-    display:flex;
-    gap:8px;
-    align-items:center;
-    margin:8px 0;
+  .side-link:hover {
+    background: #fafafa;
   }
 
-  .side-row select, .side-row input[type="text"]{
-    width:100%;
-    padding:6px 8px;
-    border:1px solid #ccc;
-    border-radius:3px;
-    font-size:12px;
+  .side-box .inner {
+    padding: 12px;
+    font-size: 12px;
+    color: #555;
   }
 
-  .btn-green{
-    width:100%;
-    background:#79a52c;
-    color:#fff;
-    border:none;
-    border-radius:3px;
-    padding:10px 0;
-    font-weight:bold;
-    cursor:pointer;
-    font-size:13px;
+  .side-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 8px 0;
   }
 
-  .btn-outline{
-    width:100%;
-    background:#fff;
-    color:#06c;
-    border:1px solid #cfd8e6;
-    border-radius:3px;
-    padding:9px 0;
-    font-weight:bold;
-    cursor:pointer;
-    font-size:12px;
-    margin-top:8px;
+  .side-row select,
+  .side-row input[type="text"] {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 12px;
+  }
+
+  .btn-green {
+    width: 100%;
+    background: #79a52c;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 10px 0;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 13px;
+  }
+
+  .btn-outline {
+    width: 100%;
+    background: #fff;
+    color: #06c;
+    border: 1px solid #cfd8e6;
+    border-radius: 3px;
+    padding: 9px 0;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 12px;
+    margin-top: 8px;
   }
 
   /* 右カラム */
-  .main{
-    flex:1;
-    min-width:0;
+  .main {
+    flex: 1;
+    min-width: 0;
   }
 
-  .main-title{
-    font-size:18px;
-    font-weight:bold;
-    margin:6px 0 10px;
+  .main-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 6px 0 10px;
   }
 
-  .main-note{
-    font-size:12px;
-    color:#666;
-    margin-bottom:14px;
+  .main-note {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 14px;
   }
 
-  .main-head{
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    border-bottom:1px solid #e5e5e5;
-    padding-bottom:10px;
-    margin-bottom:12px;
+  .main-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    border-bottom: 1px solid #e5e5e5;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
   }
 
-  .sort-row{
-    font-size:12px;
-    color:#666;
-    display:flex;
-    gap:14px;
-    align-items:center;
-    margin-bottom:14px;
-  }
-  .sort-row a{
-    color:#06c;
-    text-decoration:none;
+  .sort-row {
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 14px;
   }
 
-  .empty{
-    border:1px solid #eee;
-    background:#fff;
-    padding:36px 18px;
-    text-align:center;
-    color:#666;
-    border-radius:4px;
-  }
-  .empty strong{
-    display:block;
-    font-size:13px;
-    color:#333;
-    margin-bottom:8px;
+  .sort-row a {
+    color: #06c;
+    text-decoration: none;
   }
 
-  .preserve-list{
-    display:flex;
-    flex-direction:column;
-    gap:12px;
+  .empty {
+    border: 1px solid #eee;
+    background: #fff;
+    padding: 36px 18px;
+    text-align: center;
+    color: #666;
+    border-radius: 4px;
   }
 
-  .preserve-card{
-    border:1px solid #e5e5e5;
-    background:#fff;
-    border-radius:4px;
-    padding:12px;
-    display:flex;
-    justify-content:space-between;
-    gap:12px;
-    align-items:flex-start;
+  .empty strong {
+    display: block;
+    font-size: 13px;
+    color: #333;
+    margin-bottom: 8px;
   }
 
-  .preserve-name{
-    font-weight:bold;
-    margin-bottom:6px;
+  .preserve-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
-  .preserve-meta{
-    font-size:12px;
-    color:#666;
-    line-height:1.5;
+  .preserve-card {
+    border: 1px solid #e5e5e5;
+    background: #fff;
+    border-radius: 4px;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .preserve-name {
+    font-weight: bold;
+    margin-bottom: 6px;
+  }
+
+  .preserve-meta {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.5;
   }
 
   /* 追加：保存解除ボタン */
-  .btn-remove{
-    background:#fff;
-    border:1px solid #d6d6d6;
-    color:#666;
-    border-radius:3px;
-    padding:8px 10px;
-    font-size:12px;
-    cursor:pointer;
-    white-space:nowrap;
+  .btn-remove {
+    background: #fff;
+    border: 1px solid #d6d6d6;
+    color: #666;
+    border-radius: 3px;
+    padding: 8px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
   }
-  .btn-remove:hover{
-    background:#fafafa;
+
+  .btn-remove:hover {
+    background: #fafafa;
   }
 </style>
+{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumbs">
+  <ol>
+    <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
+    <li><span>保存済みのお店</span></li>
+  </ol>
+</nav>
 {% endblock %}
 
 {% block content %}
@@ -221,16 +237,22 @@
         <div class="inner">
           <div class="side-row">
             <label style="width:48px;">下限</label>
-            <select><option>下限なし</option></select>
+            <select>
+              <option>下限なし</option>
+            </select>
           </div>
           <div class="side-row">
             <label style="width:48px;">上限</label>
-            <select><option>上限なし</option></select>
+            <select>
+              <option>上限なし</option>
+            </select>
           </div>
 
           <div style="margin-top:10px; font-weight:bold; font-size:12px;">営業時間</div>
           <div class="side-row">
-            <select><option>指定なし</option></select>
+            <select>
+              <option>指定なし</option>
+            </select>
           </div>
 
           <div class="side-row" style="margin-top:10px;">
@@ -292,37 +314,37 @@
       </div>
 
       {% if saved_list and saved_list|length > 0 %}
-        <div class="preserve-list">
-          {% for r in saved_list %}
-            <div class="preserve-card">
-              <div>
-                <div class="preserve-name">
-                  {{ r.store.store_name }} {{ r.store.branch_name }}
-                </div>
-                <div class="preserve-meta">
-                  保存日時：{{ r.created_at|date:"Y/m/d H:i" }}<br>
-                  エリア：{{ r.store.area.area_name }} ／ シーン：{{ r.store.scene.scene_name }}<br>
-                  住所：{{ r.store.address }}
-                </div>
-              </div>
-
-              <!-- ✅ 保存解除ボタン -->
-              <form method="post" action="{% url 'reviews:customer_store_preserve' %}" style="margin:0;">
-  {% csrf_token %}
-  <input type="hidden" name="action" value="remove_store">
-  <input type="hidden" name="reservation_id" value="{{ r.id }}">
-  <button type="submit" class="btn-remove" onclick="return confirm('保存解除しますか？');">
-    保存解除
-  </button>
-</form>
+      <div class="preserve-list">
+        {% for r in saved_list %}
+        <div class="preserve-card">
+          <div>
+            <div class="preserve-name">
+              {{ r.store.store_name }} {{ r.store.branch_name }}
             </div>
-          {% endfor %}
+            <div class="preserve-meta">
+              保存日時：{{ r.created_at|date:"Y/m/d H:i" }}<br>
+              エリア：{{ r.store.area.area_name }} ／ シーン：{{ r.store.scene.scene_name }}<br>
+              住所：{{ r.store.address }}
+            </div>
+          </div>
+
+          <!-- ✅ 保存解除ボタン -->
+          <form method="post" action="{% url 'reviews:customer_store_preserve' %}" style="margin:0;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="remove_store">
+            <input type="hidden" name="reservation_id" value="{{ r.id }}">
+            <button type="submit" class="btn-remove" onclick="return confirm('保存解除しますか？');">
+              保存解除
+            </button>
+          </form>
         </div>
+        {% endfor %}
+      </div>
       {% else %}
-        <div class="empty">
-          <strong>保存リストのお店はありません。</strong>
-          <div>検索結果やお店のページなどから保存したお店を管理することができます。</div>
-        </div>
+      <div class="empty">
+        <strong>保存リストのお店はありません。</strong>
+        <div>検索結果やお店のページなどから保存したお店を管理することができます。</div>
+      </div>
       {% endif %}
 
     </main>
