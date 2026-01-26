@@ -1,126 +1,121 @@
+{% extends "customer_base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="ja">
 
-<head>
-  <meta charset="UTF-8">
-  <title>会員登録 | 食べログ管理</title>
+{% block title %}会員登録 | 食べログ管理{% endblock %}
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+{% block css %}
+<style>
+  .auth-page-wrapper .register-wrapper {
+    margin: 10px 0 40px;
+    display: flex;
+    justify-content: center;
+  }
 
-    body {
-      margin: 0;
-      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
-      background-color: #faf8f4;
-      color: #333;
-    }
+  .auth-page-wrapper .register-box {
+    width: 800px;
+    background: #fff;
+    padding: 60px 50px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    text-align: center;
+  }
 
-    .register-wrapper {
-      margin: 40px 0;
-      display: flex;
-      justify-content: center;
-    }
+  .auth-page-wrapper h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    border-bottom: none; /* Login側と干渉しないよう明示 */
+  }
 
-    .register-box {
-      width: 480px; /* 少し余裕を持たせました */
-      background: #fff;
-      padding: 32px 28px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      text-align: center;
-    }
+  .auth-page-wrapper .register-description {
+    font-size: 18px;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 30px;
+  }
 
-    h2 {
-      font-size: 22px;
-      margin-bottom: 12px;
-      font-weight: bold;
-    }
+  .auth-page-wrapper .form-group {
+    text-align: left;
+    margin-bottom: 24px;
+  }
 
-    .register-description {
-      font-size: 14px;
-      color: #555;
-      line-height: 1.6;
-      margin-bottom: 24px;
-    }
+  .auth-page-wrapper label {
+    display: block;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #444;
+  }
 
-    .form-group {
-      text-align: left;
-      margin-bottom: 20px;
-    }
+  .auth-page-wrapper .form-group input,
+  .auth-page-wrapper .form-group select,
+  .auth-page-wrapper .form-group textarea {
+    width: 100%;
+    padding: 16px;
+    font-size: 18px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    box-sizing: border-box; /* 追加 */
+  }
 
-    label {
-      display: block;
-      font-size: 13px;
-      font-weight: bold;
-      margin-bottom: 8px;
-      color: #444;
-    }
+  .auth-page-wrapper .form-group input:focus {
+    outline: none;
+    border-color: #ff8a00;
+    box-shadow: 0 0 0 2px rgba(255, 138, 0, 0.1);
+  }
 
-    /* Djangoのformから出力されるinput/selectにスタイルを適用 */
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      width: 100%;
-      padding: 12px;
-      font-size: 14px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      background-color: #fff;
-    }
+  .auth-page-wrapper .btn-submit {
+    width: 100%;
+    padding: 20px 0;
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+    background: #ff8a00;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.2s;
+  }
 
-    .form-group input:focus {
-      outline: none;
-      border-color: #ff8a00;
-      box-shadow: 0 0 0 2px rgba(255, 138, 0, 0.1);
-    }
+  .auth-page-wrapper .btn-submit:hover {
+    background: #e67e00;
+  }
 
-    .btn-submit {
-      width: 100%;
-      padding: 16px 0;
-      font-size: 16px;
-      font-weight: bold;
-      color: #fff;
-      background: #ff8a00;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: background 0.2s;
-    }
+  .auth-page-wrapper .back-link {
+    margin-top: 24px;
+    font-size: 13px;
+  }
 
-    .btn-submit:hover {
-      background: #e67e00;
-    }
+  .auth-page-wrapper .back-link a {
+    color: #0066cc;
+    text-decoration: none;
+  }
 
-    .back-link {
-      margin-top: 24px;
-      font-size: 13px;
-    }
+  .auth-page-wrapper .back-link a:hover {
+    text-decoration: underline;
+  }
 
-    .back-link a {
-      color: #0066cc;
-      text-decoration: none;
-    }
+  .auth-page-wrapper .error-text {
+    color: #e02020;
+    font-size: 12px;
+    margin-top: 5px;
+  }
+</style>
+{% endblock %}
 
-    .back-link a:hover {
-      text-decoration: underline;
-    }
+{% block breadcrumb %}
+<nav class="breadcrumbs">
+  <ol>
+    <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
+    <li><span>新規会員登録</span></li>
+  </ol>
+</nav>
+{% endblock %}
 
-    .error-text {
-      color: #e02020;
-      font-size: 12px;
-      margin-top: 5px;
-    }
-  </style>
-</head>
-
-<body>
-
-  {% include 'customer_header.html' %}
-
+{% block content %}
+<div class="auth-page-wrapper">
   <div class="register-wrapper">
     <div class="register-box">
 
@@ -146,13 +141,13 @@
         <div class="form-group">
           <label for="{{ field.id_for_label }}">{{ field.label }}</label>
           {{ field }}
-          
+
           {% if field.help_text %}
           <div style="font-size: 11px; color: #777; margin-top: 4px;">
             {{ field.help_text }}
           </div>
           {% endif %}
-          
+
           {% for error in field.errors %}
           <div class="error-text">
             {{ error }}
@@ -174,8 +169,5 @@
 
     </div>
   </div>
-
-  {% include 'customer_footer.html' %}
-
-</body>
-</html>
+</div>
+{% endblock %}

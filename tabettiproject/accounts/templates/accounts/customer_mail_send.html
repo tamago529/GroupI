@@ -1,146 +1,126 @@
+{% extends "customer_base.html" %}
 {% load static %}
-{% include 'customer_header.html' %}
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>パスワード再設定</title>
 
-  <style>
-    /* ===== 共通 ===== */
-    * {
-      box-sizing: border-box;
-    }
+{% block title %}パスワードをお忘れの方 | タベッチ{% endblock %}
 
-    body {
-      margin: 0;
-      font-family: Helvetica, Arial, sans-serif;
-      background-color: #faf8f4;
-      color: #333;
-    }
+{% block css %}
+<style>
+  .auth-page-wrapper .password-reset-wrapper {
+    margin: 10px 0 40px;
+    display: flex;
+    justify-content: center;
+  }
 
-/* ===== レイアウト ===== */
-.password-reset-wrapper {
-  margin: 40px 0;   /* ← 上下余白を指定（ここで調整） */
-  display: flex;
-  justify-content: center;
-}
+  .auth-page-wrapper .password-reset-box {
+    width: 800px;
+    background: #fff;
+    padding: 60px 50px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    text-align: center;
+  }
 
-.password-reset-box {
-  width: 420px;
-  background: #fff;
-  padding: 28px 28px; /* ← 少しだけ縦を詰める */
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  text-align: center;
-}
+  .auth-page-wrapper h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
 
-    /* ===== 見出し ===== */
-    h2 {
-      font-size: 22px;
-      margin-bottom: 16px;
-      font-weight: bold;
-    }
+  .auth-page-wrapper .reset-description {
+    font-size: 18px;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 30px;
+  }
 
-    /* ===== 説明 ===== */
-    .reset-description {
-      font-size: 14px;
-      color: #555;
-      line-height: 1.6;
-      margin-bottom: 24px;
-    }
+  .auth-page-wrapper .form-group {
+    text-align: left;
+    margin-bottom: 24px;
+  }
 
-    /* ===== フォーム ===== */
-    .form-group {
-      text-align: left;
-      margin-bottom: 20px;
-    }
+  .auth-page-wrapper label {
+    display: block;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #444;
+  }
 
-    label {
-      display: block;
-      font-size: 13px;
-      margin-bottom: 6px;
-    }
+  .auth-page-wrapper input {
+    width: 100%;
+    padding: 16px;
+    font-size: 18px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
 
-    input {
-      width: 100%;
-      padding: 10px 12px;
-      font-size: 14px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
+  .auth-page-wrapper .btn-submit {
+    width: 100%;
+    padding: 20px 0;
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+    background: #ff8a00;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
 
-    input:focus {
-      outline: none;
-      border-color: #ff8a00;
-    }
+  .auth-page-wrapper .back-links {
+    margin-top: 30px;
+    font-size: 15px;
+  }
 
-    /* ===== ボタン ===== */
-    .btn-submit {
-      width: 100%;
-      padding: 12px 0;
-      font-size: 15px;
-      font-weight: bold;
-      color: #fff;
-      background: #ff8a00;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
+  .auth-page-wrapper .back-links a {
+    color: #ff8a00;
+    text-decoration: none;
+  }
 
-    .btn-submit:hover {
-      opacity: 0.85;
-    }
+  .auth-page-wrapper .back-links a:hover {
+    text-decoration: underline;
+  }
+</style>
+{% endblock %}
 
-    /* ===== リンク ===== */
-    .back-links {
-      margin-top: 20px;
-      font-size: 13px;
-    }
+{% block breadcrumb %}
+<nav class="breadcrumbs">
+  <ol>
+    <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
+    <li><a href="{% url 'accounts:customer_login' %}">ログイン</a></li>
+    <li><span>パスワードをお忘れの方</span></li>
+  </ol>
+</nav>
+{% endblock %}
 
-    .back-links a {
-      color: #ff8a00;
-      text-decoration: none;
-    }
+{% block content %}
+<div class="auth-page-wrapper">
+  <div class="password-reset-wrapper">
+    <div class="password-reset-box">
 
-    .back-links a:hover {
-      text-decoration: underline;
-    }
-  </style>
-</head>
+      <h2>パスワードをお忘れの方</h2>
 
-<body>
+      <p class="reset-description">
+        タベッチに登録したメールアドレスを入力してください。<br>
+        パスワード再設定用のメールをお送りします。
+      </p>
 
-<div class="password-reset-wrapper">
-  <div class="password-reset-box">
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="email">メールアドレス</label>
+          <input type="email" name="email" id="email" required placeholder="example@mail.com">
+        </div>
+        <button type="submit" class="btn-submit">送信する</button>
+      </form>
 
-    <h2>パスワードをお忘れの方</h2>
+      <div class="back-links">
+        <a href="{% url 'accounts:customer_login' %}">
+          新規登録／ログイン画面に戻る
+        </a>
+      </div>
 
-    <p class="reset-description">
-      タベッチに登録したメールアドレスを入力してください。<br>
-      パスワード再設定用のメールをお送りします。
-    </p>
-
- <form method="post">
-  {% csrf_token %}
-  <div class="form-group">
-    <label for="email">メールアドレス</label>
-    <!-- 🌟 name="email" になっていればOK -->
-    <input type="email" name="email" id="email" required>
-  </div>
-  <button type="submit" class="btn-submit">送信</button>
-</form>
-
-
-    <div class="back-links">
-      <a href="{% url 'accounts:customer_login' %}">
-        新規登録／ログイン画面に戻る
-      </a>
     </div>
-
   </div>
 </div>
-
-</body>
-</html>
-{% include 'customer_footer.html' %}
+{% endblock %}
