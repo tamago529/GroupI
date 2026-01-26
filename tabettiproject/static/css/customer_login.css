@@ -1,16 +1,16 @@
-body {
-  margin: 0;
-  font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
-  background: #faf8f4;
+/* customer_login.css - Scoped for Base Inheritance */
+
+.auth-page-wrapper {
+  min-height: calc(100vh - 120px);
 }
 
-.auth-wrapper {
+.auth-page-wrapper .auth-wrapper {
   max-width: 1100px;
   margin: 30px auto;
   padding: 0 20px;
 }
 
-.notice {
+.auth-page-wrapper .notice {
   background: #fff8d8;
   border: 1px solid #f0e1a0;
   padding: 10px;
@@ -18,23 +18,24 @@ body {
   margin-bottom: 20px;
 }
 
-.notice a {
+.auth-page-wrapper .notice a {
   color: #0073cc;
 }
 
-.auth-container {
+.auth-page-wrapper .auth-container {
   display: flex;
   gap: 30px;
 }
 
-.auth-box {
+.auth-page-wrapper .auth-box {
   background: #fff;
   border: 1px solid #ddd;
   padding: 30px;
   width: 50%;
+  box-sizing: border-box; /* コンテンツがはみ出さないように追加 */
 }
 
-.auth-box h2 {
+.auth-page-wrapper .auth-box h2 {
   text-align: center;
   border-bottom: 1px solid #eee;
   padding-bottom: 10px;
@@ -42,24 +43,24 @@ body {
 }
 
 /* ===== 登録側 ===== */
-.step-box {
+.auth-page-wrapper .step-box {
   background: #f7f7f7;
   padding: 20px;
   margin-bottom: 20px;
 }
 
-.step-title {
+.auth-page-wrapper .step-title {
   font-weight: bold;
   text-align: center;
 }
 
-.steps {
+.auth-page-wrapper .steps {
   display: flex;
   justify-content: space-between;
   margin-top: 15px;
 }
 
-.steps span {
+.auth-page-wrapper .steps span {
   background: #fff;
   border-radius: 50%;
   width: 80px;
@@ -70,13 +71,13 @@ body {
   border: 2px solid #f0b400;
 }
 
-.auth-text {
+.auth-page-wrapper .auth-text {
   text-align: center;
   font-size: 14px;
   margin-bottom: 15px;
 }
 
-.btn-register {
+.auth-page-wrapper .btn-register {
   display: block;
   background: #7dbb2c;
   color: #fff;
@@ -87,13 +88,13 @@ body {
 }
 
 /* ===== ログイン側 ===== */
-.login-form label {
+.auth-page-wrapper .login-form label {
   display: block;
   margin-bottom: 15px;
   font-size: 14px;
 }
 
-.login-form input {
+.auth-page-wrapper .login-form input {
   width: 100%;
   padding: 8px;
   margin-top: 5px;
@@ -101,7 +102,7 @@ body {
   box-sizing: border-box;
 }
 
-.btn-login {
+.auth-page-wrapper .btn-login {
   width: 100%;
   background: #f39800;
   color: #fff;
@@ -112,40 +113,41 @@ body {
   border-radius: 4px;
 }
 
-.login-links {
+.auth-page-wrapper .login-links {
   margin-top: 15px;
   text-align: center;
 }
 
-.login-links a {
+.auth-page-wrapper .login-links a {
   font-size: 13px;
   color: #0073cc;
 }
+
 /* ===== ログアウト画面 ===== */
-.logout-wrapper {
+.auth-page-wrapper .logout-wrapper {
   max-width: 600px;
   margin: 60px auto;
   padding: 0 20px;
 }
 
-.logout-box {
+.auth-page-wrapper .logout-box {
   background: #fff;
   border: 1px solid #ddd;
   padding: 40px;
   text-align: center;
 }
 
-.logout-box h2 {
+.auth-page-wrapper .logout-box h2 {
   margin-bottom: 20px;
 }
 
-.logout-message {
+.auth-page-wrapper .logout-message {
   font-size: 14px;
   margin-bottom: 30px;
   color: #555;
 }
 
-.btn-top {
+.auth-page-wrapper .btn-top {
   display: inline-block;
   background: #f39800;
   color: #fff;

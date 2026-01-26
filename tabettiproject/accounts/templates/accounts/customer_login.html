@@ -1,80 +1,84 @@
+{% extends "customer_base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>無料会員登録 / ログイン</title>
-  <link rel="stylesheet" href="{% static 'css/customer_login.css' %}">
-</head>
-<body>
 
-<!-- ヘッダー -->
-{% include 'customer_header.html' %}
+{% block title %}無料会員登録 / ログイン{% endblock %}
 
-<div class="auth-wrapper">
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/customer_login.css' %}">
+{% endblock %}
 
-  <div class="auth-container">
+{% block breadcrumb %}
+<nav class="breadcrumbs">
+  <ol>
+    <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
+    <li><span>ログイン</span></li>
+  </ol>
+</nav>
+{% endblock %}
 
-    <!-- ===== 左：無料会員登録 ===== -->
-    <div class="auth-box">
-      <h2>無料会員登録</h2>
+{% block content %}
+<div class="auth-page-wrapper">
+  <div class="auth-wrapper">
 
-      <div class="step-box">
-        <p class="step-title">3 STEPでカンタン登録！</p>
-        <div class="steps">
-          <span>1<br>メールアドレス登録</span>
-          <span>2<br>パスワード登録</span>
-          <span>3<br>登録完了</span>
+    <div class="auth-container">
+
+      <!-- ===== 左：無料会員登録 ===== -->
+      <div class="auth-box">
+        <h2>無料会員登録</h2>
+
+        <div class="step-box">
+          <p class="step-title">3 STEPでカンタン登録！</p>
+          <div class="steps">
+            <span>1<br>メールアドレス登録</span>
+            <span>2<br>パスワード登録</span>
+            <span>3<br>登録完了</span>
+          </div>
+        </div>
+
+        <p class="auth-text">
+          まだ会員でない方は、<br>
+          以下より会員登録をお願いいたします。
+        </p>
+
+        <a href="{% url 'accounts:customer_register' %}" class="btn-register">無料会員登録はこちら</a>
+      </div>
+
+      <!-- ===== 右：ログイン ===== -->
+      <div class="auth-box">
+        <h2>ログイン</h2>
+
+        <p class="auth-text">
+          登録済みの方はこちらからログインしてください。
+        </p>
+
+        <form class="login-form" method="post">
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+          <div style="color: red; font-size: 12px; margin-bottom: 10px;">
+            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+          </div>
+          {% endif %}
+
+          <label>
+            ユーザーネーム
+            <input type="text" name="username" required value="{{ form.username.value|default:'' }}">
+          </label>
+
+          <label>
+            パスワード
+            <input type="password" name="password" required>
+          </label>
+
+          <button type="submit" class="btn-login">ログイン</button>
+        </form>
+
+        <div class="login-links">
+          <a href="{% url 'accounts:customer_mail_send' %}">パスワードを忘れた方</a>
         </div>
       </div>
 
-      <p class="auth-text">
-        まだ会員でない方は、<br>
-        以下より会員登録をお願いいたします。
-      </p>
-
-      <a href="{% url 'accounts:customer_register' %}" class="btn-register">無料会員登録はこちら</a>
     </div>
-
-<!-- ===== 右：ログイン（作り直し） ===== -->
-    <div class="auth-box">
-      <h2>ログイン</h2>
-
-      <p class="auth-text">
-        登録済みの方はこちらからログインしてください。
-      </p>
-
-      <form class="login-form" method="post">
-  {% csrf_token %}
-
-  <!-- エラーメッセージの表示（追加） -->
-  {% if form.non_field_errors %}
-    <div style="color: red; font-size: 12px; margin-bottom: 10px;">
-      {% for error in form.non_field_errors %}{{ error }}{% endfor %}
-    </div>
-  {% endif %}
-
-  <label>
-    ユーザーネーム  <!-- name="email" を name="username" に変更 -->
-    <input type="text" name="username" required value="{{ form.username.value|default:'' }}">
-  </label>
-
-  <label>
-    パスワード
-    <input type="password" name="password" required>
-  </label>
-
-  <button type="submit" class="btn-login">ログイン</button>
-</form>
-
-      <div class="login-links">
-        <a href="{% url 'accounts:customer_mail_send' %}">パスワードを忘れた方</a>
-      </div>
-    </div>
-
   </div>
 </div>
-
-</body>
-{% include 'customer_footer.html' %}
-</html>
+{% endblock %}
