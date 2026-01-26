@@ -368,16 +368,34 @@ class customer_store_infoView(TemplateView):
         last_day = calendar.monthrange(year, month)[1]
         end = date(year, month, last_day)
 
-        # 受付中の日（過去日は除外）
-        open_days = list(
+        # 受付中の日（過去日は除外） ※ここは date 型のまま持っておく
+        open_days_dates = list(
             StoreOnlineReservation.objects.filter(
                 store=store,
                 date__range=(start, end),
                 booking_status=True,
             ).values_list("date", flat=True)
         )
-        open_days = [d for d in open_days if d >= today]
-        context["open_days"] = [d.isoformat() for d in sorted(open_days)]
+        open_days_dates = [d for d in open_days_dates if d >= today]
+
+        # ★テンプレの「今月0件判定」用（文字列）
+        context["open_days"] = [d.isoformat() for d in sorted(open_days_dates)]
+
+        # ★★★★★ カレンダー表示用（12日分）を追加 ★★★★★
+        open_set = set(open_days_dates)
+        dow_ja = ["月", "火", "水", "木", "金", "土", "日"]
+
+        calendar_12 = []
+        for i in range(12):
+            d = today + timedelta(days=i)
+            calendar_12.append({
+                "date": d,
+                "day": d.day,
+                "dow_ja": dow_ja[d.weekday()],
+                "is_open": (d in open_set),
+            })
+        context["calendar_12"] = calendar_12
+        # ★★★★★ ここまで ★★★★★
 
         # ログイン顧客（初期値用）
         customer = _get_customer_from_user(self.request.user)
