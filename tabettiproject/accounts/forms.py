@@ -34,6 +34,12 @@ class CustomerRegisterForm(forms.ModelForm):
         min_length=8,
         help_text="8文字以上で入力してください。"
     )
+    # ユーザーネーム（ログインID）フィールドをカスタマイズ
+    username = forms.CharField(
+        label="ユーザーネーム",
+        help_text="※ログイン時に使用するため、忘れないよう必ず保存してください。この項目は必須です。<br>半角アルファベット、半角数字、および記号（@/./+/-/_）のみ使用可能です（150文字以下）。"
+    )
+
     confirm_password = forms.CharField(
         label="パスワード（確認）",
         widget=forms.PasswordInput()
@@ -46,7 +52,7 @@ class CustomerRegisterForm(forms.ModelForm):
         from commons.models import CustomerAccount
         model = CustomerAccount
         fields = [
-            'email', 'password', 'nickname', 'phone_number', 
+            'email', 'username', 'password', 'nickname', 'phone_number', 
             'age_group', 'gender', 'address', 'title', 'location', 'birth_date'
         ]
         # sub_email は email をコピーして使う方針で除外、あるいは入力させるか。
@@ -74,7 +80,7 @@ class CustomerRegisterForm(forms.ModelForm):
         # AbstractUserのモデルフォームを使わない場合、set_passwordを自分で呼ぶ必要がある。
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password"])
-        user.username = user.email # usernameをemailと同じにする
+        # user.username = user.email  # 👈 ここを削除：フォームの入力値をそのまま使う
         user.sub_email = user.email # sub_emailもemailと同じにする
         
         # AccountTypeを「顧客」に設定
