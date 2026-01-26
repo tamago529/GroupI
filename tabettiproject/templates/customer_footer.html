@@ -4,7 +4,7 @@
     ----------------------------------------- */
     .tabelog-footer {
         width: 100%;
-        min-width: 1280px;
+        /* min-width: 1280px; 削除: レスポンシブ対応のため */
         font-family: "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ ProN W3", Meiryo, sans-serif;
         color: #333;
         border-top: 1px solid #e8e8e8;
@@ -26,8 +26,13 @@
     }
 
     .footer-inner {
-        width: 1280px;
+        width: 100%;
+        max-width: 1280px;
+        /* 固定幅から最大幅へ変更 */
         margin: 0 auto;
+        padding: 0 16px;
+        /* スマホ時の余白確保 */
+        box-sizing: border-box;
     }
 
     /* -----------------------------------------
@@ -41,21 +46,43 @@
 
     .major-services {
         display: flex;
+        flex-wrap: wrap;
+        /* レスポンシブ対応: 折り返し許可 */
+        justify-content: center;
+        /* 中央寄せ */
         list-style: none;
         padding: 0;
         margin: 0;
-        border-bottom: 1px dashed #dcdcdc; /* 下部の点線 */
+        border-bottom: 1px dashed #dcdcdc;
+        /* 下部の点線 */
         padding-bottom: 25px;
     }
 
     .major-services li {
         flex: 1;
+        min-width: 200px;
+        /* 必要に応じて折り返すための最小幅 */
         text-align: center;
-        border-right: 1px dashed #dcdcdc; /* 項目間の点線 */
+        border-right: 1px dashed #dcdcdc;
+        /* 項目間の点線 */
+        margin-bottom: 10px;
     }
 
     .major-services li:last-child {
         border-right: none;
+    }
+
+    /* スマホ画面でボーダーを消すためのメディアクエリ */
+    @media (max-width: 768px) {
+        .major-services li {
+            border-right: none;
+            border-bottom: 1px dashed #dcdcdc;
+            padding-bottom: 15px;
+        }
+
+        .major-services li:last-child {
+            border-bottom: none;
+        }
     }
 
     .major-services a {
@@ -96,9 +123,12 @@
     }
 
     .link-navigation li {
-        display: inline;
+        display: inline-block;
+        /* 改行可能なようにinline-blockへ */
         font-size: 11px;
-        color: #ccc; /* セパレーターの色 */
+        color: #ccc;
+        /* セパレーターの色 */
+        margin-bottom: 5px;
     }
 
     /* 言語設定エリア */
@@ -129,13 +159,18 @@
     .kakaku-logo span {
         font-family: Arial, sans-serif;
         font-size: 18px;
-        color: #003399; /* 本家の深い青 */
+        color: #003399;
+        /* 本家の深い青 */
         margin-right: 5px;
     }
 
     /* コピーライトとロゴの底辺揃え */
     .footer-bottom-row {
         display: flex;
+        flex-wrap: wrap;
+        /* 折り返し許可 */
+        gap: 10px;
+        /* 間隔を追加 */
         justify-content: space-between;
         align-items: flex-end;
     }
@@ -148,7 +183,8 @@
     }
 
     .tabelog-20th-logo em {
-        color: #ff9900; /* 20thのオレンジ */
+        color: #ff9900;
+        /* 20thのオレンジ */
         font-style: italic;
         font-family: Arial, sans-serif;
         margin-left: 4px;
@@ -172,7 +208,7 @@
         border: none;
         cursor: pointer;
         font-size: 18px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
 </style>
 
@@ -181,7 +217,7 @@
     <div class="footer-red-zone">
         <div class="footer-inner">
             <ul class="major-services">
-                
+
                 <li>
                     <a href="https://magazine.tabelog.com/">タベッチログ
                         <strong>毎日のお外食が楽しくなるグルメ検索</strong>
@@ -203,25 +239,33 @@
 
     <div class="footer-yellow-zone">
         <div class="footer-inner">
-            
+
             <nav class="link-navigation">
                 <ul>
                     <li><a href="https://help.tabelog.com/">ヘルプ・お問い合わせ</a> <span>|</span></li>
                     <li><a href="https://tabelog.com/help/beginner/">タベッチについて</a> <span>|</span></li>
                     <li><a href="https://tabelog.com/help/policy/">口コミ・ランキングに対する取り組み</a> <span>|</span></li>
-                    <li><a href="https://owner.tabelog.com/home/?lid=ownerinfo_rstother_footer">飲食店・飲食企業様向けサービス</a> <span>|</span></li>
-                    <li><a href="https://owner.tabelog.com/home/registration/?lid=ownerinfo_registration_rstother_footer">タベッチ店舗会員について</a> <span>|</span></li>
+                    <li><a href="https://owner.tabelog.com/home/?lid=ownerinfo_rstother_footer">飲食店・飲食企業様向けサービス</a>
+                        <span>|</span>
+                    </li>
+                    <li><a
+                            href="https://owner.tabelog.com/home/registration/?lid=ownerinfo_registration_rstother_footer">タベッチ店舗会員について</a>
+                        <span>|</span>
+                    </li>
                     <li><a href="https://tabelog.com/advertisement">広告（メーカー・団体等様向け）について</a></li>
                 </ul>
                 <ul>
                     {# ✅ 未ログイン時は「機能改善要望」を表示しない #}
                     {% if user.is_authenticated %}
-                      <li><a href="{% url 'reviews:customer_review_report' %}">機能改善要望</a> <span>|</span></li>
+                    <li><a href="{% url 'reviews:customer_review_report' %}">機能改善要望</a> <span>|</span></li>
                     {% endif %}
 
                     <li><a href="https://tabelog.com/help/review_guide/">口コミガイドライン</a> <span>|</span></li>
-                    <li><a href="https://tabelog.com/rst/premium_service_guide?tid=ps_footer">タベッチプレミアム</a> <span>|</span></li>
-                    <li><a href="https://tabelog.com/ai_request_booking/guide/index">ネット予約（リクエスト予約）</a> <span>|</span></li>
+                    <li><a href="https://tabelog.com/rst/premium_service_guide?tid=ps_footer">タベッチプレミアム</a>
+                        <span>|</span>
+                    </li>
+                    <li><a href="https://tabelog.com/ai_request_booking/guide/index">ネット予約（リクエスト予約）</a> <span>|</span>
+                    </li>
                     <li><a href="https://tabelog.com/help/rules/">利用規約</a> <span>|</span></li>
                     <li><a href="https://corporate.kakaku.com/privacy/about/optout">外部送信（オプトアウト）</a> <span>|</span></li>
                     <li><a href="https://corporate.kakaku.com/privacy/">個人情報保護方針</a> <span>|</span></li>
