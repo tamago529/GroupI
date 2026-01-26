@@ -1,6 +1,7 @@
 <!-- customer_base.html -->
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,6 +18,48 @@
     <!-- 共通CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 
+    <style>
+        /* パンくずリスト */
+        .breadcrumbs {
+            max-width: 1100px;
+            /* 検索一覧などに合わせる */
+            margin: 16px auto 0;
+            padding: 0 16px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .breadcrumbs ol {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 0;
+            margin: 0;
+        }
+
+        .breadcrumbs li {
+            display: flex;
+            align-items: center;
+        }
+
+        .breadcrumbs li:not(:last-child)::after {
+            content: ">";
+            margin-left: 8px;
+            color: #999;
+            font-size: 12px;
+        }
+
+        .breadcrumbs a {
+            text-decoration: none;
+            color: #1e73c9;
+        }
+
+        .breadcrumbs a:hover {
+            text-decoration: underline;
+        }
+    </style>
+
     <!-- ページ専用CSS -->
     {% block css %}{% endblock %}
 </head>
@@ -25,6 +68,9 @@
 
     <!-- ヘッダー -->
     {% include 'customer_header.html' %}
+
+    <!-- パンくずリスト -->
+    {% block breadcrumb %}{% endblock %}
 
     <!-- メインコンテンツ -->
     <main class="content">
@@ -40,4 +86,5 @@
     <!-- ページ専用JS -->
     {% block js %}{% endblock %}
 </body>
+
 </html>

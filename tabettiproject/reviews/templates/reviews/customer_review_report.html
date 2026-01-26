@@ -18,8 +18,10 @@
         font-size: 26px;
         font-weight: bold;
         text-align: center;
-        margin-top: 40px;    /* 上の空間 */
-        margin-bottom: 60px; /* 下の空間 */
+        margin-top: 40px;
+        /* 上の空間 */
+        margin-bottom: 60px;
+        /* 下の空間 */
     }
 
     /* セクション見出し（お問い合わせ） */
@@ -35,16 +37,20 @@
         margin-bottom: 30px;
         font-size: 15px;
     }
+
     .info-message-box p {
         margin-bottom: 10px;
     }
+
     .link-blue {
         color: #06c;
         text-decoration: none;
     }
+
     .link-blue:hover {
         text-decoration: underline;
     }
+
     .text-note {
         color: #666;
         font-size: 13px;
@@ -60,12 +66,14 @@
     .form-item {
         margin-bottom: 30px;
     }
+
     .form-label {
         display: block;
         font-weight: bold;
         font-size: 15px;
         margin-bottom: 10px;
     }
+
     .badge-must {
         background-color: #e60000;
         color: #fff;
@@ -92,12 +100,14 @@
         gap: 25px;
         padding: 5px 0;
     }
+
     .radio-item {
         display: flex;
         align-items: center;
         cursor: pointer;
         font-size: 15px;
     }
+
     .radio-item input {
         margin-right: 8px;
     }
@@ -109,6 +119,7 @@
         background-color: #f6f5f0;
         text-align: center;
     }
+
     .btn-submit-green {
         background-color: #9dbd25;
         color: #fff;
@@ -123,6 +134,15 @@
         box-shadow: 0 3px 0 #7a941a;
     }
 </style>
+{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumbs">
+    <ol>
+        <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
+        <li><span>機能改善要望</span></li>
+    </ol>
+</nav>
 {% endblock %}
 
 {% block content %}
@@ -152,7 +172,8 @@
             <label for="message" class="form-label">
                 お問い合わせ内容 <span class="badge-must">必須</span>
             </label>
-            <textarea id="message" name="message" class="input-textarea" rows="10" placeholder="お問い合わせ内容をご記入ください"></textarea>
+            <textarea id="message" name="message" class="input-textarea" rows="10"
+                placeholder="お問い合わせ内容をご記入ください"></textarea>
         </div>
 
         <div class="form-item">

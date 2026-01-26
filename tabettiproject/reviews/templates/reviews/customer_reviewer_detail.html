@@ -49,7 +49,7 @@
         position: absolute;
         bottom: 15px;
         right: 15px;
-        background: rgba(255,255,255,0.92);
+        background: rgba(255, 255, 255, 0.92);
         border: 1px solid #999;
         padding: 8px 12px;
         font-size: 12px;
@@ -57,8 +57,9 @@
         border-radius: 6px;
         cursor: pointer;
     }
+
     .cover-edit-btn:hover {
-        background: rgba(255,255,255,1);
+        background: rgba(255, 255, 255, 1);
     }
 
     /* ==========================================
@@ -78,7 +79,7 @@
         background-color: #fff;
         border: 4px solid #fff;
         border-radius: 4px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
         margin-top: -55px;
         position: relative;
         z-index: 10;
@@ -86,6 +87,7 @@
         cursor: pointer;
         display: block;
     }
+
     .mp-user-avatar img {
         width: 100%;
         height: 100%;
@@ -99,7 +101,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(0,0,0,0.35);
+        background: rgba(0, 0, 0, 0.35);
         color: #fff;
         font-size: 11px;
         font-weight: bold;
@@ -107,6 +109,7 @@
         transition: 0.2s;
         pointer-events: none;
     }
+
     .mp-user-avatar:hover .avatar-overlay {
         opacity: 1;
     }
@@ -132,11 +135,13 @@
         margin-bottom: 10px;
         flex-shrink: 0;
     }
+
     .mp-stats-table td {
         padding: 4px 5px;
         font-size: 11px;
         border-bottom: 1px solid #eee;
     }
+
     .mp-stats-table .val {
         text-align: right;
         font-weight: bold;
@@ -152,6 +157,7 @@
         border-bottom: 2px solid #f60;
         background-color: #fff;
     }
+
     .mp-nav-item {
         flex: 1;
         text-align: center;
@@ -160,6 +166,7 @@
         color: #333;
         text-decoration: none;
     }
+
     .mp-nav-item.active {
         border-bottom: 4px solid #f60;
         margin-bottom: -2px;
@@ -172,19 +179,28 @@
         cursor: not-allowed;
         background: #fafafa;
     }
+
     .mp-nav-item.disabled .mp-nav-count {
         color: #999;
     }
 </style>
 {% endblock %}
 
+{% block breadcrumb %}
+<nav class="breadcrumbs">
+    <ol>
+        <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
+        <li><span>{{ user_name }}さんのページ</span></li>
+    </ol>
+</nav>
+{% endblock %}
+
 {% block content %}
 <div class="mp-container">
 
     {# ✅ cover は 1つだけにして id 重複を防ぐ #}
-    <section class="mp-cover"
-             aria-label="マイページカバー写真"
-             style="background-image:url('{% if cover_image_url %}{{ cover_image_url }}{% else %}/static/images/default_cover.jpg{% endif %}');">
+    <section class="mp-cover" aria-label="マイページカバー写真"
+        style="background-image:url('{% if cover_image_url %}{{ cover_image_url }}{% else %}/static/images/default_cover.jpg{% endif %}');">
 
         {# ✅ 他人ページでは編集UIを出さない #}
         {% if not readonly_mode %}
@@ -208,23 +224,15 @@
             <input id="iconInput" class="visually-hidden" type="file" name="icon_image" accept="image/*">
 
             <label class="mp-user-avatar" for="iconInput" title="クリックしてアイコン変更">
-                <img
-                    src="{% if user_icon_url %}{{ user_icon_url }}{% else %}/static/images/default_icon.png{% endif %}"
-                    alt="{{ user_name }}さんのアイコン"
-                    width="120"
-                    height="120"
-                >
+                <img src="{% if user_icon_url %}{{ user_icon_url }}{% else %}/static/images/default_icon.png{% endif %}"
+                    alt="{{ user_name }}さんのアイコン" width="120" height="120">
                 <div class="avatar-overlay">クリックして変更</div>
             </label>
         </form>
         {% else %}
         <div class="mp-user-avatar" style="cursor: default;">
-            <img
-                src="{% if user_icon_url %}{{ user_icon_url }}{% else %}/static/images/default_icon.png{% endif %}"
-                alt="{{ user_name }}さんのアイコン"
-                width="120"
-                height="120"
-            >
+            <img src="{% if user_icon_url %}{{ user_icon_url }}{% else %}/static/images/default_icon.png{% endif %}"
+                alt="{{ user_name }}さんのアイコン" width="120" height="120">
         </div>
         {% endif %}
 
@@ -237,21 +245,36 @@
         <table class="mp-stats-table" aria-label="ユーザーアクティビティ統計">
             <caption class="visually-hidden">ユーザー統計データ一覧</caption>
             <tbody>
-                <tr><td>口コミ数</td><td class="val">{{ stats_reviews|default:0 }}</td><td style="width:25px; color:#666;">件</td></tr>
-                <tr><td>写真</td><td class="val">{{ stats_photos|default:0 }}</td><td style="color:#666;">枚</td></tr>
-                <tr><td>訪問者数</td><td class="val">{{ stats_visitors|default:0 }}</td><td style="color:#666;">人</td></tr>
-                <tr><td>いいね！</td><td class="val">{{ stats_likes|default:0 }}</td><td></td></tr>
+                <tr>
+                    <td>口コミ数</td>
+                    <td class="val">{{ stats_reviews|default:0 }}</td>
+                    <td style="width:25px; color:#666;">件</td>
+                </tr>
+                <tr>
+                    <td>写真</td>
+                    <td class="val">{{ stats_photos|default:0 }}</td>
+                    <td style="color:#666;">枚</td>
+                </tr>
+                <tr>
+                    <td>訪問者数</td>
+                    <td class="val">{{ stats_visitors|default:0 }}</td>
+                    <td style="color:#666;">人</td>
+                </tr>
+                <tr>
+                    <td>いいね！</td>
+                    <td class="val">{{ stats_likes|default:0 }}</td>
+                    <td></td>
+                </tr>
             </tbody>
         </table>
     </section>
 
     <nav class="mp-nav" aria-label="マイページメニュータブ">
 
-    {% if readonly_mode %}
+        {% if readonly_mode %}
         {# ✅ 相手ページ：トップは相手ページのまま（自分のトップに飛ばさない） #}
-        <a href="{% url 'follows:customer_user_page' customer.pk %}"
-           class="mp-nav-item active"
-           style="padding-top: 28px;">
+        <a href="{% url 'follows:customer_user_page' customer.pk %}" class="mp-nav-item active"
+            style="padding-top: 28px;">
             トップ
         </a>
 
@@ -271,7 +294,7 @@
             <span class="mp-nav-label">フォロワー</span>
         </span>
 
-    {% else %}
+        {% else %}
         {# ✅ 自分ページ：通常どおり押せる #}
         <a href="{% url 'reviews:customer_reviewer_detail' %}" class="mp-nav-item active" style="padding-top: 28px;">
             トップ
@@ -291,9 +314,9 @@
             <span class="mp-nav-count">{{ count_followers|default:0 }}</span>
             <span class="mp-nav-label">フォロワー</span>
         </a>
-    {% endif %}
+        {% endif %}
 
-</nav>
+    </nav>
 
     <div style="display: flex; padding: 20px; gap: 20px;">
         <div style="width: 640px;">

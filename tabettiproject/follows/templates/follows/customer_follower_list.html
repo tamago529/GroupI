@@ -7,11 +7,12 @@
 <style>
   /* --- 1. ベース設定 --- */
   body {
-      background-color: #f6f5f0; /* 本家ベージュ系背景 */
-      color: #333;
-      font-size: 13px;
-      line-height: 1.5;
-      margin: 0;
+    background-color: #f6f5f0;
+    /* 本家ベージュ系背景 */
+    color: #333;
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0;
   }
 
   /* 共通のコンテンツ幅（980px） */
@@ -50,35 +51,36 @@
 
   /* プロフィールアイコン */
   .profile-icon {
-      position: absolute;
-      bottom: -15px;
-      left: 10px;
-      width: 90px;
-      height: 90px;
-      background: #fff;
-      border: 1px solid #c2c2b8;
-      border-radius: 4px;
-      z-index: 10;
+    position: absolute;
+    bottom: -15px;
+    left: 10px;
+    width: 90px;
+    height: 90px;
+    background: #fff;
+    border: 1px solid #c2c2b8;
+    border-radius: 4px;
+    z-index: 10;
 
-      /* ✅ 追加：画像を枠内に収める */
-      overflow: hidden;
+    /* ✅ 追加：画像を枠内に収める */
+    overflow: hidden;
   }
+
   .profile-icon img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   /* タイトル */
   .profile-title {
-      position: absolute;
-      top: 65px;
-      left: 120px;
-      color: #fff;
-      font-size: 18px;
-      font-weight: bold;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+    position: absolute;
+    top: 65px;
+    left: 120px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
   }
 
   /* マイページ設定：右側に配置 */
@@ -131,9 +133,9 @@
   }
 
   .profile-nav a.active {
-      color: #333;
-      font-weight: bold;
-      border-bottom: 3px solid #595950;
+    color: #333;
+    font-weight: bold;
+    border-bottom: 3px solid #595950;
   }
 
   /* --- 4. メインコンテンツ（フォロワーカード） --- */
@@ -142,85 +144,87 @@
   }
 
   .follow-title {
-      font-size: 16px;
-      font-weight: bold;
-      border-bottom: 1px solid #e7e7e1;
-      padding-bottom: 10px;
-      margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: bold;
+    border-bottom: 1px solid #e7e7e1;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
   }
 
   .follow-title span {
-      font-weight: normal;
-      color: #666;
+    font-weight: normal;
+    color: #666;
   }
 
   .card-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
   }
 
   .user-card {
-      width: calc(33.333% - 8px);
-      background: #fff;
-      border: 1px solid #e7e7e1;
-      border-radius: 2px;
-      position: relative;
+    width: calc(33.333% - 8px);
+    background: #fff;
+    border: 1px solid #e7e7e1;
+    border-radius: 2px;
+    position: relative;
   }
 
   .card-image {
-      height: 90px;
-      background-color: #eee;
-      border-bottom: 1px solid #e7e7e1;
+    height: 90px;
+    background-color: #eee;
+    border-bottom: 1px solid #e7e7e1;
   }
 
-  .card-image{
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-.card-user-icon{
-  overflow: hidden;
-}
-.card-user-icon img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
+  .card-image {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
 
   .card-user-icon {
-      position: absolute;
-      top: 65px;
-      left: 10px;
-      width: 45px;
-      height: 45px;
-      background: #fff;
-      border: 1px solid #c2c2b8;
-      border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .card-user-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .card-user-icon {
+    position: absolute;
+    top: 65px;
+    left: 10px;
+    width: 45px;
+    height: 45px;
+    background: #fff;
+    border: 1px solid #c2c2b8;
+    border-radius: 2px;
   }
 
   .card-body {
-      padding: 30px 10px 10px 10px;
+    padding: 30px 10px 10px 10px;
   }
 
   .card-name {
-      font-weight: bold;
-      color: #06c;
-      text-decoration: none;
-      font-size: 13px;
+    font-weight: bold;
+    color: #06c;
+    text-decoration: none;
+    font-size: 13px;
   }
 
   /* フォロワー画面では、自分がフォローしていない場合は「フォローする」ボタンになります */
   .follow-btn {
-      padding: 2px 10px;
-      background: #fff;
-      border: 1px solid #c2c2b8;
-      font-size: 11px;
-      color: #333;
-      border-radius: 2px;
-      cursor: pointer;
-      white-space: nowrap;
+    padding: 2px 10px;
+    background: #fff;
+    border: 1px solid #c2c2b8;
+    font-size: 11px;
+    color: #333;
+    border-radius: 2px;
+    cursor: pointer;
+    white-space: nowrap;
   }
 
   /* ✅ 追加：フォロー中ボタンにホバーでメニュー表示（customer_follow_listと同じ要領） */
@@ -239,7 +243,7 @@
     background: #fff;
     border: 1px solid #c2c2b8;
     border-radius: 2px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.10);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.10);
     z-index: 50;
     padding: 4px 0;
   }
@@ -269,28 +273,37 @@
   }
 
   .card-info {
-      clear: both;
-      margin-top: 8px;
-      font-size: 11px;
-      color: #666;
+    clear: both;
+    margin-top: 8px;
+    font-size: 11px;
+    color: #666;
   }
 </style>
+{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumbs">
+  <ol>
+    <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
+    <li><a href="{% url 'reviews:customer_reviewer_detail' %}">{{ user_name }}さんのページ</a></li>
+    <li><span>フォロワー</span></li>
+  </ol>
+</nav>
 {% endblock %}
 
 {% block content %}
 <div class="profile-header">
 
   {# ✅ cover_image_url を背景に反映（なければ default_cover.jpg） #}
-  <div class="profile-cover"style="background-image:url('{% if cover_image_url %}{{ cover_image_url }}{% else %}{% static 'images/default_cover.jpg' %}{% endif %}');">
+  <div class="profile-cover"
+    style="background-image:url('{% if cover_image_url %}{{ cover_image_url }}{% else %}{% static 'images/default_cover.jpg' %}{% endif %}');">
     <div class="inner-container">
 
       {# ✅ アイコンを表示（なければ Tabecchi.png を仮フォールバック） #}
       <div class="profile-icon">
-    <img
-     src="{% if user_icon_url %}{{ user_icon_url }}{% else %}/media/customer/icon/default_cover.jpg{% endif %}"
-     alt="{{ user_name }}さんのアイコン"
-    >
-    </div>
+        <img src="{% if user_icon_url %}{{ user_icon_url }}{% else %}/media/customer/icon/default_cover.jpg{% endif %}"
+          alt="{{ user_name }}さんのアイコン">
+      </div>
 
       {# ✅ タイトル #}
       <div class="profile-title">{{ profile_title }}</div>
@@ -306,9 +319,9 @@
     <div class="inner-container">
       <div class="profile-name">
         {% if user.is_authenticated %}
-          {{ user_name }}
+        {{ user_name }}
         {% else %}
-          ゲスト
+        ゲスト
         {% endif %}
       </div>
 
@@ -328,14 +341,15 @@
   <div class="card-list">
     {% for item in followers %}
     <div class="user-card">
-  <div class="card-image"style="background-image:url('{% if item.cover_image_url %}{{ item.cover_image_url }}{% else %}{% static 'images/default_cover.jpg' %}{% endif %}');">
-  </div>
+      <div class="card-image"
+        style="background-image:url('{% if item.cover_image_url %}{{ item.cover_image_url }}{% else %}{% static 'images/default_cover.jpg' %}{% endif %}');">
+      </div>
 
-  <div class="card-user-icon">
-   <img
-    src="{% if item.user_icon_url %}{{ item.user_icon_url }}{% else %}/media/customer/icon/default_cover.jpg{% endif %}"
-    alt="{{ item.user.username }}さんのアイコン">
-  </div>
+      <div class="card-user-icon">
+        <img
+          src="{% if item.user_icon_url %}{{ item.user_icon_url }}{% else %}/media/customer/icon/default_cover.jpg{% endif %}"
+          alt="{{ item.user.username }}さんのアイコン">
+      </div>
 
       <div class="card-body">
 
@@ -344,46 +358,35 @@
           <input type="hidden" name="user_id" value="{{ item.id }}">
 
           {% if item.is_following %}
-            <!-- ✅ フォロー中：ホバーで「ミュート/解除」＆「フォローをやめる」 -->
-            <div class="follow-action">
-              <button type="button"
-                      class="follow-btn"
-                      style="background: #f2f2ef; color: #666;">
-                フォロー中{% if item.is_muted %}（ミュート）{% endif %}
+          <!-- ✅ フォロー中：ホバーで「ミュート/解除」＆「フォローをやめる」 -->
+          <div class="follow-action">
+            <button type="button" class="follow-btn" style="background: #f2f2ef; color: #666;">
+              フォロー中{% if item.is_muted %}（ミュート）{% endif %}
+            </button>
+
+            <div class="follow-menu">
+              <button type="submit" class="menu-item" name="action" value="toggle_mute">
+                {% if item.is_muted %}ミュート解除{% else %}ミュートにする{% endif %}
               </button>
 
-              <div class="follow-menu">
-                <button type="submit"
-                        class="menu-item"
-                        name="action"
-                        value="toggle_mute">
-                  {% if item.is_muted %}ミュート解除{% else %}ミュートにする{% endif %}
-                </button>
-
-                <button type="submit"
-                        class="menu-item danger"
-                        name="action"
-                        value="unfollow"
-                        onclick="return confirm('フォローを解除しますか？')">
-                  フォローをやめる
-                </button>
-              </div>
+              <button type="submit" class="menu-item danger" name="action" value="unfollow"
+                onclick="return confirm('フォローを解除しますか？')">
+                フォローをやめる
+              </button>
             </div>
+          </div>
           {% else %}
-            <!-- ✅ 未フォロー：通常の「+フォロー」 -->
-            <button type="submit"
-                    class="follow-btn"
-                    name="action"
-                    value="follow"
-                    style="color: #f0a500; border-color: #f0a500;">
-              + フォロー
-            </button>
+          <!-- ✅ 未フォロー：通常の「+フォロー」 -->
+          <button type="submit" class="follow-btn" name="action" value="follow"
+            style="color: #f0a500; border-color: #f0a500;">
+            + フォロー
+          </button>
           {% endif %}
         </form>
 
         <a href="{% url 'follows:customer_user_page' item.id %}" class="card-name">
           {{ item.user.username }}
-       </a>
+        </a>
 
         <div class="card-info">
           <div style="color: #f0a500; font-weight: bold; margin-bottom: 4px;">あなたをフォローしています</div>
