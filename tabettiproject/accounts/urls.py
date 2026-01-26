@@ -23,7 +23,7 @@ urlpatterns = [
     path("customer_mail_send/", customermail_sendView.as_view(), name="customer_mail_send"),
     path("customer_password_reset_complete/", customer_password_reset_completeView.as_view(), name="customer_password_reset_complete"),
     path("customer_password_reset_expire/", customer_password_reset_expireView.as_view(), name="customer_password_reset_expire"),
-    
+    path("customer_password_reset/", customer_password_resetView.as_view(), name="customer_password_reset"),
     path('password_reset/done/', views.customer_password_doneView.as_view(), name='customer_password_done'),
     path('reset/<uidb64>/<token>/', views.customer_password_resetView.as_view(), name='password_reset_confirm'),
     path('reset/done/', views.customer_password_reset_completeView.as_view(), name='customer_password_reset_complete'),
