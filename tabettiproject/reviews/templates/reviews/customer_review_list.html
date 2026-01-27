@@ -110,6 +110,41 @@
   line-height:1.7;
 }
 
+/* ===============================
+   ★ 口コミ写真（追加）
+================================ */
+.review-photos{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:12px;
+}
+
+.review-photos a{
+  display:block;
+}
+
+.review-photo{
+  width:110px;
+  height:110px;
+  object-fit:cover;
+  border-radius:8px;
+  border:1px solid #eee;
+  background:#fafafa;
+  transition:transform .12s ease;
+}
+
+.review-photos a:hover .review-photo{
+  transform:scale(1.03);
+}
+
+/* 写真が0枚のときの表示（任意） */
+.review-photos-empty{
+  margin-top:10px;
+  font-size:12px;
+  color:#999;
+}
+
 /* ---------- 通報 ---------- */
 .report-wrap{
   text-align:right;
@@ -131,12 +166,9 @@
 {% block content %}
 <div class="shop-main">
 
-
   {% include "stores/_customer_store_common.html" with store=store is_saved=is_saved star_states=star_states avg_rating=avg_rating review_count=review_count active_main="reviews" active_sub="top" %}
 
-
   <div class="review-wrapper">
-
 
     <section class="review-filter">
       <div class="review-search">
@@ -148,7 +180,6 @@
         全 <strong>{{ reviews.count }}</strong> 件の口コミ
       </div>
     </section>
-
 
     {% for review in reviews %}
       <article class="review-card">
@@ -173,6 +204,20 @@
         <div class="review-text">
           {{ review.review_text|linebreaksbr }}
         </div>
+
+        {% if review.photos.all %}
+          <div class="review-photos">
+            {% for photo in review.photos.all %}
+              {% if photo.image_path %}
+                <a href="{{ photo.image_path.url }}" target="_blank" rel="noopener">
+                  <img class="review-photo" src="{{ photo.image_path.url }}" alt="口コミ写真">
+                </a>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="review-photos-empty">写真はありません</div>
+        {% endif %}
 
         <div class="report-wrap">
           <a href="{% url 'reviews:customer_report_input' %}?review_id={{ review.pk }}"
