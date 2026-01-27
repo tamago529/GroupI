@@ -18,10 +18,25 @@
 </style>
 {% endblock %}
 
+{% block breadcrumb %}
+<nav class="breadcrumbs">
+  <ol>
+    <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
+    {% if from_search %}
+      <li><a href="{% url 'search:customer_search_list' %}?from_search=1{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">{% if keyword %}{{ keyword }}{% elif area %}{{ area }}{% else %}検索結果{% endif %}</a></li>
+    {% else %}
+      <li><a href="{% url 'search:customer_search_list' %}?keyword={{ store.scene.scene_name }}">{{ store.scene.scene_name }}</a></li>
+    {% endif %}
+    <li><a href="{% url 'stores:customer_store_info' store.pk %}?from_search={{ from_search }}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">{{ store.store_name }}</a></li>
+    <li><span>地図</span></li>
+  </ol>
+</nav>
+{% endblock %}
+
 {% block content %}
 <div class="shop-main">
 
-  {% include "stores/_customer_store_common.html" with store=store is_saved=is_saved star_states=star_states avg_rating=avg_rating review_count=review_count active_main="map" active_sub="map" %}
+  {% include "stores/_customer_store_common.html" with store=store is_saved=is_saved star_states=star_states avg_rating=avg_rating review_count=review_count active_main="map" active_sub="top" keyword=keyword area=area date=date time=time sort=sort from_search=from_search %}
 
   <div class="map-container">
     <div class="info-box">
@@ -44,7 +59,7 @@
       </a>
     </div>
 
-    <a href="{% url 'stores:customer_store_info' store.pk %}" class="btn-back">店舗トップへ戻る</a>
+    <a href="{% url 'stores:customer_store_info' store.pk %}?from_search={{ from_search }}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}" class="btn-back">店舗トップへ戻る</a>
   </div>
 
 </div>
