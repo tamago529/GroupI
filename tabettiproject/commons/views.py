@@ -6,7 +6,6 @@ from django.utils.http import url_has_allowed_host_and_scheme, urlencode
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth import login
-
 from commons.models import Review
 from commons.models import CustomerAccount, Gender, AccountType
 

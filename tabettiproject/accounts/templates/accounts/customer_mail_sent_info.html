@@ -1,78 +1,80 @@
+{% extends 'customer_base.html' %}
 {% load static %}
-{% include 'customer_header.html' %}
 
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>メール送信完了</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Helvetica, Arial, sans-serif;
-      background-color: #faf8f4;
-      color: #333;
-    }
-    .sent-wrapper {
-      margin: 40px 0;
-      display: flex;
-      justify-content: center;
-    }
-    .sent-box {
-      width: 420px;
-      background: #fff;
-      padding: 40px 28px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      text-align: center;
-    }
-    h2 {
-      font-size: 22px;
-      margin-bottom: 20px;
-      font-weight: bold;
-    }
-    .message {
-      font-size: 15px;
-      color: #555;
-      line-height: 1.8;
-      margin-bottom: 30px;
-    }
-    .btn-back {
-      display: block;
-      width: 100%;
-      padding: 12px 0;
-      background-color: #ff8a00;
-      color: #fff;
-      font-size: 14px;
-      font-weight: bold;
-      text-decoration: none;
-      border-radius: 4px;
-    }
-    .btn-back:hover {
-      opacity: 0.85;
-    }
-  </style>
-</head>
-<body>
+{% block title %}メール送信完了 | タベッチ{% endblock %}
 
-<div class="sent-wrapper">
-  <div class="sent-box">
+{% block css %}
+<style>
+  .cms-sent-wrapper {
+    margin: 40px 0;
+    display: flex;
+    justify-content: center;
+  }
+  .cms-sent-box {
+    width: 420px;
+    background: #fff;
+    padding: 40px 28px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+  .cms-sent-box h2 {
+    font-size: 22px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    color: #333;
+    border: none; /* baseのスタイル打ち消し（もしあれば） */
+    padding: 0;
+  }
+  .cms-message {
+    font-size: 15px;
+    color: #555;
+    line-height: 1.8;
+    margin-bottom: 30px;
+  }
+  .cms-btn-back {
+    display: block;
+    width: 100%;
+    padding: 12px 0;
+    background-color: #ff8a00;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: opacity 0.2s;
+  }
+  .cms-btn-back:hover {
+    opacity: 0.85;
+    text-decoration: none;
+  }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumbs">
+  <ol>
+    <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
+    <li><span>メール送信完了</span></li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="cms-sent-wrapper">
+  <div class="cms-sent-box">
     <h2>メールを送信しました</h2>
 
-    <div class="message">
+    <div class="cms-message">
       ご入力いただいたメールアドレス宛に、<br>
       パスワード再設定用のメールをお送りしました。<br><br>
       メール内のリンクをクリックして、<br>
       新しいパスワードの設定を行ってください。
     </div>
 
-    <a href="{% url 'accounts:customer_login' %}" class="btn-back">
+    <a href="{% url 'accounts:customer_login' %}" class="cms-btn-back">
       ログイン画面に戻る
     </a>
   </div>
 </div>
-
-</body>
-</html>
-
-{% include 'customer_footer.html' %}
+{% endblock %}
