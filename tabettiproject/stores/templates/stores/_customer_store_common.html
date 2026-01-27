@@ -435,7 +435,7 @@
       </li>
 
       <li class="{% if active_main == 'map' %}active{% endif %}">
-        <a href="{% url 'stores:customer_map' %}">地図</a>
+        <a href="{% url 'stores:customer_store_map' store.pk %}">地図</a>
       </li>
     </ul>
   </nav>
