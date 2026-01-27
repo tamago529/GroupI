@@ -1,6 +1,6 @@
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import authenticate
+from django.contrib.auth.forms import AuthenticationForm,PasswordResetForm
+from django.contrib.auth import authenticate, get_user_model
 from commons.models import Account
 
 class CustomerLoginForm(AuthenticationForm):
@@ -25,6 +25,30 @@ class CustomerLoginForm(AuthenticationForm):
             self.confirm_login_allowed(self.user_cache)
 
         return cleaned_data
+    
+
+class CustomerPasswordResetForm(PasswordResetForm):
+    """
+    ✅ 同一メールが複数アカウントに存在しても、メール送信は 1通だけにする
+    （customer_mail_send 用：顧客アカウントのみ対象）
+    """
+    def get_users(self, email):
+        UserModel = get_user_model()
+        email_field = UserModel.get_email_field_name()
+
+        qs = UserModel._default_manager.filter(
+            **{f"{email_field}__iexact": email},
+            is_active=True,
+        )
+
+        # ✅ 顧客だけ（CustomerAccount のみ）
+        qs = qs.filter(customeraccount__isnull=False)
+
+        # ✅ 1人だけ返す（古い順/小さいPKを採用）
+        user = qs.order_by("pk").first()
+        if not user:
+            return []
+        return [user]    
 
 class CustomerRegisterForm(forms.ModelForm):
     # パスワード確認用フィールド

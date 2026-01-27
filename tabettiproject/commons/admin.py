@@ -44,6 +44,15 @@ class CustomerAccountCreationForm(UserCreationForm):
         # パスワード以外で作成時に表示したいフィールドを列挙
         fields = ("username", "account_type", "email", "nickname", "phone_number", "age_group", "gender", "birth_date")
 
+    def clean_email(self):
+        email = (self.cleaned_data.get("email") or "").strip().lower()
+        if not email:
+            raise ValidationError("メールアドレスは必須です。")
+        if Account.objects.filter(email__iexact=email).exists():
+            raise ValidationError("このメールアドレスは既に使用されています。")
+        return email
+
+
     def save(self, commit=True):
         user = super().save(commit=False)
         user.account_type = self.cleaned_data.get("account_type")

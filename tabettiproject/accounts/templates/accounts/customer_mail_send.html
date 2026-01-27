@@ -105,14 +105,27 @@
         パスワード再設定用のメールをお送りします。
       </p>
 
-      <form method="post">
+      <form method="post" id="resetForm">
         {% csrf_token %}
         <div class="form-group">
           <label for="email">メールアドレス</label>
           <input type="email" name="email" id="email" required placeholder="example@mail.com">
         </div>
-        <button type="submit" class="btn-submit">送信する</button>
+        <button type="submit" class="btn-submit" id="submitBtn">送信する</button>
       </form>
+
+      <script>
+  (function(){
+    const form = document.getElementById("resetForm");
+    const btn  = document.getElementById("submitBtn");
+    if(!form || !btn) return;
+
+    form.addEventListener("submit", () => {
+      btn.disabled = true;
+      btn.textContent = "送信中...";
+    });
+  })();
+</script>
 
       <div class="back-links">
         <a href="{% url 'accounts:customer_login' %}">
