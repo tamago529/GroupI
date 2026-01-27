@@ -1,28 +1,113 @@
+{% extends "store_base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>ログアウト完了</title>
-  {# store側のCSSがあるならそれに差し替えOK #}
-  <link rel="stylesheet" href="{% static 'css/customer_login.css' %}">
-</head>
-<body>
 
-<div class="logout-wrapper">
-  <div class="logout-box">
-    <h2>ログアウトが完了しました</h2>
+{% block title %}ログアウト完了 | タベッチ{% endblock %}
 
-    <p class="logout-message">
-      ご利用ありがとうございました。<br>
-      またのご利用をお待ちしております。
-    </p>
+{% block css %}
+<style>
+/* ページ全体 */
+.logout-page {
+  min-height: calc(100vh - 120px);
+  display: flex;
+  justify-content: center;
+  align-items: center; /* ログアウトは中央寄せが自然 */
+  padding: 40px 12px 70px;
+  background: #fff;
+  color: #333;
+  font-family: "Hiragino Kaku Gothic ProN", "メイリオ", sans-serif;
+}
 
-    <a href="{% url 'accounts:store_login' %}" class="btn-top">
-      店舗ログイン画面へ
-    </a>
+/* 中央カード */
+.logout-card {
+  width: 520px;
+  max-width: 100%;
+  border: 1px solid #d8d8d8;
+  background: #fff;
+  text-align: center;
+}
+
+/* カード内 */
+.logout-card__inner {
+  padding: 40px 36px;
+}
+
+/* 見出し（ロゴ行） */
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.brand__logo-img {
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  object-fit: cover;
+  display: block;
+}
+
+.brand__title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* メッセージ */
+.logout-message {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #555;
+  margin-bottom: 30px;
+}
+
+/* ボタン */
+.btn-login-redirect {
+  display: block;
+  width: 260px;
+  margin: 0 auto;
+  padding: 12px 0;
+  background: #2a69a8; /* 店舗管理画面のテーマカラー */
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-login-redirect:hover {
+  opacity: .92;
+  text-decoration: none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="logout-page">
+  <div class="logout-card">
+    <div class="logout-card__inner">
+      
+      <div class="brand">
+        <img
+          class="brand__logo-img"
+          src="{% static 'images/Tabecchi_icon.png' %}"
+          alt="タベッチ"
+        >
+        <div class="brand__title">タベッチ 店舗管理画面</div>
+      </div>
+
+      <div class="logout-message">
+        <h2>ログアウトしました</h2>
+        <p>ご利用ありがとうございました。<br>またのご利用をお待ちしております。</p>
+      </div>
+
+      <a href="{% url 'accounts:store_login' %}" class="btn-login-redirect">
+        ログイン画面へ戻る
+      </a>
+
+    </div>
   </div>
 </div>
-
-</body>
-</html>
+{% endblock %}
