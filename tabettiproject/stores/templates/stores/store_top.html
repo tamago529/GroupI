@@ -296,12 +296,16 @@
 
         <section class="card">
           <div class="card-h">
-            <div>直近1ヶ月のアクセス数（PV）</div>
+            <div>過去7日間のアクセス数（PV）</div>
             <a href="#"><small>詳細データを見る</small></a>
           </div>
           <div class="card-b">
-            <div class="chart">（ここは後でPV集計を入れる）</div>
+            <div class="chart-container" style="position: relative; height:210px; width:100%">
+              <canvas id="accessChart"></canvas>
+            </div>
           </div>
+        </section>
+
         </section>
 
         <section class="card">
@@ -391,3 +395,62 @@
   </div>
 </div>
 {% endblock %}
+
+{% block js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('accessChart').getContext('2d');
+    const labels = {{ chart_labels|safe|default:"[]" }};
+    const data = {{ chart_data|safe|default:"[]" }};
+    
+    if (labels.length === 0) {
+      console.warn("Chart labels are empty.");
+    }
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'アクセス数 (PV)',
+          data: data,
+          borderColor: '#ff8a00',
+          backgroundColor: 'rgba(255, 138, 0, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 4,
+          pointBackgroundColor: '#ff8a00'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0
+            },
+            grid: {
+              color: '#f3f4f6'
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}
+

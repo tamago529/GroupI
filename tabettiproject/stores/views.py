@@ -28,6 +28,7 @@ from commons.models import (
     StoreImage,
     StoreMenu,
     StoreOnlineReservation,
+    StoreAccessLog,
 )
 
 from .form import (
@@ -317,7 +318,7 @@ class customer_menu_courseView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        store = get_object_or_404(Store, pk=self.kwargs["pk"])
+        store = get_store_from_user(self.request.user)
         context["store"] = store
 
         context["menu_items"] = (
@@ -362,6 +363,9 @@ class customer_store_infoView(TemplateView):
 
         store = get_object_or_404(Store, pk=self.kwargs["pk"])
         context["store"] = store
+
+        # アクセスログの記録
+        StoreAccessLog.objects.create(store=store)
 
         # 店舗画像
         context["store_images"] = StoreImage.objects.filter(store=store).order_by("id")
@@ -890,6 +894,25 @@ class store_topView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         store_account = self.request.user.storeaccount
         store = store_account.store
         context["store"] = store
+
+        # --- アクセス数チャート用データの集計 (過去7日間) ---
+        today = timezone.now().date()
+        date_list = [today - timedelta(days=i) for i in range(6, -1, -1)]
+        
+        # 日ごとのアクセス数を集計
+        access_counts = []
+        labels = []
+        for d in date_list:
+            count = StoreAccessLog.objects.filter(
+                store=store,
+                accessed_at__date=d
+            ).count()
+            access_counts.append(count)
+            labels.append(d.strftime("%Y-%m-%d"))
+        
+        context["chart_labels"] = labels
+        context["chart_data"] = access_counts
+        print(f"DEBUG: Store={store.store_name}, Labels={labels}, Data={access_counts}")
 
         today = timezone.localdate()
 

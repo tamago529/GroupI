@@ -594,3 +594,22 @@ class StoreInfoReportPhoto(models.Model):
 
     def __str__(self):
         return str(self.image)
+
+
+class StoreAccessLog(models.Model):
+    store = models.ForeignKey(
+        "Store",
+        on_delete=models.CASCADE,
+        related_name="access_logs",
+        verbose_name="店舗",
+    )
+    accessed_at = models.DateTimeField(auto_now_add=True, verbose_name="アクセス日時")
+
+    class Meta:
+        db_table = "store_access_logs"
+        verbose_name = "店舗アクセスログ"
+        verbose_name_plural = "店舗アクセスログ"
+        ordering = ["-accessed_at"]
+
+    def __str__(self):
+        return f"{self.store.store_name} - {self.accessed_at}"

@@ -11,7 +11,8 @@ from .models import (
     ReservationStatus, ImageStatus, ApplicationStatus,
     Review, ReviewPhoto, ReviewReport, Follow, Reservator,
     Reservation, StoreOnlineReservation, StoreImage, StoreMenu,
-    StoreAccountRequest, StoreAccountRequestLog, PasswordResetLog, TempRequestMailLog,StoreInfoReport
+    StoreAccountRequest, StoreAccountRequestLog, PasswordResetLog, TempRequestMailLog, StoreInfoReport,
+    StoreAccessLog
 )
 
 # ==========================================================
@@ -266,3 +267,10 @@ admin.site.register(Area)
 admin.site.register(ReservationStatus)
 admin.site.register(ImageStatus)
 admin.site.register(ApplicationStatus)
+
+
+@admin.register(StoreAccessLog)
+class StoreAccessLogAdmin(admin.ModelAdmin):
+    list_display = ("id", "store", "accessed_at")
+    list_filter = ("store", "accessed_at")
+    date_hierarchy = "accessed_at"

@@ -96,18 +96,26 @@
   }
 
   .follow-btn {
-    padding: 2px 8px;
-    background: #fff;
-    border: 1px solid #c2c2b8;
+    padding: 4px 10px;
+    background: #ff8a00;
+    border: 1px solid #e67e00;
     font-size: 11px;
-    color: #333;
+    color: #fff;
+    font-weight: bold;
     border-radius: 2px;
     cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .follow-btn:hover {
+    opacity: 0.9;
   }
 
   .follow-btn.following {
       background: #f2f2ef;
       color: #666;
+      border: 1px solid #c2c2b8;
+      font-weight: normal;
   }
 
   .card-info {
@@ -156,7 +164,7 @@
     {% for item in user_list %}
     <div class="user-card">
       <div class="card-image"
-        style="background-image:url('{% if item.cover_image_url %}{{ item.cover_image_url }}{% else %}{% static 'images/default_cover.jpg' %}{% endif %}');">
+        style="background-color: #eee; background-image: url('{% if item.cover_image_url %}{{ item.cover_image_url }}{% else %}{% static 'images/default_cover.jpg' %}{% endif %}');">
       </div>
 
       <div class="card-user-icon">
