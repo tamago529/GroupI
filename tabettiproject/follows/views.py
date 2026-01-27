@@ -115,19 +115,20 @@ class Customer_follower_listView(LoginRequiredMixin, TemplateView):
             return redirect("follows:customer_follower_list")
 
         rel = Follow.objects.filter(follower=customer, followee=target).first()
+        next_url = request.POST.get("next")
 
         # ✅ ミュート切り替え（フォロー関係がある時のみ）
         if action == "toggle_mute":
             if rel:
                 rel.is_muted = not rel.is_muted
                 rel.save(update_fields=["is_muted"])
-            return redirect("follows:customer_follower_list")
+            return redirect(next_url or "follows:customer_follower_list")
 
         # ✅ フォロー解除
         if action == "unfollow":
             if rel:
                 rel.delete()
-            return redirect("follows:customer_follower_list")
+            return redirect(next_url or "follows:customer_follower_list")
 
         # ✅ フォローする（明示）
         if action == "follow":
@@ -137,19 +138,19 @@ class Customer_follower_listView(LoginRequiredMixin, TemplateView):
                         Follow.objects.get_or_create(follower=customer, followee=target)
                 except IntegrityError:
                     pass
-            return redirect("follows:customer_follow_list")
+            return redirect(next_url or "follows:customer_follow_list")
 
         # ✅ 互換：action無し（従来のトグル動作）
         if rel:
             rel.delete()
-            return redirect("follows:customer_follower_list")
+            return redirect(next_url or "follows:customer_follower_list")
 
         try:
             with transaction.atomic():
                 Follow.objects.get_or_create(follower=customer, followee=target)
         except IntegrityError:
             pass
-        return redirect("follows:customer_follow_list")
+        return redirect(next_url or "follows:customer_follow_list")
 
 
 class Customer_follow_listView(LoginRequiredMixin, TemplateView):
@@ -215,19 +216,28 @@ class Customer_follow_listView(LoginRequiredMixin, TemplateView):
             return redirect("follows:customer_follow_list")
 
         rel = Follow.objects.filter(follower=customer, followee_id=target_id).first()
+        next_url = request.POST.get("next")
+
         if not rel:
-            return redirect("follows:customer_follow_list")
+            # フォローしていない場合でも、action=follow なら新規作成してnextへ（検索用拡張）
+            if action == "follow":
+                try:
+                    with transaction.atomic():
+                        Follow.objects.get_or_create(follower=customer, followee_id=target_id)
+                except IntegrityError:
+                    pass
+            return redirect(next_url or "follows:customer_follow_list")
 
         if action == "toggle_mute":
             rel.is_muted = not rel.is_muted
             rel.save(update_fields=["is_muted"])
-            return redirect("follows:customer_follow_list")
+            return redirect(next_url or "follows:customer_follow_list")
 
         if action == "unfollow":
             rel.delete()
-            return redirect("follows:customer_follow_list")
+            return redirect(next_url or "follows:customer_follow_list")
 
-        return redirect("follows:customer_follow_list")
+        return redirect(next_url or "follows:customer_follow_list")
     
 class Customer_user_pageView(LoginRequiredMixin, TemplateView):
     """

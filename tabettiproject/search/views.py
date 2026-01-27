@@ -265,3 +265,72 @@ def customer_search_listView(request):
         "base_date": base_date,
     }
     return render(request, "search/customer_search_list.html", context)
+
+
+# =====================================================
+# ユーザー検索
+# =====================================================
+def customer_user_search_listView(request):
+    from commons.models import CustomerAccount, Follow
+
+    keyword = (request.GET.get("keyword") or "").strip()
+    
+    # 全顧客アカウントをベースにキーワード検索
+    user_qs = CustomerAccount.objects.all()
+    if keyword:
+        user_qs = user_qs.filter(
+            Q(nickname__icontains=keyword) | 
+            Q(username__icontains=keyword)
+        )
+    
+    # ページネーション（1ページに多く出しすぎない）
+    paginator = Paginator(user_qs.order_by("id"), 20)
+    page_number = request.GET.get("page")
+    users_page = paginator.get_page(page_number)
+
+    # ログインユーザー情報の取得
+    login_customer = None
+    if request.user.is_authenticated:
+        login_customer = CustomerAccount.objects.filter(pk=request.user.pk).first()
+
+    # 表示用データの整形（フォロー状態など）
+    user_list = []
+    for target in users_page:
+        # 自分自身は検索結果から除外するか、区別する
+        if login_customer and target.pk == login_customer.pk:
+            continue
+
+        follower_count = Follow.objects.filter(followee=target).count()
+        is_following = False
+        is_follower = False
+        is_muted = False
+
+        if login_customer:
+            rel = Follow.objects.filter(follower=login_customer, followee=target).first()
+            is_following = rel is not None
+            if rel:
+                is_muted = rel.is_muted
+            
+            is_follower = Follow.objects.filter(follower=target, followee=login_customer).exists()
+
+        cover_field = getattr(target, "cover_image", None)
+        icon_field = getattr(target, "icon_image", None)
+
+        user_list.append({
+            "id": target.pk,
+            "user": target,
+            "review_count": target.review_count,
+            "follower_count": follower_count,
+            "is_following": is_following,
+            "is_follower": is_follower,
+            "is_muted": is_muted,
+            "cover_image_url": cover_field.url if cover_field else "",
+            "user_icon_url": icon_field.url if icon_field else "",
+        })
+
+    context = {
+        "users": users_page,
+        "user_list": user_list,
+        "keyword": keyword,
+    }
+    return render(request, "search/user_search_list.html", context)
