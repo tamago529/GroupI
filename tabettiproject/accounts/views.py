@@ -1,8 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+import urllib.parse
 from django.contrib import messages
 from django.contrib.auth import logout, login
 from django.contrib.auth.views import LoginView, LogoutView
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.db.models import Q
 from django.views.generic import ListView, CreateView
 from django.views.generic.base import TemplateView
@@ -58,7 +59,17 @@ class company_account_managementView(CompanyOnlyMixin, ListView):
         context["query"] = self.request.GET.get("q", "")
         context["selected_type"] = self.request.GET.get("type", "all")
         return context
-
+def account_delete_execute(request, pk):
+    # 削除対象のアカウントを取得
+    user = get_object_or_404(Account, pk=pk)
+    username = user.username
+    
+    # データベースから削除（※注意：紐づくデータがある場合、前述のProtectedErrorが出る可能性があります）
+    user.delete()
+    
+    # 完了画面へリダイレクト
+    msg = f"アカウント「{username}」の削除"
+    return redirect(reverse('commons:company_common_complete') + f"?msg={urllib.parse.quote(msg)}")
 
 class company_loginView(LoginView):
     template_name = "accounts/company_login.html"

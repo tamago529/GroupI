@@ -327,6 +327,16 @@ class customer_store_mapView(TemplateView):
         customer = _get_customer_from_user(self.request.user)
         context["is_saved"] = _get_is_saved_for_customer(customer=customer, store=store)
 
+        # ★検索条件（パンくず用）
+        context.update({
+            "keyword": self.request.GET.get("keyword", ""),
+            "area": self.request.GET.get("area", ""),
+            "date": self.request.GET.get("date", ""),
+            "time": self.request.GET.get("time", ""),
+            "sort": self.request.GET.get("sort", ""),
+            "from_search": self.request.GET.get("from_search", ""),
+        })
+
         return context
 
 
@@ -362,6 +372,16 @@ class customer_menu_courseView(TemplateView):
         # ★保存判定
         customer = _get_customer_from_user(self.request.user)
         context["is_saved"] = _get_is_saved_for_customer(customer=customer, store=store)
+
+        # ★検索条件（パンくず用）
+        context.update({
+            "keyword": self.request.GET.get("keyword", ""),
+            "area": self.request.GET.get("area", ""),
+            "date": self.request.GET.get("date", ""),
+            "time": self.request.GET.get("time", ""),
+            "sort": self.request.GET.get("sort", ""),
+            "from_search": self.request.GET.get("from_search", ""),
+        })
 
         return context
 
@@ -508,6 +528,16 @@ class customer_store_infoView(TemplateView):
 
         # ★星評価（共通ヘッダー用）
         context.update(_get_store_rating_context(store))
+
+        # ★検索条件（パンくず用）
+        context.update({
+            "keyword": self.request.GET.get("keyword", ""),
+            "area": self.request.GET.get("area", ""),
+            "date": self.request.GET.get("date", ""),
+            "time": self.request.GET.get("time", ""),
+            "sort": self.request.GET.get("sort", ""),
+            "from_search": self.request.GET.get("from_search", ""),
+        })
 
         return context
 
