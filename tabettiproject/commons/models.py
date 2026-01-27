@@ -141,6 +141,7 @@ class AccountManager(BaseUserManager):
 
 
 class Account(AbstractUser):
+    email = models.EmailField(max_length=254, unique=True, verbose_name="メールアドレス")  # ✅ 追加/上書き
     account_type = models.ForeignKey("AccountType", on_delete=models.PROTECT, verbose_name="種類")
     objects = AccountManager()
 

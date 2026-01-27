@@ -9,7 +9,7 @@ from django.views.generic.base import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 from commons.models import StoreAccount, Account
-from .forms import CustomerLoginForm, CustomerRegisterForm
+from .forms import CustomerLoginForm, CustomerRegisterForm, CustomerPasswordResetForm
 from django.contrib.auth.views import (
     PasswordResetView, PasswordResetDoneView,
     PasswordResetConfirmView, PasswordResetCompleteView
@@ -147,7 +147,8 @@ class customermail_sendView(PasswordResetView):
     subject_template_name = "accounts/password_reset_subject.txt"
     success_url = reverse_lazy("accounts:customer_password_done")
     from_email = settings.DEFAULT_FROM_EMAIL
-   
+    form_class = CustomerPasswordResetForm
+
     def dispatch(self, request, *args, **kwargs):
         self.from_email = settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER
         return super().dispatch(request, *args, **kwargs)
