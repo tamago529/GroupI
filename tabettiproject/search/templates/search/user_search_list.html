@@ -1,0 +1,215 @@
+{% extends "customer_base.html" %}
+{% load static %}
+
+{% block title %}ユーザー検索結果 | タベッチ{% endblock %}
+
+{% block css %}
+<style>
+  /* 基本的には follows のスタイルを流用 */
+  .inner-container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 10px;
+    box-sizing: border-box;
+  }
+
+  .container {
+    padding-top: 25px;
+    padding-bottom: 50px;
+  }
+
+  .search-title {
+    font-size: 18px;
+    font-weight: bold;
+    border-bottom: 1px solid #e7e7e1;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+  }
+
+  .search-title span {
+    font-weight: normal;
+    color: #666;
+    margin-left: 10px;
+  }
+
+  .card-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .user-card {
+    width: calc(33.333% - 8px);
+    background: #fff;
+    border: 1px solid #e7e7e1;
+    border-radius: 2px;
+    position: relative;
+    min-height: 200px;
+  }
+
+  .card-image {
+    height: 80px;
+    background-color: #eee;
+    border-bottom: 1px solid #e7e7e1;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .card-user-icon {
+    position: absolute;
+    top: 55px;
+    left: 10px;
+    width: 45px;
+    height: 45px;
+    background: #fff;
+    border: 1px solid #c2c2b8;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .card-user-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .card-body {
+    padding: 25px 10px 10px 10px;
+  }
+
+  .card-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 5px;
+  }
+
+  .card-name {
+    font-weight: bold;
+    color: #06c;
+    text-decoration: none;
+    font-size: 13px;
+  }
+
+  .card-name:hover {
+    text-decoration: underline;
+  }
+
+  .follow-btn {
+    padding: 2px 8px;
+    background: #fff;
+    border: 1px solid #c2c2b8;
+    font-size: 11px;
+    color: #333;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+
+  .follow-btn.following {
+      background: #f2f2ef;
+      color: #666;
+  }
+
+  .card-info {
+    font-size: 11px;
+    color: #666;
+    margin-top: 5px;
+  }
+
+  .is-follower-tag {
+    color: #999;
+    font-size: 10px;
+    margin-bottom: 2px;
+  }
+  
+  /* レスポンシブ */
+  @media (max-width: 768px) {
+    .user-card {
+      width: calc(50% - 6px);
+    }
+  }
+  @media (max-width: 480px) {
+    .user-card {
+      width: 100%;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumbs">
+  <ol>
+    <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
+    <li><span>ユーザー検索</span></li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container inner-container">
+  <h1 class="search-title">
+    ユーザー検索結果
+    {% if keyword %}<span>「{{ keyword }}」の検索結果</span>{% endif %}
+  </h1>
+
+  <div class="card-list">
+    {% for item in user_list %}
+    <div class="user-card">
+      <div class="card-image"
+        style="background-image:url('{% if item.cover_image_url %}{{ item.cover_image_url }}{% else %}{% static 'images/default_cover.jpg' %}{% endif %}');">
+      </div>
+
+      <div class="card-user-icon">
+        <img
+          src="{% if item.user_icon_url %}{{ item.user_icon_url }}{% else %}/media/customer/icon/default_cover.jpg{% endif %}"
+          alt="{{ item.user.username }}さんのアイコン">
+      </div>
+
+      <div class="card-body">
+        <div class="card-header-row">
+            <a href="{% url 'follows:customer_user_page' item.id %}" class="card-name">
+                {{ item.user.nickname|default:item.user.username }}
+            </a>
+            
+            {% if user.is_authenticated %}
+            <form action="{% url 'follows:customer_follow_list' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="user_id" value="{{ item.id }}">
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                {% if item.is_following %}
+                    <button type="submit" name="action" value="unfollow" class="follow-btn following">フォロー中</button>
+                {% else %}
+                    <button type="submit" name="action" value="follow" class="follow-btn">フォローする</button>
+                {% endif %}
+            </form>
+            {% endif %}
+        </div>
+
+        <div class="card-info">
+          {% if item.is_follower %}
+          <div class="is-follower-tag">あなたのフォロワーです</div>
+          {% endif %}
+          <div>{{ item.review_count }}ログ</div>
+          <div>フォロワー：{{ item.follower_count }}人</div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <p style="padding: 20px; color:#999;">該当するユーザーは見つかりませんでした。</p>
+    {% endfor %}
+  </div>
+
+  {# 簡易的なページネーション #}
+  {% if users.has_other_pages %}
+  <div style="margin-top: 30px; text-align: center;">
+    {% if users.has_previous %}
+      <a href="?keyword={{ keyword }}&page={{ users.previous_page_number }}">前へ</a>
+    {% endif %}
+    <span>{{ users.number }} / {{ users.paginator.num_pages }}</span>
+    {% if users.has_next %}
+      <a href="?keyword={{ keyword }}&page={{ users.next_page_number }}">次へ</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
