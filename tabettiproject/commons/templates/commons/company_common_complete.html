@@ -1,51 +1,84 @@
-<!--運用共通完了画面-->
 {% extends 'company_base.html' %}
 
 {% block content %}
 <style>
-    .complete-wrapper { max-width: 850px; margin: 100px auto; padding: 0 20px; font-family: sans-serif; }
+    /* 全体のレイアウト */
+    .complete-wrapper {
+        max-width: 850px;
+        margin: 100px auto;
+        padding: 0 20px;
+        font-family: sans-serif;
+    }
+
+    /* ② 完了メッセージを囲む大きな枠 */
     .complete-box {
-        border: 2px solid #ccc;
-        border-radius: 40px;
+        border: 2px solid #ccc;    /* 設計図通りのグレーの枠線 */
+        border-radius: 40px;       /* 設計図通りの大きな角丸 */
         background-color: #fff;
-        padding: 80px 40px;
+        padding: 80px 40px;        /* 上下に広い余白 */
         text-align: center;
         margin-bottom: 25px;
         min-height: 200px;
         display: flex;
         align-items: center;
         justify-content: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
-    .complete-text { font-size: 24px; color: #333; margin: 0; }
 
-    .complete-button-row { display: flex; justify-content: flex-end; gap: 16px; }
+    /* メッセージテキスト */
+    .complete-text {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+        margin: 0;
+    }
 
-    .btn-top, .btn-back {
+    /* ① ボタン配置エリア（右寄せ） */
+    .complete-button-row {
+        display: flex;
+        justify-content: flex-end; /* 右端に寄せる */
+    }
+
+    /* ① TOPへボタンのスタイル */
+    .btn-top {
         display: inline-block;
-        border: 2px solid #333;
-        border-radius: 15px;
+        border: 2px solid #333;    /* 設計図の太めの枠線 */
+        border-radius: 15px;       /* ボタンの角丸 */
         padding: 12px 45px;
         font-size: 18px;
         font-weight: bold;
         text-decoration: none;
         color: #000;
         background-color: #fff;
-        transition: 0.2s;
+        transition: all 0.2s;
+        text-align: center;
     }
-    .btn-top:hover, .btn-back:hover {
+
+    /* ホバー時の演出（食べログオレンジ） */
+    .btn-top:hover {
         background-color: #f0f0f0;
         border-color: #ff9600;
         color: #ff9600;
+        transform: translateY(-2px);
     }
 </style>
 
 <div class="complete-wrapper">
+    <!-- ② 完了メッセージ項目 -->
     <div class="complete-box">
-        <p class="complete-text">{{ display_message|default:"処理" }}が完了しました</p>
+        <!-- 
+            🌟 ここがポイント！
+            request.GET.msg と書くことで、URLの ?msg=... の中身を直接表示します。
+            何も送られてこなかった場合は「処理」と表示されます。
+        -->
+        <p class="complete-text">
+            {{ request.GET.msg|default:"処理" }}が完了しました
+        </p>
     </div>
 
+    <!-- ① TOPへボタン -->
     <div class="complete-button-row">
-        <a href="{{ next_url|default:request.META.HTTP_REFERER }}" class="btn-back">一覧へ</a>
+        <!-- 運用管理トップ画面へ戻る -->
         <a href="{% url 'accounts:company_top' %}" class="btn-top">TOPへ</a>
     </div>
 </div>

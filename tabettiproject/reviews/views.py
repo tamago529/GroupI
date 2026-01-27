@@ -583,7 +583,7 @@ class store_review_reportView(TemplateView):
         )
 
         messages.success(request, "口コミを通報しました。運営にて内容を確認いたします。")
-        return redirect("reviews:store_review_list")
+        return redirect("reviews:store_review_list",pk=review.store.pk)
 
 
 class store_review_listView(LoginRequiredMixin, ListView):
@@ -700,6 +700,15 @@ class reportView(TemplateView):
         context["reports"] = reports
         return context
 
+def review_delete_execute(request, pk):
+    # ① 対象の口コミを取得して削除
+    review = get_object_or_404(Review, pk=pk)
+    review.delete()
+    
+    # ② 共通完了画面へ（msgパラメータを使用）
+    msg = "不適切な口コミの削除"
+    return redirect(reverse('commons:company_common_complete') + f"?msg={urllib.parse.quote(msg)}&action=delete")
+    
 
 class customer_common_completeView(View):
     template_name = "commons/customer_common_complete.html"

@@ -19,7 +19,7 @@
         padding-left: 15px;
     }
 
-    /* ② 報告カードのグリッド配置（横2列） */
+    /* ② 報告カードのグリッド配置 */
     .report-grid {
         display: grid;
         grid-template-columns: 1fr 1fr; 
@@ -27,7 +27,6 @@
         margin-bottom: 50px;
     }
 
-    /* 各報告カードの枠 */
     .report-card {
         border: 2px solid #333;
         background-color: #fff;
@@ -46,7 +45,6 @@
         border-color: #ff9600;
     }
 
-    /* カード内のテキスト配置 */
     .user-name {
         font-size: 18px;
         font-weight: bold;
@@ -54,18 +52,13 @@
     }
 
     .report-summary {
-        text-align: right; /* 設計図通り右側に寄せる */
-        font-size: 16px;
+        text-align: right;
+        font-size: 14px;
         color: #666;
         margin-top: 10px;
     }
 
     /* ① 戻るボタンエリア */
-    .footer-actions {
-        display: flex;
-        justify-content: flex-start; /* 左寄せ */
-    }
-
     .btn-back {
         padding: 10px 40px;
         border: 2px solid #333;
@@ -74,10 +67,7 @@
         text-decoration: none;
         font-weight: bold;
         font-size: 16px;
-    }
-
-    .btn-back:hover {
-        background-color: #f0f0f0;
+        display: inline-block;
     }
 
     /* --- JS用ポップアップ（モーダル） --- */
@@ -97,7 +87,7 @@
         padding: 30px;
         border: 2px solid #333;
         border-radius: 15px;
-        width: 500px;
+        width: 550px;
         max-width: 90%;
     }
 
@@ -108,31 +98,50 @@
         border-bottom: 1px solid #eee;
         padding-bottom: 10px;
     }
+
+    /* 🌟 削除ボタンのスタイル */
+    .btn-delete-review {
+        padding: 8px 20px;
+        border: 2px solid #d9534f;
+        background-color: #fff;
+        color: #d9534f;
+        text-decoration: none;
+        font-weight: bold;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+    .btn-delete-review:hover {
+        background-color: #d9534f;
+        color: #fff;
+    }
+
+    .modal-footer {
+        margin-top: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 </style>
 
 <div class="report-wrapper">
     <h1 class="page-title">報告管理</h1>
 
-    <!-- ② 報告リスト（グリッド） -->
     <div class="report-grid">
-            {% for report in reports %}
-    <!-- 
-        JSの関数 openReport に、本物のデータを引数として渡します。
-        文字の中に改行や引用符があるとJSが壊れるので '|escapejs' を使う
-    -->
-    <div class="report-card" 
-         onclick="openReport('{{ report.reporter.username }}', '{{ report.report_text|escapejs }}')">
-        <div class="user-name">通報者：{{ report.reporter.username }}</div>
-        <div class="report-summary">
-            対象口コミID: {{ report.review.id }}<br>
-            内容：{{ report.report_text|truncatechars:30 }}
+        {% for report in reports %}
+        <!-- 🌟 第3引数に review.id を追加 -->
+        <div class="report-card" 
+             onclick="openReport('{{ report.reporter.username }}', '{{ report.report_text|escapejs }}', '{{ report.review.id }}')">
+            <div class="user-name">通報者：{{ report.reporter.username }}</div>
+            <div class="report-summary">
+                対象口コミID: {{ report.review.id }}<br>
+                内容：{{ report.report_text|truncatechars:30 }}
+            </div>
         </div>
+        {% empty %}
+            <p>報告はありません。</p>
+        {% endfor %}
     </div>
-    {% empty %}
-        <p>報告はありません。</p>
-    {% endfor %}
-</div>
-    <!-- ① 戻るボタン -->
+
     <div class="footer-actions">
         <a href="{% url 'accounts:company_top' %}" class="btn-back">戻る</a>
     </div>
@@ -143,27 +152,34 @@
     <div class="modal-content">
         <div class="modal-header" id="modalUserName">ユーザー名</div>
         <p id="modalFullContent">報告内容の詳細がここに表示されます。</p>
-        <div style="margin-top: 25px; text-align: right;">
-            <button onclick="closeReport()" style="padding: 8px 25px; cursor: pointer; font-weight: bold;">閉じる</button>
+        
+        <div class="modal-footer">
+            <!-- 🌟 削除ボタンを追加（リンクはJSで動的に書き換えます） -->
+            <a href="#" id="deleteReviewBtn" class="btn-delete-review">🚩 口コミを削除する</a>
+            
+            <button onclick="closeReport()" style="padding: 8px 25px; cursor: pointer; font-weight: bold; border: 1px solid #ccc; background: #fff;">閉じる</button>
         </div>
     </div>
 </div>
 
 <script>
-    // JSの解説：
-    // 引数として「名前」と「内容」を受け取って、ポップアップの中身を書き換えて表示します。
-    function openReport(name, content) {
-        // 1. モーダル内の名前を書き換える
-        document.getElementById('modalUserName').innerText = name + " からの報告";
-        // 2. モーダル内の詳細文を書き換える
-        document.getElementById('modalFullContent').innerText = content;
-        // 3. モーダル全体を見えるようにする
-        document.getElementById('reportModal').style.display = 'flex';
-    }
+  function openReport(name, content, reviewId) {
+    document.getElementById('modalUserName').innerText = name + " からの報告";
+    document.getElementById('modalFullContent').innerText = content;
 
-    function closeReport() {
-        // モーダルを隠す
-        document.getElementById('reportModal').style.display = 'none';
-    }
+    // 削除実行URL（Djangoに作らせる）
+    let deletePattern = "{% url 'reviews:review_delete_execute' 0 %}";
+    const deleteExecUrl = deletePattern.replace("0", reviewId);
+
+    // 🌟 運用共通確認画面のURL
+    const confirmUrl = "{% url 'commons:company_common_confirm' %}";
+    
+    // 🌟 パラメータ名を「confirm_message」に合わせる
+    const message = encodeURIComponent("この不適切な口コミを完全に削除しますか？");
+    const finalUrl = `${confirmUrl}?confirm_message=${message}&next_url=${deleteExecUrl}`;
+    
+    document.getElementById('deleteReviewBtn').href = finalUrl;
+    document.getElementById('reportModal').style.display = 'flex';
+}
 </script>
 {% endblock %}

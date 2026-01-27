@@ -66,4 +66,7 @@ urlpatterns = [
         reportView.as_view(),
         name="report"
     ),
+      path('review_delete_execute/<int:pk>/', 
+           review_delete_execute, 
+           name='review_delete_execute'),
 ]

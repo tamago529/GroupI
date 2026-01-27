@@ -55,16 +55,17 @@
         <p class="confirm-text">{{ confirm_message|default:"確認内容" }}</p>
     </div>
 
-    <div class="confirm-button-row">
-        <!-- キャンセル：一覧に戻る -->
-        <a href="{{ cancel_url }}" class="btn-base btn-cancel">キャンセル</a>
+   
+    
 
-        <!-- OK：POSTで実処理（削除） -->
-        <form method="post" action="{% url 'commons:company_common_complete' %}" style="margin:0;">
-            {% csrf_token %}
-            <input type="hidden" name="next_url" value="{{ next_url }}">
-            <button type="submit" class="btn-base btn-ok">OK</button>
-        </form>
+        <div class="confirm-button-row">
+    <!-- ② キャンセル：直前の画面に戻る -->
+    <a href="{{ cancel_url }}" class="btn-base btn-cancel">キャンセル</a>
+
+    <!-- ① OK：実際に削除などの処理を行うURL（next_url）へ飛ばす -->
+    <!-- 🌟 formをやめて、シンプルな a タグにします -->
+    <a href="{{ next_url }}" class="btn-base btn-ok">OK</a>
+</div>
     </div>
 </div>
 {% endblock %}

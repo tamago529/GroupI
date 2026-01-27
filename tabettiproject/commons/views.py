@@ -126,23 +126,23 @@ class company_common_confirmView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["confirm_message"] = self.request.GET.get("message", "実行してよろしいですか？")
-        referer = self.request.META.get("HTTP_REFERER")
-        default_back_url = "/accounts/company/top/"
-        context["cancel_url"] = referer if referer else default_back_url
-        context["ok_action"] = self.request.GET.get("ok_action", "#")
-        context["next_url"] = self.request.GET.get("next", default_back_url)
+        # 🌟 HTMLの変数 {{ confirm_message }} に合わせて「confirm_message」で受け取る
+        context['confirm_message'] = self.request.GET.get('confirm_message', '実行してよろしいですか？')
+        
+        # 🌟 OKボタンの飛び先
+        context['next_url'] = self.request.GET.get('next_url', '#')
+
+        # 🌟 キャンセル時の戻り先（方法3：自動で前の画面へ）
+        referer = self.request.META.get('HTTP_REFERER')
+        context['cancel_url'] = referer if referer else '/accounts/company_top/'
+        
         return context
 
 
 class company_common_completeView(TemplateView):
     template_name = "commons/company_common_complete.html"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["display_message"] = self.request.GET.get("message", "処理")
-        context["next_url"] = self.request.GET.get("next", "")
-        return context
+    
 
 
 # ✅ 口コミ削除フロー
