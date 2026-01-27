@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.db.models import Q
 from django.views.generic import ListView, CreateView
 from django.views.generic.base import TemplateView
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 from commons.models import StoreAccount, Account
 from .forms import CustomerLoginForm, CustomerRegisterForm
@@ -19,7 +19,17 @@ from django.conf import settings
 # =========================
 # 企業側
 # =========================
-class company_account_managementView(ListView):
+
+class CompanyOnlyMixin(LoginRequiredMixin, UserPassesTestMixin):
+    """ログイン必須、かつ「企業」アカウントのみ許可する門番"""
+    login_url = 'accounts:company_login' # ログインしてない時の飛ばし先
+
+    def test_func(self):
+        # ログインしていて、かつ種類が「企業」なら合格（True）
+        user = self.request.user
+        return user.is_authenticated and user.account_type.account_type == "企業"
+
+class company_account_managementView(CompanyOnlyMixin, ListView):
     template_name = "accounts/company_account_management.html"
     model = Account
     context_object_name = "accounts"
@@ -69,16 +79,18 @@ def company_logout_view(request):
     return render(request, "accounts/company_logout.html")
 
 
-class company_store_review_detailView(TemplateView):
+class company_store_review_detailView(CompanyOnlyMixin, TemplateView):
     template_name = "accounts/company_store_review_detail.html"
 
 
-class company_store_reviewView(TemplateView):
+class company_store_reviewView(CompanyOnlyMixin, TemplateView):
     template_name = "accounts/company_store_review.html"
 
 
-class company_topView(TemplateView):
+class company_topView(CompanyOnlyMixin, TemplateView):
     template_name = "accounts/company_top.html"
+
+
 
 
 # =========================
