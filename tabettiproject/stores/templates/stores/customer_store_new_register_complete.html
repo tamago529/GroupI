@@ -1,0 +1,62 @@
+{% extends 'customer_base.html' %}
+{% load static %}
+
+{% block title %}登録完了 - タベッチ{% endblock %}
+
+{% block css %}
+<style>
+  .complete-container {
+    max-width: 600px;
+    margin: 80px auto;
+    padding: 50px 30px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+  .complete-icon {
+    font-size: 64px;
+    color: #4caf50;
+    margin-bottom: 20px;
+  }
+  .complete-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  .complete-text {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 40px;
+  }
+  .btn-home {
+    display: inline-block;
+    padding: 15px 40px;
+    background: #ff8a00;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: background 0.2s;
+  }
+  .btn-home:hover {
+    background: #e67e00;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="complete-container">
+  <div class="complete-icon">
+    <i class="fas fa-check-circle"></i>
+  </div>
+  <h1 class="complete-title">店舗情報の登録が完了しました</h1>
+  <p class="complete-text">
+    ご協力ありがとうございます。<br>
+    登録された情報は管理者の確認後、サイトに反映されます。
+  </p>
+  
+  <a href="{% url 'accounts:customer_top' %}" class="btn-home">トップページへ戻る</a>
+</div>
+{% endblock %}

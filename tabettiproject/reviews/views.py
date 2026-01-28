@@ -543,8 +543,48 @@ class customer_reviewer_review_listView(LoginRequiredMixin, View):
         return redirect(reverse("reviews:customer_reviewer_review_list"))
 
 
-class customer_reviewer_searchView(TemplateView):
+class customer_reviewer_searchView(LoginRequiredMixin, View):
     template_name = "reviews/customer_reviewer_search.html"
+
+    def _get_login_customer(self, request):
+        return CustomerAccount.objects.filter(pk=request.user.pk).first()
+
+    def get(self, request, *args, **kwargs):
+        customer = self._get_login_customer(request)
+        if customer is None:
+            messages.error(request, "顧客アカウントでログインしてください。")
+            return redirect(reverse("accounts:customer_login"))
+
+        keyword = request.GET.get("keyword", "").strip()
+        
+        # 検索結果の初期化
+        search_results = []
+        result_count = 0
+
+        if keyword:
+            # キーワードによる口コミ検索（タイトル、本文、店舗名、レビュアー名）
+            from django.db.models import Q
+            
+            search_results = (
+                Review.objects
+                .select_related("store", "reviewer")
+                .filter(
+                    Q(review_title__icontains=keyword) |
+                    Q(review_text__icontains=keyword) |
+                    Q(store__store_name__icontains=keyword) |
+                    Q(reviewer__nickname__icontains=keyword)
+                )
+                .order_by("-posted_at")
+            )
+            result_count = search_results.count()
+
+        context = {
+            "customer": customer,
+            "keyword": keyword,
+            "search_results": search_results,
+            "result_count": result_count,
+        }
+        return render(request, self.template_name, context)
 
 
 class customer_review_reportView(LoginRequiredMixin, View):

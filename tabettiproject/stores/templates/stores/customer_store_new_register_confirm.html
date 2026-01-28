@@ -1,191 +1,143 @@
-{% extends "customer_base.html" %}
+{% extends 'customer_base.html' %}
+{% load static %}
 
-{% block title %}店舗新規登録確認画面{% endblock %}
+{% block title %}入力内容の確認 - タベッチ{% endblock %}
 
 {% block css %}
 <style>
-    /* --- レイアウト全体設定 --- */
-    .confirmation-container {
-        max-width: 980px;
-        margin: 20px auto;
-        background-color: #fff;
-        padding: 0 10px;
-    }
-
-    /* --- ヘッダー・タイトル部分の装飾 --- */
-    .registration-title {
-        font-size: 20px;
-        font-weight: bold;
-        border-bottom: 2px solid #e2e2e2;
-        padding-bottom: 10px;
-        margin-bottom: 15px;
-        color: #333;
-    }
-
-    .registration-guide {
-        font-size: 14px;
-        font-weight: bold;
-        color: #333;
-        margin-bottom: 30px;
-    }
-
-    /* --- セクション見出し（食べログ特有のオレンジ装飾） --- */
-    .form-section-header {
-        background-color: #f2f0eb;
-        padding: 10px 15px;
-        font-weight: bold;
-        border-left: 4px solid #ed6103;
-        margin: 35px 0 0 0;
-        font-size: 15px;
-    }
-
-    /* --- 確認用テーブルのスタイル --- */
-    .confirm-table {
-        width: 100%;
-        border-collapse: collapse;
-        border-top: 1px solid #e2e2e2;
-        margin-bottom: 10px;
-    }
-
-    /* アクセシビリティ：caption非表示設定（スクリーンリーダーには認識される） */
-    .confirm-table caption {
-        clip: rect(1px, 1px, 1px, 1px);
-        height: 1px;
-        overflow: hidden;
-        position: absolute;
-        width: 1px;
-    }
-
-    .confirm-table th, .confirm-table td {
-        padding: 15px;
-        border-bottom: 1px solid #e2e2e2;
-        text-align: left;
-        vertical-align: middle;
-    }
-
-    /* ラベル側（左カラム） */
-    .confirm-table th {
-        width: 220px;
-        background-color: #f9f9f9;
-        font-weight: bold;
-        font-size: 13px;
-    }
-
-    /* 値側（右カラム） */
-    .confirm-table td {
-        font-size: 14px;
-        color: #333;
-    }
-
-    /* --- 下部アクションエリア（リンクボタン） --- */
-    .action-container {
-        background-color: #f6f6f6;
-        padding: 30px;
-        text-align: center;
-        margin-top: 50px;
-        border-top: 1px solid #e2e2e2;
-    }
-
-    /* 戻るリンクをボタン風に装飾（白背景） */
-    .btn-back {
-        display: inline-block;
-        background-color: #fff;
-        border: 1px solid #bbb;
-        padding: 12px 35px;
-        font-size: 14px;
-        color: #333;
-        text-decoration: none;
-        margin-right: 15px;
-        border-radius: 3px;
-        vertical-align: middle;
-    }
-
-    /* 登録リンクをボタン風に装飾（緑背景） */
-    .btn-submit {
-        display: inline-block;
-        background-color: #93b92c;
-        color: #fff;
-        border: none;
-        padding: 12px 50px;
-        font-weight: bold;
-        font-size: 15px;
-        text-decoration: none;
-        border-radius: 3px;
-        vertical-align: middle;
-    }
-
-    .btn-submit:hover {
-        opacity: 0.8;
-        color: #fff;
-    }
+  .confirm-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+  }
+  .confirm-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #ff8a00;
+    color: #333;
+  }
+  .confirm-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+  }
+  .confirm-table th, .confirm-table td {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+  }
+  .confirm-table th {
+    width: 200px;
+    background: #f9f9f9;
+    color: #666;
+    font-weight: bold;
+  }
+  .action-buttons {
+    display: flex;
+    gap: 20px;
+    margin-top: 40px;
+  }
+  .btn-back {
+    flex: 1;
+    padding: 15px;
+    background: #f2f2ef;
+    color: #666;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .btn-submit {
+    flex: 2;
+    padding: 15px;
+    background: #ff8a00;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn-submit:hover {
+    background: #e67e00;
+  }
+  .btn-back:hover {
+    background: #e5e5e2;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="confirmation-container">
-    <h1 class="registration-title">レストラン新規登録（内容確認）</h1>
-    <p class="registration-guide">
-        入力内容をご確認ください。よろしければ「登録」ボタンを押してください。
-    </p>
+<div class="confirm-container">
+  <h1 class="confirm-title">入力内容の確認</h1>
+  
+  <p style="margin-bottom: 20px; color: #666;">以下の内容で登録します。よろしいですか？</p>
 
-    <div class="form-section-header">基本情報</div>
-    <table class="confirm-table">
-        <caption>入力された基本情報の確認用テーブル</caption>
-        <tr>
-            <th scope="row">店名</th>
-            <td>{{ request.POST.shop_name|default:"（未入力）" }}</td>
-        </tr>
-        <tr>
-            <th scope="row">支店名</th>
-            <td>{{ request.POST.branch_name|default:"（なし）" }}</td>
-        </tr>
-        <tr>
-            <th scope="row">フリガナ</th>
-            <td>{{ request.POST.kana_name|default:"（未入力）" }}</td>
-        </tr>
-    </table>
+  <table class="confirm-table">
+    <tr>
+      <th>店舗名</th>
+      <td>{{ data.store_name }}</td>
+    </tr>
+    <tr>
+      <th>支店名</th>
+      <td>{{ data.branch_name|default:"-" }}</td>
+    </tr>
+    <tr>
+      <th>エリア</th>
+      <td>{{ data.area_obj.area_name }}</td>
+    </tr>
+    <tr>
+      <th>ジャンル</th>
+      <td>{{ data.genre }}</td>
+    </tr>
+    <tr>
+      <th>住所</th>
+      <td>{{ data.address }}</td>
+    </tr>
+    <tr>
+      <th>電話番号</th>
+      <td>{{ data.phone_number }}</td>
+    </tr>
+    <tr>
+      <th>メールアドレス</th>
+      <td>{{ data.email }}</td>
+    </tr>
+    <tr>
+      <th>営業時間</th>
+      <td>
+        {% if data.open_time_1 %}{{ data.open_time_1 }} 〜 {{ data.close_time_1 }}{% endif %}
+        {% if data.open_time_2 %}<br>{{ data.open_time_2 }} 〜 {{ data.close_time_2 }}{% endif %}
+        {% if data.business_hours %}<br>{{ data.business_hours|linebreaksbr }}{% endif %}
+      </td>
+    </tr>
+    <tr>
+      <th>席数</th>
+      <td>{{ data.seats }} 席</td>
+    </tr>
+    <tr>
+      <th>予算</th>
+      <td>{{ data.budget }} 円</td>
+    </tr>
+    <tr>
+      <th>利用シーン</th>
+      <td>{{ data.scene_obj.scene_name }}</td>
+    </tr>
+  </table>
 
-    <div class="form-section-header">電話番号・所在地情報</div>
-    <table class="confirm-table">
-        <caption>入力された所在地情報の確認用テーブル</caption>
-        <tr>
-            <th scope="row">電話番号</th>
-            <td>
-                {% if request.POST.has_tel == "1" %}
-                    {{ request.POST.tel }}
-                {% else %}
-                    無（不明または非公開）
-                {% endif %}
-            </td>
-        </tr>
-        <tr>
-            <th scope="row">都道府県</th>
-            <td>{{ request.POST.prefecture|default:"（未選択）" }}</td>
-        </tr>
-        <tr>
-            <th scope="row">市区町村・番地</th>
-            <td>{{ request.POST.address|default:"（未入力）" }}</td>
-        </tr>
-    </table>
-
-    <div class="form-section-header">備考</div>
-    <table class="confirm-table">
-        <caption>入力された備考の確認用テーブル</caption>
-        <tr>
-            <th scope="row">備考</th>
-            <td>{{ request.POST.remarks|linebreaksbr|default:"（なし）" }}</td>
-        </tr>
-    </table>
-
-    <div class="action-container">
-        <a href="{% url 'stores:customer_store_new_register' %}" class="btn-back">戻る</a>
-        
-        <a href="#" class="btn-submit">登録</a>
+  <form method="post">
+    {% csrf_token %}
+    <div class="action-buttons">
+      <button type="submit" name="back" class="btn-back">修正する</button>
+      <button type="submit" class="btn-submit">この内容で登録する</button>
     </div>
+  </form>
 </div>
 {% endblock %}
-
-<h2>店舗新規登録確認画面</h2>
-
-<a href="{% url 'stores:customer_store_new_register' %}">戻る</a>
-<a href="{% url 'common:customer_common_complete' %}">登録</a>

@@ -321,12 +321,64 @@
     <div class="ranking-wrapper">
         <main class="ranking-main">
             <section class="search-section">
-                <input type="text" placeholder="全国のレビュアーから探す [例:食べログ太郎]">
-                <button type="button">検索</button>
+                <form method="get" action="{% url 'reviews:customer_reviewer_search' %}" style="display: flex; width: 100%;">
+                    <input type="text" name="keyword" placeholder="全国のレビュアーから探す [例:食べログ太郎]" value="{{ keyword }}">
+                    <button type="submit">検索</button>
+                </form>
             </section>
 
-            <h2 style="font-size: 16px; font-weight: bold; margin-bottom: 15px;">noconecoさんのランキング</h2>
+            {% if keyword %}
+            <h2 style="font-size: 16px; font-weight: bold; margin-bottom: 15px;">
+                「{{ keyword }}」の検索結果
+            </h2>
 
+            <div style="font-size: 13px; margin: 15px 0 10px;">
+                <strong>全 {{ result_count }}</strong> 件
+            </div>
+
+            {% if search_results %}
+            <div style="margin-top: 20px;">
+                {% for review in search_results %}
+                <article style="border-top:1px dotted #ccc; padding: 16px 0;">
+                    <div style="display:flex; justify-content:space-between; gap:12px;">
+                        <div style="min-width:0; flex: 1;">
+                            <div style="font-weight:bold; font-size:15px;">
+                                <a href="{% url 'reviews:customer_review_list' %}?store_id={{ review.store.pk }}" style="color: #06c; text-decoration: none;">
+                                    {{ review.store.store_name }}{% if review.store.branch_name %} {{ review.store.branch_name }}{% endif %}
+                                </a>
+                            </div>
+
+                            <div style="font-size:12px; color:#666; margin-top:4px;">
+                                投稿者：<a href="{% url 'follows:customer_user_page' review.reviewer.pk %}" style="color: #06c; text-decoration: none;">{{ review.reviewer.nickname }}</a> ／ 
+                                投稿日：{{ review.posted_at|date:"Y/m/d H:i" }} ／ 
+                                評価：{{ review.score }}
+                            </div>
+
+                            {% if review.review_title %}
+                            <div style="font-weight: bold; font-size: 14px; margin-top: 8px;">
+                                {{ review.review_title }}
+                            </div>
+                            {% endif %}
+
+                            <div style="font-size:13px; margin-top:8px; line-height:1.6;">
+                                {{ review.review_text|truncatewords:30|linebreaksbr }}
+                            </div>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="padding:20px; color:#666; text-align: center;">
+                検索結果が見つかりませんでした。
+            </div>
+            {% endif %}
+
+            {% else %}
+            <h2 style="font-size: 16px; font-weight: bold; margin-bottom: 15px;">口コミ検索</h2>
+            <p style="color: #666; font-size: 13px;">キーワードを入力して口コミを検索してください。</p>
+
+            {% if not keyword %}
             <div class="summary-box">
                 <div class="summary-item">
                     <div class="summary-date">2026年1月</div>
@@ -334,7 +386,7 @@
                         <div class="summary-rank-text">TOP100位</div>
                         <div class="summary-rank-val">圏外</div>
                         <div style="font-size: 11px;">口コミ数 0件</div>
-                        <div class="summary-hint">あと2件口コミ投稿したらランクインします！</div>
+                        <div class="summary-hint">あと2件口コミ投稿したらランクインします!</div>
                     </div>
                 </div>
                 <div class="summary-item">
@@ -343,15 +395,15 @@
                         <div class="summary-rank-text">TOP100位</div>
                         <div class="summary-rank-val">圏外</div>
                         <div style="font-size: 11px;">口コミ数 5件</div>
-                        <div class="summary-hint">あと30件口コミ投稿したらランクインします！</div>
+                        <div class="summary-hint">あと30件口コミ投稿したらランクインします!</div>
                     </div>
                 </div>
             </div>
             <p style="font-size: 10px; color: #999; margin-bottom: 30px;">※上記ランキングは著者ランキングと比較し、更新に時間を要する場合がございます。</p>
 
-            <h2 style="font-size: 18px; font-weight: bold;">noconecoさんの地域ランキング</h2>
+            <h2 style="font-size: 18px; font-weight: bold;">{{ customer.nickname }}さんの地域ランキング</h2>
 
-            <div class="section-headline">大宮・与野周辺の口コミ数（2026年1月）ランキング</div>
+            <div class="section-headline">大宮・与野周辺の口コミ数(2026年1月)ランキング</div>
             <div class="reviewer-grid">
                 <div class="reviewer-item">
                     <span class="rank-badge">1</span>
@@ -392,37 +444,27 @@
                     </tr>
                 </table>
             </section>
+            {% endif %}
+            {% endif %}
         </main>
 
         <aside class="ranking-sidebar">
             <div class="sidebar-box">
                 <div class="user-profile">
-                    <div class="profile-img-placeholder"></div>
-                    <div style="font-weight: bold;">noconeco <span>さん</span></div>
-                </div>
-
-                <div
-                    style="background-color: #fffce6; border: 1px solid #f2e699; padding: 8px; font-size: 11px; margin-bottom: 15px; text-align: center;">
-                    <a href="#" style="color:#06c; text-decoration:none;">携帯電話番号認証にご協力ください</a>
+                    <div class="profile-img-placeholder">
+                        {% if customer.icon_image %}
+                        <img src="{{ customer.icon_image.url }}" alt="アイコン" style="width: 40px; height: 40px; object-fit: cover;">
+                        {% endif %}
+                    </div>
+                    <div style="font-weight: bold;">{{ customer.nickname }} <span>さん</span></div>
                 </div>
 
                 <ul class="sidebar-nav-list">
-                    <li><a href="#">マイページ</a></li>
-                    <li><a href="#">行ったお店</a> <span style="color:#999; font-size:11px;">10</span></li>
-                    <li><a href="#">公開中口コミ一覧</a> <span style="color:#999; font-size:11px;">7</span></li>
-                    <li><a href="#">フォロー中</a> <span style="color:#999; font-size:11px;">3</span></li>
-                    <li><a href="#">保存リスト</a> <span style="color:#999; font-size:11px;">10</span></li>
+                    <li><a href="{% url 'reviews:customer_reviewer_detail' %}">マイページ</a></li>
+                    <li><a href="{% url 'reviews:customer_reviewer_review_list' %}">公開中口コミ一覧</a></li>
+                    <li><a href="{% url 'follows:customer_follow_list' %}">フォロー中</a></li>
+                    <li><a href="{% url 'reviews:customer_store_preserve' %}">保存リスト</a></li>
                 </ul>
-
-                <div style="margin-top: 15px; font-size: 11px; color: #666;">
-                    ランキング設定地域 <span style="float: right; color:#999; cursor:pointer;">⚙</span><br>
-                    <span style="color: #333; font-weight: bold; font-size: 12px;">大宮・与野周辺</span>
-                </div>
-
-                <div class="premium-card">
-                    <p style="font-size: 10px; color: #666; margin-bottom: 5px;">クレジットカードで初月無料</p>
-                    <button class="premium-btn">食べログプレミアムについて</button>
-                </div>
             </div>
         </aside>
     </div>

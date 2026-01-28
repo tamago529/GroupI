@@ -1,247 +1,184 @@
-{% extends "customer_base.html" %}
+{% extends 'customer_base.html' %}
+{% load static %}
 
-{% block title %}店舗新規登録画面{% endblock %}
+{% block title %}店舗情報を登録する - タベッチ{% endblock %}
 
 {% block css %}
 <style>
-    /* --- レイアウト全体設定 --- */
-    .registration-container {
-        max-width: 980px;
-        margin: 20px auto;
-        background-color: #fff;
-        padding: 0 10px;
-    }
-
-    /* --- ヘッダー・ガイド文 --- */
-    .registration-title {
-        font-size: 20px;
-        font-weight: bold;
-        border-bottom: 2px solid #e2e2e2;
-        padding-bottom: 10px;
-        margin-bottom: 15px;
-        color: #333;
-    }
-
-    .registration-guide {
-        font-size: 12px;
-        color: #666;
-        line-height: 1.8;
-        margin-bottom: 30px;
-    }
-
-    /* --- セクション見出し（食べログ特有の装飾） --- */
-    .form-section-header {
-        background-color: #f2f0eb;
-        padding: 10px 15px;
-        font-weight: bold;
-        border-left: 4px solid #ed6103;
-        margin: 35px 0 0 0;
-        font-size: 15px;
-    }
-
-    /* --- テーブルレイアウトとアクセシビリティ（caption非表示設定） --- */
-    .form-table {
-        width: 100%;
-        border-collapse: collapse;
-        border-top: 1px solid #e2e2e2;
-        margin-bottom: 10px;
-    }
-
-    .form-table caption {
-        /* スクリーンリーダーには読み上げさせ、視覚的には隠す設定 */
-        clip: rect(1px, 1px, 1px, 1px);
-        height: 1px;
-        overflow: hidden;
-        position: absolute;
-        width: 1px;
-    }
-
-    .form-table th, .form-table td {
-        padding: 15px;
-        border-bottom: 1px solid #e2e2e2;
-        text-align: left;
-        vertical-align: top;
-    }
-
-    .form-table th {
-        width: 220px;
-        background-color: #f9f9f9;
-        font-weight: bold;
-        font-size: 13px;
-    }
-
-    /* 必須ラベル（赤色） */
-    .badge-required {
-        background-color: #e83a3a;
-        color: #fff;
-        font-size: 10px;
-        padding: 2px 4px;
-        border-radius: 2px;
-        margin-left: 8px;
-        font-weight: normal;
-    }
-
-    /* --- フォームパーツ --- */
-    .input-field {
-        width: 100%;
-        max-width: 550px;
-        padding: 8px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
-        box-sizing: border-box;
-        font-size: 14px;
-    }
-
-    .textarea-field {
-        width: 100%;
-        max-width: 650px;
-        height: 120px;
-        padding: 8px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
-    }
-
-    .counter-text {
-        display: block;
-        text-align: right;
-        font-size: 11px;
-        color: #999;
-        max-width: 550px;
-        margin-top: 4px;
-    }
-
-    /* --- 下部アクションエリア（リンクボタン） --- */
-    .action-container {
-        background-color: #f6f6f6;
-        padding: 30px;
-        text-align: center;
-        margin-top: 50px;
-        border-top: 1px solid #e2e2e2;
-    }
-
-    /* 戻るボタン（リンクをボタン風に装飾） */
-    .btn-back {
-        display: inline-block;
-        background-color: #fff;
-        border: 1px solid #bbb;
-        padding: 12px 35px;
-        font-size: 14px;
-        color: #333;
-        text-decoration: none;
-        margin-right: 15px;
-        vertical-align: middle;
-    }
-
-    /* 確認画面へボタン（リンクをボタン風に装飾） */
-    .btn-submit {
-        display: inline-block;
-        background-color: #93b92c;
-        color: #fff;
-        border: none;
-        padding: 12px 50px;
-        font-weight: bold;
-        font-size: 15px;
-        text-decoration: none;
-        border-radius: 3px;
-        vertical-align: middle;
-    }
-
-    .btn-submit:hover {
-        opacity: 0.8;
-        color: #fff;
-    }
+  .register-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+  }
+  .register-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #ff8a00;
+    color: #333;
+  }
+  .form-group {
+    margin-bottom: 20px;
+  }
+  .form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #444;
+  }
+  .form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 15px;
+    box-sizing: border-box;
+  }
+  .form-control:focus {
+    border-color: #ff8a00;
+    outline: none;
+    box-shadow: 0 0 5px rgba(255,138,0,0.2);
+  }
+  .errorlist {
+    color: #d32f2f;
+    font-size: 13px;
+    margin-top: 5px;
+    padding-left: 0;
+    list-style: none;
+  }
+  .btn-submit {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    background: #ff8a00;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 30px;
+  }
+  .btn-submit:hover {
+    background: #e67e00;
+  }
+  .time-range {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .time-range .form-control {
+    width: auto;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="registration-container">
-    <h1 class="registration-title">レストラン新規登録（レストラン情報入力）</h1>
-    <p class="registration-guide">
-        レストランを追加する際には、レストラン情報が最新のものであることをご確認の上、入力してください。<br>
-        また、当サイトの趣旨にあわないお店は管理側で判断し、削除する場合がございますので、ご了承ください。
-    </p>
+<div class="register-container">
+  <h1 class="register-title">店舗情報を登録する</h1>
+  
+  <form method="post">
+    {% csrf_token %}
+    
+    <div class="form-group">
+      <label for="{{ form.store_name.id_for_label }}">店舗名 <span style="color:red;">*</span></label>
+      {{ form.store_name }}
+      {{ form.store_name.errors }}
+    </div>
 
-    <form method="POST">
-        {% csrf_token %}
+    <div class="form-group">
+      <label for="{{ form.branch_name.id_for_label }}">支店名</label>
+      {{ form.branch_name }}
+      {{ form.branch_name.errors }}
+    </div>
 
-        <div class="form-section-header">基本情報入力</div>
-        <table class="form-table">
-            <caption>店舗の名称に関する基本情報入力フォーム</caption>
-            <tr>
-                <th scope="row"><label for="shop_name">店名</label><span class="badge-required">必須</span></th>
-                <td>
-                    <input type="text" id="shop_name" name="shop_name" class="input-field" placeholder="例 レストラン タベログ">
-                    <span class="counter-text">0 / 50</span>
-                </td>
-            </tr>
-            <tr>
-                <th scope="row"><label for="branch_name">支店名</label></th>
-                <td>
-                    <input type="text" id="branch_name" name="branch_name" class="input-field" placeholder="例 恵比寿店">
-                    <span class="counter-text">0 / 50</span>
-                </td>
-            </tr>
-            <tr>
-                <th scope="row"><label for="kana_name">フリガナ（全角カナ）</label><span class="badge-required">必須</span></th>
-                <td>
-                    <input type="text" id="kana_name" name="kana_name" class="input-field" placeholder="例 レストランタベログエビステン">
-                    <span class="counter-text">0 / 50</span>
-                </td>
-            </tr>
-        </table>
+    <div class="form-group">
+      <label for="{{ form.area.id_for_label }}">エリア <span style="color:red;">*</span></label>
+      {{ form.area }}
+      {{ form.area.errors }}
+    </div>
 
-        <div class="form-section-header">電話番号・所在地情報</div>
-        <table class="form-table">
-            <caption>店舗の連絡先と所在地に関する入力フォーム</caption>
-            <tr>
-                <th scope="row">電話番号<span class="badge-required">必須</span></th>
-                <td>
-                    <div style="display: flex; gap: 15px; align-items: center;">
-                        <label><input type="radio" name="has_tel" value="1" checked> 有</label>
-                        <input type="text" name="tel" class="input-field" style="width: 200px;" placeholder="01-2345-6789" aria-label="電話番号">
-                        <label><input type="radio" name="has_tel" value="0"> 無（不明または非公開）</label>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <th scope="row"><label for="prefecture">都道府県</label><span class="badge-required">必須</span></th>
-                <td>
-                    <select id="prefecture" name="prefecture" class="input-field" style="width: 200px;">
-                        <option value="">選択してください</option>
-                        <option value="13">東京都</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <th scope="row"><label for="address">市区町村・番地</label><span class="badge-required">必須</span></th>
-                <td>
-                    <input type="text" id="address" name="address" class="input-field" placeholder="例 渋谷区恵比寿南3-5-7">
-                    <span class="counter-text">0 / 100</span>
-                </td>
-            </tr>
-        </table>
+    <div class="form-group">
+      <label for="{{ form.genre.id_for_label }}">ジャンル <span style="color:red;">*</span></label>
+      {{ form.genre }}
+      {{ form.genre.errors }}
+    </div>
 
-        <div class="form-section-header">備考</div>
-        <table class="form-table">
-            <caption>店舗に関する補足情報の入力フォーム</caption>
-            <tr>
-                <th scope="row"><label for="remarks">備考</label></th>
-                <td>
-                    <textarea id="remarks" name="remarks" class="textarea-field" placeholder="例 ペットはテラス席のみ可"></textarea>
-                    <span class="counter-text">0 / 2000</span>
-                </td>
-            </tr>
-        </table>
+    <div class="form-group">
+      <label for="{{ form.address.id_for_label }}">住所 <span style="color:red;">*</span></label>
+      {{ form.address }}
+      {{ form.address.errors }}
+    </div>
 
-        <div class="action-container">
-            <a href="#" class="btn-back">戻る</a>
-            <a href="{% url 'stores:customer_store_new_register_confirm' %}" class="btn-submit">確認画面へ</a>
-        </div>
-    </form>
+    <div class="form-group">
+      <label for="{{ form.phone_number.id_for_label }}">電話番号 <span style="color:red;">*</span></label>
+      {{ form.phone_number }}
+      {{ form.phone_number.errors }}
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.email.id_for_label }}">メールアドレス <span style="color:red;">*</span></label>
+      {{ form.email }}
+      {{ form.email.errors }}
+    </div>
+
+    <div class="form-group">
+      <label>営業時間（スロット1）</label>
+      <div class="time-range">
+        {{ form.open_time_1 }} 〜 {{ form.close_time_1 }}
+      </div>
+      {{ form.open_time_1.errors }}
+      {{ form.close_time_1.errors }}
+    </div>
+
+    <div class="form-group">
+      <label>営業時間（スロット2）</label>
+      <div class="time-range">
+        {{ form.open_time_2 }} 〜 {{ form.close_time_2 }}
+      </div>
+      {{ form.open_time_2.errors }}
+      {{ form.close_time_2.errors }}
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.business_hours.id_for_label }}">営業時間（自由記述）</label>
+      {{ form.business_hours }}
+      {{ form.business_hours.errors }}
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.seats.id_for_label }}">席数 <span style="color:red;">*</span></label>
+      {{ form.seats }}
+      {{ form.seats.errors }}
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.budget.id_for_label }}">予算 <span style="color:red;">*</span></label>
+      {{ form.budget }}
+      {{ form.budget.errors }}
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.scene.id_for_label }}">利用シーン <span style="color:red;">*</span></label>
+      {{ form.scene }}
+      {{ form.scene.errors }}
+    </div>
+
+    <button type="submit" class="btn-submit">入力内容を確認する</button>
+  </form>
 </div>
+
+<script>
+  // Widgetにクラスを追加
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    if (el.type !== 'checkbox' && el.type !== 'radio') {
+      el.classList.add('form-control');
+    }
+  });
+</script>
 {% endblock %}
-
-<h2>店舗新規登録画面</h2>
-
-<a href="{% url 'search:top' %}">戻る</a>
-<a href="{% url 'stores:store_new_register_confirm' %}">確認画面へ</a>

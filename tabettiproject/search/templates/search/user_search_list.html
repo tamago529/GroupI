@@ -141,6 +141,36 @@
       width: 100%;
     }
   }
+
+  /* ページネーション */
+  .pagination {
+    text-align: center;
+    margin: 32px 0;
+  }
+
+  .pagination a {
+    margin: 0 6px;
+    color: #ff7a00;
+    text-decoration: none;
+  }
+
+  .pagination a:hover {
+    text-decoration: underline;
+  }
+
+  .pagination .current {
+    margin: 0 6px;
+    font-weight: bold;
+    color: #fff;
+    background: #ff7a00;
+    padding: 4px 10px;
+    border-radius: 2px;
+  }
+
+  .pagination .ellipsis {
+    margin: 0 6px;
+    color: #999;
+  }
 </style>
 {% endblock %}
 
@@ -198,7 +228,7 @@
           <div class="is-follower-tag">あなたのフォロワーです</div>
           {% endif %}
           <div>{{ item.review_count }}ログ</div>
-          <div>フォロワー：{{ item.follower_count }}人</div>
+          <div>フォロワー:{{ item.follower_count }}人</div>
         </div>
       </div>
     </div>
@@ -207,15 +237,25 @@
     {% endfor %}
   </div>
 
-  {# 簡易的なページネーション #}
-  {% if users.has_other_pages %}
-  <div style="margin-top: 30px; text-align: center;">
+  {# ページネーション（検索画面と同じ実装） #}
+  {% if users.paginator.num_pages > 1 %}
+  <div class="pagination">
     {% if users.has_previous %}
-      <a href="?keyword={{ keyword }}&page={{ users.previous_page_number }}">前へ</a>
+    <a href="?page={{ users.previous_page_number }}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}">前へ</a>
     {% endif %}
-    <span>{{ users.number }} / {{ users.paginator.num_pages }}</span>
+
+    {% for num in page_range %}
+      {% if num == users.paginator.ELLIPSIS %}
+        <span class="ellipsis">{{ num }}</span>
+      {% elif users.number == num %}
+        <span class="current">{{ num }}</span>
+      {% else %}
+        <a href="?page={{ num }}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}">{{ num }}</a>
+      {% endif %}
+    {% endfor %}
+
     {% if users.has_next %}
-      <a href="?keyword={{ keyword }}&page={{ users.next_page_number }}">次へ</a>
+    <a href="?page={{ users.next_page_number }}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}">次へ</a>
     {% endif %}
   </div>
   {% endif %}

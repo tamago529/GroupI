@@ -342,6 +342,18 @@
     </div>
   </section>
 
+  <!-- 店舗登録プロモーション -->
+  <section class="section" style="border-top: 1px solid #eee; padding-top: 40px;">
+    <div style="background: linear-gradient(135deg, #fff 0%, #fffbf2 100%); padding: 30px; border-radius: 8px; border: 1px solid #ffe8cc; text-align: center;">
+      <h3 style="font-size: 20px; font-weight: bold; margin-bottom: 12px; color: #333;">掲載されていない店舗を見つけましたか？</h3>
+      <p style="margin-bottom: 20px; color: #666; font-size: 15px;">新しいお店の情報を登録して、みんなと共有しましょう。</p>
+      <a href="{% url 'stores:customer_store_new_register' %}" 
+         style="display: inline-block; padding: 12px 40px; background: #ff8a00; color: #fff; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px; transition: background 0.2s;">
+         店舗を登録する
+      </a>
+    </div>
+  </section>
+
   <!-- ユーザー検索 -->
   <section class="section" style="border-top: 1px solid #eee; padding-top: 40px;">
     <div class="section-title">ユーザーを探す</div>

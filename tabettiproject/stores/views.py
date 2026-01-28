@@ -29,6 +29,8 @@ from commons.models import (
     StoreMenu,
     StoreOnlineReservation,
     StoreAccessLog,
+    Area,
+    Scene,
 )
 
 from .form import (
@@ -37,6 +39,7 @@ from .form import (
     StoreBasicForm,
     StoreImageFormSet,
     StoreMenuFormSet,
+    StoreRegistrationForm,
 )
 
 # ============================================================
@@ -792,12 +795,82 @@ class CustomerReservationCreateView(View):
         return redirect("stores:customer_store_info", pk=store.id)
 
 
-class customer_store_new_registerView(TemplateView):
+class customer_store_new_registerView(LoginRequiredMixin, TemplateView):
     template_name = "stores/customer_store_new_register.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # セッションからデータを復元（戻るボタン対策など）
+        initial_data = self.request.session.get("store_register_data", {})
+        context["form"] = StoreRegistrationForm(initial=initial_data)
+        return context
 
-class customer_store_new_register_confirmView(TemplateView):
+    def post(self, request, *args, **kwargs):
+        form = StoreRegistrationForm(request.POST)
+        if form.is_valid():
+            # シリアライズ可能な形式でセッションに保存
+            data = form.cleaned_data
+            serializable_data = {}
+            for key, value in data.items():
+                if isinstance(value, models.Model):
+                    serializable_data[key] = value.pk
+                elif hasattr(value, "isoformat"):
+                    serializable_data[key] = value.isoformat()
+                else:
+                    serializable_data[key] = value
+            
+            request.session["store_register_data"] = serializable_data
+            return redirect("stores:customer_store_new_register_confirm")
+        
+        return render(request, self.template_name, {"form": form})
+
+
+class customer_store_new_register_confirmView(LoginRequiredMixin, TemplateView):
     template_name = "stores/customer_store_new_register_confirm.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        data = self.request.session.get("store_register_data")
+        if not data:
+            return redirect("stores:customer_store_new_register")
+
+        # 表示用にモデルオブジェクトに復元（エリア、シーンのみ）
+        display_data = data.copy()
+        if "area" in data:
+            display_data["area_obj"] = get_object_or_404(Area, pk=data["area"])
+        if "scene" in data:
+            display_data["scene_obj"] = get_object_or_404(Scene, pk=data["scene"])
+        
+        context["data"] = display_data
+        return context
+
+    def post(self, request, *args, **kwargs):
+        if "back" in request.POST:
+            return redirect("stores:customer_store_new_register")
+
+        data = request.session.get("store_register_data")
+        if not data:
+            messages.error(request, "セッションがタイムアウトしました。最初からやり直してください。")
+            return redirect("stores:customer_store_new_register")
+
+        form = StoreRegistrationForm(data)
+        if form.is_valid():
+            store = form.save(commit=False)
+            store.creator = _get_customer_from_user(request.user)
+            store.save()
+            
+            # セッションクリア
+            if "store_register_data" in request.session:
+                del request.session["store_register_data"]
+            
+            return redirect("stores:customer_store_new_register_complete")
+        
+        messages.error(request, "登録に失敗しました。")
+        return redirect("stores:customer_store_new_register")
+
+
+class customer_store_new_register_completeView(LoginRequiredMixin, TemplateView):
+    template_name = "stores/customer_store_new_register_complete.html"
 
 
 # =========================

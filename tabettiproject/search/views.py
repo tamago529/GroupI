@@ -291,7 +291,7 @@ def customer_user_search_listView(request):
             Q(username__icontains=keyword)
         )
     
-    # ページネーション（1ページに多く出しすぎない）
+    # ページネーション（検索画面と同じ実装）
     paginator = Paginator(user_qs.order_by("id"), 20)
     page_number = request.GET.get("page")
     users_page = paginator.get_page(page_number)
@@ -336,9 +336,17 @@ def customer_user_search_listView(request):
             "user_icon_url": icon_field.url if icon_field else "",
         })
 
+    # 省略表示用のページ範囲（前後3ページ、端2ページ）
+    page_range = paginator.get_elided_page_range(
+        number=users_page.number,
+        on_each_side=3,
+        on_ends=2
+    )
+
     context = {
         "users": users_page,
         "user_list": user_list,
         "keyword": keyword,
+        "page_range": page_range,
     }
     return render(request, "search/user_search_list.html", context)

@@ -172,3 +172,49 @@ class CustomerReserveForm(forms.Form):
         required=False,
         widget=forms.Textarea(attrs={"rows": 3})
     )
+
+
+# ============================================================
+# 顧客側：新規店舗登録フォーム
+# ============================================================
+class StoreRegistrationForm(forms.ModelForm):
+    """
+    顧客が新規店舗を登録するためのフォーム
+    """
+    class Meta:
+        model = Store
+        fields = [
+            "store_name",
+            "branch_name",
+            "area",
+            "genre",
+            "address",
+            "phone_number",
+            "email",
+            "business_hours",
+            "open_time_1",
+            "close_time_1",
+            "open_time_2",
+            "close_time_2",
+            "seats",
+            "budget",
+            "scene",
+        ]
+
+        widgets = {
+            "store_name": forms.TextInput(attrs={"placeholder": "例：タベッチ食堂"}),
+            "branch_name": forms.TextInput(attrs={"placeholder": "例：渋谷店（なければ空欄）"}),
+            "address": forms.TextInput(attrs={"placeholder": "例：東京都渋谷区..."}),
+            "phone_number": forms.TextInput(attrs={"placeholder": "例：03-1234-5678"}),
+            "email": forms.EmailInput(attrs={"placeholder": "例：store@example.com"}),
+            "business_hours": forms.Textarea(
+                attrs={"rows": 2, "placeholder": "例：11:00-15:00 / 17:00-22:00"}
+            ),
+            "open_time_1": forms.TimeInput(attrs={"type": "time"}),
+            "close_time_1": forms.TimeInput(attrs={"type": "time"}),
+            "open_time_2": forms.TimeInput(attrs={"type": "time"}),
+            "close_time_2": forms.TimeInput(attrs={"type": "time"}),
+            "seats": forms.NumberInput(attrs={"min": 0}),
+            "budget": forms.NumberInput(attrs={"min": 0, "placeholder": "￥"}),
+            "genre": forms.TextInput(attrs={"placeholder": "例：イタリアン、和食など"}),
+        }
