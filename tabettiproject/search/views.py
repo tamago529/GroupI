@@ -254,8 +254,16 @@ def customer_search_listView(request):
         else:
             s.calendar_12 = None
 
+    # 省略表示用のページ範囲（前後3ページ、端2ページ）
+    page_range = paginator.get_elided_page_range(
+        number=stores.number,
+        on_each_side=3,
+        on_ends=2
+    )
+
     context = {
         "stores": stores,
+        "page_range": page_range,
         "area": area_name,
         "keyword": keyword,
         "sort": sort_key,          # ★ページング引き継ぎ用

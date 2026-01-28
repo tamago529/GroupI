@@ -84,13 +84,38 @@
         {% endfor %}
     ];
 
+    // 座標の妥当性チェック
+    function isValidLatLng(lat, lng) {
+        if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) return false;
+        if (lat < -90 || lat > 90) return false;
+        if (lng < -180 || lng > 180) return false;
+        return true;
+    }
+
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(onSuccess, onError);
+        if (!navigator.onLine) {
+            document.getElementById('loading-status').innerHTML = '<span style="color:red;">情報が取得できませんでした インターネット状況をご確認してください</span>';
+        } else {
+            navigator.geolocation.getCurrentPosition(onSuccess, onError);
+        }
+    } else {
+        document.getElementById('loading-status').innerText = "お使いのブラウザは位置情報に対応していません。";
     }
 
     async function onSuccess(position) {
+        if (!navigator.onLine) {
+            document.getElementById('loading-status').innerHTML = '<span style="color:red;">情報が取得できませんでした インターネット状況をご確認してください</span>';
+            return;
+        }
+
         const userLat = position.coords.latitude;
         const userLng = position.coords.longitude;
+
+        if (!isValidLatLng(userLat, userLng)) {
+            document.getElementById('loading-status').innerHTML = '<span style="color:red;">不正な位置情報が検出されました。</span>';
+            return;
+        }
+
         const userLatLng = L.latLng(userLat, userLng);
 
         map.setView(userLatLng, 15);
@@ -101,22 +126,34 @@
         let foundCount = 0;
 
         for (const shop of myShopList) {
+            if (!navigator.onLine) break;
+
             try {
                 // 住所から座標を取得（ジオコーディング）
                 const res = await fetch(`https://msearch.gsi.go.jp/address-search/AddressSearch?q=${encodeURIComponent(shop.address)}`);
+                if (!res.ok) throw new Error("Network response was not ok");
+                
                 const data = await res.json();
 
                 if (data && data.length > 0) {
                     const sLat = data[0].geometry.coordinates[1];
                     const sLng = data[0].geometry.coordinates[0];
-                    const shopLatLng = L.latLng(sLat, sLng);
+                    
+                    if (!isValidLatLng(sLat, sLng)) {
+                        console.warn(`不正な座標をスキップしました: ${shop.name}`, sLat, sLng);
+                        continue;
+                    }
+                } else {
+                    console.warn(`住所が見つかりませんでした (スキップ): ${shop.name} [${shop.address}]`);
+                    continue;
+                }
                     const distance = userLatLng.distanceTo(shopLatLng);
 
                     // 半径1km以内の判定
                     if (distance <= 1000) {
                         foundCount++;
 
-                        // 地図のピンにポップアップを設定（リンクをshop.detailUrlに変更）
+                        // 地図のピンにポップアップを設定
                         L.marker(shopLatLng, {icon: bluePinIcon}).addTo(map)
                             .bindPopup(`
                                 <div style="min-width:150px;">
@@ -126,7 +163,7 @@
                                 </div>
                             `);
 
-                        // 左側の店舗カード（リンクをshop.detailUrlに変更）
+                        // 左側の店舗カード
                         const card = `
                             <a href="${shop.detailUrl}" class="shop-link">
                                 <article class="shop-card">
@@ -143,12 +180,29 @@
                         listContainer.innerHTML += card;
                     }
                 }
-            } catch (e) { console.error("住所変換エラー:", e); }
+            } catch (e) { 
+                console.error("住所変換エラー:", e);
+                if (!navigator.onLine) {
+                    document.getElementById('loading-status').innerHTML = '<span style="color:red;">情報が取得できませんでした インターネット状況をご確認してください</span>';
+                    return;
+                }
+            }
             await new Promise(r => setTimeout(r, 150));
         }
-        document.getElementById('loading-status').innerText = foundCount > 0 ? `1km圏内に ${foundCount} 件の店舗が見つかりました` : "近くに店舗が見つかりませんでした";
+        
+        if (!navigator.onLine) {
+            document.getElementById('loading-status').innerHTML = '<span style="color:red;">情報が取得できませんでした インターネット状況をご確認してください</span>';
+        } else {
+            document.getElementById('loading-status').innerText = foundCount > 0 ? `1km圏内に ${foundCount} 件の店舗が見つかりました` : "近くに店舗が見つかりませんでした";
+        }
     }
 
-    function onError() { document.getElementById('loading-status').innerText = "位置情報の取得に失敗しました。"; }
+    function onError(error) { 
+        if (!navigator.onLine) {
+            document.getElementById('loading-status').innerHTML = '<span style="color:red;">情報が取得できませんでした インターネット状況をご確認してください</span>';
+        } else {
+            document.getElementById('loading-status').innerText = "位置情報の取得に失敗しました。"; 
+        }
+    }
 </script>
 {% endblock %}

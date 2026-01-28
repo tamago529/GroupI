@@ -11,7 +11,7 @@ from django.db import transaction
 from django.db.models import Count, Sum
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views import View
 from django.views.generic.base import TemplateView
@@ -38,6 +38,12 @@ def _course_label(minutes: int) -> str:
     if minutes == 150:
         return "2時間30分コース"
     return f"{minutes}分コース"
+
+#直接アクセスしようとしたらstore_loginに遷移
+class StoreLoginRequiredMixin(LoginRequiredMixin):
+    # 未ログイン時の飛ばし先を「店舗ログイン」に固定
+    login_url = reverse_lazy("accounts:store_login")
+    redirect_field_name = "next"  # デフォルトだけど明示してもOK    
 
 
 # ============================================================
@@ -354,7 +360,7 @@ def _assign_bars_to_fixed_lanes(
 # ============================================================
 # 予約台帳トップ → 今日へ
 # ============================================================
-class store_reservation_ledgerView(LoginRequiredMixin, TemplateView):
+class store_reservation_ledgerView(StoreLoginRequiredMixin, TemplateView):
     template_name = "reservations_management/store_reservation_ledger.html"
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
@@ -365,7 +371,7 @@ class store_reservation_ledgerView(LoginRequiredMixin, TemplateView):
 # ============================================================
 # 予約台帳（日別）
 # ============================================================
-class store_reservation_ledger_dayView(LoginRequiredMixin, TemplateView):
+class store_reservation_ledger_dayView(StoreLoginRequiredMixin, TemplateView):
     template_name = "reservations_management/store_reservation_ledger.html"
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -412,7 +418,7 @@ class store_reservation_ledger_dayView(LoginRequiredMixin, TemplateView):
 # ============================================================
 # 予約詳細
 # ============================================================
-class store_reservation_detailView(LoginRequiredMixin, TemplateView):
+class store_reservation_detailView(StoreLoginRequiredMixin, TemplateView):
     template_name = "reservations_management/store_reservation_ledger.html"
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -433,7 +439,7 @@ class store_reservation_detailView(LoginRequiredMixin, TemplateView):
 # ============================================================
 # 予約編集（店舗側：GET/POST）
 # ============================================================
-class store_reservation_editView(LoginRequiredMixin, TemplateView):
+class store_reservation_editView(StoreLoginRequiredMixin, TemplateView):
     template_name = "reservations_management/store_reservation_ledger.html"
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -633,7 +639,7 @@ def _set_booking_status_safely(reservation: Reservation, action: str) -> None:
 # ============================================================
 # 予約ステータス変更（POST）
 # ============================================================
-class store_reservation_actionView(LoginRequiredMixin, View):
+class store_reservation_actionView(StoreLoginRequiredMixin, View):
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         pk = kwargs.get("pk")
         action = request.POST.get("action")
@@ -663,18 +669,18 @@ class store_reservation_actionView(LoginRequiredMixin, View):
 # ============================================================
 # 顧客台帳・席設定（TemplateView）
 # ============================================================
-class store_customer_ledgerView(LoginRequiredMixin, TemplateView):
+class store_customer_ledgerView(StoreLoginRequiredMixin, TemplateView):
     template_name = "reservations_management/store_customer_ledger.html"
 
 
-class store_seat_settingsView(LoginRequiredMixin, TemplateView):
+class store_seat_settingsView(StoreLoginRequiredMixin, TemplateView):
     template_name = "reservations_management/store_seat_settings.html"
 
 
 # ============================================================
 # 予約カレンダー
 # ============================================================
-class store_reservation_calendarView(LoginRequiredMixin, TemplateView):
+class store_reservation_calendarView(StoreLoginRequiredMixin, TemplateView):
     template_name = "reservations_management/store_reservation_calendar.html"
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -732,7 +738,7 @@ class store_reservation_calendarView(LoginRequiredMixin, TemplateView):
 # ============================================================
 # 受付設定
 # ============================================================
-class store_reservation_settingsView(LoginRequiredMixin, TemplateView):
+class store_reservation_settingsView(StoreLoginRequiredMixin, TemplateView):
     template_name = "reservations_management/store_reservation_settings.html"
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -838,3 +844,4 @@ class store_reservation_settingsView(LoginRequiredMixin, TemplateView):
         )
         messages.success(request, f"{target_date} の設定を保存しました。")
         return redirect(f"{reverse('reservations_management:store_reservation_settings')}?year={year}&month={month}")
+    

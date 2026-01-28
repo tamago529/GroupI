@@ -285,7 +285,7 @@
 <nav class="breadcrumbs">
   <ol>
     <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
-    <li><a href="{% url 'reviews:customer_reviewer_detail' %}">{{ user_name }}さんのページ</a></li>
+    <li><a href="{% if readonly_mode %}{% url 'follows:customer_user_page' customer.pk %}{% else %}{% url 'reviews:customer_reviewer_detail' %}{% endif %}">{{ user_name }}さんのページ</a></li>
     <li><span>フォロワー</span></li>
   </ol>
 </nav>
@@ -308,9 +308,11 @@
       {# ✅ タイトル #}
       <div class="profile-title">{{ profile_title }}</div>
 
+      {% if not readonly_mode %}
       <div class="profile-setting-wrapper">
         <a href="{% url 'accounts:customer_settings' %}" class="profile-setting">マイページ設定</a>
       </div>
+      {% endif %}
 
     </div>
   </div>
@@ -326,10 +328,10 @@
       </div>
 
       <nav class="profile-nav">
-        <a href="{% url 'reviews:customer_reviewer_detail' %}">トップ</a>
-        <a href="{% url 'reviews:customer_reviewer_review_list' %}">口コミ</a>
-        <a href="{% url 'follows:customer_follow_list' %}">フォロー中</a>
-        <a href="{% url 'follows:customer_follower_list' %}" class="active">フォロワー</a>
+        <a href="{% if readonly_mode %}{% url 'follows:customer_user_page' customer.pk %}{% else %}{% url 'reviews:customer_reviewer_detail' %}{% endif %}">トップ</a>
+        <a href="{% if readonly_mode %}{% url 'reviews:customer_reviewer_other_review_list' customer.pk %}{% else %}{% url 'reviews:customer_reviewer_review_list' %}{% endif %}">口コミ</a>
+        <a href="{% if readonly_mode %}{% url 'follows:customer_other_follow_list' customer.pk %}{% else %}{% url 'follows:customer_follow_list' %}{% endif %}">フォロー中</a>
+        <a href="{% if readonly_mode %}{% url 'follows:customer_other_follower_list' customer.pk %}{% else %}{% url 'follows:customer_follower_list' %}{% endif %}" class="active">フォロワー</a>
       </nav>
     </div>
   </div>
@@ -353,12 +355,16 @@
 
       <div class="card-body">
 
+        {% if not readonly_mode %}
+        {# ✅ 自分が見ているフォロワー一覧のみ、個別の操作（フォローor解除）を出す #}
         <form method="post" style="display: inline;">
           {% csrf_token %}
           <input type="hidden" name="user_id" value="{{ item.id }}">
 
+          {# nextパラメータは現在のURLに。他人の一覧ページならそのIDを引数に含める必要あり #}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
           {% if item.is_following %}
-          <!-- ✅ フォロー中：ホバーで「ミュート/解除」＆「フォローをやめる」 -->
           <div class="follow-action">
             <button type="button" class="follow-btn" style="background: #f2f2ef; color: #666;">
               フォロー中{% if item.is_muted %}（ミュート）{% endif %}
@@ -370,19 +376,16 @@
               </button>
 
               <button type="submit" class="menu-item danger" name="action" value="unfollow"
-                onclick="return confirm('フォローを解除しますか？')">
+                onclick="return confirm('{{ item.user.username }}さんのフォローを解除しますか？')">
                 フォローをやめる
               </button>
             </div>
           </div>
           {% else %}
-          <!-- ✅ 未フォロー：通常の「+フォロー」 -->
-          <button type="submit" class="follow-btn" name="action" value="follow"
-            style="color: #f0a500; border-color: #f0a500;">
-            + フォロー
-          </button>
+          <button type="submit" class="follow-btn" name="action" value="follow">フォローする</button>
           {% endif %}
         </form>
+        {% endif %}
 
         <a href="{% url 'follows:customer_user_page' item.id %}" class="card-name">
           {{ item.user.username }}

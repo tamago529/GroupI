@@ -361,7 +361,7 @@
       </button>
 
       <form method="post"
-            action="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}"
+            action="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}&from_search={{ from_search }}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}"
             style="margin:0;">
         {% csrf_token %}
         <input type="hidden" name="action" value="save_store">
@@ -422,20 +422,20 @@
   <nav>
     <ul class="main-navigation">
       <li class="{% if active_main == 'top' %}active{% endif %}">
-        <a href="{% url 'stores:customer_store_info' store.pk %}">トップ</a>
+        <a href="{% url 'stores:customer_store_info' store.pk %}?from_search={{ from_search }}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">トップ</a>
       </li>
       <li class="{% if active_main == 'menu' %}active{% endif %}">
-        <a href="{% url 'stores:customer_menu_course' store.pk %}">メニュー・コース</a>
+        <a href="{% url 'stores:customer_menu_course' store.pk %}?from_search={{ from_search }}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">メニュー・コース</a>
       </li>
       <li><span>写真</span></li>
 
       {# active_main は 'reviews' に統一（include でもそう渡す） #}
       <li class="{% if active_main == 'reviews' %}active{% endif %}">
-        <a href="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}">口コミ</a>
+        <a href="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}&from_search={{ from_search }}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">口コミ</a>
       </li>
 
       <li class="{% if active_main == 'map' %}active{% endif %}">
-        <a href="{% url 'stores:customer_map' %}">地図</a>
+        <a href="{% url 'stores:customer_store_map' store.pk %}?from_search={{ from_search }}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">地図</a>
       </li>
     </ul>
   </nav>
@@ -451,7 +451,7 @@
 
     <form id="reviewPostForm"
           method="post"
-          action="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}">
+          action="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}&from_search={{ from_search }}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">
       {% csrf_token %}
       <input type="hidden" name="action" value="create_review">
       <input type="hidden" name="store_id" value="{{ store.id }}">

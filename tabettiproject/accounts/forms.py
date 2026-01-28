@@ -117,3 +117,57 @@ class CustomerRegisterForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
+class CustomerSettingsForm(forms.ModelForm):
+    # Account(AbstractUser) のフィールド
+    last_name = forms.CharField(label="姓", required=False)
+    first_name = forms.CharField(label="名", required=False)
+    email = forms.EmailField(label="メールアドレス", required=True)
+    standard_score = forms.ChoiceField(
+        label="標準点",
+        choices=[(0, "未選択")] + [(i, f"{'★' * i}{'☆' * (5-i)} {i}") for i in range(5, 0, -1)],
+        initial=0,
+        required=False,
+        widget=forms.Select(attrs={'class': 'rating-select'})
+    )
+
+    class Meta:
+        from commons.models import CustomerAccount
+        model = CustomerAccount
+        fields = [
+            'last_name_kana', 'first_name_kana', 'gender', 'phone_number',
+            'nickname', 'occupation', 'camera', 'standard_score', 'introduction',
+            'title', 'subtitle', 'genre_focus', 'icon_image', 'cover_image'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # 追加フィールドを任意にする（モデルの blank=True でも自動でなるが、念のため明示）
+        optional_fields = [
+            'last_name_kana', 'first_name_kana', 'occupation', 'camera', 
+            'introduction', 'title', 'subtitle', 'genre_focus', 'phone_number'
+        ]
+        for field_name in optional_fields:
+            if field_name in self.fields:
+                self.fields[field_name].required = False
+
+        if self.instance and self.instance.pk:
+            # Account のフィールドを初期値にセット
+            self.fields['last_name'].initial = self.instance.last_name
+            self.fields['first_name'].initial = self.instance.first_name
+            self.fields['email'].initial = self.instance.email
+        
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'form-control'
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        # Account のフィールドを更新
+        user.last_name = self.cleaned_data['last_name']
+        user.first_name = self.cleaned_data['first_name']
+        user.email = self.cleaned_data['email']
+        user.sub_email = user.email
+
+        if commit:
+            user.save()
+        return user

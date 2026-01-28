@@ -150,6 +150,12 @@ class customer_review_listView(View):
             # 共通ヘッダーのタブ制御を使っているなら渡す
             "active_main": "reviews",
             "active_sub": "top",
+            "keyword": request.GET.get("keyword", ""),
+            "area": request.GET.get("area", ""),
+            "date": request.GET.get("date", ""),
+            "time": request.GET.get("time", ""),
+            "sort": request.GET.get("sort", ""),
+            "from_search": request.GET.get("from_search", ""),
         }
         return render(request, self.template_name, context)
 
@@ -207,7 +213,18 @@ class customer_review_listView(View):
                 )
                 messages.success(request, "保存しました。")
 
-            return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
+            params = {
+                "store_id": store.pk,
+                "keyword": request.GET.get("keyword", ""),
+                "area": request.GET.get("area", ""),
+                "date": request.GET.get("date", ""),
+                "time": request.GET.get("time", ""),
+                "sort": request.GET.get("sort", ""),
+                "from_search": request.GET.get("from_search", ""),
+            }
+            # 空のパラメータを除外
+            query_string = urllib.parse.urlencode({k: v for k, v in params.items() if v})
+            return redirect(f"{reverse('reviews:customer_review_list')}?{query_string}")
 
         # -----------------------------
         # 口コミ投稿処理
@@ -232,7 +249,17 @@ class customer_review_listView(View):
                 or not agree
             ):
                 messages.error(request, "入力内容に不備があります。")
-                return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
+                params = {
+                    "store_id": store.pk,
+                    "keyword": request.GET.get("keyword", ""),
+                    "area": request.GET.get("area", ""),
+                    "date": request.GET.get("date", ""),
+                    "time": request.GET.get("time", ""),
+                    "sort": request.GET.get("sort", ""),
+                    "from_search": request.GET.get("from_search", ""),
+                }
+                query_string = urllib.parse.urlencode({k: v for k, v in params.items() if v})
+                return redirect(f"{reverse('reviews:customer_review_list')}?{query_string}")
 
             Review.objects.create(
                 reviewer=customer,
@@ -242,7 +269,17 @@ class customer_review_listView(View):
             )
             messages.success(request, "口コミを投稿しました。")
 
-            return redirect(f"{reverse('reviews:customer_review_list')}?store_id={store.pk}")
+            params = {
+                "store_id": store.pk,
+                "keyword": request.GET.get("keyword", ""),
+                "area": request.GET.get("area", ""),
+                "date": request.GET.get("date", ""),
+                "time": request.GET.get("time", ""),
+                "sort": request.GET.get("sort", ""),
+                "from_search": request.GET.get("from_search", ""),
+            }
+            query_string = urllib.parse.urlencode({k: v for k, v in params.items() if v})
+            return redirect(f"{reverse('reviews:customer_review_list')}?{query_string}")
 
         return redirect(reverse("reviews:customer_review_list"))
 
@@ -375,7 +412,14 @@ class customer_reviewer_review_listView(LoginRequiredMixin, View):
         return CustomerAccount.objects.filter(pk=request.user.pk).first()
 
     def get(self, request, *args, **kwargs):
-        customer = self._get_login_customer(request)
+        customer_id = kwargs.get("customer_id")
+        if customer_id:
+            customer = get_object_or_404(CustomerAccount, pk=customer_id)
+            readonly_mode = (customer.pk != request.user.pk)
+        else:
+            customer = self._get_login_customer(request)
+            readonly_mode = False
+
         if customer is None:
             messages.error(request, "顧客アカウントでログインしてください。")
             return redirect(reverse("accounts:customer_login"))
@@ -408,6 +452,7 @@ class customer_reviewer_review_listView(LoginRequiredMixin, View):
             "user_name": customer.nickname,
             "cover_image_url": cover_field.url if cover_field else "",
             "user_icon_url": icon_field.url if icon_field else "",
+            "readonly_mode": readonly_mode,
 
             "reviewed_store_list": reviewed_store_rows,
             "reviewed_total": reviewed_store_rows.count(),

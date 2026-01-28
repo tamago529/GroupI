@@ -92,10 +92,16 @@
                     </span>
                     <span class="account-sub-info">ID: {{ acc.username }} / {{ acc.email }}</span>
                 </div>
-                <div class="item-actions">
-                    <button class="btn-item" onclick="showDetail('{{ acc.username }}')">詳細</button>
-                    <a href="{% url 'commons:company_common_confirm' %}?message={{ acc.username }}を削除しますか？&next_url={% url 'commons:company_common_confirm'%}" class="btn-item">削除</a>
-                </div>
+               <!-- HTML内の削除ボタン部分 -->
+<div class="item-actions">
+    <button class="btn-item" onclick="showDetail('{{ acc.username }}')">詳細</button>
+
+    <!-- 🌟 修正：next_url の飛び先を削除実行Viewにする -->
+    <!-- また、パラメータ名を confirm_message に合わせます -->
+    <a href="{% url 'commons:company_common_confirm' %}?confirm_message={{ acc.username }}を削除しますか？&next_url={% url 'accounts:account_delete_execute' acc.pk %}" class="btn-item">
+        削除
+    </a>
+</div>
             </div>
         {% empty %}
             <div class="no-results">

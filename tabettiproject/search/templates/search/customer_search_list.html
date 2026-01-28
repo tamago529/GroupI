@@ -303,6 +303,11 @@
     border-radius: 20px;
     display: inline-block;
   }
+
+  .pagination .ellipsis {
+    margin: 0 6px;
+    color: #666;
+  }
 </style>
 
 <!-- SVG（half star 用） -->
@@ -346,7 +351,7 @@
 
       <div class="shop-head">
         <h2 class="shop-name">
-          <a href="{% url 'stores:customer_store_info' store.pk %}">
+          <a href="{% url 'stores:customer_store_info' store.pk %}?from_search=1{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">
             {{ store.store_name }}{% if store.branch_name %}（{{ store.branch_name }}）{% endif %}
           </a>
         </h2>
@@ -429,15 +434,14 @@
       href="?page={{ stores.previous_page_number }}{% if area %}&area={{ area|urlencode }}{% endif %}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">前へ</a>
     {% endif %}
 
-    {% for num in stores.paginator.page_range %}
-    {% if stores.number == num %}
-    <span class="current">{{ num }}</span>
-    {% else %}
-    <a
-      href="?page={{ num }}{% if area %}&area={{ area|urlencode }}{% endif %}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">
-      {{ num }}
-    </a>
-    {% endif %}
+    {% for num in page_range %}
+      {% if num == stores.paginator.ELLIPSIS %}
+        <span class="ellipsis">{{ num }}</span>
+      {% elif stores.number == num %}
+        <span class="current">{{ num }}</span>
+      {% else %}
+        <a href="?page={{ num }}{% if area %}&area={{ area|urlencode }}{% endif %}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">{{ num }}</a>
+      {% endif %}
     {% endfor %}
 
 

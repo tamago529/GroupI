@@ -1,0 +1,112 @@
+{% extends "customer_base.html" %}
+
+{% block title %}{{ store.store_name }} - 地図{% endblock %}
+
+{% block css %}
+<style>
+  .shop-main{ max-width:1000px; margin:0 auto; background:#fff; border:1px solid #e6e6e6; color:#333; }
+  .map-container { padding: 20px; }
+  .map-area { height: 500px; width: 100%; border: 1px solid #ddd; border-radius: 8px; margin-top: 15px; overflow: hidden; }
+  .info-box { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #ff9900; }
+  .info-box p { margin: 5px 0; font-size: 14px; }
+  .btn-back { display: inline-block; margin-top: 15px; padding: 10px 20px; background: #eee; color: #333; text-decoration: none; border-radius: 6px; font-weight: bold; }
+  .btn-back:hover { background: #ddd; }
+  .google-map-iframe { width: 100%; height: 100%; border: 0; }
+  .map-links { margin-top: 10px; display: flex; gap: 10px; }
+  .btn-external { font-size: 12px; color: #06c; text-decoration: none; border: 1px solid #06c; padding: 4px 10px; border-radius: 4px; }
+  .btn-external:hover { background: #f0f7ff; }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumbs">
+  <ol>
+    <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
+    {% if from_search %}
+      <li><a href="{% url 'search:customer_search_list' %}?from_search=1{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">{% if keyword %}{{ keyword }}{% elif area %}{{ area }}{% else %}検索結果{% endif %}</a></li>
+    {% else %}
+      <li><a href="{% url 'search:customer_search_list' %}?keyword={{ store.scene.scene_name }}">{{ store.scene.scene_name }}</a></li>
+    {% endif %}
+    <li><a href="{% url 'stores:customer_store_info' store.pk %}?from_search={{ from_search }}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">{{ store.store_name }}</a></li>
+    <li><span>地図</span></li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="shop-main">
+
+  {% include "stores/_customer_store_common.html" with store=store is_saved=is_saved star_states=star_states avg_rating=avg_rating review_count=review_count active_main="map" active_sub="top" keyword=keyword area=area date=date time=time sort=sort from_search=from_search %}
+
+  <div class="map-container">
+    <div class="info-box">
+      <p><strong>住所:</strong> {{ store.address }}</p>
+      <p><strong>電話番号:</strong> {{ store.phone_number }}</p>
+    </div>
+
+    <div id="address-error" style="display:none; color:red; font-weight:bold; margin-bottom:10px;">
+      ご指定の住所が見つかりませんでした。正しい住所が設定されているかご確認ください。
+    </div>
+
+    <div id="offline-message" style="display:none; color:red; font-weight:bold; margin-bottom:10px;">
+      情報が取得できませんでした インターネット状況をご確認してください
+    </div>
+
+    <div class="map-area">
+      <iframe
+        id="map-iframe"
+        class="google-map-iframe"
+        src="https://maps.google.com/maps?q={{ store.address|urlencode }}&t=&z=16&ie=UTF8&iwloc=&output=embed"
+        allowfullscreen=""
+        loading="lazy">
+      </iframe>
+    </div>
+
+    <script>
+      async function verifyAddress() {
+        if (!navigator.onLine) return;
+        
+        try {
+          const address = "{{ store.address|escapejs }}";
+          const res = await fetch(`https://msearch.gsi.go.jp/address-search/AddressSearch?q=${encodeURIComponent(address)}`);
+          const data = await res.json();
+          
+          if (!data || data.length === 0) {
+            document.getElementById('address-error').style.display = 'block';
+            document.getElementById('map-iframe').style.opacity = '0.3';
+          }
+        } catch (e) {
+          console.error("Address verification failed:", e);
+        }
+      }
+
+      window.addEventListener('load', function() {
+        verifyAddress();
+        if (!navigator.onLine) {
+          document.getElementById('offline-message').style.display = 'block';
+          document.getElementById('map-iframe').style.opacity = '0.3';
+        }
+      });
+      window.addEventListener('offline', function() {
+        document.getElementById('offline-message').style.display = 'block';
+        document.getElementById('map-iframe').style.opacity = '0.3';
+      });
+      window.addEventListener('online', function() {
+        document.getElementById('offline-message').style.display = 'none';
+        document.getElementById('map-iframe').style.opacity = '1';
+        document.getElementById('map-iframe').src = document.getElementById('map-iframe').src; // リロード
+        verifyAddress();
+      });
+    </script>
+
+    <div class="map-links">
+      <a href="https://www.google.com/maps/search/?api=1&query={{ store.address|urlencode }}" target="_blank" class="btn-external">
+        大きな地図で見る (Google Maps)
+      </a>
+    </div>
+
+    <a href="{% url 'stores:customer_store_info' store.pk %}?from_search={{ from_search }}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}" class="btn-back">店舗トップへ戻る</a>
+  </div>
+
+</div>
+{% endblock %}

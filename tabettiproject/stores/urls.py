@@ -3,6 +3,7 @@ from django.urls import path
 from .views import (
     # --- 顧客側 ---
     customer_mapView,
+    customer_store_mapView,
     customer_menu_courseView,
     customer_store_infoView,
     customer_store_basic_editView,
@@ -35,6 +36,7 @@ urlpatterns = [
     path("customer_store_basic_edit/", customer_store_basic_editView.as_view(), name="customer_store_basic_edit"),
     path("customer_store_new_register/", customer_store_new_registerView.as_view(), name="customer_store_new_register"),
     path("customer_store_new_register_confirm/", customer_store_new_register_confirmView.as_view(), name="customer_store_new_register_confirm"),
+    path("customer_store_map/<int:pk>/", customer_store_mapView.as_view(), name="customer_store_map"),
 
     # --- 店舗側 ---
     path("store_basic_edit/", store_basic_editView.as_view(), name="store_basic_edit"),

@@ -293,7 +293,7 @@
 <nav class="breadcrumbs">
   <ol>
     <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
-    <li><a href="{% url 'reviews:customer_reviewer_detail' %}">{{ user_name }}さんのページ</a></li>
+    <li><a href="{% if readonly_mode %}{% url 'follows:customer_user_page' customer.pk %}{% else %}{% url 'reviews:customer_reviewer_detail' %}{% endif %}">{{ user_name }}さんのページ</a></li>
     <li><span>フォロー中</span></li>
   </ol>
 </nav>
@@ -316,9 +316,11 @@
       {# ✅ タイトル #}
       <div class="profile-title">{{ profile_title }}</div>
 
+      {% if not readonly_mode %}
       <div class="profile-setting-wrapper">
         <a href="{% url 'accounts:customer_settings' %}" class="profile-setting">マイページ設定</a>
       </div>
+      {% endif %}
 
     </div>
   </div>
@@ -334,10 +336,10 @@
       </div>
 
       <nav class="profile-nav">
-        <a href="{% url 'reviews:customer_reviewer_detail' %}">トップ</a>
-        <a href="{% url 'reviews:customer_reviewer_review_list' %}">口コミ</a>
-        <a href="{% url 'follows:customer_follow_list' %}" class="active">フォロー中</a>
-        <a href="{% url 'follows:customer_follower_list' %}">フォロワー</a>
+        <a href="{% if readonly_mode %}{% url 'follows:customer_user_page' customer.pk %}{% else %}{% url 'reviews:customer_reviewer_detail' %}{% endif %}">トップ</a>
+        <a href="{% if readonly_mode %}{% url 'reviews:customer_reviewer_other_review_list' customer.pk %}{% else %}{% url 'reviews:customer_reviewer_review_list' %}{% endif %}">口コミ</a>
+        <a href="{% if readonly_mode %}{% url 'follows:customer_other_follow_list' customer.pk %}{% else %}{% url 'follows:customer_follow_list' %}{% endif %}" class="active">フォロー中</a>
+        <a href="{% if readonly_mode %}{% url 'follows:customer_other_follower_list' customer.pk %}{% else %}{% url 'follows:customer_follower_list' %}{% endif %}">フォロワー</a>
       </nav>
     </div>
   </div>
@@ -361,6 +363,7 @@
 
       <div class="card-body">
 
+        {% if not readonly_mode %}
         {# ✅ フォロー中一覧なので、基本「フォロー中」メニュー（ミュート/解除） #}
         <form method="post" style="display: inline;">
           {% csrf_token %}
@@ -383,6 +386,7 @@
             </div>
           </div>
         </form>
+        {% endif %}
 
         {# ✅ ユーザー名クリックで、そのユーザーのマイページへ #}
         <a href="{% url 'follows:customer_user_page' item.id %}" class="card-name">

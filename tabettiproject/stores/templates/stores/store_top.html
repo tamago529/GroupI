@@ -5,6 +5,10 @@
 
 {% block css %}
 <style>
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
   :root{
     --bg:#f3f4f6;
     --card:#ffffff;
@@ -230,33 +234,11 @@
           <li class="active">
             <a href="{% url 'stores:store_top' %}"><span>トップ</span><span>›</span></a>
           </li>
-
-          <li>
-            <a href="{% url 'reservations_management:store_reservation_calendar' %}">
-              <span>予約カレンダー</span><span>›</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'reservations_management:store_reservation_ledger' %}">
-              <span>予約台帳</span><span>›</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'reservations_management:store_customer_ledger' %}">
-              <span>顧客台帳</span><span>›</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'reservations_management:store_reservation_settings' %}">
-              <span>ネット予約受付設定</span><span>›</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'reservations_management:store_seat_settings' %}">
-              <span>席設定</span><span>›</span>
-            </a>
-          </li>
-
+          <li><a href="{% url 'reservations_management:store_reservation_calendar' %}"><span>予約カレンダー</span><span>›</span></a></li>
+          <li><a href="{% url 'reservations_management:store_reservation_ledger' %}"><span>予約台帳</span><span>›</span></a></li>
+          <li><a href="{% url 'reservations_management:store_customer_ledger' %}"><span>顧客台帳</span><span>›</span></a></li>
+          <li><a href="{% url 'reservations_management:store_reservation_settings' %}"><span>ネット予約受付設定</span><span>›</span></a></li>
+          <li><a href="{% url 'reservations_management:store_seat_settings' %}"><span>席設定</span><span>›</span></a></li>
           <li><a href="#"><span>店舗情報の設定</span><span>›</span></a></li>
           <li><a href="#"><span>広告・ページ管理</span><span>›</span></a></li>
           <li><a href="#"><span>レポート</span><span>›</span></a></li>
@@ -304,8 +286,6 @@
               <canvas id="accessChart"></canvas>
             </div>
           </div>
-        </section>
-
         </section>
 
         <section class="card">
@@ -403,10 +383,6 @@
     const ctx = document.getElementById('accessChart').getContext('2d');
     const labels = {{ chart_labels|safe|default:"[]" }};
     const data = {{ chart_data|safe|default:"[]" }};
-    
-    if (labels.length === 0) {
-      console.warn("Chart labels are empty.");
-    }
 
     new Chart(ctx, {
       type: 'line',
@@ -428,24 +404,12 @@
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: {
-            display: false
-          }
+          legend: { display: false }
         },
         scales: {
           y: {
             beginAtZero: true,
-            ticks: {
-              precision: 0
-            },
-            grid: {
-              color: '#f3f4f6'
-            }
-          },
-          x: {
-            grid: {
-              display: false
-            }
+            ticks: { precision: 0 }
           }
         }
       }
@@ -453,4 +417,3 @@
   });
 </script>
 {% endblock %}
-

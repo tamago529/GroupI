@@ -111,7 +111,11 @@
 <nav class="breadcrumbs">
   <ol>
     <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
-    <li><a href="{% url 'search:customer_search_list' %}?keyword={{ store.scene.scene_name }}">{{ store.scene.scene_name }}</a></li>
+    {% if from_search %}
+      <li><a href="{% url 'search:customer_search_list' %}?from_search=1{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">{% if keyword %}{{ keyword }}{% elif area %}{{ area }}{% else %}検索結果{% endif %}</a></li>
+    {% else %}
+      <li><a href="{% url 'search:customer_search_list' %}?keyword={{ store.scene.scene_name }}">{{ store.scene.scene_name }}</a></li>
+    {% endif %}
     <li><span>{{ store.store_name }}</span></li>
   </ol>
 </nav>
@@ -138,7 +142,7 @@
         <table class="detail-table">
           <tbody>
             <tr><th>店名</th><td>{{ store.store_name }}{% if store.branch_name %} {{ store.branch_name }}{% endif %}</td></tr>
-            <tr><th>住所</th><td>{{ store.address }}</td></tr>
+            <tr><th>住所</th><td>{{ store.address }} <a href="{% url 'stores:customer_store_map' store.pk %}" style="display:inline-block; margin-left:10px; padding:2px 8px; background:#ff9900; color:#fff; text-decoration:none; border-radius:4px; font-size:11px; font-weight:bold;">📍 地図を見る</a></td></tr>
             <tr><th>ジャンル</th><td>{{ store.scene.scene_name }}</td></tr>
             <tr><th>営業時間</th><td>{{ store.business_hours|linebreaksbr }}</td></tr>
           </tbody>

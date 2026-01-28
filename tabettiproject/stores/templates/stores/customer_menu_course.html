@@ -140,7 +140,12 @@
 <nav class="breadcrumbs">
   <ol>
     <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
-    <li><a href="{% url 'stores:customer_store_info' store.pk %}">{{ store.store_name }}</a></li>
+    {% if from_search %}
+      <li><a href="{% url 'search:customer_search_list' %}?from_search=1{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">{% if keyword %}{{ keyword }}{% elif area %}{{ area }}{% else %}検索結果{% endif %}</a></li>
+    {% else %}
+      <li><a href="{% url 'search:customer_search_list' %}?keyword={{ store.scene.scene_name }}">{{ store.scene.scene_name }}</a></li>
+    {% endif %}
+    <li><a href="{% url 'stores:customer_store_info' store.pk %}?from_search={{ from_search }}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">{{ store.store_name }}</a></li>
     <li><span>メニュー・コース</span></li>
   </ol>
 </nav>
