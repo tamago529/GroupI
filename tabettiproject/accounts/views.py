@@ -148,8 +148,34 @@ class customer_registerView(CreateView):
         return response
 
 
-class customer_settingsView(TemplateView):
+class customer_settingsView(LoginRequiredMixin, TemplateView):
     template_name = "accounts/customer_settings.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # ログインユーザーが CustomerAccount であることを確認
+        try:
+            customer = self.request.user.customeraccount
+            from .forms import CustomerSettingsForm
+            context['form'] = CustomerSettingsForm(instance=customer)
+        except Exception:
+            pass
+        return context
+
+    def post(self, request, *args, **kwargs):
+        try:
+            customer = self.request.user.customeraccount
+            from .forms import CustomerSettingsForm
+            form = CustomerSettingsForm(request.POST, request.FILES, instance=customer)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "設定を変更しました。")
+                return redirect("accounts:customer_setting")
+            else:
+                return self.render_to_response(self.get_context_data(form=form))
+        except Exception as e:
+            messages.error(request, f"エラーが発生しました: {e}")
+            return redirect("accounts:customer_setting")
 
 
 class customermail_sendView(PasswordResetView):

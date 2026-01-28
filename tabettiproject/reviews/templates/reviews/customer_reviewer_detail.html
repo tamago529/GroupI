@@ -237,9 +237,11 @@
         {% endif %}
 
         <div class="mp-user-info">
-            <div style="color:#666; font-size:12px;">僕のレストランガイド</div>
+            <div style="color:#666; font-size:12px;">{{ customer.subtitle|default:"(サブタイトル未設定)" }}</div>
             <h1 class="mp-user-name">{{ user_name }}</h1>
-            <a href="#" style="font-size: 11px; color:var(--tb-blue);">▶ 詳細を見る</a>
+            <div style="font-size: 13px; color: #333; margin-top: 5px;">
+                {{ customer.occupation|default:"(職業未設定)" }} / {{ customer.camera|default:"(カメラ未設定)" }}
+            </div>
         </div>
 
         <table class="mp-stats-table" aria-label="ユーザーアクティビティ統計">
@@ -320,6 +322,20 @@
 
     <div style="display: flex; padding: 20px; gap: 20px;">
         <div style="width: 640px;">
+            <div style="margin-bottom: 30px;">
+                <h2 style="font-size:15px; border-bottom:2px solid #ddd; padding-bottom:8px;">📝 自己紹介</h2>
+                <div style="font-size: 14px; line-height: 1.6; color: #444; white-space: pre-wrap; padding: 10px 0;">
+                    {{ customer.introduction|default:"自己紹介はまだありません。" }}
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <h2 style="font-size:15px; border-bottom:2px solid #ddd; padding-bottom:8px;">💡 得意ジャンル・こだわり</h2>
+                <div style="font-size: 14px; line-height: 1.6; color: #444; white-space: pre-wrap; padding: 10px 0;">
+                    {{ customer.genre_focus|default:"未設定" }}
+                </div>
+            </div>
+
             <h2 style="font-size:15px; border-bottom:2px solid #ddd; padding-bottom:8px;">👑 おすすめレストラン</h2>
             <div style="text-align:center; padding:50px; color:#ccc;">読み込み中...</div>
         </div>

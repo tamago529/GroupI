@@ -553,7 +553,7 @@
       images/default_cover.jpg" %}{% endif %}');">
 
 
-      <div class="sub-id-in-cover">{{ user_name }}のレストランガイド</div>
+      <div class="sub-id-in-cover">{{ customer.subtitle|default:"(サブタイトル未設定)" }}</div>
     </div>
     <div class="user-icon-box">
       <img src="{% if user_icon_url %}{{ user_icon_url }}{% else %}{% static 'images/default_icon.png' %}{% endif %}"
@@ -561,7 +561,7 @@
     </div>
     <div class="profile-info-nav-bar">
       <div class="name-set">
-        <h1 class="main-nick">{{ user_name }}</h1>
+          <div class="nickname">{{ customer.nickname }} さんのガイド</div>
       </div>
       <nav>
         <ul class="mypage-tabs">
