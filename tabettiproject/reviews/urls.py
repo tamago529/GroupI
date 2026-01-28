@@ -20,6 +20,11 @@ urlpatterns = [
         name="customer_reviewer_review_list",
     ),
     path(
+        "customer_reviewer_review_list/<int:customer_id>/",
+        customer_reviewer_review_listView.as_view(),
+        name="customer_reviewer_other_review_list",
+    ),
+    path(
     "customer_reviewer_detail/",
     customer_reviewer_detailView.as_view(),
     name="customer_reviewer_detail",

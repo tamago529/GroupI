@@ -280,21 +280,20 @@
             トップ
         </a>
 
-        {# ✅ 相手ページ：口コミ/フォロー中/フォロワーは押せない #}
-        <span class="mp-nav-item disabled" aria-disabled="true">
+        <a href="{% url 'reviews:customer_reviewer_other_review_list' customer.pk %}" class="mp-nav-item">
             <span class="mp-nav-count">{{ count_reviews|default:0 }}</span>
             <span class="mp-nav-label">口コミ</span>
-        </span>
+        </a>
 
-        <span class="mp-nav-item disabled" aria-disabled="true">
+        <a href="{% url 'follows:customer_other_follow_list' customer.pk %}" class="mp-nav-item">
             <span class="mp-nav-count">{{ count_following|default:0 }}</span>
             <span class="mp-nav-label">フォロー中</span>
-        </span>
+        </a>
 
-        <span class="mp-nav-item disabled" aria-disabled="true">
+        <a href="{% url 'follows:customer_other_follower_list' customer.pk %}" class="mp-nav-item">
             <span class="mp-nav-count">{{ count_followers|default:0 }}</span>
             <span class="mp-nav-label">フォロワー</span>
-        </span>
+        </a>
 
         {% else %}
         {# ✅ 自分ページ：通常どおり押せる #}

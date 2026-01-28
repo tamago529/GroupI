@@ -538,7 +538,7 @@
 <nav class="breadcrumbs">
   <ol>
     <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
-    <li><a href="{% url 'reviews:customer_reviewer_detail' %}">{{ user_name }}さんのページ</a></li>
+    <li><a href="{% if readonly_mode %}{% url 'follows:customer_user_page' customer.pk %}{% else %}{% url 'reviews:customer_reviewer_detail' %}{% endif %}">{{ user_name }}さんのページ</a></li>
     <li><span>口コミ投稿一覧</span></li>
   </ol>
 </nav>
@@ -565,7 +565,7 @@
       </div>
       <nav>
         <ul class="mypage-tabs">
-          <li><a href="{% url 'reviews:customer_reviewer_detail' %}">トップ</a></li>
+          <li><a href="{% if readonly_mode %}{% url 'follows:customer_user_page' customer.pk %}{% else %}{% url 'reviews:customer_reviewer_detail' %}{% endif %}">トップ</a></li>
           <li><a href="#" class="active">口コミ</a></li>
           <li><a href="{% url 'follows:customer_follow_list' %}">フォロー中</a></li>
           <li><a href="{% url 'follows:customer_follower_list' %}">フォロワー</a></li>
@@ -684,6 +684,7 @@
             <!-- 右側：ボタン群 -->
             <div style="display:flex; gap:8px; align-items:flex-start; flex-shrink:0;">
 
+              {% if not readonly_mode %}
               <!-- 口コミを投稿（モーダル起動） -->
               <button type="button" class="btn-action btn-green openPostModal" style="white-space:nowrap;">
                 口コミを投稿
@@ -699,6 +700,7 @@
                   削除
                 </button>
               </form>
+              {% endif %}
 
             </div>
           </div>
