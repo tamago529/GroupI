@@ -210,7 +210,7 @@
             <a class="menu-item" href="{% url 'accounts:company_login' %}" role="menuitem">企業ログイン</a>
             {% else %}
             {# ✅ ログイン時：通常メニュー + ログアウト #}
-            <a class="menu-item" href="#" role="menuitem">予約確認</a>
+            <a class="menu-item" href="{% url 'accounts:customer_setting' %}" role="menuitem">設定</a>
             <a class="menu-item" href="#" role="menuitem">メッセージ</a>
             <a class="menu-item" href="#" role="menuitem">お知らせ</a>
             <a class="menu-item" href="{% url 'reservations:store_reservation_history' %}" role="menuitem">予約確認</a>

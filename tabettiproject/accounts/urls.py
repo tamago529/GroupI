@@ -21,6 +21,7 @@ urlpatterns = [
     path("customer_logout/", customer_logout_view, name="customer_logout"),
     path("customer_register/", customer_registerView.as_view(), name="customer_register"),
     path("customer_settings/", customer_settingsView.as_view(), name="customer_settings"),
+    path("customer_setting/", customer_settingsView.as_view(), name="customer_setting"), # エイリアス
     path("customer_mail_send/", customermail_sendView.as_view(), name="customer_mail_send"),
     path("customer_password_reset_complete/", customer_password_reset_completeView.as_view(), name="customer_password_reset_complete"),
     path("customer_password_reset_expire/", customer_password_reset_expireView.as_view(), name="customer_password_reset_expire"),

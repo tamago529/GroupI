@@ -55,26 +55,33 @@ def _pack_user_card(viewer: CustomerAccount, target: CustomerAccount):
 class Customer_follower_listView(LoginRequiredMixin, TemplateView):
     template_name = "follows/customer_follower_list.html"
 
-    def _get_login_customer(self):
+    def _get_target_customer(self):
+        customer_id = self.kwargs.get("customer_id")
+        if customer_id:
+            return get_object_or_404(CustomerAccount, pk=customer_id)
         return CustomerAccount.objects.filter(pk=self.request.user.pk).first()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        customer = self._get_login_customer()
+        customer = self._get_target_customer()
         if not customer:
             raise Http404("CustomerAccount not found")
+        
+        readonly_mode = (customer.pk != self.request.user.pk)
+        viewer = CustomerAccount.objects.filter(pk=self.request.user.pk).first()
 
         cover_field = getattr(customer, "cover_image", None)
         icon_field = getattr(customer, "icon_image", None)
 
-        display_name = customer.nickname or self.request.user.username
+        display_name = customer.nickname or customer.username
         context["profile_title"] = f"{display_name}のレストランガイド"
 
         context["customer"] = customer
         context["user_name"] = display_name
         context["cover_image_url"] = cover_field.url if cover_field else ""
         context["user_icon_url"] = icon_field.url if icon_field else ""
+        context["readonly_mode"] = readonly_mode
 
         # ✅ あなたをフォローしている人（フォロワー）
         follower_rels = (
@@ -84,7 +91,7 @@ class Customer_follower_listView(LoginRequiredMixin, TemplateView):
             .order_by("-followed_at")
         )
 
-        followers = [_pack_user_card(customer, rel.follower) for rel in follower_rels]
+        followers = [_pack_user_card(viewer or customer, rel.follower) for rel in follower_rels]
 
         context["followers"] = followers
         context["follower_count"] = len(followers)
@@ -156,24 +163,29 @@ class Customer_follower_listView(LoginRequiredMixin, TemplateView):
 class Customer_follow_listView(LoginRequiredMixin, TemplateView):
     template_name = "follows/customer_follow_list.html"
 
-    def _get_login_customer(self):
+    def _get_target_customer(self):
+        customer_id = self.kwargs.get("customer_id")
+        if customer_id:
+            return get_object_or_404(CustomerAccount, pk=customer_id)
         return CustomerAccount.objects.filter(pk=self.request.user.pk).first()
 
     def _build_profile_context(self):
-        customer = self._get_login_customer()
-        if not customer:
+        target = self._get_target_customer()
+        if not target:
             raise Http404("CustomerAccount not found")
 
-        cover_field = getattr(customer, "cover_image", None)
-        icon_field = getattr(customer, "icon_image", None)
-        display_name = customer.nickname or self.request.user.username
+        cover_field = getattr(target, "cover_image", None)
+        icon_field = getattr(target, "icon_image", None)
+        display_name = target.nickname or target.username
+        readonly_mode = (target.pk != self.request.user.pk)
 
         return {
-            "customer": customer,
+            "customer": target,
             "user_name": display_name,
             "profile_title": f"{display_name}のレストランガイド",
             "cover_image_url": cover_field.url if cover_field else "",
             "user_icon_url": icon_field.url if icon_field else "",
+            "readonly_mode": readonly_mode,
         }
 
     def get_context_data(self, **kwargs):
@@ -189,9 +201,10 @@ class Customer_follow_listView(LoginRequiredMixin, TemplateView):
             .order_by("-followed_at")
         )
 
+        viewer = CustomerAccount.objects.filter(pk=self.request.user.pk).first()
         follows = []
         for rel in follow_rels:
-            card = _pack_user_card(customer, rel.followee)
+            card = _pack_user_card(viewer or customer, rel.followee)
             card["is_muted"] = rel.is_muted
             follows.append(card)
 
