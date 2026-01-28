@@ -4,6 +4,8 @@ from .views import (
     store_reservation_confirmView,
     store_reservation_editView,
     store_reservation_cancelView,
+    available_timesView,
+    
 )
 
 app_name = "reservations"
@@ -26,6 +28,11 @@ urlpatterns = [
         name="store_reservation_edit"
         ),
 
+    path(
+        "store_reservation_edit/<int:reservation_id>/available_times/",
+        available_timesView.as_view(),
+        name="available_times"
+        ),
 
     # 予約キャンセル
     path(
