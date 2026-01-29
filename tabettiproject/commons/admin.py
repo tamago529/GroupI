@@ -12,7 +12,7 @@ from .models import (
     Review, ReviewPhoto, ReviewReport, Follow, Reservator,
     Reservation, StoreOnlineReservation, StoreImage, StoreMenu,
     StoreAccountRequest, StoreAccountRequestLog, PasswordResetLog, TempRequestMailLog, StoreInfoReport,
-    StoreAccessLog
+    StoreAccessLog,Genre
 )
 
 # ==========================================================
@@ -184,9 +184,9 @@ from .models import Store, Area
 
 @admin.register(Store)
 class StoreAdmin(admin.ModelAdmin):
-    list_display = ("id", "store_name", "branch_name", "area", "address","genre","scene")
-    list_filter = ("area","scene")
-    search_fields = ("store_name", "branch_name", "address")
+    list_display = ("id", "store_name", "branch_name", "area", "address", "genre", "genre_master", "scene")
+    list_filter = ("area", "scene", "genre_master")
+    search_fields = ("store_name", "branch_name", "address", "genre", "genre_master__name")
     actions = ["sync_area_from_address_prefecture"]
 
     def _extract_pref_from_address(self, address: str, areas: list[Area]) -> Area | None:
@@ -249,6 +249,11 @@ class StoreAdmin(admin.ModelAdmin):
             obj.area = guessed
         super().save_model(request, obj, form, change)
 
+
+@admin.register(Genre)
+class GenreAdmin(admin.ModelAdmin):
+    list_display = ("id", "name")
+    search_fields = ("name",)
 
 
 @admin.register(Review)
