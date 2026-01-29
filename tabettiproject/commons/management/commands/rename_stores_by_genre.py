@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from datetime import time
 from typing import Optional
 
 from django.core.management.base import BaseCommand
@@ -49,6 +50,7 @@ def normalize_genre(g: str) -> str:
 # 住所から「地名っぽい部分」を抜く
 # ==========================
 CITY_RE = re.compile(r"(?:都|道|府|県).+?(?:市|区|町|村)")
+
 
 def guess_place_from_address(address: str) -> str:
     addr = (address or "").strip()
@@ -112,6 +114,7 @@ NAME_SPECS: dict[str, NameSpec] = {
         prefix="",
     ),
 }
+
 
 def make_store_name(store: Store) -> str:
     genre_key = normalize_genre(store.genre)
@@ -192,8 +195,146 @@ def make_store_account_email(store: Store, acc: StoreAccount, genre_key: str, do
     return ensure_unique_email(local, domain, exclude_account_pk=acc.pk)
 
 
+# ==========================
+# 追加：ジャンル別プロファイル（電話/営業時間/席数/予算）
+# ==========================
+@dataclass(frozen=True)
+class StoreProfile:
+    business_hours: str
+    open_time_1: time | None
+    close_time_1: time | None
+    open_time_2: time | None
+    close_time_2: time | None
+    seats_min: int
+    seats_max: int
+    budget_min: int
+    budget_max: int
+
+
+PROFILES: dict[str, StoreProfile] = {
+    "washoku": StoreProfile(
+        business_hours="11:00〜14:30 / 17:00〜22:00",
+        open_time_1=time(11, 0), close_time_1=time(14, 30),
+        open_time_2=time(17, 0), close_time_2=time(22, 0),
+        seats_min=20, seats_max=80,
+        budget_min=3000, budget_max=12000,
+    ),
+    "sushi": StoreProfile(
+        business_hours="11:30〜14:00 / 17:00〜21:30",
+        open_time_1=time(11, 30), close_time_1=time(14, 0),
+        open_time_2=time(17, 0), close_time_2=time(21, 30),
+        seats_min=8, seats_max=30,
+        budget_min=5000, budget_max=20000,
+    ),
+    "chinese": StoreProfile(
+        business_hours="11:00〜15:00 / 17:00〜23:00",
+        open_time_1=time(11, 0), close_time_1=time(15, 0),
+        open_time_2=time(17, 0), close_time_2=time(23, 0),
+        seats_min=30, seats_max=120,
+        budget_min=2000, budget_max=6000,
+    ),
+    "western": StoreProfile(
+        business_hours="11:30〜15:00 / 17:30〜22:00",
+        open_time_1=time(11, 30), close_time_1=time(15, 0),
+        open_time_2=time(17, 30), close_time_2=time(22, 0),
+        seats_min=20, seats_max=90,
+        budget_min=2500, budget_max=9000,
+    ),
+    "yakiniku": StoreProfile(
+        business_hours="17:00〜24:00",
+        # 日跨ぎ用：open > close の形にしておく（あなたの検索ロジックがこれを日跨ぎとして扱う）
+        open_time_1=time(17, 0), close_time_1=time(0, 0),
+        open_time_2=None, close_time_2=None,
+        seats_min=30, seats_max=150,
+        budget_min=3500, budget_max=9000,
+    ),
+    "ramen": StoreProfile(
+        business_hours="11:00〜15:00 / 17:00〜21:00",
+        open_time_1=time(11, 0), close_time_1=time(15, 0),
+        open_time_2=time(17, 0), close_time_2=time(21, 0),
+        seats_min=10, seats_max=45,
+        budget_min=800, budget_max=1500,
+    ),
+    "cafe": StoreProfile(
+        business_hours="08:00〜18:00",
+        open_time_1=time(8, 0), close_time_1=time(18, 0),
+        open_time_2=None, close_time_2=None,
+        seats_min=15, seats_max=70,
+        budget_min=800, budget_max=2500,
+    ),
+    "other": StoreProfile(
+        business_hours="11:00〜22:00",
+        open_time_1=time(11, 0), close_time_1=time(22, 0),
+        open_time_2=None, close_time_2=None,
+        seats_min=20, seats_max=100,
+        budget_min=1000, budget_max=6000,
+    ),
+}
+
+
+def pick_profile(genre_key: str) -> StoreProfile:
+    return PROFILES.get(genre_key, PROFILES["other"])
+
+
+def deterministic_int(seed: int, low: int, high: int) -> int:
+    """store.id から毎回同じ値が出るようにする（再実行してもブレない）"""
+    if high < low:
+        low, high = high, low
+    span = (high - low) + 1
+    return low + (seed % span)
+
+
+def make_seats(store: Store, prof: StoreProfile) -> int:
+    return deterministic_int((store.id or 1) * 31, prof.seats_min, prof.seats_max)
+
+
+def make_budget(store: Store, prof: StoreProfile) -> int:
+    return deterministic_int((store.id or 1) * 97, prof.budget_min, prof.budget_max)
+
+
+def guess_phone_prefix(area_name: str) -> str:
+    a = (area_name or "").strip()
+    if "東京都" in a:
+        return "03"
+    if "大阪府" in a:
+        return "06"
+    if "北海道" in a:
+        return "011"
+    if "愛知県" in a:
+        return "052"
+    if "福岡県" in a:
+        return "092"
+    # その他は “代表番号っぽく” 050 に寄せる
+    return "050"
+
+
+def make_phone_number(store: Store) -> str:
+    area_name = ""
+    try:
+        area_name = store.area.area_name
+    except Exception:
+        area_name = ""
+
+    prefix = guess_phone_prefix(area_name)
+
+    # 8桁部分をIDから作る（例: 12345678）
+    n = ((store.id or 1) * 123457) % 100000000
+    s = f"{n:08d}"
+
+    # 03/06 は 4-4、それ以外(3桁市外局番)は 3-4 っぽく
+    if prefix in ("03", "06"):
+        return f"{prefix}-{s[:4]}-{s[4:]}"
+    else:
+        # 050/011/052/092 など
+        return f"{prefix}-{s[:3]}-{s[3:7]}"
+
+
 class Command(BaseCommand):
-    help = "全Storeの店舗名/支店名/emailをジャンルに合わせて一括リネームし、紐づくStoreAccountのemail/admin_emailも更新します（UNIQUE衝突回避）。"
+    help = (
+        "全Storeの店舗名/支店名/email をジャンルに合わせて一括リネームし、"
+        "紐づくStoreAccountのemail/admin_emailも更新します（UNIQUE衝突回避）。"
+        "さらに電話番号/営業時間/席数/予算/open-closeもジャンルに合わせて更新します。"
+    )
 
     def add_arguments(self, parser):
         parser.add_argument("--domain", type=str, default="tabetti.example")
@@ -221,22 +362,55 @@ class Command(BaseCommand):
             new_branch = make_branch_name(store, place)
             new_store_email = make_store_email(store, genre_key, domain)
 
+            prof = pick_profile(genre_key)
+            new_phone = make_phone_number(store)
+            new_hours = prof.business_hours
+            new_seats = make_seats(store, prof)
+            new_budget = make_budget(store, prof)
+            new_open1, new_close1 = prof.open_time_1, prof.close_time_1
+            new_open2, new_close2 = prof.open_time_2, prof.close_time_2
+
             if (
                 store.store_name != new_name or
                 store.branch_name != new_branch or
-                (store.email or "").lower() != new_store_email
+                (store.email or "").lower() != new_store_email or
+                (store.phone_number or "") != new_phone or
+                (store.business_hours or "") != new_hours or
+                (store.seats or 0) != new_seats or
+                (store.budget or 0) != new_budget or
+                store.open_time_1 != new_open1 or
+                store.close_time_1 != new_close1 or
+                store.open_time_2 != new_open2 or
+                store.close_time_2 != new_close2
             ):
                 self.stdout.write(
                     f"[Store id={store.id}] "
-                    f"'{store.store_name}'→'{new_name}' / "
-                    f"'{store.branch_name}'→'{new_branch}' / "
-                    f"'{store.email}'→'{new_store_email}'"
+                    f"name '{store.store_name}'→'{new_name}' / "
+                    f"branch '{store.branch_name}'→'{new_branch}' / "
+                    f"email '{store.email}'→'{new_store_email}' / "
+                    f"phone '{store.phone_number}'→'{new_phone}' / "
+                    f"hours '{store.business_hours}'→'{new_hours}' / "
+                    f"seats {store.seats}→{new_seats} / "
+                    f"budget {store.budget}→{new_budget}"
                 )
                 if not dry_run:
                     store.store_name = new_name
                     store.branch_name = new_branch
                     store.email = new_store_email
-                    store.save(update_fields=["store_name", "branch_name", "email"])
+                    store.phone_number = new_phone
+                    store.business_hours = new_hours
+                    store.seats = new_seats
+                    store.budget = new_budget
+                    store.open_time_1 = new_open1
+                    store.close_time_1 = new_close1
+                    store.open_time_2 = new_open2
+                    store.close_time_2 = new_close2
+
+                    store.save(update_fields=[
+                        "store_name", "branch_name", "email",
+                        "phone_number", "business_hours", "seats", "budget",
+                        "open_time_1", "close_time_1", "open_time_2", "close_time_2",
+                    ])
                 updated_store += 1
 
             # StoreAccount 側：emailは必ずユニークに（アカウント単位）
