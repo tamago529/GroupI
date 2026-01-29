@@ -2,50 +2,139 @@
 
 {% block content %}
 <style>
-/* --- 共通スタイル --- */
-:root{
-  --bg:#f3f4f6; --card:#ffffff; --line:#d9dde3; --text:#222; --muted:#6b7280;
-  --nav:#2f343a; --link:#1a73e8; --chip:#eef2f7; --bar:#ff9800; --bar2:#ffb74d;
-  --danger-bg:#ffe9e7; --danger-line:#f3b6b0; --danger-text:#b42318;
-}
-.wrap{max-width:800px;margin:0 auto;padding:20px 12px 40px;color:var(--text); font-family: sans-serif;}
-.hd{margin-bottom: 25px;}
-.title{font-size:20px;font-weight:900; border-left: 4px solid var(--danger-text); padding-left: 12px;}
+    /* --- 共通スタイル --- */
+    :root {
+        --bg: #f3f4f6;
+        --card: #ffffff;
+        --line: #d9dde3;
+        --text: #222;
+        --muted: #6b7280;
+        --nav: #2f343a;
+        --link: #1a73e8;
+        --chip: #eef2f7;
+        --bar: #ff9800;
+        --bar2: #ffb74d;
+        --danger-bg: #ffe9e7;
+        --danger-line: #f3b6b0;
+        --danger-text: #b42318;
+    }
 
-.card{border:1px solid var(--line);border-radius:8px;background:#fff;margin-bottom:20px;}
-.card-head{background:#fafafa; padding:12px 16px; border-bottom:1px solid var(--line); font-weight:800; font-size:14px;}
-.card-body{padding:16px;}
+    .wrap {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px 12px 40px;
+        color: var(--text);
+        font-family: sans-serif;
+    }
 
-/* 通報対象の口コミ表示エリア */
-.target-review {
-  background: #f9f9f9;
-  border-radius: 6px;
-  padding: 15px;
-  font-size: 14px;
-  color: #555;
-  line-height: 1.6;
-  border-left: 3px solid var(--line);
-}
+    .hd {
+        margin-bottom: 25px;
+    }
 
-/* 入力エリア */
-.form-group { margin-top: 20px; }
-.label { display: block; font-size: 14px; font-weight: 800; margin-bottom: 8px; }
-.textarea {
-  width: 100%; min-height: 150px; padding: 12px; border: 1px solid var(--line);
-  border-radius: 6px; font-size: 14px; resize: vertical;
-}
-.textarea:focus { outline: none; border-color: var(--link); box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
+    .title {
+        font-size: 20px;
+        font-weight: 900;
+        border-left: 4px solid var(--danger-text);
+        padding-left: 12px;
+    }
 
-/* ボタンエリア */
-.btns { display: flex; gap: 12px; margin-top: 30px; justify-content: flex-end; }
-.btn {
-  padding: 10px 24px; border-radius: 6px; font-weight: 900; font-size: 14px;
-  cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line);
-}
-.btn-white { background: #fff; color: #333; }
-.btn-white:hover { background: #f3f4f6; }
-.btn-danger { background: var(--danger-text); color: #fff; border-color: var(--danger-text); }
-.btn-danger:hover { opacity: 0.9; }
+    .card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        margin-bottom: 20px;
+    }
+
+    .card-head {
+        background: #fafafa;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--line);
+        font-weight: 800;
+        font-size: 14px;
+    }
+
+    .card-body {
+        padding: 16px;
+    }
+
+    /* 通報対象の口コミ表示エリア */
+    .target-review {
+        background: #f9f9f9;
+        border-radius: 6px;
+        padding: 15px;
+        font-size: 14px;
+        color: #555;
+        line-height: 1.6;
+        border-left: 3px solid var(--line);
+    }
+
+    /* 入力エリア */
+    .form-group {
+        margin-top: 20px;
+    }
+
+    .label {
+        display: block;
+        font-size: 14px;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .textarea {
+        width: 100%;
+        min-height: 150px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        font-size: 14px;
+        resize: vertical;
+    }
+
+    .textarea:focus {
+        outline: none;
+        border-color: var(--link);
+        box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+    }
+
+    /* ボタンエリア */
+    .btns {
+        display: flex;
+        gap: 12px;
+        margin-top: 30px;
+        justify-content: flex-end;
+    }
+
+    .btn {
+        padding: 10px 24px;
+        border-radius: 6px;
+        font-weight: 900;
+        font-size: 14px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid var(--line);
+    }
+
+    .btn-white {
+        background: #fff;
+        color: #333;
+    }
+
+    .btn-white:hover {
+        background: #f3f4f6;
+    }
+
+    .btn-danger {
+        background: var(--danger-text);
+        color: #fff;
+        border-color: var(--danger-text);
+    }
+
+    .btn-danger:hover {
+        opacity: 0.9;
+    }
 </style>
 
 <div class="wrap">
@@ -60,7 +149,8 @@
     <div class="card">
         <div class="card-head">通報対象の口コミ</div>
         <div class="card-body">
-            <div class="user-name" style="font-weight: bold; margin-bottom: 10px;">👤 {{ review.reviewer.nickname }} 様の投稿</div>
+            <div class="user-name" style="font-weight: bold; margin-bottom: 10px;">👤 {{ review.reviewer.nickname }}
+                様の投稿</div>
             <div class="target-review">
                 {{ review.review_text|linebreaksbr }}
             </div>
@@ -75,15 +165,26 @@
             <div class="card-body">
                 <div class="form-group">
                     <label class="label">通報理由（必須）</label>
-                    <textarea name="report_text" class="textarea" placeholder="例：事実無根の内容で誹謗中傷にあたるため、削除を依頼します。" required></textarea>
+                    <textarea name="report_text" class="textarea" placeholder="例：事実無根の内容で誹謗中傷にあたるため、削除を依頼します。"
+                        required></textarea>
                 </div>
             </div>
         </div>
+</div>
 
-        <div class="btns">
-            <a href="{% url 'reviews:store_review_list' pk=review.store.pk %}" class="btn btn-white">キャンセル</a>
-            <button type="submit" class="btn btn-danger">この内容で通報する</button>
-        </div>
-    </form>
+<div class="card">
+    <div class="card-body">
+        <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" name="consent" required>
+            <span style="font-size: 14px; font-weight: bold;">虚偽の通報ではないことに同意します</span>
+        </label>
+    </div>
+</div>
+
+<div class="btns">
+    <a href="{% url 'reviews:store_review_list' pk=review.store.pk %}" class="btn btn-white">キャンセル</a>
+    <button type="submit" class="btn btn-danger">この内容で通報する</button>
+</div>
+</form>
 </div>
 {% endblock %}

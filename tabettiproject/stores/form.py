@@ -2,6 +2,7 @@ from django import forms
 from django.forms import inlineformset_factory
 
 from commons.models import Store, StoreImage, StoreMenu
+from commons.constants import GENRE_CHOICES
 
 
 # ============================================================
@@ -52,7 +53,7 @@ class CompanyStoreEditForm(forms.ModelForm):
             "seats": forms.NumberInput(attrs={"min": 0}),
             "budget": forms.NumberInput(attrs={"min": 0, "placeholder": "￥"}),
 
-            "genre": forms.TextInput(attrs={"placeholder": "カフェ、焼肉など"}),
+            "genre": forms.Select(choices=GENRE_CHOICES, attrs={"class": "form-control"}),
             "reservable": forms.CheckboxInput(attrs={"style": "width: auto;"}),
         }
 
@@ -91,7 +92,7 @@ class StoreBasicForm(forms.ModelForm):
             "open_time_2": forms.TimeInput(attrs={"type": "time"}),
             "close_time_2": forms.TimeInput(attrs={"type": "time"}),
 
-            "genre": forms.TextInput(attrs={"placeholder": "カフェ、焼肉など"}),
+            "genre": forms.Select(choices=GENRE_CHOICES, attrs={"class": "form-control"}),
         }
 
 
@@ -216,5 +217,5 @@ class StoreRegistrationForm(forms.ModelForm):
             "close_time_2": forms.TimeInput(attrs={"type": "time"}),
             "seats": forms.NumberInput(attrs={"min": 0}),
             "budget": forms.NumberInput(attrs={"min": 0, "placeholder": "￥"}),
-            "genre": forms.TextInput(attrs={"placeholder": "例：イタリアン、和食など"}),
+            "genre": forms.Select(choices=GENRE_CHOICES, attrs={"class": "form-control"}),
         }

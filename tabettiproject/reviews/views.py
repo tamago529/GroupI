@@ -657,6 +657,10 @@ class store_review_reportView(TemplateView):
         review = get_object_or_404(Review, pk=pk)
         report_text = request.POST.get("report_text")
 
+        if not request.POST.get("consent"):
+            messages.error(request, "通報するには同意が必要です。")
+            return render(request, self.template_name, {"review": review})
+
         if not report_text:
             messages.error(request, "通報理由を入力してください。")
             return render(request, self.template_name, {"review": review})

@@ -18,6 +18,8 @@ from commons.models import (
 # =====================================================
 # ジャンル一覧（画像つき）
 # =====================================================
+from commons.constants import GENRE_STRUCTURE
+
 def genre_list(request):
     # ジャンル名 → 画像ファイル名（static/images/ 配下に置く想定）
     genre_image_map = {
@@ -55,81 +57,21 @@ def genre_list(request):
         "その他施設": "other.jpg",
     }
 
-    def _item(name: str, tags: str) -> dict:
-        return {
-            "name": name,
-            "tags": tags,
-            # マップに無ければ noimage を出す（static/images/noimage.jpg を用意）
-            "image": genre_image_map.get(name, "noimage.jpg"),
-        }
-
-    genre_data = [
-        {
-            "category": "和食",
-            "items": [
-                _item("日本料理・懐石", "日本料理｜郷土料理｜豆腐料理｜料理旅館"),
-                _item("寿司・海鮮", "寿司｜回転寿司｜海鮮｜ふぐ｜かに｜えび｜貝"),
-                _item("うなぎ・肉料理(和)", "うなぎ｜あなご｜すき焼き｜しゃぶしゃぶ｜牛タン"),
-                _item("天ぷら・揚げ物", "天ぷら｜とんかつ｜串揚げ｜からあげ"),
-                _item("焼き鳥・鳥料理", "焼き鳥｜串焼き｜もつ焼き｜手羽先"),
-                _item("そば・うどん・麺", "そば｜うどん｜ほうとう｜ちゃんぽん｜焼きそば"),
-                _item("丼・お好み焼き・おでん", "牛丼｜親子丼｜天丼｜かつ丼｜海鮮丼｜お好み焼き｜もんじゃ｜たこ焼き｜おでん"),
-            ],
-        },
-        {
-            "category": "洋食・西洋料理",
-            "items": [
-                _item("イタリアン・フレンチ", "イタリアン｜パスタ｜ピザ｜フレンチ｜ビストロ"),
-                _item("洋食・ステーキ", "洋食｜ハンバーグ｜オムライス｜ステーキ｜鉄板焼"),
-                _item("各国料理(欧米)", "スペイン料理｜ドイツ料理｜ロシア料理｜アメリカ料理｜ハンバーガー"),
-            ],
-        },
-        {
-            "category": "中華・アジア・エスニック",
-            "items": [
-                _item("中華料理", "中華料理｜四川料理｜広東料理｜上海料理｜飲茶｜点心｜餃子"),
-                _item("韓国料理", "韓国料理｜サムギョプサル｜冷麺"),
-                _item("アジア・エスニック", "タイ料理｜ベトナム料理｜インドネシア料理｜インド料理｜中東料理｜メキシコ料理"),
-            ],
-        },
-        {
-            "category": "カレー・焼肉・鍋",
-            "items": [
-                _item("カレー", "カレー｜インドカレー｜スープカレー｜欧風カレー"),
-                _item("焼肉・ホルモン", "焼肉｜ホルモン｜ジンギスカン｜バーベキュー"),
-                _item("鍋料理", "もつ鍋｜水炊き｜ちゃんこ鍋｜火鍋｜うどんすき"),
-            ],
-        },
-        {
-            "category": "ラーメン・つけ麺",
-            "items": [
-                _item("ラーメン・麺専門店", "ラーメン｜つけ麺｜まぜそば｜担々麺｜刀削麺"),
-            ],
-        },
-        {
-            "category": "居酒屋・バー・お酒",
-            "items": [
-                _item("居酒屋・ダイニングバー", "居酒屋｜立ち飲み｜バル｜肉バル｜ダイニングバー"),
-                _item("バー・パブ", "バー｜ワインバー｜ビアバー｜スポーツバー｜日本酒バー"),
-                _item("ビアガーデン・ホール", "ビアガーデン｜ビアホール"),
-            ],
-        },
-        {
-            "category": "カフェ・パン・スイーツ",
-            "items": [
-                _item("カフェ・喫茶店", "カフェ｜喫茶店｜コーヒースタンド｜ティーパレス"),
-                _item("パン・サンドイッチ", "パン｜サンドイッチ｜ベーカリー"),
-                _item("スイーツ・和菓子", "ケーキ｜パフェ｜和菓子｜大福｜かき氷｜アイスクリーム"),
-            ],
-        },
-        {
-            "category": "その他・施設",
-            "items": [
-                _item("レストラン・食堂", "ファミレス｜食堂｜弁当｜惣菜｜オーガニック｜ビュッフェ"),
-                _item("その他施設", "カラオケ｜ホテル｜道の駅｜コンビニ｜屋形船"),
-            ],
-        },
-    ]
+    genre_data = []
+    for group in GENRE_STRUCTURE:
+        cat = group["category"]
+        items_data = []
+        for name, tags in group["items"]:
+            items_data.append({
+                "name": name,
+                "tags": tags,
+                "image": genre_image_map.get(name, "noimage.jpg"),
+            })
+        
+        genre_data.append({
+            "category": cat,
+            "items": items_data,
+        })
 
     return render(request, "search/customer_genre_list.html", {"genre_data": genre_data})
 

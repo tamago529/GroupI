@@ -14,6 +14,7 @@ from .models import (
     StoreAccountRequest, StoreAccountRequestLog, PasswordResetLog, TempRequestMailLog, StoreInfoReport,
     StoreAccessLog
 )
+from commons.constants import GENRE_CHOICES
 
 # ==========================================================
 # 1. 作成用フォーム（ここがエラー回避の核心）
@@ -181,6 +182,11 @@ class CompanyAccountAdmin(UserAdmin):
 @admin.register(Store)
 class StoreAdmin(admin.ModelAdmin):
     list_display = ("id", "store_name", "branch_name")
+    
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == "genre":
+            kwargs["widget"] = forms.Select(choices=GENRE_CHOICES)
+        return super().formfield_for_dbfield(db_field, **kwargs)
 
 
 @admin.register(Review)
