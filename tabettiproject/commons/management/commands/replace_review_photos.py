@@ -8,14 +8,14 @@ from commons.models import ReviewPhoto
 
 
 class Command(BaseCommand):
-    help = "ReviewPhoto の画像を、用意した画像プールで一括置換する（DBは触らない）"
+    help = "ReviewPhoto(image_path) の実ファイルを、DBが指す review/photos 配下に一括置換（DBは触らない）"
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--pool",
             type=str,
             default="media/_pool/review",
-            help="口コミ画像プールのパス（プロジェクト直下からの相対パス）例: media/_pool/review",
+            help="置換用画像プール（プロジェクト直下からの相対パス）例: media/_pool/review",
         )
         parser.add_argument(
             "--rotate",
@@ -27,6 +27,7 @@ class Command(BaseCommand):
         if not settings.MEDIA_ROOT:
             raise CommandError("MEDIA_ROOT が設定されていません")
 
+        # プール読み込み
         pool_dir = os.path.join(settings.BASE_DIR, options["pool"])
         if not os.path.isdir(pool_dir):
             raise CommandError(f"プールフォルダが存在しません: {pool_dir}")
@@ -44,23 +45,29 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("ReviewPhoto が 0 件です"))
             return
 
+        # ★DBが指している場所に合わせる（ここがポイント）
+        # 例：review/photos/review_4859_1.png
+        dst_root = os.path.join(settings.MEDIA_ROOT, "review", "photos")
+        os.makedirs(dst_root, exist_ok=True)
+
         count = 0
         idx = 0
+        skipped = 0
 
         for rp in qs.iterator():
             if not rp.image_path:
+                skipped += 1
                 continue
 
-            # ImageField の実ファイル
-            dst_path = rp.image_path.path
+            # DBの name を基準に「ファイル名」を維持して上書き
+            filename = os.path.basename(rp.image_path.name)  # review_4859_1.png
+            dst_path = os.path.join(dst_root, filename)
 
             if options["rotate"]:
                 src_path = pool_files[idx % len(pool_files)]
                 idx += 1
             else:
                 src_path = random.choice(pool_files)
-
-            os.makedirs(os.path.dirname(dst_path), exist_ok=True)
 
             with open(src_path, "rb") as src, open(dst_path, "wb") as dst:
                 dst.write(src.read())
@@ -69,6 +76,6 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"完了: 口コミ写真 {count} 件を置換しました（プール {len(pool_files)} 枚）"
+                f"完了: review/photos に {count} 件 置換しました（skip={skipped}, pool={len(pool_files)}）"
             )
         )
