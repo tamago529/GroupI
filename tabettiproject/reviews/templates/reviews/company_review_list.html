@@ -181,20 +181,15 @@
     <h1 class="page-title">口コミ閲覧（管理）</h1>
 
     <!-- フィルタエリア -->
-    <div class="filter-section">
-        <label class="filter-label">
-            {# ★チェック状態はサーバから渡された only_reported で制御 #}
-            <input
-                type="checkbox"
-                name="reported"
-                value="1"
-                id="reportedFilter"
-                onchange="toggleFilter()"
-                {% if only_reported %}checked{% endif %}
-            >
-            <span>通報済みのみ表示</span>
-        </label>
-    </div>
+   <form method="get" id="filter-form">
+    <label class="filter-label">
+        <!-- 🌟 onchange を追加して、チェックしたら即座に送信するようにします -->
+        <input type="checkbox" name="reported" value="1" id="reportedFilter" 
+               onchange="this.form.submit()"
+               {% if only_reported %}checked{% endif %}>
+        <span>通報済みのみ表示</span>
+    </label>
+</form>
 
     <!-- 口コミ一覧 -->
     <div class="review-list">
@@ -222,9 +217,11 @@
 
                 <!-- ✅ 削除ボタン（各カード右下） -->
                 <div class="review-actions">
-                    <a class="btn-delete"
-                       href="{% url 'commons:review_delete_confirm' review.pk %}?next={{ request.get_full_path|urlencode }}">
-                        削除
+                    <a href="{% url 'commons:company_common_confirm' %}?confirm_message=この口コミを完全に削除しますか？&next_url={% url 'reviews:review_delete_execute' review.pk %}" 
+                    
+                         class="btn-delete" 
+       style="border:1px solid #d9534f; color:#d9534f; padding:5px 15px; border-radius:5px; text-decoration:none;">
+        削除
                     </a>
                 </div>
             </div>
