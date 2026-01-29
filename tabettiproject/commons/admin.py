@@ -179,14 +179,82 @@ class CompanyAccountAdmin(UserAdmin):
 # ==========================================================
 # 3. 通常モデルの登録（変更なし）
 # ==========================================================
+import re
+from django.contrib import admin
+from .models import Store, Area
+
 @admin.register(Store)
 class StoreAdmin(admin.ModelAdmin):
-    list_display = ("id", "store_name", "branch_name")
-    
+    list_display = ("id", "store_name", "branch_name", "area", "address","genre","scene")
+    list_filter = ("area","scene")
+    search_fields = ("store_name", "branch_name", "address")
+    actions = ["sync_area_from_address_prefecture"]
+
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == "genre":
             kwargs["widget"] = forms.Select(choices=GENRE_CHOICES)
         return super().formfield_for_dbfield(db_field, **kwargs)
+
+    def _extract_pref_from_address(self, address: str, areas: list[Area]) -> Area | None:
+        """
+        住所から都道府県を推定して Area を返す（できるだけ誤爆しないように先頭優先）
+        """
+        addr = (address or "").strip()
+        if not addr:
+            return None
+
+        # まず「住所の先頭」一致（いちばん安全）
+        # 例: "東京都渋谷区..." / "大阪府..." / "沖縄県..."
+        for a in areas:
+            name = (a.area_name or "").strip()
+            if name and addr.startswith(name):
+                return a
+
+        # 住所が "東京..." のように「都/府/県」が抜けるケース吸収（稀だけど一応）
+        # Area名から末尾の 都道府県 を外した短縮名でも先頭一致を試す
+        for a in areas:
+            name = (a.area_name or "").strip()
+            short = re.sub(r"(都|道|府|県)$", "", name)
+            if short and addr.startswith(short):
+                return a
+
+        # 最後に「含まれる」一致（ビル名等で誤爆し得るので最後）
+        for a in areas:
+            name = (a.area_name or "").strip()
+            if name and name in addr:
+                return a
+
+        return None
+
+    @admin.action(description="住所から都道府県(Area)を自動設定（先頭一致優先）")
+    def sync_area_from_address_prefecture(self, request, queryset):
+        areas = list(Area.objects.all())
+        updated = 0
+        skipped = 0
+
+        for store in queryset:
+            guessed = self._extract_pref_from_address(store.address, areas)
+            if not guessed:
+                skipped += 1
+                continue
+
+            if store.area_id != guessed.id:
+                store.area = guessed
+                store.save(update_fields=["area"])
+                updated += 1
+            else:
+                skipped += 1
+
+        self.message_user(request, f"更新: {updated}件 / スキップ: {skipped}件")
+
+    def save_model(self, request, obj, form, change):
+        # adminで住所を編集したときも自動補正（推定できた場合だけ）
+        areas = list(Area.objects.all())
+        guessed = self._extract_pref_from_address(getattr(obj, "address", ""), areas)
+        if guessed:
+            obj.area = guessed
+        super().save_model(request, obj, form, change)
+
 
 
 @admin.register(Review)

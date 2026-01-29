@@ -718,6 +718,15 @@ class company_review_listView(TemplateView):
         context["reported_review_ids"] = reported_review_ids
         context["only_reported"] = only_reported
         return context
+    
+def review_delete_execute(request, pk):
+    # ① 口コミを削除
+    review = get_object_or_404(Review, pk=pk)
+    review.delete()
+    
+    # ② 完了画面へリダイレクト
+    msg = "口コミの削除"
+    return redirect(reverse('commons:company_common_complete') + f"?msg={urllib.parse.quote(msg)}")
 
 
 class customer_report_input(LoginRequiredMixin, View):
