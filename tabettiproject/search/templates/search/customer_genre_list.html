@@ -1,4 +1,5 @@
 {% extends "customer_base.html" %}
+{% load static %}
 
 {% block title %}ジャンル一覧{% endblock %}
 
@@ -66,9 +67,10 @@
     width: 60px;
     height: 60px;
     object-fit: cover;
-    /* これにより画像が歪まずに収まります */
     border: 1px solid #ddd;
     margin-right: 12px;
+    border-radius: 6px;
+    background: #f2f2f2;
   }
 
   .genre-name {
@@ -86,14 +88,8 @@
   }
 
   @media (max-width: 768px) {
-    .genre-group {
-      flex-direction: column;
-    }
-
-    .sub-categories {
-      grid-template-columns: 1fr;
-      margin-top: 15px;
-    }
+    .genre-group { flex-direction: column; }
+    .sub-categories { grid-template-columns: 1fr; margin-top: 15px; }
   }
 </style>
 
@@ -108,8 +104,15 @@
 
     <div class="sub-categories">
       {% for item in group.items %}
-      <a href="{% url 'search:customer_search_list' %}?keyword={{ item.name }}" class="genre-link">
-        <img src="/static/images/{{ item.image }}" alt="{{ item.name }}" class="genre-img" width="60" height="60">
+      <a href="{% url 'search:customer_search_list' %}?keyword={{ item.name|urlencode }}" class="genre-link">
+        <img
+          src="{% static 'images/' %}{{ item.image }}"
+          alt="{{ item.name }}"
+          class="genre-img"
+          width="60"
+          height="60"
+          onerror="this.onerror=null; this.src='{% static 'images/noimage.jpg' %}';"
+        >
         <div class="genre-info">
           <span class="genre-name">{{ item.name }}</span>
           <span class="genre-tags">{{ item.tags }}</span>
