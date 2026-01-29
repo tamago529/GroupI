@@ -184,8 +184,8 @@ from .models import Store, Area
 
 @admin.register(Store)
 class StoreAdmin(admin.ModelAdmin):
-    list_display = ("id", "store_name", "branch_name", "area", "address")
-    list_filter = ("area",)
+    list_display = ("id", "store_name", "branch_name", "area", "address","genre","scene")
+    list_filter = ("area","scene")
     search_fields = ("store_name", "branch_name", "address")
     actions = ["sync_area_from_address_prefecture"]
 
