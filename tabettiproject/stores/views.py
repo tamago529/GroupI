@@ -8,7 +8,7 @@ from datetime import date, datetime, time, timedelta
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db import models
-from django.db.models import Q, Avg, Count
+from django.db.models import Q, Avg, Count, Sum, F
 from django.http import HttpRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -232,15 +232,29 @@ def build_star_states(avg_rating: float) -> list[str]:
     return (["full"] * full) + (["half"] * half) + (["empty"] * empty)
 
 
+
+
 def _get_store_rating_context(store: Store) -> dict[str, object]:
     """
     Reviewから毎回集計してテンプレ用の値を返す
     """
     agg = Review.objects.filter(store=store).aggregate(
+        weighted_sum=Sum(F("score") * F("reviewer__trust_score")),
+        weight_total=Sum("reviewer__trust_score"),
         avg=Avg("score"),
         cnt=Count("id"),
     )
-    avg_rating = float(agg["avg"] or 0.0)
+
+    # 加重平均を計算（重み合計が0の場合は単純平均、それもなければ0）
+    if agg["weight_total"]:
+        avg_rating = float(agg["weighted_sum"]) / float(agg["weight_total"])
+    else:
+        avg_rating = float(agg["avg"] or 0.0)
+
+    # 5.0を超えないようにキャップ（念のため）
+    if avg_rating > 5.0:
+        avg_rating = 5.0
+    
     review_count = int(agg["cnt"] or 0)
     return {
         "avg_rating": avg_rating,

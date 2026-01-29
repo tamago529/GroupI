@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ mode_label }}完了 | 食べログ管理</title>
+    {# ステータスによってブラウザのタイトルも変更 #}
+    <title>{% if status == 'error' %}エラー{% else %}{{ mode_label }}完了{% endif %} | 食べログ管理</title>
     <style>
         :root {
             --tabelog-orange: #ff9900;
             --success: #28a745;
             --danger: #e02020;
             --bg-gray: #f8f9fa;
-            --theme-color: #ff9900; /* デフォルト値 */
+            /* 基本テーマカラーは後述のインラインスタイルで動的に上書きします */
+            --theme-color: var(--tabelog-orange); 
         }
 
         body {
@@ -59,26 +61,48 @@
             text-decoration: none;
             border-radius: 50px;
             font-weight: bold;
+            transition: opacity 0.3s;
         }
+        .btn-home:hover { opacity: 0.8; }
     </style>
 </head>
 
-<body style="--theme-color: {% if action_type == 'delete' %}#e02020{% elif action_type == 'update' %}#28a745{% else %}#ff9900{% endif %};">
+{# ステータスが error の場合は赤、それ以外は既存の action_type ロジックを適用 #}
+<body style="--theme-color: {% if status == 'error' %}var(--danger){% elif action_type == 'delete' %}var(--danger){% elif action_type == 'update' %}var(--success){% else %}var(--tabelog-orange){% endif %};">
 
     <div class="complete-card">
         <div class="status-icon">
-            {% if action_type == 'delete' %}🗑️{% else %}✓{% endif %}
+            {% if status == 'error' %}
+                ⚠️ {# エラー時のアイコン #}
+            {% elif action_type == 'delete' %}
+                🗑️
+            {% else %}
+                ✓
+            {% endif %}
         </div>
 
-        <h1 class="title">{{ mode_label }}完了</h1>
+        <h1 class="title">
+            {% if status == 'error' %}
+                処理に失敗しました
+            {% else %}
+                {{ mode_label }}完了
+            {% endif %}
+        </h1>
 
         <p class="message">
             {{ msg|safe }}
         </p>
 
-        <a href="{% url 'accounts:customer_top' %}" class="btn-home">
-            TOPへ戻る
-        </a>
+        {% if status == 'error' %}
+            {# エラー時は前の画面（確認画面）に戻れるようにする #}
+            <a href="javascript:history.back()" class="btn-home">
+                内容を修正する
+            </a>
+        {% else %}
+            <a href="{% url 'accounts:customer_top' %}" class="btn-home">
+                TOPへ戻る
+            </a>
+        {% endif %}
     </div>
 
 </body>

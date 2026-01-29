@@ -9,14 +9,15 @@ from django.contrib.auth import login
 from commons.models import Review
 from commons.models import CustomerAccount, Gender, AccountType
 
-# 1. 【重要】NameErrorを防ぐため、先に完了画面のクラスを定義します
+# 1. 完了画面のクラス：成否ステータスを受け取れるように拡張
 class customer_common_completeView(TemplateView):
     template_name = "commons/customer_common_complete.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # URLパラメータからメッセージを取得して画面に渡す
+        # URLパラメータからメッセージとステータス（success/error）を取得
         context['msg'] = self.request.GET.get('msg', '完了しました。')
+        context['status'] = self.request.GET.get('status', 'success')
         return context
 
 # 2. 確認と保存を行うメインのView
@@ -52,6 +53,7 @@ class customer_common_confirmView(View):
             
             if key == 'gender' and value:
                 try:
+                    from .models import Gender # モデル構成に合わせて適宜変更してください
                     gender_obj = Gender.objects.get(id=value)
                     display_val = gender_obj.gender
                 except: pass
@@ -70,18 +72,16 @@ class customer_common_confirmView(View):
         return render(request, "commons/customer_common_confirm.html", context)
 
     def handle_final_save(self, request):
-        """DBの必須制約（birth_date, age_group等）をforms.pyの仕様に合わせて保存します"""
+        """DB保存の実行と成否判定"""
         p = request.POST
+        status = 'success'
+        
         try:
-            # 顧客タイプの取得（forms.pyの仕様：'顧客'という文字列でマスタ検索）
-            try:
-                acc_type = AccountType.objects.get(account_type="顧客")
-            except AccountType.DoesNotExist:
-                # マスタにない場合は作成、またはエラーにする
-                acc_type, _ = AccountType.objects.get_or_create(account_type="顧客")
+            # 顧客タイプの取得
+            from .models import AccountType, CustomerAccount # 適宜インポート
+            acc_type, _ = AccountType.objects.get_or_create(account_type="顧客")
 
-            # 【最終解決】必須項目をすべて含めてユーザー作成
-            # フォームで入力された username を尊重するように修正
+            # ユーザー作成の実行
             new_user = CustomerAccount.objects.create_user(
                 username=p.get('username'), 
                 email=p.get('email'),
@@ -92,21 +92,24 @@ class customer_common_confirmView(View):
                 phone_number=p.get('phone_number', ''),
                 birth_date=p.get('birth_date') if p.get('birth_date') else None,
                 gender_id=p.get('gender') if p.get('gender') else None,
-                age_group_id=p.get('age_group') if p.get('age_group') else None, # 年代必須エラー対策
+                age_group_id=p.get('age_group') if p.get('age_group') else None,
                 account_type=acc_type
             )
             
-            # sub_emailの補完（こちらは email と同じで維持）
             new_user.sub_email = p.get('email')
             new_user.save()
             
+            # ログイン処理
             login(request, new_user)
             msg = "会員登録が完了しました！"
 
         except Exception as e:
-            msg = f"保存失敗（モデルの項目を確認してください）: {str(e)}"
+            # 保存失敗時の処理
+            status = 'error'
+            msg = f"保存ができませんでした。恐れ入りますが、最初からやり直してください。（エラー内容: {str(e)}）"
 
-        params = urlencode({'msg': msg})
+        # 成否ステータスをパラメータに含めてリダイレクト
+        params = urlencode({'msg': msg, 'status': status})
         return redirect(f"{reverse('commons:customer_common_complete')}?{params}")
 
 class errorView(TemplateView):

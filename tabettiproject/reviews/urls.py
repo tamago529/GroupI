@@ -74,4 +74,6 @@ urlpatterns = [
       path('review_delete_execute/<int:pk>/', 
            review_delete_execute, 
            name='review_delete_execute'),
+
+     path('review/like/<int:pk>/', toggle_review_like, name='toggle_review_like'),
 ]

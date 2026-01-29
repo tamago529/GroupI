@@ -5,6 +5,7 @@ from __future__ import annotations
 import urllib.parse
 from datetime import date, time
 
+from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Avg, Max, Count
@@ -801,3 +802,28 @@ class customer_common_completeView(View):
     def get(self, request, *args, **kwargs):
         msg = request.GET.get("msg", "完了しました。")
         return render(request, self.template_name, {"msg": msg})
+
+def toggle_review_like(request, pk):
+    # ログインしていない場合は403エラーを返す
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'login_required'}, status=403)
+
+    review = get_object_or_404(Review, pk=pk)
+    user = request.user
+
+    # 🌟 すでに「いいね」リストの中に自分がいるか判定
+    if user in review.liked_users.all():
+        review.liked_users.remove(user) # リストから削除
+        liked = False
+    else:
+        review.liked_users.add(user) # リストに追加
+        liked = True
+
+    # 🌟 数のカウントを更新して保存
+    review.like_count = review.liked_users.count()
+    review.save()
+
+    return JsonResponse({
+        'liked': liked,
+        'total_likes': review.like_count
+    })

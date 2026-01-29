@@ -245,7 +245,9 @@ def customer_search_listView(request):
             empty = 0
 
         s.star_states = (["full"] * full) + (["half"] * half) + (["empty"] * empty)
-        s.display_rating = rounded
+
+        # 表示用（テンプレの数値表示に使うなら）
+        s.display_rating = rating
 
         if s.has_account:
             opened = open_map.get(s.id, set())
