@@ -174,6 +174,7 @@ class CustomerAccount(Account):
     review_count = models.IntegerField(verbose_name="口コミ数", default=0)
     total_likes = models.IntegerField(verbose_name="総いいね数", default=0)
     standard_score = models.IntegerField(verbose_name="標準点", default=0)
+    trust_score = models.FloatField(verbose_name="信頼度スコア", default=50.0)
     inquiry_log = models.TextField(verbose_name="問い合わせ内容", blank=True, default="")
     icon_image = models.ImageField(
         upload_to="customer/icon/",
@@ -197,6 +198,64 @@ class CustomerAccount(Account):
 
     def __str__(self):
         return self.nickname
+
+    def calculate_trust_score(self):
+        """
+        ユーザーの信頼度スコアを計算 (0-100点)
+        
+        計算要素:
+        - アカウント年齢 (0-25点)
+        - レビュー数 (0-25点)
+        - レビューの質 (0-30点)
+        - レビューの一貫性 (0-20点)
+        """
+        from datetime import datetime
+        from django.db.models import Avg, StdDev
+        
+        score = 0.0
+        
+        # 1. アカウント年齢スコア (0-25点)
+        if self.date_joined:
+            account_age_days = (datetime.now(self.date_joined.tzinfo) - self.date_joined).days
+            # 365日以上で満点、線形に増加
+            age_score = min(25.0, (account_age_days / 365.0) * 25.0)
+            score += age_score
+        
+        # 2. レビュー数スコア (0-25点)
+        # 50件以上で満点、線形に増加
+        review_score = min(25.0, (self.review_count / 50.0) * 25.0)
+        score += review_score
+        
+        # 3. レビューの質スコア (0-30点)
+        if self.review_count > 0:
+            # 平均いいね数を計算
+            avg_likes = self.total_likes / self.review_count
+            # 平均10いいね以上で満点、線形に増加
+            quality_score = min(30.0, (avg_likes / 10.0) * 30.0)
+            score += quality_score
+        
+        # 4. レビューの一貫性スコア (0-20点)
+        reviews = self.review_set.all()
+        if reviews.count() >= 3:
+            # 評価点数の標準偏差を計算
+            stats = reviews.aggregate(std_dev=StdDev('score'))
+            std_dev = stats['std_dev'] or 0
+            
+            # 標準偏差が小さいほど一貫性が高い
+            # 標準偏差0で満点、2.0以上で0点
+            consistency_score = max(0.0, 20.0 - (std_dev / 2.0) * 20.0)
+            score += consistency_score
+        elif reviews.count() > 0:
+            # レビュー数が少ない場合は中間点
+            score += 10.0
+        
+        return round(score, 2)
+
+    def update_trust_score(self):
+        """信頼度スコアを計算して保存"""
+        self.trust_score = self.calculate_trust_score()
+        self.save(update_fields=['trust_score'])
+
 
 
 class Store(models.Model):

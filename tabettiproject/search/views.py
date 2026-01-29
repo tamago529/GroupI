@@ -114,6 +114,11 @@ def customer_search_listView(request):
         .select_related("area", "scene")
         .annotate(
             has_account=models.Count("storeaccount", distinct=True),
+            # 信頼度による加重平均評価
+            weighted_avg_rating=models.Sum(
+                models.F("review__score") * models.F("review__reviewer__trust_score")
+            ) / models.Sum(models.F("review__reviewer__trust_score")),
+            # 通常の平均評価（比較用）
             avg_rating=models.Avg("review__score"),
             review_count=models.Count("review", distinct=True),
         )
@@ -122,8 +127,8 @@ def customer_search_listView(request):
     # ソート順
     sort_key = request.GET.get("sort")
     if sort_key == "rating":
-        # 評価が高い順（同じ評価ならID順）
-        store_qs = store_qs.order_by("-avg_rating", "id")
+        # 加重平均評価が高い順（同じ評価ならID順）
+        store_qs = store_qs.order_by("-weighted_avg_rating", "id")
     elif sort_key == "reviews":
         # 口コミ数が多い順
         store_qs = store_qs.order_by("-review_count", "id")
@@ -217,7 +222,8 @@ def customer_search_listView(request):
         s.has_account = bool(getattr(s, "has_account", 0) > 0)
 
         # ---- 星（0.5刻みに切り捨て → 2.5〜2.9 は 2.5） ----
-        rating = float(s.avg_rating or 0.0)
+        # 加重平均評価を優先、なければ通常の平均評価
+        rating = float(s.weighted_avg_rating or s.avg_rating or 0.0)
         if rating < 0:
             rating = 0.0
         if rating > 5:
