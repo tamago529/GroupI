@@ -9,7 +9,7 @@ from django.views.generic import ListView, CreateView
 from django.views.generic.base import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
-from commons.models import StoreAccount, Account
+from commons.models import StoreAccount, Account, Scene
 from .forms import CustomerLoginForm, CustomerRegisterForm, CustomerPasswordResetForm
 from django.contrib.auth.views import (
     PasswordResetView, PasswordResetDoneView,
@@ -303,3 +303,23 @@ class store_account_staff_inputView(TemplateView):
 
 class customer_topView(TemplateView):
     template_name = "accounts/customer_top.html"
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        SCENE_IMAGE_MAP = {
+            "お一人様": "images/scene_solo.jpg",
+            "家族・こどもと": "images/scene_family.jpg",
+            "接待": "images/scene_business.jpg",
+            "デート": "images/scene_date.jpg",
+            "女子会": "images/scene_girls.jpg",
+            "合コン": "images/scene_gokon.jpg",
+        }
+
+        scenes = list(Scene.objects.all().order_by("id"))
+        for s in scenes:
+            s.image_static = SCENE_IMAGE_MAP.get(s.scene_name, "images/scene_default.jpg")
+
+        context["scenes"] = scenes
+        return context

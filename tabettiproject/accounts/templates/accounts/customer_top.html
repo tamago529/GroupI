@@ -213,6 +213,46 @@
   .genre-list-btn:focus-visible {
     outline: none;
     text-decoration: underline;
+  } 
+
+  /* ===== 利用シーン ===== */
+  .scenes {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    flex-wrap: nowrap;          /* ✅ 折り返さない＝横一列 */
+    overflow-x: auto;           /* ✅ 画面に収まらなければ横スクロール */
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;        /* スクロールバーとの干渉軽減 */
+  }
+
+  .scene-card {
+    flex: 0 0 auto;             /* ✅ 均等伸縮させず固定 */
+    width: 120px;               /* ✅ 正方形サイズ（好みで調整OK） */
+    text-decoration: none;
+    color: inherit;
+    transition: opacity 0.2s;
+    text-align: center;
+  }
+
+  .scene-card:hover { opacity: 0.85; }
+
+  .scene-card img {
+    width: 120px;
+    height: 120px;              /* ✅ 正方形 */
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
+    background: #f2f2f2;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  .scene-card span {
+    display: block;
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;        /* ✅ 2行にしない */
   }
 </style>
 {% endblock %}
@@ -295,6 +335,21 @@
       </a>
     </div>
   </section>
+
+    <!-- 利用シーン -->
+  <section class="section">
+    <div class="section-title">利用シーンから探す</div>
+
+    <div class="scenes">
+      {% for s in scenes %}
+        <a href="{% url 'search:customer_search_list' %}?scene={{ s.id }}" class="scene-card">
+          <img src="{% static s.image_static %}" alt="{{ s.scene_name }}">
+          <span>{{ s.scene_name }}</span>
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+
 
   <!-- ランキング -->
   <section class="section">

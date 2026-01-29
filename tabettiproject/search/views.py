@@ -99,6 +99,9 @@ def customer_search_listView(request):
     keyword = (request.GET.get("keyword") or "").strip()
     search_time_str = (request.GET.get("time") or "").strip()
 
+    # ★追加：利用シーン
+    scene_id_str = (request.GET.get("scene") or "").strip()
+
     # カレンダー基準日
     date_str = (request.GET.get("date") or "").strip()
     try:
@@ -124,17 +127,16 @@ def customer_search_listView(request):
         )
     )
 
-    # ソート順
+    # ---------- ソート順 ----------
     sort_key = request.GET.get("sort")
     if sort_key == "rating":
-        # 加重平均評価が高い順（同じ評価ならID順）
         store_qs = store_qs.order_by("-weighted_avg_rating", "id")
     elif sort_key == "reviews":
-        # 口コミ数が多い順
         store_qs = store_qs.order_by("-review_count", "id")
     else:
         store_qs = store_qs.order_by("id")
 
+    # ---------- 絞り込み ----------
     if area_name:
         store_qs = store_qs.filter(area__area_name__icontains=area_name)
 
@@ -144,6 +146,14 @@ def customer_search_listView(request):
             Q(genre__icontains=keyword) |
             Q(address__icontains=keyword)
         )
+
+    # ★追加：利用シーン（store_qs 定義の「後」に必ず置く）
+    if scene_id_str:
+        try:
+            scene_id = int(scene_id_str)
+            store_qs = store_qs.filter(scene_id=scene_id)
+        except ValueError:
+            pass
 
     # ---------- 時間検索（日跨ぎ対応） ----------
     if search_time_str:
@@ -218,18 +228,15 @@ def customer_search_listView(request):
     for s in stores:
         s.thumb_path = thumb_map.get(s.id)
 
-        # annotate の has_account は数値 → bool化
         s.has_account = bool(getattr(s, "has_account", 0) > 0)
 
-        # ---- 星（0.5刻みに切り捨て → 2.5〜2.9 は 2.5） ----
-        # 加重平均評価を優先、なければ通常の平均評価
         rating = float(s.weighted_avg_rating or s.avg_rating or 0.0)
         if rating < 0:
             rating = 0.0
         if rating > 5:
             rating = 5.0
 
-        rounded = (int(rating * 2)) / 2.0   # ★0.5刻みで切り捨て
+        rounded = (int(rating * 2)) / 2.0
 
         full = int(rounded)
         half = 1 if (rounded - full) >= 0.5 else 0
@@ -238,11 +245,8 @@ def customer_search_listView(request):
             empty = 0
 
         s.star_states = (["full"] * full) + (["half"] * half) + (["empty"] * empty)
-
-        # 表示用（テンプレの数値表示に使うなら）
         s.display_rating = rounded
 
-        # ---- 12日分カレンダー（紐づき店舗のみ） ----
         if s.has_account:
             opened = open_map.get(s.id, set())
             s.calendar_12 = [
@@ -260,7 +264,6 @@ def customer_search_listView(request):
         else:
             s.calendar_12 = None
 
-    # 省略表示用のページ範囲（前後3ページ、端2ページ）
     page_range = paginator.get_elided_page_range(
         number=stores.number,
         on_each_side=3,
@@ -272,14 +275,14 @@ def customer_search_listView(request):
         "page_range": page_range,
         "area": area_name,
         "keyword": keyword,
-        "sort": sort_key,          # ★ページング引き継ぎ用
-        "time": search_time_str,   # ★ページング引き継ぎ
-        "date": date_str,          # ★ページング引き継ぎ
+        "scene": scene_id_str,   
+        "sort": sort_key,
+        "time": search_time_str,
+        "date": date_str,
         "MEDIA_URL": settings.MEDIA_URL,
         "base_date": base_date,
     }
     return render(request, "search/customer_search_list.html", context)
-
 
 # =====================================================
 # ユーザー検索

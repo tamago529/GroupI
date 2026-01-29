@@ -43,7 +43,7 @@ class AccountType(models.Model):
 
 
 class Scene(models.Model):
-    scene_name = models.CharField(max_length=100, verbose_name="シーン名")
+    scene_name = models.CharField(max_length=100, unique=True, verbose_name="シーン名")
 
     class Meta:
         db_table = "scene"
