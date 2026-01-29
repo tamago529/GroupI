@@ -336,8 +336,14 @@ class Review(models.Model):
     score = models.IntegerField(verbose_name="点数")
     review_text = models.TextField(verbose_name="レビュー")
     like_count = models.IntegerField(verbose_name="いいね数", default=0)
+    liked_users = models.ManyToManyField(
+        "Account", 
+        related_name="liked_reviews", 
+        blank=True, 
+        verbose_name="いいねしたユーザー"
+    )
     posted_at = models.DateTimeField(auto_now_add=True, verbose_name="投稿日時")
-
+    
     class Meta:
         db_table = "reviews"
         verbose_name = "口コミ"

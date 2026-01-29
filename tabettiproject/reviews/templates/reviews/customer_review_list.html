@@ -111,7 +111,7 @@
 }
 
 /* ===============================
-   ★ 口コミ写真（追加）
+   ★ 口コミ写真
 ================================ */
 .review-photos{
   display:flex;
@@ -138,17 +138,49 @@
   transform:scale(1.03);
 }
 
-/* 写真が0枚のときの表示（任意） */
 .review-photos-empty{
   margin-top:10px;
   font-size:12px;
   color:#999;
 }
 
-/* ---------- 通報 ---------- */
-.report-wrap{
-  text-align:right;
-  margin-top:10px;
+/* ===============================
+   🌟 いいね！ ＆ 通報エリア（追加）
+================================ */
+.review-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px dotted #eee;
+}
+
+/* いいね！ボタンのスタイル */
+.btn-like {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.2s;
+}
+
+.btn-like:hover {
+  background: #f9f9f9;
+  border-color: #999;
+}
+
+.btn-like.is-active {
+  color: #e91e63;
+  border-color: #e91e63;
+  background-color: #fff5f8;
 }
 
 .report-link{
@@ -219,11 +251,24 @@
           <div class="review-photos-empty">写真はありません</div>
         {% endif %}
 
-        <div class="report-wrap">
-          <a href="{% url 'reviews:customer_report_input' %}?review_id={{ review.pk }}"
-             class="report-link">
-            🚩 この口コミを通報する
-          </a>
+        <!-- 🌟 追記：アクションエリア（いいね & 通報） -->
+        <div class="review-footer">
+          <!-- いいね！ボタン -->
+          <!-- 自分がいいね済みなら is-active クラスを付与します -->
+          <button type="button" 
+                  class="btn-like {% if user in review.liked_users.all %}is-active{% endif %}" 
+                  onclick="toggleLike(this, {{ review.pk }})">
+            <span style="font-size: 16px;">♥</span>
+            いいね！ <span class="like-count">{{ review.like_count }}</span>
+          </button>
+
+          <!-- 通報リンク -->
+          <div class="report-wrap">
+            <a href="{% url 'reviews:customer_report_input' %}?review_id={{ review.pk }}"
+               class="report-link">
+              🚩 この口コミを通報する
+            </a>
+          </div>
         </div>
 
       </article>
@@ -235,4 +280,35 @@
 
   </div>
 </div>
+
+<!-- 🌟 追記：JavaScriptロジック -->
+<script>
+async function toggleLike(button, reviewId) {
+    // urls.py で設定した toggle_review_like のパス
+    const url = `/reviews/review/like/${reviewId}/`;
+    
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        
+        const data = await response.json();
+        
+        if (data.error === 'login_required') {
+            alert("いいねをするにはログインが必要です。");
+            window.location.href = "{% url 'accounts:customer_login' %}";
+            return;
+        }
+
+        // 数値と見た目の更新
+        const countSpan = button.querySelector('.like-count');
+        countSpan.innerText = data.total_likes;
+        button.classList.toggle('is-active', data.liked);
+        
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
+</script>
 {% endblock %}
