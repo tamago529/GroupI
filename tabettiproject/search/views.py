@@ -240,7 +240,7 @@ def customer_search_listView(request):
         s.star_states = (["full"] * full) + (["half"] * half) + (["empty"] * empty)
 
         # 表示用（テンプレの数値表示に使うなら）
-        s.display_rating = rounded
+        s.display_rating = rating
 
         # ---- 12日分カレンダー（紐づき店舗のみ） ----
         if s.has_account:
