@@ -2,12 +2,16 @@
 from __future__ import annotations
 
 import calendar
+import os
+import random
 import urllib.parse
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.files import File
 from django.db import models
 from django.db.models import Q, Avg, Count, Sum, F
 from django.http import HttpRequest, JsonResponse
@@ -129,6 +133,89 @@ def _ensure_month_online_settings(store: Store, year: int, month: int) -> None:
         ],
         ignore_conflicts=True,
     )
+
+
+# ============================================================
+# ★追加：ID209〜390 は「メニューが無ければ」自動生成して画像を割り当て
+# ============================================================
+AUTO_MENU_STORE_ID_MIN = 209
+AUTO_MENU_STORE_ID_MAX = 390
+
+
+def _is_auto_menu_store(store: Store) -> bool:
+    sid = int(getattr(store, "pk", 0) or 0)
+    return AUTO_MENU_STORE_ID_MIN <= sid <= AUTO_MENU_STORE_ID_MAX
+
+
+def _get_pool_files(pool_rel: str) -> list[str]:
+    """
+    pool_rel: BASE_DIR からの相対パス（例: "media/_pool/store/food"）
+    """
+    pool_rel = (pool_rel or "").strip().replace("\\", "/")
+    pool_dir = os.path.join(settings.BASE_DIR, pool_rel)
+    if not os.path.isdir(pool_dir):
+        return []
+    files: list[str] = []
+    for f in os.listdir(pool_dir):
+        p = os.path.join(pool_dir, f)
+        if os.path.isfile(p):
+            files.append(p)
+    return files
+
+
+def _ensure_store_menus(
+    *,
+    store: Store,
+    per_store: int = 6,
+    pool_rel: str = "media/_pool/store/food",
+    rotate: bool = True,
+) -> int:
+    """
+    ID209-390 の店舗は StoreMenu が0件なら自動生成して “メニューがある扱い” にする。
+    画像は pool から割り当てて image_file に保存する。
+
+    return: 作成した件数
+    """
+    if not _is_auto_menu_store(store):
+        return 0
+
+    if StoreMenu.objects.filter(store=store).exists():
+        return 0
+
+    base_names = [
+        "おすすめ盛り合わせ",
+        "季節の前菜",
+        "お刺身盛り",
+        "焼き物",
+        "揚げ物",
+        "〆の一品",
+        "デザート",
+        "ドリンク",
+    ]
+
+    pool_files = _get_pool_files(pool_rel)  # 無ければ画像なしでも作る
+
+    created = 0
+    for i in range(per_store):
+        name = base_names[i % len(base_names)]
+        price = 700 + (i * 150)
+
+        menu = StoreMenu.objects.create(
+            store=store,
+            menu_name=name,
+            price=price,
+            image_path="----",
+        )
+
+        # 画像割り当て（プールがある場合だけ）
+        if pool_files:
+            src = pool_files[i % len(pool_files)] if rotate else random.choice(pool_files)
+            with open(src, "rb") as f:
+                menu.image_file.save(os.path.basename(src), File(f), save=True)
+
+        created += 1
+
+    return created
 
 
 # ============================================================
@@ -452,6 +539,9 @@ class customer_menu_courseView(TemplateView):
 
         store = get_object_or_404(Store, pk=self.kwargs["pk"])
         context["store"] = store
+
+        # ★ID209-390 はメニューが無ければ自動生成して “ある扱い” にする（画像も割り当て）
+        _ensure_store_menus(store=store, per_store=6, pool_rel="media/_pool/store/food", rotate=True)
 
         context["menu_items"] = (
             StoreMenu.objects
