@@ -15,6 +15,7 @@ from django.utils import timezone
 from django.views import View
 from django.views.generic import ListView
 from django.views.generic.base import TemplateView
+from commons.models import Review, ReviewPhoto # ReviewPhotoをインポート
 
 from commons.models import (
     CustomerAccount,
@@ -262,12 +263,23 @@ class customer_review_listView(View):
                 query_string = urllib.parse.urlencode({k: v for k, v in params.items() if v})
                 return redirect(f"{reverse('reviews:customer_review_list')}?{query_string}")
 
-            Review.objects.create(
+            review_obj = Review.objects.create(
                 reviewer=customer,
                 store=store,
                 score=score,
                 review_text=f"【{time_slot}】{title}\n{body}",
             )
+
+            # HTMLの <input name="photos"> から送られてきたファイルリストを取得
+            files = request.FILES.getlist('photos')
+            
+            # 最大5枚まで保存する
+            for f in files[:5]:
+                ReviewPhoto.objects.create(
+                    review=review_obj, # さっき作った口コミと紐付け
+                    image_path=f        # commons/models.pyのフィールド名に合わせる
+                )
+
             messages.success(request, "口コミを投稿しました。")
 
             params = {

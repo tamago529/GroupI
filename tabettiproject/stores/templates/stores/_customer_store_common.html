@@ -451,8 +451,10 @@
 
     <form id="reviewPostForm"
           method="post"
-          action="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}&from_search={{ from_search }}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">
-      {% csrf_token %}
+          action="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}&from_search={{ from_search }}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}"
+          enctype="multipart/form-data"
+          action="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}" >
+          {% csrf_token %}
       <input type="hidden" name="action" value="create_review">
       <input type="hidden" name="store_id" value="{{ store.id }}">
       <input type="hidden" name="time_slot" id="timeSlotInput" value="">
@@ -483,9 +485,16 @@
           <input class="review-text-input" type="text" name="title" maxlength="100" placeholder="例）また行きたい！" required>
         </div>
 
+
         <div class="review-field">
           <label class="review-label">本文</label>
           <textarea class="review-text-area" name="body" placeholder="料理・雰囲気・接客など" required></textarea>
+        </div>
+
+          <div class="review-field">
+          <label class="review-label">写真（最大5枚まで）</label>
+          <input type="file" name="photos" multiple accept="image/*" class="review-file-input">
+          <p style="font-size: 10px; color: #999; margin-top: 5px;">※料理や店舗の写真を複数選択できます。</p>
         </div>
 
         <div class="review-agree">
