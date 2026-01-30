@@ -1,89 +1,149 @@
 import os
 import random
+import shutil
+from uuid import uuid4
 
-from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
+from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 
-from commons.models import StoreImage, ImageStatus
+from commons.models import Store, StoreImage, ImageStatus
+
+
+def _list_files(abs_dir: str) -> list[str]:
+    if not os.path.isdir(abs_dir):
+        return []
+    files = []
+    for f in os.listdir(abs_dir):
+        p = os.path.join(abs_dir, f)
+        if os.path.isfile(p):
+            files.append(p)
+    return sorted(files)
 
 
 class Command(BaseCommand):
-    help = "ImageStatus=外装 の店舗画像だけを、用意した画像プールで一括置換する（DBは触らない）"
+    """
+    外装画像（ImageStatus.status == '外装'）だけを対象に、
+    - 既存外装は image_file をプール画像で置換
+    - 外装が0枚の店舗には最低1枚を新規追加
+    - 既存レコードは削除しない
+    """
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--pool",
             type=str,
-            default="media/_pool/store_exterior",
-            help="外装画像プールのパス（プロジェクト直下からの相対パス）例: media/_pool/store_exterior",
+            default="media/_pool/store/exterior",
+            help="外装プール画像フォルダ（BASE_DIR からの相対パス）",
         )
         parser.add_argument(
             "--rotate",
             action="store_true",
-            help="ランダムではなく均等ローテーションで割り当てる",
+            help="プール画像を均等ローテで使う（指定なしはランダム）",
         )
         parser.add_argument(
-            "--status",
-            type=str,
-            default="外装",
-            help="対象にする ImageStatus.status（デフォルト: 外装）",
+            "--dryrun",
+            action="store_true",
+            help="差し替え/作成はせず、対象件数だけ表示",
+        )
+        parser.add_argument(
+            "--limit",
+            type=int,
+            default=0,
+            help="0=無制限 / 例: 50 のように指定すると修正件数を制限",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **opt):
         if not settings.MEDIA_ROOT:
             raise CommandError("MEDIA_ROOT が設定されていません")
 
-        pool_dir = os.path.join(settings.BASE_DIR, options["pool"])
-
-        if not os.path.isdir(pool_dir):
-            raise CommandError(f"プールフォルダが存在しません: {pool_dir}")
-
-        pool_files = [
-            os.path.join(pool_dir, f)
-            for f in os.listdir(pool_dir)
-            if os.path.isfile(os.path.join(pool_dir, f))
-        ]
-
-        if not pool_files:
-            raise CommandError(f"プールに画像がありません: {pool_dir}")
-
-        status_name = options["status"]
+        pool_dir = os.path.join(settings.BASE_DIR, opt["pool"])
+        pool = _list_files(pool_dir)
+        if not pool:
+            raise CommandError(f"外装プールが空です: {pool_dir}")
 
         try:
-            target_status = ImageStatus.objects.get(status=status_name)
+            st_exterior = ImageStatus.objects.get(status="外装")
         except ImageStatus.DoesNotExist:
-            raise CommandError(f"ImageStatus に '{status_name}' が存在しません")
+            raise CommandError("ImageStatus に '外装' がありません")
 
-        qs = StoreImage.objects.filter(image_status=target_status)
+        # 書き込み先（StoreImage.image_file の upload_to は store/images/）
+        dst_dir = os.path.join(settings.MEDIA_ROOT, "store", "images")
+        os.makedirs(dst_dir, exist_ok=True)
 
-        if not qs.exists():
-            self.stdout.write(self.style.WARNING(f"ImageStatus='{status_name}' の StoreImage が 0 件です"))
+        rotate = bool(opt["rotate"])
+        limit = int(opt["limit"] or 0)
+
+        # 対象件数の見積もり
+        total_stores = Store.objects.count()
+        ext_qs = StoreImage.objects.filter(image_status=st_exterior).only("id", "store_id", "image_file")
+        ext_existing_count = ext_qs.count()
+
+        stores_with_ext = set(ext_qs.values_list("store_id", flat=True).distinct())
+        stores_without_ext_count = Store.objects.exclude(id__in=stores_with_ext).count()
+
+        self.stdout.write(f"総店舗数: {total_stores}")
+        self.stdout.write(f"既存 外装レコード数: {ext_existing_count}")
+        self.stdout.write(f"外装0枚の店舗数（最低1枚追加対象）: {stores_without_ext_count}")
+        if opt["dryrun"]:
+            self.stdout.write("dryrun のため変更しません")
             return
 
-        count = 0
-        idx = 0
+        # プール選択
+        pool_index = 0
 
-        for si in qs.iterator():
-            if not si.image_file:
-                continue
+        def pick() -> str:
+            nonlocal pool_index
+            if rotate:
+                src = pool[pool_index % len(pool)]
+                pool_index += 1
+                return src
+            return random.choice(pool)
 
-            dst_path = si.image_file.path
+        replaced = 0
+        created = 0
 
-            if options["rotate"]:
-                src_path = pool_files[idx % len(pool_files)]
-                idx += 1
-            else:
-                src_path = random.choice(pool_files)
+        with transaction.atomic():
+            # 1) 既存外装を置換（レコードはそのまま、image_file だけ差し替え）
+            for si in ext_qs.order_by("id").iterator():
+                if limit and (replaced + created) >= limit:
+                    break
 
-            os.makedirs(os.path.dirname(dst_path), exist_ok=True)
+                src = pick()
+                ext = os.path.splitext(src)[1].lower() or ".png"
+                new_filename = f"exterior_{si.store_id}_{si.id}_{uuid4().hex}{ext}"
 
-            with open(src_path, "rb") as src, open(dst_path, "wb") as dst:
-                dst.write(src.read())
+                abs_dst = os.path.join(dst_dir, new_filename)
+                shutil.copy2(src, abs_dst)
 
-            count += 1
+                si.image_file.name = f"store/images/{new_filename}"
+                si.save(update_fields=["image_file"])
+                replaced += 1
 
-        self.stdout.write(
-            self.style.SUCCESS(
-                f"完了: ImageStatus='{status_name}' の画像 {count} 件を置換しました（プール {len(pool_files)} 枚）"
-            )
-        )
+            # 2) 外装0枚の店舗に最低1枚追加
+            #    limit がある場合、置換で上限に達してたら追加しない
+            if not limit or (replaced + created) < limit:
+                store_ids_without = Store.objects.exclude(id__in=stores_with_ext).values_list("id", flat=True)
+                for store_id in store_ids_without.iterator():
+                    if limit and (replaced + created) >= limit:
+                        break
+
+                    src = pick()
+                    ext = os.path.splitext(src)[1].lower() or ".png"
+                    new_filename = f"exterior_{store_id}_new_{uuid4().hex}{ext}"
+
+                    abs_dst = os.path.join(dst_dir, new_filename)
+                    shutil.copy2(src, abs_dst)
+
+                    si = StoreImage.objects.create(
+                        store_id=store_id,
+                        image_status=st_exterior,
+                        image_path="",
+                    )
+                    si.image_file.name = f"store/images/{new_filename}"
+                    si.save(update_fields=["image_file"])
+                    created += 1
+
+        self.stdout.write(self.style.SUCCESS(
+            f"完了: 置換={replaced} / 追加(外装0店舗への最低1枚)={created}"
+        ))
