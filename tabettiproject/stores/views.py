@@ -1,3 +1,4 @@
+# stores/views.py
 from __future__ import annotations
 
 import calendar
@@ -41,6 +42,94 @@ from .form import (
     StoreMenuFormSet,
     StoreRegistrationForm,
 )
+
+# ============================================================
+# ★ 追加：ID209〜390は「店舗アカウント無しでも」予約機能を有効化
+# （今後範囲が増えるならここだけ触ればOK）
+# ============================================================
+AUTO_RESERVATION_STORE_ID_MIN = 209
+AUTO_RESERVATION_STORE_ID_MAX = 390
+
+
+def _is_auto_reservation_store(store: Store) -> bool:
+    sid = int(getattr(store, "pk", 0) or 0)
+    return AUTO_RESERVATION_STORE_ID_MIN <= sid <= AUTO_RESERVATION_STORE_ID_MAX
+
+
+def _default_available_seats(store: Store) -> int:
+    # seats が 0/None の場合は “無制限相当” として大きめにする
+    seats = int(getattr(store, "seats", 0) or 0)
+    return seats if seats > 0 else 999
+
+
+def has_net_reservation(store: Store) -> bool:
+    """
+    ネット予約可能か（店舗アカウントあり or ID209-390）
+    """
+    return StoreAccount.objects.filter(store=store).exists() or _is_auto_reservation_store(store)
+
+
+def _ensure_online_setting(store: Store, target_date: date) -> StoreOnlineReservation | None:
+    """
+    ID209-390の店舗は StoreOnlineReservation が未作成でも
+    予約を使えるように、必要な日だけ自動で作る（既存なら何もしない）
+    """
+    if not _is_auto_reservation_store(store):
+        return None
+
+    obj = StoreOnlineReservation.objects.filter(store=store, date=target_date).first()
+    if obj:
+        return obj
+
+    return StoreOnlineReservation.objects.create(
+        store=store,
+        date=target_date,
+        booking_status=True,
+        available_seats=_default_available_seats(store),
+    )
+
+
+def _ensure_month_online_settings(store: Store, year: int, month: int) -> None:
+    """
+    customer_store_info のカレンダー表示用：
+    ID209-390店舗は、その月の未来日ぶんの StoreOnlineReservation を
+    まとめて自動生成して “open_days が 0件” にならないようにする
+    """
+    if not _is_auto_reservation_store(store):
+        return
+
+    today = timezone.localdate()
+    start = date(year, month, 1)
+    last_day = calendar.monthrange(year, month)[1]
+    end = date(year, month, last_day)
+
+    # 未来日だけ
+    dates = [start + timedelta(days=i) for i in range((end - start).days + 1)]
+    dates = [d for d in dates if d >= today]
+    if not dates:
+        return
+
+    existing = set(
+        StoreOnlineReservation.objects.filter(store=store, date__range=(start, end))
+        .values_list("date", flat=True)
+    )
+    to_create = [d for d in dates if d not in existing]
+    if not to_create:
+        return
+
+    StoreOnlineReservation.objects.bulk_create(
+        [
+            StoreOnlineReservation(
+                store=store,
+                date=d,
+                booking_status=True,
+                available_seats=_default_available_seats(store),
+            )
+            for d in to_create
+        ],
+        ignore_conflicts=True,
+    )
+
 
 # ============================================================
 # 営業時間ヘルパ（Store.open/close 1・2枠）
@@ -232,8 +321,6 @@ def build_star_states(avg_rating: float) -> list[str]:
     return (["full"] * full) + (["half"] * half) + (["empty"] * empty)
 
 
-
-
 def _get_store_rating_context(store: Store) -> dict[str, object]:
     """
     Reviewから毎回集計してテンプレ用の値を返す
@@ -254,7 +341,7 @@ def _get_store_rating_context(store: Store) -> dict[str, object]:
     # 5.0を超えないようにキャップ（念のため）
     if avg_rating > 5.0:
         avg_rating = 5.0
-    
+
     review_count = int(agg["cnt"] or 0)
     return {
         "avg_rating": avg_rating,
@@ -380,8 +467,8 @@ class customer_menu_courseView(TemplateView):
         context["closed_ranges_json"] = _format_intervals_for_js(closed_ranges)
         context["has_business_hours"] = bool(intervals)
 
-        # ★ネット予約対応
-        context["has_account"] = StoreAccount.objects.filter(store=store).exists()
+        # ★ネット予約対応（店舗アカウント or ID209-390）
+        context["has_account"] = has_net_reservation(store)
 
         # ★星評価
         context.update(_get_store_rating_context(store))
@@ -425,8 +512,8 @@ class customer_store_infoView(TemplateView):
         # 店舗画像
         context["store_images"] = StoreImage.objects.filter(store=store).order_by("id")
 
-        # ★ネット予約対応
-        context["has_account"] = StoreAccount.objects.filter(store=store).exists()
+        # ★ネット予約対応（店舗アカウント or ID209-390）
+        context["has_account"] = has_net_reservation(store)
 
         # 表示月（?ym=YYYY-MM）
         ym = self.request.GET.get("ym")
@@ -447,6 +534,9 @@ class customer_store_infoView(TemplateView):
         # ★「来月を見る→」ボタン用
         context["next_ym"] = _get_next_ym(year, month)
 
+        # ★ID209-390なら、その月の予約設定を自動生成（未来日だけ）
+        _ensure_month_online_settings(store, year, month)
+
         start = date(year, month, 1)
         last_day = calendar.monthrange(year, month)[1]
         end = date(year, month, last_day)
@@ -464,32 +554,26 @@ class customer_store_infoView(TemplateView):
         # ★テンプレの「今月0件判定」用（文字列）
         context["open_days"] = [d.isoformat() for d in sorted(open_days_dates)]
 
-        # ★カレンダー表示用（当月：6週×7日=42マス）を追加
-        # --- ここから置き換え ---
+        # ★カレンダー表示用（当月：6週×7日=42マス）
         open_set = set(open_days_dates)
 
-# 月カレンダーの開始日（当月1日の「月曜始まり」の週の先頭）
         first = date(year, month, 1)
-# weekday(): 月0..日6
-        offset = first.weekday()  # 月曜始まりなのでそのまま
+        offset = first.weekday()  # 月曜始まり
         grid_start = first - timedelta(days=offset)
 
         calendar_cells = []
-        for i in range(42):  # 6週ぶん
+        for i in range(42):
             d = grid_start + timedelta(days=i)
             in_month = (d.month == month and d.year == year)
 
-    # 当月以外は無効
             if not in_month:
                 is_open = False
                 is_disabled = True
             else:
-        # 過去日は無効
                 if d < today:
                     is_open = False
                     is_disabled = True
                 else:
-            # 受付日のみ open
                     is_open = (d in open_set)
                     is_disabled = (not is_open)
 
@@ -500,36 +584,35 @@ class customer_store_infoView(TemplateView):
                 "in_month": in_month,
                 "is_open": is_open,
                 "is_disabled": is_disabled,
+                "weekday": d.weekday(),
             })
 
         context["calendar_cells"] = calendar_cells
         context["weekdays_ja"] = ["月", "火", "水", "木", "金", "土", "日"]
 
-# 月送りリンク
-        def _ym(y: int, m: int) -> str:
+        # 月送りリンク
+        def _ym_str(y: int, m: int) -> str:
             return f"{y}-{m:02d}"
 
-# 次月
+        # 次月
         ny, nm = (year + 1, 1) if month == 12 else (year, month + 1)
-        context["cal_next_ym"] = _ym(ny, nm)
+        context["cal_next_ym"] = _ym_str(ny, nm)
 
-# 前月（ただし過去月は出さない＝リンク無効化用）
+        # 前月（ただし過去月は出さない）
         py, pm = (year - 1, 12) if month == 1 else (year, month - 1)
-        prev_ym = _ym(py, pm)
-# 「今月より前」はリンク無しにしたい
+        prev_ym = _ym_str(py, pm)
         is_prev_allowed = (py, pm) >= (today.year, today.month)
         context["cal_prev_ym"] = prev_ym
         context["cal_prev_allowed"] = is_prev_allowed
-# --- ここまで置き換え ---
 
         # ログイン顧客（初期値用）
         customer = _get_customer_from_user(self.request.user)
         context["login_customer"] = customer
 
-        # ★予約モーダル初期値（ここが今回の追加点）
+        # ★予約モーダル初期値
         context["reservator_initial"] = _get_reservator_initial(customer)
 
-        # ★保存判定（共通ヘッダー用）
+        # ★保存判定
         context["is_saved"] = _get_is_saved_for_customer(customer=customer, store=store)
 
         # JS側で使う
@@ -543,7 +626,7 @@ class customer_store_infoView(TemplateView):
         context["closed_ranges_json"] = _format_intervals_for_js(closed_ranges)
         context["has_business_hours"] = bool(intervals)
 
-        # ★星評価（共通ヘッダー用）
+        # ★星評価
         context.update(_get_store_rating_context(store))
 
         # ★検索条件（パンくず用）
@@ -578,6 +661,9 @@ class StoreAvailabilityJsonView(View):
         if (year, month) < (today.year, today.month):
             year, month = today.year, today.month
 
+        # ★ID209-390なら、その月の予約設定を自動生成（未来日だけ）
+        _ensure_month_online_settings(store, year, month)
+
         start = date(year, month, 1)
         last_day = calendar.monthrange(year, month)[1]
         end = date(year, month, last_day)
@@ -599,12 +685,11 @@ class StoreAvailabilityJsonView(View):
 
 
 # -----------------------------
-# ★ 予約：選択可能な時間候補 JSON（UIで使う）
+# ★ 予約：選択可能な時間候補 JSON
 # -----------------------------
 class StoreTimeSlotsJsonView(View):
     """
     GET /stores/time-slots/<store_id>/?date=YYYY-MM-DD&course_minutes=60
-    - 営業時間外 / 中休み跨ぎ / コース終了はみ出し を除外した開始時刻候補を返す
     """
     def get(self, request: HttpRequest, store_id: int):
         store = get_object_or_404(Store, pk=store_id)
@@ -629,8 +714,11 @@ class StoreTimeSlotsJsonView(View):
         if not intervals:
             return JsonResponse({"ok": True, "slots": [], "reason": "営業時間未設定"})
 
-        # 受付日チェック
+        # 受付日チェック（ID209-390は未設定なら自動作成）
         setting = StoreOnlineReservation.objects.filter(store=store, date=target_date).first()
+        if not setting:
+            setting = _ensure_online_setting(store, target_date)
+
         if not setting or not setting.booking_status:
             return JsonResponse({"ok": True, "slots": [], "reason": "この日は受付していません"})
 
@@ -681,7 +769,7 @@ class StoreTimeSlotsJsonView(View):
 
 
 # -----------------------------
-# 予約：作成（Reservator/Reservation を作る）
+# 予約：作成
 # -----------------------------
 class CustomerReservationCreateView(View):
     def post(self, request, store_id):
@@ -709,8 +797,11 @@ class CustomerReservationCreateView(View):
             messages.error(request, "現在時刻より前の時刻は予約できません。")
             return redirect("stores:customer_store_info", pk=store.id)
 
-        # 受付チェック
+        # 受付チェック（ID209-390は未設定なら自動作成）
         setting = StoreOnlineReservation.objects.filter(store=store, date=visit_date).first()
+        if not setting:
+            setting = _ensure_online_setting(store, visit_date)
+
         if not setting or not setting.booking_status:
             messages.error(request, "この日はネット予約を受け付けていません。")
             return redirect("stores:customer_store_info", pk=store.id)
@@ -766,13 +857,17 @@ class CustomerReservationCreateView(View):
             else:
                 changed = False
                 if not reservator.full_name and form.cleaned_data.get("full_name"):
-                    reservator.full_name = form.cleaned_data["full_name"]; changed = True
+                    reservator.full_name = form.cleaned_data["full_name"]
+                    changed = True
                 if not reservator.full_name_kana and form.cleaned_data.get("full_name_kana"):
-                    reservator.full_name_kana = form.cleaned_data["full_name_kana"]; changed = True
+                    reservator.full_name_kana = form.cleaned_data["full_name_kana"]
+                    changed = True
                 if not reservator.email and form.cleaned_data.get("email"):
-                    reservator.email = form.cleaned_data["email"]; changed = True
+                    reservator.email = form.cleaned_data["email"]
+                    changed = True
                 if not reservator.phone_number and form.cleaned_data.get("phone_number"):
-                    reservator.phone_number = form.cleaned_data["phone_number"]; changed = True
+                    reservator.phone_number = form.cleaned_data["phone_number"]
+                    changed = True
                 if changed:
                     reservator.save()
         else:
@@ -814,7 +909,6 @@ class customer_store_new_registerView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # セッションからデータを復元（戻るボタン対策など）
         initial_data = self.request.session.get("store_register_data", {})
         context["form"] = StoreRegistrationForm(initial=initial_data)
         return context
@@ -822,7 +916,6 @@ class customer_store_new_registerView(LoginRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         form = StoreRegistrationForm(request.POST)
         if form.is_valid():
-            # シリアライズ可能な形式でセッションに保存
             data = form.cleaned_data
             serializable_data = {}
             for key, value in data.items():
@@ -832,10 +925,10 @@ class customer_store_new_registerView(LoginRequiredMixin, TemplateView):
                     serializable_data[key] = value.isoformat()
                 else:
                     serializable_data[key] = value
-            
+
             request.session["store_register_data"] = serializable_data
             return redirect("stores:customer_store_new_register_confirm")
-        
+
         return render(request, self.template_name, {"form": form})
 
 
@@ -848,13 +941,12 @@ class customer_store_new_register_confirmView(LoginRequiredMixin, TemplateView):
         if not data:
             return redirect("stores:customer_store_new_register")
 
-        # 表示用にモデルオブジェクトに復元（エリア、シーンのみ）
         display_data = data.copy()
         if "area" in data:
             display_data["area_obj"] = get_object_or_404(Area, pk=data["area"])
         if "scene" in data:
             display_data["scene_obj"] = get_object_or_404(Scene, pk=data["scene"])
-        
+
         context["data"] = display_data
         return context
 
@@ -872,13 +964,12 @@ class customer_store_new_register_confirmView(LoginRequiredMixin, TemplateView):
             store = form.save(commit=False)
             store.creator = _get_customer_from_user(request.user)
             store.save()
-            
-            # セッションクリア
+
             if "store_register_data" in request.session:
                 del request.session["store_register_data"]
-            
+
             return redirect("stores:customer_store_new_register_complete")
-        
+
         messages.error(request, "登録に失敗しました。")
         return redirect("stores:customer_store_new_register")
 
@@ -922,9 +1013,6 @@ class company_store_managementView(TemplateView):
 # store views（店舗側）
 # =========================
 class store_basic_editView(LoginRequiredMixin, UserPassesTestMixin, View):
-    """
-    店舗基本情報 + 店舗画像(FormSet) + メニュー(FormSet)
-    """
     template_name = "stores/store_basic_edit.html"
     login_url = "accounts:store_login"
 
@@ -973,7 +1061,6 @@ class store_basic_editView(LoginRequiredMixin, UserPassesTestMixin, View):
         if form.is_valid() and image_formset.is_valid() and menu_formset.is_valid():
             form.save()
 
-            # 店舗画像
             image_objs = image_formset.save(commit=False)
             for obj in image_objs:
                 if not getattr(obj, "image_path", ""):
@@ -983,7 +1070,6 @@ class store_basic_editView(LoginRequiredMixin, UserPassesTestMixin, View):
             for obj in image_formset.deleted_objects:
                 obj.delete()
 
-            # メニュー
             menu_objs = menu_formset.save(commit=False)
             for obj in menu_objs:
                 if not getattr(obj, "image_path", ""):
@@ -998,7 +1084,6 @@ class store_basic_editView(LoginRequiredMixin, UserPassesTestMixin, View):
 
         messages.error(request, "入力内容にエラーがあります。")
 
-        # デバッグ表示（必要なら残す）
         print("FORM ERRORS:", form.errors)
         print("IMAGE NON_FORM_ERRORS:", image_formset.non_form_errors())
         print("MENU NON_FORM_ERRORS:", menu_formset.non_form_errors())
@@ -1033,8 +1118,7 @@ class store_topView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         # --- アクセス数チャート用データの集計 (過去7日間) ---
         today = timezone.now().date()
         date_list = [today - timedelta(days=i) for i in range(6, -1, -1)]
-        
-        # 日ごとのアクセス数を集計
+
         access_counts = []
         labels = []
         for d in date_list:
@@ -1044,7 +1128,7 @@ class store_topView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             ).count()
             access_counts.append(count)
             labels.append(d.strftime("%Y-%m-%d"))
-        
+
         context["chart_labels"] = labels
         context["chart_data"] = access_counts
         print(f"DEBUG: Store={store.store_name}, Labels={labels}, Data={access_counts}")

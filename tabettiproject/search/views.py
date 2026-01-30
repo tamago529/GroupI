@@ -1,3 +1,4 @@
+# search/views.py
 from __future__ import annotations
 
 from datetime import date, datetime, timedelta
@@ -15,11 +16,80 @@ from commons.models import (
     StoreOnlineReservation,
 )
 
+# ============================================================
+# ★追加：ID209〜390は「店舗アカウント無しでも」ネット予約を有効化
+# （今後範囲が増えるならここだけ触ればOK）
+# ============================================================
+AUTO_RESERVATION_STORE_ID_MIN = 209
+AUTO_RESERVATION_STORE_ID_MAX = 390
+
+
+def _is_auto_reservation_store_id(store_id: int) -> bool:
+    try:
+        sid = int(store_id or 0)
+    except Exception:
+        sid = 0
+    return AUTO_RESERVATION_STORE_ID_MIN <= sid <= AUTO_RESERVATION_STORE_ID_MAX
+
+
+def _default_available_seats(store: Store) -> int:
+    seats = int(getattr(store, "seats", 0) or 0)
+    return seats if seats > 0 else 999
+
+
+def _ensure_online_settings_for_12days(stores_page, date_list: list[date]) -> int:
+    """
+    検索一覧で表示する12日分について、
+    ID209-390 の店は StoreOnlineReservation が無ければ自動で作る（○扱いにする）
+    戻り値: 作成件数
+    """
+    # 対象storeを抽出（ページ内のみ）
+    targets = []
+    for s in stores_page:
+        if _is_auto_reservation_store_id(getattr(s, "id", 0)):
+            targets.append(s)
+
+    if not targets or not date_list:
+        return 0
+
+    store_ids = [s.id for s in targets]
+    start = date_list[0]
+    end = date_list[-1]
+
+    # 既存を取得（該当範囲）
+    existing_pairs = set(
+        StoreOnlineReservation.objects.filter(
+            store_id__in=store_ids,
+            date__range=(start, end),
+        ).values_list("store_id", "date")
+    )
+
+    to_create = []
+    for s in targets:
+        for d in date_list:
+            if (s.id, d) in existing_pairs:
+                continue
+            to_create.append(
+                StoreOnlineReservation(
+                    store=s,
+                    date=d,
+                    booking_status=True,
+                    available_seats=_default_available_seats(s),
+                )
+            )
+
+    if not to_create:
+        return 0
+
+    # UniqueConstraint( store, date ) がある前提なので ignore_conflicts=True で安全に
+    StoreOnlineReservation.objects.bulk_create(to_create, ignore_conflicts=True)
+    return len(to_create)
+
+
 # =====================================================
 # ジャンル一覧（画像つき）
 # =====================================================
 def genre_list(request):
-    # ジャンル名 → 画像ファイル名（static/images/ 配下に置く想定）
     genre_image_map = {
         "日本料理・懐石": "japanese_kaiseki.jpg",
         "寿司・海鮮": "sushi.jpg",
@@ -59,7 +129,6 @@ def genre_list(request):
         return {
             "name": name,
             "tags": tags,
-            # マップに無ければ noimage を出す（static/images/noimage.jpg を用意）
             "image": genre_image_map.get(name, "noimage.jpg"),
         }
 
@@ -143,7 +212,7 @@ def customer_search_listView(request):
     keyword = (request.GET.get("keyword") or "").strip()
     search_time_str = (request.GET.get("time") or "").strip()
 
-    # ★追加：利用シーン
+    # 利用シーン
     scene_id_str = (request.GET.get("scene") or "").strip()
 
     # カレンダー基準日
@@ -161,11 +230,9 @@ def customer_search_listView(request):
         .select_related("area", "scene")
         .annotate(
             has_account=models.Count("storeaccount", distinct=True),
-            # 信頼度による加重平均評価
             weighted_avg_rating=models.Sum(
                 models.F("review__score") * models.F("review__reviewer__trust_score")
             ) / models.Sum(models.F("review__reviewer__trust_score")),
-            # 通常の平均評価（比較用）
             avg_rating=models.Avg("review__score"),
             review_count=models.Count("review", distinct=True),
         )
@@ -192,7 +259,6 @@ def customer_search_listView(request):
             Q(address__icontains=keyword)
         )
 
-    # ★追加：利用シーン（store_qs 定義の「後」に必ず置く）
     if scene_id_str:
         try:
             scene_id = int(scene_id_str)
@@ -253,6 +319,14 @@ def customer_search_listView(request):
     for row in thumbs:
         thumb_map.setdefault(row["store_id"], row["image_file"])
 
+    # =========================================================
+    # ★ここが追加の本体
+    # ID209-390の店は、12日分の予約設定が無ければ自動生成して「○」扱いにする
+    # =========================================================
+    created_count = _ensure_online_settings_for_12days(stores, date_list)
+    # 必要ならデバッグ（本番では消してOK）
+    # print(f"DEBUG: auto online settings created={created_count}")
+
     # ---------- 予約受付（12日分） ----------
     open_qs = (
         StoreOnlineReservation.objects
@@ -273,7 +347,11 @@ def customer_search_listView(request):
     for s in stores:
         s.thumb_path = thumb_map.get(s.id)
 
-        s.has_account = bool(getattr(s, "has_account", 0) > 0)
+        real_has_account = bool(getattr(s, "has_account", 0) > 0)
+        is_auto = _is_auto_reservation_store_id(s.id)
+
+        # ★テンプレ表示判定：店アカウント or 自動予約対象
+        s.has_account = real_has_account or is_auto
 
         rating = float(s.weighted_avg_rating or s.avg_rating or 0.0)
         if rating < 0:
@@ -282,7 +360,6 @@ def customer_search_listView(request):
             rating = 5.0
 
         rounded = (int(rating * 2)) / 2.0
-
         full = int(rounded)
         half = 1 if (rounded - full) >= 0.5 else 0
         empty = 5 - full - half
@@ -290,8 +367,6 @@ def customer_search_listView(request):
             empty = 0
 
         s.star_states = (["full"] * full) + (["half"] * half) + (["empty"] * empty)
-
-        # 表示用（テンプレの数値表示に使うなら）
         s.display_rating = rating
 
         if s.has_account:
@@ -322,7 +397,7 @@ def customer_search_listView(request):
         "page_range": page_range,
         "area": area_name,
         "keyword": keyword,
-        "scene": scene_id_str,   
+        "scene": scene_id_str,
         "sort": sort_key,
         "time": search_time_str,
         "date": date_str,
@@ -331,6 +406,7 @@ def customer_search_listView(request):
     }
     return render(request, "search/customer_search_list.html", context)
 
+
 # =====================================================
 # ユーザー検索
 # =====================================================
@@ -338,29 +414,24 @@ def customer_user_search_listView(request):
     from commons.models import CustomerAccount, Follow
 
     keyword = (request.GET.get("keyword") or "").strip()
-    
-    # 全顧客アカウントをベースにキーワード検索
+
     user_qs = CustomerAccount.objects.all()
     if keyword:
         user_qs = user_qs.filter(
-            Q(nickname__icontains=keyword) | 
+            Q(nickname__icontains=keyword) |
             Q(username__icontains=keyword)
         )
-    
-    # ページネーション（検索画面と同じ実装）
+
     paginator = Paginator(user_qs.order_by("id"), 20)
     page_number = request.GET.get("page")
     users_page = paginator.get_page(page_number)
 
-    # ログインユーザー情報の取得
     login_customer = None
     if request.user.is_authenticated:
         login_customer = CustomerAccount.objects.filter(pk=request.user.pk).first()
 
-    # 表示用データの整形（フォロー状態など）
     user_list = []
     for target in users_page:
-        # 自分自身は検索結果から除外するか、区別する
         if login_customer and target.pk == login_customer.pk:
             continue
 
@@ -374,7 +445,7 @@ def customer_user_search_listView(request):
             is_following = rel is not None
             if rel:
                 is_muted = rel.is_muted
-            
+
             is_follower = Follow.objects.filter(follower=target, followee=login_customer).exists()
 
         cover_field = getattr(target, "cover_image", None)
@@ -392,7 +463,6 @@ def customer_user_search_listView(request):
             "user_icon_url": icon_field.url if icon_field else "",
         })
 
-    # 省略表示用のページ範囲（前後3ページ、端2ページ）
     page_range = paginator.get_elided_page_range(
         number=users_page.number,
         on_each_side=3,
