@@ -10,7 +10,7 @@
 
   /* ... (中略：既存のスタイル定義) ... */
   .nav-left {
-    display: flex; 
+    display: flex;
     align-items: center;
     gap: 12px;
     flex-wrap: wrap;
@@ -244,10 +244,21 @@
       <input type="time" name="time" value="{{ request.GET.time }}">
 
       <select name="people">
-        <option value="1" {% if request.GET.people == "1" %}selected{% endif %}>1名</option>
-        <option value="2" {% if request.GET.people == "2" %}selected{% endif %}>2名</option>
-        <option value="3" {% if request.GET.people == "3" %}selected{% endif %}>3名</option>
-        <option value="4" {% if request.GET.people == "4" %}selected{% endif %}>4名</option>
+        <option value="">人数 指定なし</option>
+        <option value="1" {% if request.GET.people=="1" %}selected{% endif %}>1名</option>
+        <option value="2" {% if request.GET.people=="2" %}selected{% endif %}>2名</option>
+        <option value="3" {% if request.GET.people=="3" %}selected{% endif %}>3名</option>
+        <option value="4" {% if request.GET.people=="4" %}selected{% endif %}>4名</option>
+        <option value="5" {% if request.GET.people=="5" %}selected{% endif %}>5名</option>
+        <option value="6" {% if request.GET.people=="6" %}selected{% endif %}>6名</option>
+        <option value="7" {% if request.GET.people=="7" %}selected{% endif %}>7名</option>
+        <option value="8" {% if request.GET.people=="8" %}selected{% endif %}>8名</option>
+        <option value="9" {% if request.GET.people=="9" %}selected{% endif %}>9名</option>
+        <option value="10" {% if request.GET.people=="10" %}selected{% endif %}>10名</option>
+        <option value="12" {% if request.GET.people=="12" %}selected{% endif %}>12名</option>
+        <option value="15" {% if request.GET.people=="15" %}selected{% endif %}>15名</option>
+        <option value="20" {% if request.GET.people=="20" %}selected{% endif %}>20名</option>
+        <option value="30" {% if request.GET.people=="30" %}selected{% endif %}>30名</option>
       </select>
 
       <button type="submit" class="search-btn">🔍</button>

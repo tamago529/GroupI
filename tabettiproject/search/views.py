@@ -215,6 +215,15 @@ def customer_search_listView(request):
     # 利用シーン
     scene_id_str = (request.GET.get("scene") or "").strip()
 
+    # 人数
+    people_str = (request.GET.get("people") or "").strip()
+    people = 0
+    try:
+        if people_str:
+            people = int(people_str)
+    except ValueError:
+        pass
+
     # カレンダー基準日
     date_str = (request.GET.get("date") or "").strip()
     try:
@@ -258,6 +267,26 @@ def customer_search_listView(request):
             Q(genre_master__name__icontains=keyword) |
             Q(address__icontains=keyword)
         )
+
+    # 人数連動フィルタリング
+    if people > 0:
+        # 席数のチェック
+        store_qs = store_qs.filter(seats__gte=people)
+
+        # 利用シーンの絞り込み (scene_id が明示されていない場合のみ自動連動)
+        if not scene_id_str:
+            if people == 1:
+                # お一人様 (ID: 2)
+                store_qs = store_qs.filter(scene_id=2)
+            elif people == 2:
+                # デート(5), 家族・こどもと(3), 接待(4) を含め、お一人様(2), 実演(6?), 合コン(7) などを除外
+                # ユーザーの要望: 「お一人様や女子会 合コン除外してデートや家族と子供ととかは表示すること」
+                # シーンID: 2:お一人様, 3:家族, 4:接待, 5:デート, 6:女子会, 7:合コン
+                store_qs = store_qs.filter(scene_id__in=[3, 4, 5])
+            else:
+                # 3名以上: 家族(3), 接待(4), 女子会(6), 合コン(7)
+                # お一人様(2), デート(5) を除外
+                store_qs = store_qs.filter(scene_id__in=[3, 4, 6, 7])
 
     if scene_id_str:
         try:
@@ -399,6 +428,7 @@ def customer_search_listView(request):
         "keyword": keyword,
         "scene": scene_id_str,
         "sort": sort_key,
+        "people": people_str,
         "time": search_time_str,
         "date": date_str,
         "MEDIA_URL": settings.MEDIA_URL,

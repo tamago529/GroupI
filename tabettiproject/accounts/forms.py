@@ -1,4 +1,5 @@
 from django import forms
+from django.utils import timezone
 from django.contrib.auth.forms import AuthenticationForm,PasswordResetForm
 from django.contrib.auth import authenticate, get_user_model
 from commons.models import Account
@@ -77,8 +78,13 @@ class CustomerRegisterForm(forms.ModelForm):
         model = CustomerAccount
         fields = [
             'email', 'username', 'password', 'nickname', 'phone_number', 
-            'age_group', 'gender', 'address', 'title', 'location', 'birth_date'
+            'age_group', 'gender', 'address', 'title', 'birth_date'
         ]
+        widgets = {
+            'birth_date': forms.SelectDateWidget(
+                years=range(1920, timezone.now().year + 1)
+            ),
+        }
         # sub_email は email をコピーして使う方針で除外、あるいは入力させるか。
         # fields にないものは save 時に手動で入れる必要がある。
     

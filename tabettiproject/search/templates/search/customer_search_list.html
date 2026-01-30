@@ -39,7 +39,8 @@
     border-radius: 8px;
     overflow: hidden;
     background: #f2f2f2;
-    position: relative; /* ランキングバッジ用 */
+    position: relative;
+    /* ランキングバッジ用 */
   }
 
   .shop-thumb img {
@@ -93,7 +94,8 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    min-width: 0; /* 文字折返し安定 */
+    min-width: 0;
+    /* 文字折返し安定 */
   }
 
   .shop-head {
@@ -348,7 +350,8 @@
 
       <div class="shop-head">
         <h2 class="shop-name">
-          <a href="{% url 'stores:customer_store_info' store.pk %}?from_search=1{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if scene %}&scene={{ scene|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">
+          <a
+            href="{% url 'stores:customer_store_info' store.pk %}?from_search=1{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if scene %}&scene={{ scene|urlencode }}{% endif %}{% if people %}&people={{ people|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">
             {{ store.store_name }}{% if store.branch_name %}（{{ store.branch_name }}）{% endif %}
           </a>
         </h2>
@@ -428,22 +431,24 @@
   <div class="pagination">
     {% if stores.has_previous %}
     <a
-      href="?page={{ stores.previous_page_number }}{% if area %}&area={{ area|urlencode }}{% endif %}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if scene %}&scene={{ scene|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">前へ</a>
+      href="?page={{ stores.previous_page_number }}{% if area %}&area={{ area|urlencode }}{% endif %}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if scene %}&scene={{ scene|urlencode }}{% endif %}{% if people %}&people={{ people|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">前へ</a>
     {% endif %}
 
     {% for num in page_range %}
-      {% if num == stores.paginator.ELLIPSIS %}
-        <span class="ellipsis">{{ num }}</span>
-      {% elif stores.number == num %}
-        <span class="current">{{ num }}</span>
-      {% else %}
-        <a href="?page={{ num }}{% if area %}&area={{ area|urlencode }}{% endif %}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if scene %}&scene={{ scene|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">{{ num }}</a>
-      {% endif %}
+    {% if num == stores.paginator.ELLIPSIS %}
+    <span class="ellipsis">{{ num }}</span>
+    {% elif stores.number == num %}
+    <span class="current">{{ num }}</span>
+    {% else %}
+    <a
+      href="?page={{ num }}{% if area %}&area={{ area|urlencode }}{% endif %}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if scene %}&scene={{ scene|urlencode }}{% endif %}{% if people %}&people={{ people|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">{{
+      num }}</a>
+    {% endif %}
     {% endfor %}
 
     {% if stores.has_next %}
     <a
-      href="?page={{ stores.next_page_number }}{% if area %}&area={{ area|urlencode }}{% endif %}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if scene %}&scene={{ scene|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">次へ</a>
+      href="?page={{ stores.next_page_number }}{% if area %}&area={{ area|urlencode }}{% endif %}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if scene %}&scene={{ scene|urlencode }}{% endif %}{% if people %}&people={{ people|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">次へ</a>
     {% endif %}
   </div>
   {% endif %}
