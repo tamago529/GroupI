@@ -1,0 +1,72 @@
+{% extends 'store_base.html' %}
+{% load static %}
+
+{% block title %}メール送信完了 | タベッチ店舗{% endblock %}
+
+{% block css %}
+<style>
+  .sms-sent-wrapper{
+    margin: 40px 0;
+    display:flex;
+    justify-content:center;
+  }
+  .sms-sent-box{
+    width: 460px;
+    background:#fff;
+    padding: 40px 28px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    text-align:center;
+    border: 1px solid #eee;
+  }
+  .sms-sent-box h2{
+    font-size:22px;
+    margin-bottom: 18px;
+    font-weight:900;
+    color:#333;
+    border:none;
+    padding:0;
+  }
+  .sms-message{
+    font-size:14px;
+    color:#555;
+    line-height:1.8;
+    margin-bottom: 26px;
+  }
+  .sms-btn-back{
+    display:block;
+    width:100%;
+    padding: 12px 0;
+    background-color:#ff8a00;
+    color:#fff;
+    font-size:14px;
+    font-weight:900;
+    text-decoration:none;
+    border-radius: 8px;
+    transition: opacity .2s;
+  }
+  .sms-btn-back:hover{
+    opacity:.88;
+    text-decoration:none;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sms-sent-wrapper">
+  <div class="sms-sent-box">
+    <h2>メールを送信しました</h2>
+
+    <div class="sms-message">
+      ご入力いただいたメールアドレス宛に、<br>
+      パスワード再設定用のメールをお送りしました。<br><br>
+      メール内のリンクをクリックして、<br>
+      新しいパスワードの設定を行ってください。
+    </div>
+
+    <a href="{% url 'accounts:store_login' %}" class="sms-btn-back">
+      店舗ログイン画面に戻る
+    </a>
+  </div>
+</div>
+{% endblock %}

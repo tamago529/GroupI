@@ -177,3 +177,26 @@ class CustomerSettingsForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
+class StorePasswordResetForm(PasswordResetForm):
+    """
+    ✅ 同一メールが複数アカウントに存在しても、メール送信は 1通だけにする
+    （store_mail_send 用：店舗アカウントのみ対象）
+    """
+    def get_users(self, email):
+        UserModel = get_user_model()
+        email_field = UserModel.get_email_field_name()
+
+        qs = UserModel._default_manager.filter(
+            **{f"{email_field}__iexact": email},
+            is_active=True,
+        )
+
+        # ✅ 店舗だけ（StoreAccount のみ）
+        qs = qs.filter(storeaccount__isnull=False)
+
+        # ✅ 1人だけ返す（古い順/小さいPKを採用）
+        user = qs.order_by("pk").first()
+        if not user:
+            return []
+        return [user]

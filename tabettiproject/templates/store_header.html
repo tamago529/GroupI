@@ -64,30 +64,24 @@
     </div>
 
     <nav class="header-nav">
-      <span class="username">ようこそ
-        {% if request.user.is_authenticated and request.user.storeaccount %}
-          {{ request.user.storeaccount.store.store_name }}
-        {% else %}
-          ゲスト
-        {% endif %}
-        様
-      </span>
+      {% if request.user.is_authenticated and request.user.storeaccount %}
+        <span class="username">
+          ようこそ{{ request.user.storeaccount.store.store_name }}様
+        </span>
 
-      {# ✅ ログイン時のみ表示 #}
-      {% if request.user.is_authenticated %}
         <a href="{% url 'stores:store_top' %}">トップ</a>
         <a href="{% url 'reservations_management:store_reservation_settings' %}">ネット予約管理</a>
         <a href="{% url 'stores:store_basic_edit' %}">店舗基本情報編集</a>
         <a href="#">管理・メールでのお問い合わせ</a>
+        <a href="{% url 'accounts:store_logout' %}">ログアウト</a>
+
+      {% else %}
+        <span class="username">ようこそ ゲスト 様</span>
       {% endif %}
 
       {# ヘルプはログイン不要なら常に表示でOK（要件にないので残す） #}
       <a href="https://owner-support.tabelog.com/">ヘルプ</a>
 
-      {# ✅ ログアウト（ログイン時のみ） #}
-      {% if request.user.is_authenticated %}
-        <a href="{% url 'accounts:store_logout' %}">ログアウト</a>
-      {% endif %}
     </nav>
 
   </div>

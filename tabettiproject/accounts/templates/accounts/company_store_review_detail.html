@@ -2,162 +2,185 @@
 
 {% block content %}
 <style>
-    /* 1. 全体のレイアウト */
-    .detail-container {
-        max-width: 1000px;
-        margin: 40px auto;
-        padding: 0 20px;
-        font-family: sans-serif;
-    }
+/* ===== Layout ===== */
+.detail-container{
+  max-width:1000px;
+  margin:40px auto;
+  padding:0 20px;
+  font-family:sans-serif;
+}
+.detail-title{
+  font-size:24px;
+  margin-bottom:30px;
+  border-left:5px solid #ff9600;
+  padding-left:15px;
+}
 
-    /* 上段のボックス並び（①申請情報と②画像） */
-    .info-section {
-        display: flex;
-        gap: 30px;
-        margin-bottom: 50px;
-        align-items: flex-start;
-    }
+/* ===== Upper Section ===== */
+.info-section{
+  display:flex;
+  gap:30px;
+  margin-bottom:40px;
+  align-items:flex-start;
+}
 
-    /* ① 申請情報ボックス */
-    .info-box {
-        flex: 1;
-        border: 2px solid #333;
-        padding: 20px;
-        min-height: 250px;
-    }
+/* Info Box */
+.info-box{
+  flex:1;
+  border:2px solid #333;
+  padding:20px;
+  background:#fff;
+}
+.info-box h3{
+  margin-top:0;
+  margin-bottom:15px;
+}
+.info-box p{
+  font-size:14px;
+  margin:6px 0;
+}
 
-    /* ② 営業許可証ボックス */
-    .image-box {
-        flex: 1.5; 
-        border: 2px solid #333;
-        padding: 20px;
-        min-height: 250px;
-        text-align: center;
-        background-color: #f9f9f9;
-    }
+/* Image Box */
+.image-box{
+  flex:1.5;
+  border:2px solid #333;
+  padding:20px;
+  background:#f9f9f9;
+  text-align:center;
+}
+.image-box h3{
+  margin-top:0;
+}
+.license-img{
+  max-width:100%;
+  height:auto;
+  border:1px solid #ccc;
+  margin-top:15px;
+}
 
-    .license-img {
-        max-width: 100%;
-        height: auto;
-        border: 1px solid #ccc;
-    }
+/* ===== Bottom ===== */
+.bottom-actions{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.right-buttons{
+  display:flex;
+  gap:15px;
+}
 
-    /* 下段のボタンエリア */
-    .bottom-actions {
-        display: flex;
-        justify-content: space-between; 
-        align-items: center;
-    }
+/* ===== Buttons ===== */
+.btn{
+  padding:12px 28px;
+  border:2px solid #333;
+  background:#fff;
+  font-weight:bold;
+  font-size:16px;
+  cursor:pointer;
+  text-decoration:none;
+  color:#000;
+}
+.btn:hover{
+  background:#f0f0f0;
+}
+.btn-permit:hover{
+  background:#ff9600;
+  color:#fff;
+}
 
-    .right-buttons {
-        display: flex;
-        gap: 15px;
-    }
-
-    /* ボタン共通スタイル */
-    .btn {
-        padding: 12px 30px;
-        border: 2px solid #333;
-        background-color: #fff;
-        font-weight: bold;
-        font-size: 18px;
-        cursor: pointer;
-        text-decoration: none;
-        color: #000;
-        text-align: center;
-    }
-
-    /* ③ 戻る / ⑤ 不可 */
-    .btn:hover {
-        background-color: #f0f0f0;
-    }
-
-    /* ④ 許可ボタン（少し目立たせる） */
-    .btn-permit:hover {
-        background-color: #ff9600; 
-        color: #fff;
-    }
-
-    /* --- JavaScript用のポップアップ（モーダル） --- */
-    .modal-overlay {
-        display: none; 
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(0,0,0,0.5); 
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-    }
-
-    .modal-content {
-        background: #fff;
-        padding: 40px;
-        border: 2px solid #333;
-        border-radius: 10px;
-        text-align: center;
-    }
+/* ===== Modal ===== */
+.modal-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  justify-content:center;
+  align-items:center;
+  z-index:1000;
+}
+.modal-content{
+  background:#fff;
+  padding:40px;
+  border:2px solid #333;
+  border-radius:10px;
+  text-align:center;
+}
 </style>
 
 <div class="detail-container">
-    <h1>店舗アカウント審査詳細</h1>
 
-    <div class="info-section">
-        <!-- ① 申請情報 -->
-        <div class="info-box">
-            <h3>① 申請情報</h3>
-            <p>店舗名：サンプル食堂</p>
-            <p>申請者：田中 太郎</p>
-            <p>所在地：東京都渋谷区...</p>
-        </div>
+  <h1 class="detail-title">店舗アカウント審査詳細</h1>
 
-        <!-- ② 営業許可証 -->
-        <div class="image-box">
-            <h3>② 営業許可証（画像）</h3>
-            <div style="margin-top: 20px; color: #888;">
-                [ ここに画像が表示されます ]
-            </div>
-        </div>
+  <div class="info-section">
+    <!-- ① 申請情報 -->
+    <div class="info-box">
+      <h3>① 申請情報</h3>
+      <p><strong>店舗名：</strong>{{ req.store_name }}{% if req.branch_name %} {{ req.branch_name }}{% endif %}</p>
+      <p><strong>申請者：</strong>{{ req.applicant_name }}</p>
+      <p><strong>店舗との関係：</strong>{{ req.relation_to_store }}</p>
+      <p><strong>所在地：</strong>{{ req.address }}</p>
+      <p><strong>申請日時：</strong>{{ req.requested_at|date:"Y-m-d H:i" }}</p>
+      <p><strong>ステータス：</strong>{{ req.request_status.status }}</p>
     </div>
 
-    <!-- 下部ボタン -->
-    <div class="bottom-actions">
-        <!-- ③ 戻る -->
-        <a href="javascript:history.back();" class="btn">戻る</a>
+    <!-- ② 営業許可証 -->
+    <div class="image-box">
+      <h3>② 営業許可証（画像）</h3>
 
-        <div class="right-buttons">
-            <!-- ④ 許可（JSを呼び出す） -->
-            <button class="btn btn-permit" onclick="showPopup()">許可</button>
-            <!-- ⑤ 不可（確認画面などへ） -->
-            <a href="#" class="btn">不可</a>
-        </div>
+      {% if req.license_image %}
+        <img
+          class="license-img"
+          src="{{ req.license_image.url }}"
+          alt="営業許可証">
+      {% else %}
+        <p style="margin-top:20px; color:#888;">
+          画像がアップロードされていません
+        </p>
+      {% endif %}
     </div>
+  </div>
+
+  <!-- Buttons -->
+  <div class="bottom-actions">
+    <a href="{% url 'accounts:company_store_review' %}" class="btn">
+      戻る
+    </a>
+
+    <div class="right-buttons">
+      <button class="btn btn-permit" onclick="showPopup()">許可</button>
+      <a href="#" class="btn">不可</a>
+    </div>
+  </div>
 </div>
 
-<!-- 許可ボタンを押した時に出るポップアップ -->
+<!-- Permit Modal -->
 <div class="modal-overlay" id="permitModal">
-    <div class="modal-content">
-        <h2>確認</h2>
-        <p>この店舗アカウントを許可してもよろしいですか？</p>
-        <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
-            <button class="btn" onclick="closePopup()">キャンセル</button>
-            <a href="{% url 'accounts:company_top' %}" class="btn btn-permit">実行する</a>
-        </div>
+  <div class="modal-content">
+    <h2>確認</h2>
+    <p>この店舗アカウントを許可してもよろしいですか？</p>
+    <div style="margin-top:20px; display:flex; gap:12px; justify-content:center;">
+      <button class="btn" type="button" onclick="closePopup()">キャンセル</button>
+      <!-- 次はここを POST にする -->
+      <form method="post" action="{% url 'accounts:company_store_review_permit' req.id %}">
+        {% csrf_token %}
+        <button class="btn btn-permit" type="submit">実行する</button>
+      </form>
+
+      <form method="post" action="{% url 'accounts:company_store_review_reject' req.id %}">
+        {% csrf_token %}
+        <button class="btn" type="submit">却下する</button>
+      </form>
     </div>
+  </div>
 </div>
 
-<!-- JavaScriptの解説用コード -->
 <script>
-    // 1. ポップアップを表示する関数
-    function showPopup() {
-        // IDが「permitModal」の要素を探して、表示（flex）に変える
-        document.getElementById('permitModal').style.display = 'flex';
-    }
-
-    // 2. ポップアップを閉じる関数
-    function closePopup() {
-        // IDが「permitModal」の要素を、非表示（none）に変える
-        document.getElementById('permitModal').style.display = 'none';
-    }
+function showPopup(){
+  document.getElementById('permitModal').style.display = 'flex';
+}
+function closePopup(){
+  document.getElementById('permitModal').style.display = 'none';
+}
 </script>
+
 {% endblock %}

@@ -1,0 +1,164 @@
+{% extends "store_base.html" %}
+{% load static %}
+
+{% block title %}パスワードをお忘れの方 | タベッチ店舗{% endblock %}
+
+{% block css %}
+<style>
+  .auth-page-wrapper .password-reset-wrapper{
+    margin: 10px 0 40px;
+    display:flex;
+    justify-content:center;
+  }
+
+  .auth-page-wrapper .password-reset-box{
+    width: 720px;
+    background:#fff;
+    padding: 50px 44px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    text-align:center;
+    border: 1px solid #eee;
+  }
+
+  .auth-page-wrapper .brand{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin-bottom: 14px;
+  }
+  .auth-page-wrapper .brand .logo{
+    font-weight:900;
+    font-size:22px;
+    color:#333;
+    letter-spacing: .02em;
+  }
+  .auth-page-wrapper .brand .badge{
+    font-size:12px;
+    color:#666;
+    background:#f3f3f3;
+    padding:4px 10px;
+    border-radius:999px;
+  }
+
+  .auth-page-wrapper h2{
+    font-size:28px;
+    margin: 8px 0 14px;
+    font-weight:900;
+  }
+
+  .auth-page-wrapper .reset-description{
+    font-size:16px;
+    color:#555;
+    line-height:1.7;
+    margin-bottom: 26px;
+  }
+
+  .auth-page-wrapper .form-group{
+    text-align:left;
+    margin-bottom: 20px;
+  }
+
+  .auth-page-wrapper label{
+    display:block;
+    font-size:14px;
+    font-weight:800;
+    margin-bottom: 8px;
+    color:#444;
+  }
+
+  .auth-page-wrapper input{
+    width:100%;
+    padding: 14px 14px;
+    font-size:16px;
+    border:1px solid #ccc;
+    border-radius: 8px;
+    box-sizing:border-box;
+  }
+
+  .auth-page-wrapper .btn-submit{
+    width:100%;
+    padding: 16px 0;
+    font-size:16px;
+    font-weight:900;
+    color:#fff;
+    background:#ff8a00;
+    border:none;
+    border-radius: 8px;
+    cursor:pointer;
+  }
+
+  .auth-page-wrapper .btn-submit:disabled{
+    opacity:.7;
+    cursor:not-allowed;
+  }
+
+  .auth-page-wrapper .back-links{
+    margin-top: 22px;
+    font-size: 13px;
+    display:flex;
+    justify-content:center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .auth-page-wrapper .back-links a{
+    color:#ff8a00;
+    text-decoration:none;
+    font-weight:700;
+  }
+  .auth-page-wrapper .back-links a:hover{
+    text-decoration:underline;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-page-wrapper">
+  <div class="password-reset-wrapper">
+    <div class="password-reset-box">
+
+      <div class="brand">
+        <div class="logo">タベッチ</div>
+        <div class="badge">店舗管理</div>
+      </div>
+
+      <h2>パスワードをお忘れの方（店舗）</h2>
+
+      <p class="reset-description">
+        店舗アカウントに登録したメールアドレスを入力してください。<br>
+        パスワード再設定用のメールをお送りします。
+      </p>
+
+      <form method="post" id="resetForm">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="email">メールアドレス</label>
+          <input type="email" name="email" id="email" required placeholder="example@shop.com">
+        </div>
+        <button type="submit" class="btn-submit" id="submitBtn">送信する</button>
+      </form>
+
+      <script>
+        (function(){
+          const form = document.getElementById("resetForm");
+          const btn  = document.getElementById("submitBtn");
+          if(!form || !btn) return;
+
+          form.addEventListener("submit", () => {
+            btn.disabled = true;
+            btn.textContent = "送信中...";
+          });
+        })();
+      </script>
+
+      <div class="back-links">
+        <a href="{% url 'accounts:store_login' %}">店舗ログインに戻る</a>
+        <a href="{% url 'accounts:customer_login' %}">顧客ログインはこちら</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

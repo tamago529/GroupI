@@ -1,95 +1,271 @@
 {% extends 'store_base.html' %}
 {% block content %}
-店舗アカウント作成店舗検索画面
 
-<a href="{% url 'accounts:customer_top' %}">顧客トップ画面へ</a>   
+<div class="sa-page">
+  <div class="sa-head">
+    <a class="sa-link" href="{% url 'accounts:customer_top' %}">タベッチtopへ</a>
+    <h1 class="sa-title">店舗会員のお申し込みの前に</h1>
+    <p class="sa-sub">まずは店舗を検索して、該当店舗があればそのまま申請できます。</p>
+  </div>
 
+  <div class="sa-card">
+    <!-- 検索フォーム（GET） -->
+    <form method="get" class="sa-form">
+      <div class="sa-grid">
+        <div class="sa-field">
+          <label class="sa-label">店舗名</label>
+          <input class="sa-input" name="rst_name" value="{{ q_rst_name }}" placeholder="例）マクドナルド">
+        </div>
 
-<style>
-.page{max-width:960px;margin:0 auto;padding:20px;}
-.title-bar{background:#22395a;color:#fff;padding:12px;border-radius:4px;font-weight:700;}
+        <div class="sa-field">
+          <label class="sa-label">電話番号</label>
+          <input class="sa-input" name="tel_number" value="{{ q_tel }}" placeholder="例）03-1234-5678">
+        </div>
 
-.search-box{background:#fff7cc;border:1px solid #f0e3a5;padding:20px;margin-top:16px;}
-.field{margin-bottom:12px;}
-.field label{display:block;font-size:12px;margin-bottom:4px;}
-.field input, select{padding:8px;width:100%;max-width:400px;}
-
-.btn{padding:10px 20px;background:#2a69a8;color:#fff;border:none;border-radius:4px;font-weight:700;}
-
-.tools{display:flex;justify-content:space-between;margin-top:14px;font-size:12px;}
-
-.results{margin-top:10px;border-top:1px solid #ccc;}
-.row{padding:10px 0;border-bottom:1px dotted #ccc;display:flex;justify-content:space-between;}
-.store-name{color:#1e73c9;font-weight:700;}
-.store-meta{font-size:12px;color:#666;}
-</style>
-
-<div class="page">
-  <div class="title-bar">店舗会員（無料）のお申し込みの前に</div>
-
-  <div class="search-box">
-    {% comment %}
-    <form method="get" action="{% url 'owner_info:entry_flow' %}">
-      <div class="field">
-    {% endcomment %}
-        <label>店舗名</label>
-        <input name="rst_name" value="{{ q_rst_name }}" placeholder="例）マクドナルド">
-      </div>
-      <div class="field">
-        <label>電話番号</label>
-        <input name="tel_number" value="{{ q_tel }}" placeholder="例）03-1234-5678">
-      </div>
-      <button class="btn" type="submit">検索</button>
-    </form>
-
-    <div class="tools">
-      <div>
-        絞り込み：
-        <form method="get" style="display:inline;">
-          <input type="hidden" name="rst_name" value="{{ q_rst_name }}">
-          <input type="hidden" name="tel_number" value="{{ q_tel }}">
-          <select name="area" onchange="this.form.submit()">
-            <option value="">エリア</option>
+        <div class="sa-field">
+          <label class="sa-label">エリア（都道府県）</label>
+          <select class="sa-select" name="area">
+            <option value="">指定なし</option>
             {% for a in areas %}
               <option value="{{ a.id }}" {% if q_area|stringformat:"s" == a.id|stringformat:"s" %}selected{% endif %}>
                 {{ a.area_name }}
               </option>
             {% endfor %}
           </select>
-        </form>
+        </div>
+
+        <div class="sa-actions">
+          <button class="sa-btn" type="submit">検索</button>
+          <a class="sa-btn sa-btn-ghost" href="{% url 'accounts:store_account_search' %}">条件クリア</a>
+        </div>
+      </div>
+    </form>
+
+    <div class="sa-meta">
+      <div class="sa-meta-left">
+        {% if q_rst_name or q_tel or q_area %}
+          <span class="sa-chip">絞り込み中</span>
+        {% else %}
+          <span class="sa-chip sa-chip-muted">条件なし</span>
+        {% endif %}
       </div>
 
-      <div>
+      <div class="sa-meta-right">
         {% if stores %}
-          {{ stores.start_index }}〜{{ stores.end_index }}件 / 全{{ total_count }}件
+          <span class="sa-count">{{ stores.start_index }}〜{{ stores.end_index }}件 / 全{{ total_count }}件</span>
         {% else %}
-          0件
+          <span class="sa-count">0件</span>
         {% endif %}
       </div>
     </div>
 
-    <div class="results">
+    <div class="sa-results">
       {% for s in stores %}
-        <div class="row">
-          <div>
-            <div class="store-name">
-              {{ s.store_name }}{% if s.branch_name %} {{ s.branch_name }}{% endif %}
-            </div>
-            <div class="store-meta">
-              {{ s.address }} / {{ s.phone_number }}
+        <div class="sa-row">
+          <div class="sa-row-main">
+            <div class="sa-store">
+              <div class="sa-store-name">
+                {{ s.store_name }}{% if s.branch_name %} <span class="sa-branch">{{ s.branch_name }}</span>{% endif %}
+              </div>
+              <div class="sa-store-meta">{{ s.address }} / {{ s.phone_number }}</div>
             </div>
           </div>
-          <div>
-            <span style="font-size:12px;color:#999;">申込は後で</span>
+
+          <div class="sa-row-side">
+            {% if s.has_store_account %}
+              <span class="sa-badge sa-badge-done">登録済み</span>
+            {% elif s.has_pending_request %}
+              <span class="sa-badge sa-badge-wait">申請中</span>
+            {% else %}
+              <button class="sa-btn sa-btn-sm" type="button"
+                onclick="openRequestModal('{{ s.id }}','{{ s.store_name|escapejs }}','{{ s.branch_name|default_if_none:""|escapejs }}')">
+                この店舗で申請する
+              </button>
+            {% endif %}
           </div>
         </div>
       {% empty %}
-        <p>該当する店舗がありません。</p>
+        <div class="sa-empty">
+          該当する店舗がありません。
+        </div>
       {% endfor %}
     </div>
+
+    {% if stores and stores.has_other_pages %}
+      <div class="sa-pager">
+        {% if stores.has_previous %}
+          <a class="sa-link" href="?rst_name={{ q_rst_name }}&tel_number={{ q_tel }}&area={{ q_area }}&page={{ stores.previous_page_number }}">前へ</a>
+        {% else %}
+          <span class="sa-link sa-link-disabled">前へ</span>
+        {% endif %}
+
+        <span class="sa-pageinfo">Page {{ stores.number }} / {{ stores.paginator.num_pages }}</span>
+
+        {% if stores.has_next %}
+          <a class="sa-link" href="?rst_name={{ q_rst_name }}&tel_number={{ q_tel }}&area={{ q_area }}&page={{ stores.next_page_number }}">次へ</a>
+        {% else %}
+          <span class="sa-link sa-link-disabled">次へ</span>
+        {% endif %}
+      </div>
+    {% endif %}
   </div>
 </div>
 
+<!-- 申請モーダル（POST / multipart） -->
+<div class="sa-modal" id="requestModal">
+  <div class="sa-modal-panel">
+    <div class="sa-modal-head">
+      <div>
+        <div class="sa-modal-title">店舗アカウント申請</div>
+        <div id="modalStoreLabel" class="sa-modal-sub"></div>
+      </div>
+      <button class="sa-x" type="button" onclick="closeRequestModal()">×</button>
+    </div>
 
+    <form method="post" action="{% url 'accounts:store_account_request_create' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" name="store_id" id="modalStoreId">
+
+      <div class="sa-field">
+        <label class="sa-label">申込者名</label>
+        <input class="sa-input" name="applicant_name" required placeholder="例）田中 太郎">
+      </div>
+
+      <div class="sa-field">
+        <label class="sa-label">店舗との関係</label>
+        <input class="sa-input" name="relation_to_store" required placeholder="例）オーナー / 店長 / 本部担当など">
+      </div>
+
+      <div class="sa-field">
+        <label class="sa-label">営業許可証（画像）</label>
+        <input class="sa-input" type="file" name="license_image" accept="image/*" required>
+        <div class="sa-help">文字が読める解像度の画像をアップロードしてください。</div>
+      </div>
+
+      <div class="sa-field">
+        <label class="sa-label">管理者メールアドレス（ログイン用）</label>
+        <input class="sa-input" type="email" name="admin_email" required placeholder="owner@example.com">
+        <div class="sa-help">このメールアドレスが店舗管理のログインに使用されます。</div>
+      </div>
+
+      <div class="sa-modal-actions">
+        <button class="sa-btn sa-btn-ghost" type="button" onclick="closeRequestModal()">キャンセル</button>
+        <button class="sa-btn" type="submit">申請を送信</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openRequestModal(storeId, storeName, branchName){
+    document.getElementById('modalStoreId').value = storeId;
+    const label = branchName ? (storeName + ' ' + branchName) : storeName;
+    document.getElementById('modalStoreLabel').textContent = '申請対象：' + label;
+    document.getElementById('requestModal').style.display = 'flex';
+  }
+  function closeRequestModal(){
+    document.getElementById('requestModal').style.display = 'none';
+  }
+</script>
+
+<style>
+/* ===== Page ===== */
+.sa-page{max-width:980px;margin:0 auto;padding:24px 16px;color:#111;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Meiryo",sans-serif;}
+.sa-head{margin-bottom:14px;}
+.sa-title{margin:8px 0 6px;font-size:22px;line-height:1.3;}
+.sa-sub{margin:0;color:#555;font-size:13px;}
+.sa-link{color:#1e73c9;text-decoration:none;font-size:13px;}
+.sa-link:hover{text-decoration:underline;}
+.sa-link-disabled{color:#aaa;pointer-events:none;text-decoration:none;}
+
+/* ===== Card ===== */
+.sa-card{background:#fff;border:1px solid #e6e6e6;border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.04);padding:16px;}
+
+/* ===== Form ===== */
+.sa-form{margin:0;}
+.sa-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:end;}
+.sa-field{display:flex;flex-direction:column;gap:6px;}
+.sa-label{font-size:12px;color:#444;}
+.sa-input,.sa-select{
+  width:100%;
+  max-width:100%;
+  padding:10px 12px;
+  border:1px solid #dcdcdc;
+  border-radius:10px;
+  background:#fff;
+  font-size:14px;
+}
+.sa-input:focus,.sa-select:focus{outline:none;border-color:#1e73c9;box-shadow:0 0 0 3px rgba(30,115,201,.12);}
+.sa-actions{display:flex;gap:10px;justify-content:flex-end;}
+
+/* Buttons */
+.sa-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:10px 14px;border:none;border-radius:10px;
+  background:#2a69a8;color:#fff;font-weight:700;font-size:14px;cursor:pointer;
+}
+.sa-btn:hover{opacity:.92;}
+.sa-btn:active{transform:translateY(1px);}
+.sa-btn-ghost{background:#fff;color:#2a69a8;border:1px solid #cfe0f3;}
+.sa-btn-sm{padding:8px 10px;font-size:12px;border-radius:10px;white-space:nowrap;}
+
+/* Meta */
+.sa-meta{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid #eee;}
+.sa-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:#eaf3ff;color:#1e73c9;font-size:12px;}
+.sa-chip-muted{background:#f3f3f3;color:#666;}
+.sa-count{font-size:12px;color:#666;}
+
+/* Results */
+.sa-results{margin-top:10px;}
+.sa-row{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid #f0f0f0;}
+.sa-row:first-child{border-top:none;}
+.sa-store-name{font-size:14px;font-weight:800;color:#1e73c9;}
+.sa-branch{font-weight:700;color:#1e73c9;}
+.sa-store-meta{font-size:12px;color:#666;margin-top:4px;}
+.sa-empty{padding:14px;color:#666;background:#fafafa;border:1px dashed #ddd;border-radius:10px;}
+
+/* Badges */
+.sa-badge{
+  display:inline-flex;
+  align-items:center;
+  padding:8px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+  white-space:nowrap;
+  border:1px solid transparent;
+}
+.sa-badge-done{
+  background:#f3f3f3;
+  color:#666;
+  border-color:#e0e0e0;
+}
+.sa-badge-wait{
+  background:#fff3d6;
+  color:#8a5a00;
+  border-color:#ffd89a;
+}
+
+/* Pager */
+.sa-pager{display:flex;justify-content:center;align-items:center;gap:14px;margin-top:14px;padding-top:14px;border-top:1px solid #eee;}
+.sa-pageinfo{font-size:12px;color:#666;}
+
+/* Modal */
+.sa-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;justify-content:center;align-items:center;padding:18px;}
+.sa-modal-panel{width:min(720px, 96vw);background:#fff;border-radius:14px;border:1px solid #e6e6e6;box-shadow:0 8px 30px rgba(0,0,0,.18);padding:16px;}
+.sa-modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;}
+.sa-modal-title{font-size:16px;font-weight:800;}
+.sa-modal-sub{font-size:12px;color:#666;margin-top:4px;}
+.sa-x{border:none;background:transparent;font-size:20px;cursor:pointer;color:#666;line-height:1;}
+.sa-help{font-size:12px;color:#777;margin-top:6px;}
+.sa-modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px;}
+
+/* Responsive */
+@media (max-width: 860px){
+  .sa-grid{grid-template-columns:1fr;gap:10px;}
+  .sa-actions{justify-content:flex-start;}
+  .sa-row{flex-direction:column;align-items:flex-start;}
+}
+</style>
 
 {% endblock %}

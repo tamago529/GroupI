@@ -553,7 +553,7 @@ class StoreMenu(models.Model):
 class StoreAccountRequest(models.Model):
     requester = models.ForeignKey("CustomerAccount", on_delete=models.CASCADE, verbose_name="申請者")
     target_store = models.ForeignKey("Store", on_delete=models.CASCADE, verbose_name="対象店舗")
-    attachment = models.CharField(max_length=255, verbose_name="添付資料")
+    license_image = models.ImageField(upload_to="store_account_requests/licenses/",null=True,blank=True,verbose_name="営業許可証")
     request_status = models.ForeignKey("ApplicationStatus", on_delete=models.PROTECT, verbose_name="申請ステータス")
     store_name = models.CharField(max_length=100, verbose_name="店舗名")
     branch_name = models.CharField(max_length=100, verbose_name="支店名")
