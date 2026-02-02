@@ -147,16 +147,24 @@
     {% endfor %}
   </div>
 {% endif %}
+{% if form.errors %}
+  <div style="margin:12px 0; padding:10px; border:1px solid #f3c7c7; background:#fff2f2; color:#b42318;">
+    {{ form.non_field_errors }}
+    {{ form.username.errors }}
+    {{ form.password.errors }}
+  </div>
+{% endif %}
+
+
+
 
       <form method="post" action="{% url 'accounts:store_login' %}">
   {% csrf_token %}
 
   <div class="form-group">
-    <label for="login_id">ログインID</label>
-    <!-- name を username に変更 -->
-    <input id="login_id" name="username" type="text" placeholder="6〜12桁の半角英数">
+    <label for="login_id">ログインID(メールアドレス)</label>
+    <input id="login_id" name="username" type="email" required placeholder="owner@example.com">
   </div>
-
   <div class="form-group">
     <label for="password">パスワード</label>
     <input id="password" name="password" type="password" placeholder="8〜20桁の半角英数">
@@ -167,8 +175,8 @@
     </div>
 
     <div class="login-footer">
-      <div><a href="{% url 'accounts:store_account_search' %}">まだアカウントをお持ちではない方はこちら</a></div>
-      <div><a href="{% url 'accounts:customer_mail_send' %}">パスワードを忘れた方はこちら</a></div>
+      <div><a href="{% url 'accounts:customer_login' %}">まだアカウントをお持ちではない方はこちら</a></div>
+      <div><a href="{% url 'accounts:store_mail_send' %}">パスワードを忘れた方はこちら</a></div>
     </div>
   </div>
 </div>

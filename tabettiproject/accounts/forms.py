@@ -1,32 +1,52 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.contrib.auth.forms import AuthenticationForm,PasswordResetForm
-from django.contrib.auth import authenticate, get_user_model
-from commons.models import Account
+from django.contrib.auth import authenticate, get_user_model, login
+from commons.models import Account, CustomerAccount, StoreAccount, AccountType
+from django.urls import reverse
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
+from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
 
-class CustomerLoginForm(AuthenticationForm):
-    # HTMLの name="username" にあたる部分を「ユーザーネーム」として定義
-    username = forms.CharField(label="ユーザーネーム")
+
+class StoreLoginForm(AuthenticationForm):
+    username = forms.EmailField(
+        label="メールアドレス",
+        widget=forms.EmailInput(attrs={"autofocus": True})
+    )
 
     def clean(self):
-        cleaned_data = super().clean()  # AuthenticationFormの基本バリデーションも通す
-        username = cleaned_data.get("username")
-        password = cleaned_data.get("password")
+        email = (self.cleaned_data.get("username") or "").strip()
+        password = self.cleaned_data.get("password") or ""
 
-        if username and password:
-            # ✅ ユーザーネームで認証する
-            self.user_cache = authenticate(
-                self.request,
-                username=username,
-                password=password
-            )
+        if not email or not password:
+            raise ValidationError("メールアドレスとパスワードを入力してください。")
 
-            if self.user_cache is None:
-                raise self.get_invalid_login_error()
-            self.confirm_login_allowed(self.user_cache)
+        UserModel = get_user_model()
 
-        return cleaned_data
-    
+        user = (
+            UserModel._default_manager
+            .filter(email__iexact=email, is_active=True, storeaccount__isnull=False)
+            .order_by("pk")
+            .first()
+        )
+        if not user:
+            raise ValidationError("メールアドレスまたはパスワードが正しくありません。")
+
+        self.user_cache = authenticate(
+            self.request,
+            username=user.get_username(),
+            password=password,
+        )
+
+        if self.user_cache is None:
+            raise ValidationError("メールアドレスまたはパスワードが正しくありません。")
+
+        self.confirm_login_allowed(self.user_cache)
+        return self.cleaned_data
 
 class CustomerPasswordResetForm(PasswordResetForm):
     """
@@ -180,8 +200,7 @@ class CustomerSettingsForm(forms.ModelForm):
 
 class StorePasswordResetForm(PasswordResetForm):
     """
-    ✅ 同一メールが複数アカウントに存在しても、メール送信は 1通だけにする
-    （store_mail_send 用：店舗アカウントのみ対象）
+    店舗アカウントだけを対象にし、メール内リンクは店舗用confirmへ
     """
     def get_users(self, email):
         UserModel = get_user_model()
@@ -190,13 +209,70 @@ class StorePasswordResetForm(PasswordResetForm):
         qs = UserModel._default_manager.filter(
             **{f"{email_field}__iexact": email},
             is_active=True,
-        )
+        ).filter(storeaccount__isnull=False)
 
-        # ✅ 店舗だけ（StoreAccount のみ）
-        qs = qs.filter(storeaccount__isnull=False)
-
-        # ✅ 1人だけ返す（古い順/小さいPKを採用）
         user = qs.order_by("pk").first()
-        if not user:
-            return []
-        return [user]
+        return [user] if user else []
+
+    def save(
+        self,
+        domain_override=None,
+        subject_template_name="accounts/password_reset_subject.txt",
+        email_template_name="accounts/store_password_reset_email.html",
+        use_https=False,
+        token_generator=default_token_generator,
+        from_email=None,
+        request=None,
+        html_email_template_name=None,
+        extra_email_context=None,
+    ):
+        """
+        ★ここが肝：
+        Django標準は 'password_reset_confirm' 固定なので、
+        店舗用URLを自前で作って context に reset_url を渡す。
+        """
+        if extra_email_context is None:
+            extra_email_context = {}
+
+        for user in self.get_users(self.cleaned_data["email"]):
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = token_generator.make_token(user)
+
+            # 店舗用confirm URL（あなたのURL名に合わせる）
+            path = reverse("accounts:store_password_reset_confirm", kwargs={"uidb64": uid, "token": token})
+            if request is not None:
+                reset_url = request.build_absolute_uri(path)
+            else:
+                # requestが無い場合の保険（通常 permit からは request がある）
+                protocol = "https" if use_https else "http"
+                domain = domain_override or "127.0.0.1:8000"
+                reset_url = f"{protocol}://{domain}{path}"
+
+            context = {
+                "email": user.email,
+                "domain": domain_override or (request.get_host() if request else ""),
+                "site_name": "タベッチ",
+                "uid": uid,
+                "user": user,
+                "token": token,
+                "protocol": "https" if use_https else "http",
+                "reset_url": reset_url,
+                **(extra_email_context or {}),
+            }
+
+            subject = render_to_string(subject_template_name, context).strip()
+            body = render_to_string(email_template_name, context)
+
+            msg = EmailMultiAlternatives(subject, body, from_email, [user.email])
+            msg.send()
+
+class CustomerLoginForm(AuthenticationForm):
+    """
+    顧客ログイン（ひとまず Django 標準の AuthenticationForm と同等）
+    ＝username/password でログイン
+    """
+    username = forms.CharField(label="ユーザー名", widget=forms.TextInput(attrs={"autofocus": True}))
+
+    def clean(self):
+        # 標準の認証処理に任せる（authenticate呼び出し等は親がやる）
+        return super().clean()

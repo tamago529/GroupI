@@ -3,6 +3,8 @@ import urllib.parse
 from django.contrib import messages
 from django.contrib.auth import logout, login
 from django.contrib.auth.views import LoginView, LogoutView
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q, Exists, OuterRef
 from django.views.generic import ListView, CreateView, View, TemplateView
@@ -13,7 +15,7 @@ from django.views.generic.base import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 from commons.models import StoreAccount, Account, Scene, Store, StoreAccountRequest, ApplicationStatus, Area, CustomerAccount, StoreAccountRequestLog, AccountType
-from .forms import CustomerLoginForm, CustomerRegisterForm, CustomerPasswordResetForm, StorePasswordResetForm
+from .forms import CustomerLoginForm, CustomerRegisterForm, CustomerPasswordResetForm, StorePasswordResetForm, StoreLoginForm
 from django.contrib.auth.views import (
     PasswordResetView, PasswordResetDoneView,
     PasswordResetConfirmView, PasswordResetCompleteView,
@@ -107,7 +109,7 @@ class company_store_review_detailView(LoginRequiredMixin, TemplateView):
             StoreAccountRequestLog.objects
             .filter(request=req)
             .select_related("request_status")
-            .order_by("-logged_at")
+            .order_by("-updated_at")
         )
         ctx["req"] = req
         ctx["logs"] = log
@@ -129,30 +131,65 @@ class company_store_reviewView(LoginRequiredMixin, TemplateView):
         ctx["requests"] = requests
         return ctx
     
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
+from django.shortcuts import get_object_or_404, redirect
+from django.utils import timezone
+from django.views import View
+
+from commons.models import AccountType, ApplicationStatus, StoreAccount, StoreAccountRequest
+
+# from .forms import StorePasswordResetForm
+
+
 class company_store_review_permitView(LoginRequiredMixin, View):
     def post(self, request, request_id):
         req = get_object_or_404(StoreAccountRequest, id=request_id)
 
         status_pending = ApplicationStatus.objects.get(status="申請中")
         status_approved = ApplicationStatus.objects.get(status="承認")
+        status_rejected = ApplicationStatus.objects.get(status="却下")
 
-        # 二重承認防止
-        if req.request_status_id != status_pending.id:
-            messages.info(request, "この申請は既に処理済みです。")
+        # 却下は承認操作不可
+        if req.request_status_id == status_rejected.id:
+            messages.error(request, "却下済みの申請は承認できません。")
+            return redirect("accounts:company_store_review_detail", request_id=req.id)
+
+        # admin_email 必須
+        login_email = (getattr(req, "admin_email", "") or "").strip()
+        if not login_email:
+            messages.error(request, "処理できません：申請に管理者メールアドレス（ログイン用）が登録されていません。")
             return redirect("accounts:company_store_review_detail", request_id=req.id)
 
         with transaction.atomic():
-            # 1) 申請ステータス更新
-            req.request_status = status_approved
-            req.approved_at = timezone.now()
-            req.save(update_fields=["request_status", "approved_at"])
+            # 1) 申請中なら承認にする（承認済みならそのまま）
+            send_reset_mail = False
+            if req.request_status_id == status_pending.id:
+                req.request_status = status_approved
+                req.approved_at = timezone.now()
+                req.save(update_fields=["request_status", "approved_at"])
+                send_reset_mail = True
 
-            # 2) StoreAccount 作成（既存なら取得）
+            # 2) StoreAccount 作成 or 更新
+            store_type = AccountType.objects.get_or_create(account_type="店舗")[0]
             sa = StoreAccount.objects.filter(store=req.target_store).select_related("store").first()
-            if not sa:
-                store_type = AccountType.objects.get_or_create(account_type="店舗")[0]
 
-                # username かぶり対策（最低限）
+            if sa:
+                # email unique 衝突チェック（自分以外）
+                if StoreAccount.objects.filter(email__iexact=login_email).exclude(pk=sa.pk).exists():
+                    messages.error(request, "この管理者メールアドレスは既に別の店舗アカウントで使用されています。")
+                    return redirect("accounts:company_store_review_detail", request_id=req.id)
+
+                sa.email = login_email
+                sa.admin_email = login_email
+                sa.account_type = store_type
+                sa.permission_flag = True
+                sa.is_active = True
+                sa.save(update_fields=["email", "admin_email", "account_type", "permission_flag", "is_active"])
+            else:
+                # username衝突回避
                 base_username = f"store_{req.target_store_id}"
                 username = base_username
                 i = 1
@@ -160,39 +197,51 @@ class company_store_review_permitView(LoginRequiredMixin, View):
                     i += 1
                     username = f"{base_username}_{i}"
 
+                if StoreAccount.objects.filter(email__iexact=login_email).exists():
+                    messages.error(request, "この管理者メールアドレスは既に使用されています。")
+                    return redirect("accounts:company_store_review_detail", request_id=req.id)
+
                 sa = StoreAccount.objects.create(
                     username=username,
-                    email=req.email,          # 店舗メール（申請時に Store.email をコピーしてる前提）
+                    email=login_email,
                     account_type=store_type,
                     store=req.target_store,
-                    admin_email=req.admin_email if hasattr(req, "admin_email") and req.admin_email else req.email,
+                    admin_email=login_email,
                     permission_flag=True,
                     is_active=True,
                 )
-                # 初回はパスワード未設定にしておく
                 sa.set_unusable_password()
                 sa.save(update_fields=["password"])
+                send_reset_mail = True  # 新規作成なら送る
 
-            # 3) ✅ 即パスワード再設定メール送信（Django標準）
-            form = StorePasswordResetForm(data={"email": sa.email})
-            if form.is_valid():
-                form.save(
-                    request=request,
-                    use_https=False,  # 本番は True 推奨（HTTPS環境なら）
-                    from_email=settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER,
-                    subject_template_name="accounts/password_reset_subject.txt",
-                    email_template_name="accounts/store_password_reset_email.html",
-                    extra_email_context={
-                        "store_name": req.store_name,
-                        "branch_name": req.branch_name,
-                    },
-                )
-            else:
-                # ここに来るのは基本「メール空」などの異常系
-                messages.warning(request, "承認は完了しましたが、再設定メールの送信に失敗しました。")
+            # 3) パスワード再設定メール（申請中→承認 or 新規作成時のみ送る）
+            if send_reset_mail:
+                form = StorePasswordResetForm(data={"email": sa.email})
+                if form.is_valid():
+                    form.save(
+                        request=request,
+                        use_https=False,
+                        from_email=settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER,
+                        subject_template_name="accounts/password_reset_subject.txt",
+                        email_template_name="accounts/store_password_reset_email.html",
+                        extra_email_context={
+                            "store_name": req.store_name,
+                            "branch_name": req.branch_name,
+                        },
+                    )
+                else:
+                    messages.warning(request, "承認は完了しましたが、再設定メールの送信に失敗しました。")
 
-        messages.success(request, "承認しました。店舗へパスワード再設定メールを送信しました。")
+        # 表示メッセージ
+        if req.request_status_id == status_approved.id:
+            messages.success(request, "店舗アカウント情報を更新しました。")
+        else:
+            messages.success(request, "承認しました。店舗へパスワード再設定メールを送信しました。")
+
         return redirect("accounts:company_store_review_detail", request_id=req.id)
+
+    
+
 class company_store_review_rejectView(LoginRequiredMixin, View):
     def post(self, request, request_id):
         req = get_object_or_404(StoreAccountRequest, id=request_id)
@@ -357,6 +406,7 @@ def is_store_user(user) -> bool:
 
 class store_loginView(LoginView):
     template_name = "accounts/store_login.html"
+    authentication_form = StoreLoginForm
 
     def get_success_url(self):
         return reverse_lazy("stores:store_top")
@@ -430,6 +480,10 @@ class store_account_searchView(TemplateView):
         page = self.request.GET.get("page") or 1
 
         pending_status = ApplicationStatus.objects.get(status="申請中")
+        rejected_status = ApplicationStatus.objects.get(status="却下")
+
+        # ★ requester を必ず入れる（自分の申請だけ）
+        me = self.request.user
 
         qs = (
             Store.objects.all()
@@ -442,12 +496,19 @@ class store_account_searchView(TemplateView):
                     StoreAccountRequest.objects.filter(
                         target_store_id=OuterRef("pk"),
                         request_status=pending_status,
+                        requester=me,
+                    )
+                ),
+                has_rejected_request=Exists(
+                    StoreAccountRequest.objects.filter(
+                        target_store_id=OuterRef("pk"),
+                        request_status=rejected_status,
+                        requester=me,
                     )
                 ),
             )
             .order_by("id")
         )
-
 
         if q_rst_name:
             qs = qs.filter(Q(store_name__icontains=q_rst_name) | Q(branch_name__icontains=q_rst_name))
@@ -455,12 +516,11 @@ class store_account_searchView(TemplateView):
             qs = qs.filter(phone_number__icontains=q_tel)
         if q_area:
             qs = qs.filter(area_id=q_area)
-        
+
         total_count = qs.count()
         stores_page = Paginator(qs, self.paginate_by).get_page(page)
 
         ctx["areas"] = Area.objects.all().order_by("id")
-
         ctx.update({
             "stores": stores_page,
             "total_count": total_count,
@@ -477,55 +537,68 @@ class store_account_request_createView(LoginRequiredMixin, View):
         print("POST:", dict(request.POST))
         print("FILES:", request.FILES)
 
-        # CustomerAccount 判定（isinstance ではなくDB存在で判定）
+        # ✅ CustomerAccount 実体を取る（多テーブル継承対策）
         try:
-            customer = CustomerAccount.objects.get(pk=request.user.pk)
-        except CustomerAccount.DoesNotExist:
+            customer = request.user.customeraccount
+        except Exception:
+            messages.error(request, "顧客ログインが必要です。")
             return redirect("accounts:customer_top")
 
         store_id = request.POST.get("store_id")
-        if not store_id:
-            return redirect("accounts:store_account_search")
-
         store = get_object_or_404(Store, id=store_id)
 
-        # 登録済みは申請不可
+        # 既に店舗アカウントが紐づいている店舗は申請不可
         if StoreAccount.objects.filter(store=store).exists():
+            messages.info(request, "この店舗は既に店舗アカウントが登録済みです。")
             return redirect("accounts:store_account_search")
 
         applicant_name = (request.POST.get("applicant_name") or "").strip()
         relation = (request.POST.get("relation_to_store") or "").strip()
+        admin_email = (request.POST.get("admin_email") or "").strip()
         license_image = request.FILES.get("license_image")
 
-        if not applicant_name or not relation or not license_image:
+        if not applicant_name or not relation or not admin_email or not license_image:
+            messages.error(request, "必須項目が不足しています。")
             return redirect("accounts:store_account_search")
 
-        status_obj = ApplicationStatus.objects.get(status="申請中")
+        # admin_email 形式チェック（軽く）
+        try:
+            validate_email(admin_email)
+        except ValidationError:
+            messages.error(request, "管理者メールアドレスの形式が正しくありません。")
+            return redirect("accounts:store_account_search")
 
-        # 店舗単位で申請中は1つにする（テンプレの「申請中」と整合）
+        status_pending = ApplicationStatus.objects.get(status="申請中")
+
+        # ✅ 同一店舗に「申請中」が既にあるなら弾く（申請者が違っても）
         if StoreAccountRequest.objects.filter(
             target_store=store,
-            request_status=status_obj,
+            request_status=status_pending,
         ).exists():
+            messages.info(request, "この店舗は現在申請中です。")
             return redirect("accounts:store_account_search")
 
         StoreAccountRequest.objects.create(
-            requester=customer,
+            requester=customer,            # ✅ CustomerAccount を渡す
             target_store=store,
             license_image=license_image,
-            request_status=status_obj,
+            request_status=status_pending,
 
             store_name=store.store_name,
             branch_name=store.branch_name,
-            email=store.email,
+            email=store.email,             # 店舗メール（店舗情報）
             phone_number=store.phone_number,
             address=store.address,
 
             applicant_name=applicant_name,
             relation_to_store=relation,
-        )
-        return redirect("accounts:store_account_search")
 
+            admin_email=admin_email,       # ✅ ログイン用メール
+        )
+
+        messages.success(request, "申請を受け付けました。審査結果をお待ちください。")
+        return redirect("accounts:store_account_search")
+    
 class storemail_sendView(PasswordResetView):
     template_name = "accounts/store_mail_send.html"
     email_template_name = "accounts/store_password_reset_email.html"
@@ -582,4 +655,78 @@ class customer_topView(TemplateView):
             s.image_static = SCENE_IMAGE_MAP.get(s.scene_name, "images/scene_default.jpg")
 
         context["scenes"] = scenes
+        return context
+
+        from django.db.models import Avg, Count, Sum, F, ExpressionWrapper, FloatField
+
+        ranking_stores = Store.objects.prefetch_related("images").annotate(
+            weighted_avg_rating=Sum(
+                F('review__score') * F('review__reviewer__trust_score'),
+                output_field=FloatField()
+            ) / Sum(F('review__reviewer__trust_score'), output_field=FloatField()),
+            review_count_val=Count('review'),
+        ).order_by('-weighted_avg_rating', 'id')[:5]
+
+        # テンプレートで星を表示するためのヘルパー
+        for store in ranking_stores:
+             # None の場合は 0 または 3.0 (表示上のデフォルト)
+            rating = store.weighted_avg_rating if store.weighted_avg_rating else 0.0
+            store.avg_rating_val = rating
+            
+            # 星の生成（半星対応）
+            full_stars = int(rating)
+            half = (rating - full_stars) >= 0.5
+            states = []
+            for i in range(5):
+                if i < full_stars:
+                    states.append("full")
+                elif i == full_stars and half:
+                    states.append("half")
+                else:
+                    states.append("empty")
+            store.star_states = states
+
+        context["ranking_stores"] = ranking_stores
+
+        # 4) 星の合計獲得数ランキング（総スコアで上位5件）
+        total_star_stores = Store.objects.prefetch_related("images").annotate(
+            total_score_val=Sum(
+                F('review__score'),
+                output_field=FloatField()
+            )
+        ).order_by('-total_score_val', 'id')[:5]
+
+        # ヘルパー（合計ランキング用）
+        for store in total_star_stores:
+             # display rating (avg)
+             # 別途 avg_rating 計算しないと avg が出せないのでここで計算 or annotate する
+             # ここでは簡易的に aggregate せず review__score の平均を出すアノテート入れてもいいが、
+             # 既存 ranking_stores と被らないようにもう一度記述するか、共通化するか。
+             # シンプルに annotate で avg も取る。
+             pass
+
+        # 上記で annotate してないので、改めて取る（チェーンできるが可読性重視で書き直し）
+        # 実際には total_score_val だけで並び替え済み。
+        # 表示用にAvgも欲しいので追加。
+        total_star_stores = Store.objects.prefetch_related("images").annotate(
+             total_score_val=Sum('review__score'),
+             avg_rating_val=Avg('review__score')
+        ).order_by('-total_score_val', 'id')[:5]
+
+        for store in total_star_stores:
+            rating = store.avg_rating_val if store.avg_rating_val else 0.0
+            full_stars = int(rating)
+            half = (rating - full_stars) >= 0.5
+            states = []
+            for i in range(5):
+                if i < full_stars:
+                    states.append("full")
+                elif i == full_stars and half:
+                    states.append("half")
+                else:
+                    states.append("empty")
+            store.star_states = states
+
+        context["total_star_stores"] = total_star_stores
+
         return context

@@ -76,6 +76,14 @@
               <span class="sa-badge sa-badge-done">登録済み</span>
             {% elif s.has_pending_request %}
               <span class="sa-badge sa-badge-wait">申請中</span>
+            {% elif s.has_rejected_request %}
+              <span class="sa-badge sa-badge-reject">却下</span>
+              <!-- 再申請させるならボタンも出す -->
+              <button class="sa-btn sa-btn-sm" type="button"
+                  onclick="openRequestModal('{{ s.id }}','{{ s.store_name|escapejs }}','{{ s.branch_name|default_if_none:""|escapejs }}')">
+                  再申請する
+              </button>
+            
             {% else %}
               <button class="sa-btn sa-btn-sm" type="button"
                 onclick="openRequestModal('{{ s.id }}','{{ s.store_name|escapejs }}','{{ s.branch_name|default_if_none:""|escapejs }}')">
@@ -114,6 +122,16 @@
 <!-- 申請モーダル（POST / multipart） -->
 <div class="sa-modal" id="requestModal">
   <div class="sa-modal-panel">
+    {% if messages %}
+      <div style="margin-bottom:12px;">
+        {% for message in messages %}
+            <div style="padding:10px 12px; border:1px solid #ddd; border-radius:10px; margin-bottom:8px; background:#fafafa;">
+              {{ message }}
+            </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
     <div class="sa-modal-head">
       <div>
         <div class="sa-modal-title">店舗アカウント申請</div>
@@ -244,6 +262,11 @@
   background:#fff3d6;
   color:#8a5a00;
   border-color:#ffd89a;
+}
+.sa-badge-reject{
+  background:#fff1f2;
+  color:#b42318;
+  border-color:#fecdd3;
 }
 
 /* Pager */

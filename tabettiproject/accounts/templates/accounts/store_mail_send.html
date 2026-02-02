@@ -5,139 +5,183 @@
 
 {% block css %}
 <style>
-  .auth-page-wrapper .password-reset-wrapper{
-    margin: 10px 0 40px;
-    display:flex;
-    justify-content:center;
-  }
-
-  .auth-page-wrapper .password-reset-box{
-    width: 720px;
-    background:#fff;
-    padding: 50px 44px;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    text-align:center;
-    border: 1px solid #eee;
-  }
-
-  .auth-page-wrapper .brand{
+  /* store_login.html に寄せた構成 */
+  .login-page{
+    min-height: calc(100vh - 120px);
     display:flex;
     align-items:center;
     justify-content:center;
-    gap:10px;
-    margin-bottom: 14px;
+    padding: 24px 16px;
   }
-  .auth-page-wrapper .brand .logo{
-    font-weight:900;
-    font-size:22px;
-    color:#333;
+
+  .login-card{
+    width: min(520px, 96vw);
+    background:#fff;
+    border:1px solid #e6e6e6;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+  }
+
+  .login-card__inner{
+    padding: 22px 22px 18px;
+  }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    justify-content:center;
+    margin-bottom: 10px;
+  }
+  .brand__logo-img{
+    display:block;
+    border-radius: 6px;
+  }
+  .brand__title{
+    font-weight: 900;
+    font-size: 15px;
+    color:#222;
     letter-spacing: .02em;
   }
-  .auth-page-wrapper .brand .badge{
-    font-size:12px;
-    color:#666;
-    background:#f3f3f3;
-    padding:4px 10px;
-    border-radius:999px;
+
+  .page-title{
+    margin: 10px 0 8px;
+    font-size: 18px;
+    font-weight: 900;
+    text-align:center;
+    color:#111;
   }
 
-  .auth-page-wrapper h2{
-    font-size:28px;
-    margin: 8px 0 14px;
-    font-weight:900;
-  }
-
-  .auth-page-wrapper .reset-description{
-    font-size:16px;
+  .page-sub{
+    margin: 0 0 16px;
+    font-size: 12px;
+    line-height: 1.7;
+    text-align:center;
     color:#555;
-    line-height:1.7;
-    margin-bottom: 26px;
   }
 
-  .auth-page-wrapper .form-group{
-    text-align:left;
-    margin-bottom: 20px;
+  .form-group{
+    margin: 12px 0;
   }
-
-  .auth-page-wrapper label{
+  .form-group label{
     display:block;
-    font-size:14px;
-    font-weight:800;
-    margin-bottom: 8px;
-    color:#444;
+    font-size: 12px;
+    font-weight: 800;
+    color:#333;
+    margin-bottom: 6px;
   }
-
-  .auth-page-wrapper input{
+  .form-group input{
     width:100%;
-    padding: 14px 14px;
-    font-size:16px;
-    border:1px solid #ccc;
-    border-radius: 8px;
+    padding: 12px 12px;
+    border-radius: 10px;
+    border:1px solid #dcdcdc;
+    font-size: 14px;
+    background:#fff;
     box-sizing:border-box;
   }
+  .form-group input:focus{
+    outline:none;
+    border-color:#1e73c9;
+    box-shadow: 0 0 0 3px rgba(30,115,201,.12);
+  }
 
-  .auth-page-wrapper .btn-submit{
+  .btn-login{
     width:100%;
-    padding: 16px 0;
-    font-size:16px;
-    font-weight:900;
-    color:#fff;
-    background:#ff8a00;
+    margin-top: 12px;
+    padding: 12px 0;
     border:none;
-    border-radius: 8px;
+    border-radius: 10px;
+    background:#2a69a8;        /* store_loginの青系に寄せる */
+    color:#fff;
+    font-weight: 900;
+    font-size: 14px;
     cursor:pointer;
   }
-
-  .auth-page-wrapper .btn-submit:disabled{
+  .btn-login:hover{ opacity:.92; }
+  .btn-login:active{ transform: translateY(1px); }
+  .btn-login:disabled{
     opacity:.7;
     cursor:not-allowed;
+    transform:none;
   }
 
-  .auth-page-wrapper .back-links{
-    margin-top: 22px;
-    font-size: 13px;
+  .login-footer{
+    border-top: 1px solid #eee;
+    padding: 14px 16px;
     display:flex;
-    justify-content:center;
-    gap: 14px;
-    flex-wrap: wrap;
+    flex-direction:column;
+    gap: 8px;
+    text-align:center;
+    font-size: 12px;
   }
-
-  .auth-page-wrapper .back-links a{
-    color:#ff8a00;
+  .login-footer a{
+    color:#1e73c9;
     text-decoration:none;
-    font-weight:700;
+    font-weight:800;
   }
-  .auth-page-wrapper .back-links a:hover{
-    text-decoration:underline;
+  .login-footer a:hover{ text-decoration:underline; }
+
+  /* messages / errors */
+  .msg-box{
+    margin: 10px 0 0;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid #f3c7c7;
+    background: #fff2f2;
+    color:#b42318;
+    font-size: 12px;
+    text-align:left;
   }
+  .msg-box .line{ margin: 2px 0; }
+
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="auth-page-wrapper">
-  <div class="password-reset-wrapper">
-    <div class="password-reset-box">
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-card__inner">
 
       <div class="brand">
-        <div class="logo">タベッチ</div>
-        <div class="badge">店舗管理</div>
+        <img
+          class="brand__logo-img"
+          src="{% static 'images/Tabecchi_icon.png' %}"
+          alt="タベッチ"
+          width="26"
+          height="26"
+        >
+        <div class="brand__title">タベッチ 店舗管理</div>
       </div>
 
-      <h2>パスワードをお忘れの方（店舗）</h2>
-
-      <p class="reset-description">
+      <div class="page-title">パスワード再設定（店舗）</div>
+      <p class="page-sub">
         店舗アカウントに登録したメールアドレスを入力してください。<br>
-        パスワード再設定用のメールをお送りします。
+        パスワード再設定用のメールを送信します。
       </p>
+
+      {% if messages %}
+        <div class="msg-box">
+          {% for message in messages %}
+            <div class="line">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% if form.errors %}
+        <div class="msg-box" style="margin-top:10px;">
+          {{ form.non_field_errors }}
+          {{ form.email.errors }}
+        </div>
+      {% endif %}
 
       <form method="post" id="resetForm">
         {% csrf_token %}
         <div class="form-group">
           <label for="email">メールアドレス</label>
-          <input type="email" name="email" id="email" required placeholder="example@shop.com">
+          <input type="email" name="email" id="email" required placeholder="owner@example.com"
+                 value="{{ form.email.value|default_if_none:'' }}">
         </div>
-        <button type="submit" class="btn-submit" id="submitBtn">送信する</button>
+        <button type="submit" class="btn-login" id="submitBtn">送信する</button>
       </form>
 
       <script>
@@ -145,7 +189,6 @@
           const form = document.getElementById("resetForm");
           const btn  = document.getElementById("submitBtn");
           if(!form || !btn) return;
-
           form.addEventListener("submit", () => {
             btn.disabled = true;
             btn.textContent = "送信中...";
@@ -153,11 +196,11 @@
         })();
       </script>
 
-      <div class="back-links">
-        <a href="{% url 'accounts:store_login' %}">店舗ログインに戻る</a>
-        <a href="{% url 'accounts:customer_login' %}">顧客ログインはこちら</a>
-      </div>
+    </div>
 
+    <div class="login-footer">
+      <div><a href="{% url 'accounts:store_login' %}">店舗ログインに戻る</a></div>
+      <div><a href="{% url 'accounts:customer_login' %}">顧客ログインはこちら</a></div>
     </div>
   </div>
 </div>
