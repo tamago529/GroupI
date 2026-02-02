@@ -72,6 +72,21 @@
     <!-- パンくずリスト -->
     {% block breadcrumb %}{% endblock %}
 
+    <!-- メッセージ表示エリア -->
+    {% if messages %}
+    <div class="message-container" style="max-width: 1100px; margin: 16px auto 0; padding: 0 16px;">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" style="padding: 12px; margin-bottom: 10px; border-radius: 4px; font-weight: bold; 
+             {% if message.tags == 'error' %}background-color: #fca5a5; color: #7f1d1d; border: 1px solid #f87171;{% endif %}
+             {% if message.tags == 'success' %}background-color: #86efac; color: #14532d; border: 1px solid #4ade80;{% endif %}
+             {% if message.tags == 'warning' %}background-color: #fdba74; color: #7c2d12; border: 1px solid #fb923c;{% endif %}
+             {% if message.tags == 'info' %}background-color: #93c5fd; color: #1e3a8a; border: 1px solid #60a5fa;{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <!-- メインコンテンツ -->
     <main class="content">
         {% block content %}{% endblock %}

@@ -564,10 +564,10 @@ class store_account_staff_inputView(TemplateView):
 class customer_topView(TemplateView):
     template_name = "accounts/customer_top.html"
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        # 1) シーン画像の定義
         SCENE_IMAGE_MAP = {
             "お一人様": "images/scene_solo.jpg",
             "家族・こどもと": "images/scene_family.jpg",
@@ -577,9 +577,87 @@ class customer_topView(TemplateView):
             "合コン": "images/scene_gokon.jpg",
         }
 
+        # 2) シーン情報の取得
         scenes = list(Scene.objects.all().order_by("id"))
         for s in scenes:
             s.image_static = SCENE_IMAGE_MAP.get(s.scene_name, "images/scene_default.jpg")
 
         context["scenes"] = scenes
+
+        # 3) 人気ランキング（weighted_avg_rating で上位5件）
+        #    search/views.py と同様の計算式: 
+        #    Sum(score * trust) / Sum(trust)
+        
+        from django.db.models import Avg, Count, Sum, F, ExpressionWrapper, FloatField
+
+        ranking_stores = Store.objects.prefetch_related("images").annotate(
+            weighted_avg_rating=Sum(
+                F('review__score') * F('review__reviewer__trust_score'),
+                output_field=FloatField()
+            ) / Sum(F('review__reviewer__trust_score'), output_field=FloatField()),
+            review_count_val=Count('review'),
+        ).order_by('-weighted_avg_rating', 'id')[:5]
+
+        # テンプレートで星を表示するためのヘルパー
+        for store in ranking_stores:
+             # None の場合は 0 または 3.0 (表示上のデフォルト)
+            rating = store.weighted_avg_rating if store.weighted_avg_rating else 0.0
+            store.avg_rating_val = rating
+            
+            # 星の生成（半星対応）
+            full_stars = int(rating)
+            half = (rating - full_stars) >= 0.5
+            states = []
+            for i in range(5):
+                if i < full_stars:
+                    states.append("full")
+                elif i == full_stars and half:
+                    states.append("half")
+                else:
+                    states.append("empty")
+            store.star_states = states
+
+        context["ranking_stores"] = ranking_stores
+
+        # 4) 星の合計獲得数ランキング（総スコアで上位5件）
+        total_star_stores = Store.objects.prefetch_related("images").annotate(
+            total_score_val=Sum(
+                F('review__score'),
+                output_field=FloatField()
+            )
+        ).order_by('-total_score_val', 'id')[:5]
+
+        # ヘルパー（合計ランキング用）
+        for store in total_star_stores:
+             # display rating (avg)
+             # 別途 avg_rating 計算しないと avg が出せないのでここで計算 or annotate する
+             # ここでは簡易的に aggregate せず review__score の平均を出すアノテート入れてもいいが、
+             # 既存 ranking_stores と被らないようにもう一度記述するか、共通化するか。
+             # シンプルに annotate で avg も取る。
+             pass
+
+        # 上記で annotate してないので、改めて取る（チェーンできるが可読性重視で書き直し）
+        # 実際には total_score_val だけで並び替え済み。
+        # 表示用にAvgも欲しいので追加。
+        total_star_stores = Store.objects.prefetch_related("images").annotate(
+             total_score_val=Sum('review__score'),
+             avg_rating_val=Avg('review__score')
+        ).order_by('-total_score_val', 'id')[:5]
+
+        for store in total_star_stores:
+            rating = store.avg_rating_val if store.avg_rating_val else 0.0
+            full_stars = int(rating)
+            half = (rating - full_stars) >= 0.5
+            states = []
+            for i in range(5):
+                if i < full_stars:
+                    states.append("full")
+                elif i == full_stars and half:
+                    states.append("half")
+                else:
+                    states.append("empty")
+            store.star_states = states
+
+        context["total_star_stores"] = total_star_stores
+
         return context

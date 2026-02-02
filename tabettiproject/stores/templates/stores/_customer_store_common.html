@@ -356,9 +356,7 @@
     </h1>
 
     <div class="action-group">
-      <button class="btn-action-white" type="button">
-        <span>📍</span>行った
-      </button>
+
 
       <form method="post"
             action="{% url 'reviews:customer_review_list' %}?store_id={{ store.id }}&from_search={{ from_search }}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}"
@@ -415,7 +413,8 @@
   </div>
 
   <div class="meta-info-text">
-    ジャンル：{{ store.scene.scene_name }}<br>
+    ジャンル：{{ store.genre }}<br>
+    利用シーン：{{ store.scene.scene_name }}<br>
     予算：￥{{ store.budget }}〜
   </div>
 

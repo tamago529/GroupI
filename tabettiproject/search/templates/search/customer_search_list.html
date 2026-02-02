@@ -1,4 +1,6 @@
 {% extends "customer_base.html" %}
+{% load static %}
+{% load search_extras %}
 {% block title %}検索結果一覧 - タベッチ{% endblock %}
 
 {% block breadcrumb %}
@@ -430,8 +432,7 @@
   {% if stores.paginator.num_pages > 1 %}
   <div class="pagination">
     {% if stores.has_previous %}
-    <a
-      href="?page={{ stores.previous_page_number }}{% if area %}&area={{ area|urlencode }}{% endif %}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if scene %}&scene={{ scene|urlencode }}{% endif %}{% if people %}&people={{ people|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">前へ</a>
+    <a href="?{% url_replace page=stores.previous_page_number %}">前へ</a>
     {% endif %}
 
     {% for num in page_range %}
@@ -440,15 +441,12 @@
     {% elif stores.number == num %}
     <span class="current">{{ num }}</span>
     {% else %}
-    <a
-      href="?page={{ num }}{% if area %}&area={{ area|urlencode }}{% endif %}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if scene %}&scene={{ scene|urlencode }}{% endif %}{% if people %}&people={{ people|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">{{
-      num }}</a>
+    <a href="?{% url_replace page=num %}">{{ num }}</a>
     {% endif %}
     {% endfor %}
 
     {% if stores.has_next %}
-    <a
-      href="?page={{ stores.next_page_number }}{% if area %}&area={{ area|urlencode }}{% endif %}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if scene %}&scene={{ scene|urlencode }}{% endif %}{% if people %}&people={{ people|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">次へ</a>
+    <a href="?{% url_replace page=stores.next_page_number %}">次へ</a>
     {% endif %}
   </div>
   {% endif %}

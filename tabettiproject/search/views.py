@@ -264,7 +264,6 @@ def customer_search_listView(request):
         store_qs = store_qs.filter(
             Q(store_name__icontains=keyword) |
             Q(genre__icontains=keyword) |
-            Q(genre_master__name__icontains=keyword) |
             Q(address__icontains=keyword)
         )
 

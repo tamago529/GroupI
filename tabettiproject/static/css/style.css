@@ -89,7 +89,7 @@ body {
 .search-bar input[type="date"],
 .search-bar input[type="time"],
 .search-bar select {
-  width: 150px;
+  width: 180px;
 }
 
 /* ===== 検索ボタン ===== */
