@@ -64,8 +64,7 @@ class Area(models.Model):
 
     def __str__(self):
         return self.area_name
-
-
+    
 class ReservationStatus(models.Model):
     status = models.CharField(max_length=50, verbose_name="予約ステータス")
 
@@ -254,7 +253,16 @@ class CustomerAccount(Account):
         """信頼度スコアを計算して保存"""
         self.trust_score = self.calculate_trust_score()
         self.save(update_fields=['trust_score'])
+class Genre(models.Model):
+    name = models.CharField(max_length=100, unique=True, verbose_name="ジャンル名")
 
+    class Meta:
+        db_table = "genres"
+        verbose_name = "ジャンル"
+        verbose_name_plural = "ジャンル"
+
+    def __str__(self):
+        return self.name
 
 
 class Store(models.Model):
@@ -286,6 +294,13 @@ class Store(models.Model):
     seats = models.IntegerField(verbose_name="席数")
     budget = models.IntegerField(verbose_name="予算")
     genre = models.CharField(max_length=100, verbose_name="ジャンル")
+    genre_master = models.ForeignKey(
+        "Genre",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name="ジャンル（マスタ）",
+    )
     scene = models.ForeignKey("Scene", on_delete=models.PROTECT, verbose_name="利用シーン")
     reservable = models.BooleanField(verbose_name="予約可否", default=True)
     editable = models.BooleanField(verbose_name="編集可能", default=True)
