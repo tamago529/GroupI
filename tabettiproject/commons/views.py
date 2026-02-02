@@ -30,6 +30,12 @@ class customer_common_confirmView(View):
         if request.POST.get('is_final') == 'true':
             return self.handle_final_save(request)
 
+        # 入力内容のバリデーション（メール重複チェック等）
+        from accounts.forms import CustomerRegisterForm
+        form = CustomerRegisterForm(request.POST)
+        if not form.is_valid():
+            return render(request, "accounts/customer_register.html", {"form": form})
+
         # 入力画面から来た場合：確認画面用のデータ作成
         display_data = []
         hidden_data = {}

@@ -149,6 +149,68 @@
   .back-top a:hover {
     text-decoration: underline;
   }
+
+  /* ===== 画像プレビュー関連 ===== */
+  .file-input-wrapper {
+    margin-top: 10px;
+    border: 1px dashed #ccc;
+    padding: 15px;
+    border-radius: 8px;
+    background: #fdfdfd;
+  }
+
+  .preview-container {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .preview-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 8px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 6px;
+  }
+
+  .image-preview {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background: #eee;
+  }
+
+  .preview-label {
+    font-size: 12px;
+    color: #666;
+  }
+
+  .clear-checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #e02020;
+    cursor: pointer;
+  }
+
+  .clear-checkbox-wrapper input {
+    width: auto;
+    margin: 0;
+  }
+
+  current-image-info {
+    font-size: 12px;
+    color: #0066cc;
+    margin-bottom: 8px;
+    display: block;
+  }
 </style>
 {% endblock %}
 
@@ -174,6 +236,19 @@
   </div>
   {% endif %}
 
+  {% if form.errors %}
+  <div class="alert alert-error" style="background:#fff0f0; border:1px solid #ffcccc; color:#d00000; padding:15px; border-radius:4px; margin-bottom:24px;">
+    <strong>入力内容にエラーがあります。</strong> 各項目を確認してください。
+    {% if form.non_field_errors %}
+      <ul style="margin-top: 10px;">
+        {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+  {% endif %}
+
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     
@@ -185,10 +260,16 @@
         <div class="form-group">
           <label>姓</label>
           {{ form.last_name }}
+          {% if form.last_name.errors %}
+            <div class="error-text" style="color:#e02020; font-size:12px; margin-top:5px;">{{ form.last_name.errors.0 }}</div>
+          {% endif %}
         </div>
         <div class="form-group">
           <label>名</label>
           {{ form.first_name }}
+          {% if form.first_name.errors %}
+            <div class="error-text" style="color:#e02020; font-size:12px; margin-top:5px;">{{ form.first_name.errors.0 }}</div>
+          {% endif %}
         </div>
       </div>
 
@@ -216,6 +297,9 @@
       <div class="form-group">
         <label>メールアドレス</label>
         {{ form.email }}
+        {% if form.email.errors %}
+          <div class="error-text" style="color:#e02020; font-size:12px; margin-top:5px;">{{ form.email.errors.0 }}</div>
+        {% endif %}
       </div>
     </div>
 
@@ -230,7 +314,17 @@
         </div>
         <div class="form-group">
           <label>プロフィール画像</label>
-          {{ form.icon_image }}
+          <div class="file-input-wrapper">
+            {{ form.icon_image }}
+            <div class="preview-container" id="preview-icon_image">
+              {% if form.instance.icon_image %}
+                <div class="preview-item">
+                  <img src="{{ form.instance.icon_image.url }}" class="image-preview">
+                  <span class="preview-label">現在のプロフィール画像</span>
+                </div>
+              {% endif %}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -277,7 +371,17 @@
 
       <div class="form-group">
         <label>カバー画像</label>
-        {{ form.cover_image }}
+        <div class="file-input-wrapper">
+          {{ form.cover_image }}
+          <div class="preview-container" id="preview-cover_image">
+            {% if form.instance.cover_image %}
+              <div class="preview-item">
+                <img src="{{ form.instance.cover_image.url }}" class="image-preview">
+                <span class="preview-label">現在のカバー画像</span>
+              </div>
+            {% endif %}
+          </div>
+        </div>
       </div>
     </div>
 
@@ -293,4 +397,53 @@
   </form>
 
 </div>
+{% block js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // プレビュー機能の追加
+    const setupPreview = (inputId, previewContainerId) => {
+        const input = document.querySelector(`input[name="${inputId}"]`);
+        const container = document.getElementById(previewContainerId);
+        
+        if (!input || !container) return;
+
+        input.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    // プレビュー表示エリアを更新
+                    container.innerHTML = `
+                        <div class="preview-item">
+                            <img src="${e.target.result}" class="image-preview">
+                            <span class="preview-label">選択中の新しい画像</span>
+                        </div>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    };
+
+    setupPreview('icon_image', 'preview-icon_image');
+    setupPreview('cover_image', 'preview-cover_image');
+
+    // 「クリア」チェックボックスの装飾（もしあれば）
+    document.querySelectorAll('.file-input-wrapper').forEach(wrapper => {
+        const clearCheckbox = wrapper.querySelector('input[type="checkbox"]');
+        if (clearCheckbox) {
+            const cbWrapper = document.createElement('label');
+            cbWrapper.className = 'clear-checkbox-wrapper';
+            const labelSpan = document.createElement('span');
+            labelSpan.innerText = '現在の画像を削除する';
+            
+            // チェックボックスを移動
+            clearCheckbox.parentNode.insertBefore(cbWrapper, clearCheckbox);
+            cbWrapper.appendChild(clearCheckbox);
+            cbWrapper.appendChild(labelSpan);
+        }
+    });
+});
+</script>
+{% endblock %}
 {% endblock %}

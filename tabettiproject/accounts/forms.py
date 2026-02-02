@@ -108,6 +108,22 @@ class CustomerRegisterForm(forms.ModelForm):
         # sub_email は email をコピーして使う方針で除外、あるいは入力させるか。
         # fields にないものは save 時に手動で入れる必要がある。
     
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email:
+            from commons.models import Account
+            if Account.objects.filter(email=email).exists():
+                raise forms.ValidationError("このメールアドレスは既に登録されています。")
+        return email
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if username:
+            from commons.models import Account
+            if Account.objects.filter(username=username).exists():
+                raise forms.ValidationError("このユーザーネームは既に使われています。")
+        return username
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # 必須属性の追加やclassの付与
@@ -165,6 +181,17 @@ class CustomerSettingsForm(forms.ModelForm):
             'nickname', 'occupation', 'camera', 'standard_score', 'introduction',
             'title', 'subtitle', 'genre_focus', 'icon_image', 'cover_image'
         ]
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email:
+            from commons.models import Account
+            qs = Account.objects.filter(email=email)
+            if self.instance and self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise forms.ValidationError("このメールアドレスは既に登録されています。")
+        return email
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

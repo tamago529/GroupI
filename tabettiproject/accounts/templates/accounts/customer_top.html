@@ -559,6 +559,148 @@
     </div>
   </section>
 
+  <!-- 口コミから探す -->
+  <style>
+    .review-pickup-grid {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+      gap: 24px;
+    }
+    @media (min-width: 768px) {
+      .review-pickup-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .review-card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .review-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+    
+    .review-card-img {
+      width: 100%;
+      height: 250px; /* 大きくした */
+      object-fit: cover;
+      background: #f0f0f0;
+    }
+    
+    .review-card-body {
+      padding: 20px; /* パディングも大きく */
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .review-card-store {
+      font-weight: bold;
+      color: #007bff;
+      font-size: 18px; /* フォントも大きく */
+      margin-bottom: 6px;
+    }
+    .review-card-area {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 12px;
+    }
+    
+    .review-card-user {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .review-user-icon {
+      width: 32px; /* アイコンも大きく */
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+      border: 1px solid #eee;
+    }
+    .review-user-name {
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .review-card-rating {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .review-score-val {
+      font-weight: bold;
+      color: #ff9800;
+      font-size: 18px;
+    }
+
+    .review-text-snippet {
+      font-size: 14px;
+      color: #444;
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 4; /* 行数も少し増やした */
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+
+  <section class="section">
+    <div class="section-title">口コミから探す</div>
+    <div class="review-pickup-grid">
+      {% for review in pickup_reviews %}
+      <a href="{% url 'stores:customer_store_info' review.store.id %}" class="review-card">
+        <!-- 写真 -->
+        {% if review.photos.first %}
+           <img src="{{ review.photos.first.image_path.url }}" class="review-card-img" alt="Review Image">
+        {% elif review.store.images.first %}
+           <img src="{{ review.store.images.first.image_file.url }}" class="review-card-img" alt="Store Image">
+        {% else %}
+           <img src="{% static 'images/no_image.png' %}" class="review-card-img" alt="No Image">
+        {% endif %}
+
+        <div class="review-card-body">
+           <div class="review-card-store">{{ review.store.store_name }}</div>
+           <div class="review-card-area">{{ review.store.area.area_name }} / {{ review.store.genre }}</div>
+           
+           <div class="review-card-user">
+             {% if review.reviewer.icon_image %}
+               <img src="{{ review.reviewer.icon_image.url }}" class="review-user-icon" alt="icon">
+             {% else %}
+               <img src="{% static 'images/default_user.png' %}" class="review-user-icon" alt="icon">
+             {% endif %}
+             <span class="review-user-name">{{ review.reviewer.nickname }}</span>
+           </div>
+
+           <div class="review-card-rating">
+             <span class="star-rating" style="font-size:12px;">
+               {% for s in review.star_states %}
+                 <svg class="svgstar {{ s }}"><use xlink:href="#icon-star"/></svg>
+               {% endfor %}
+             </span>
+             <span class="review-score-val">{{ review.score }}</span>
+           </div>
+
+           <div class="review-text-snippet">
+             {{ review.review_text }}
+           </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+
   <!-- 店舗登録プロモーション -->
   <section class="section" style="border-top: 1px solid #eee; padding-top: 40px;">
     <div style="background: linear-gradient(135deg, #fff 0%, #fffbf2 100%); padding: 30px; border-radius: 8px; border: 1px solid #ffe8cc; text-align: center;">
@@ -583,5 +725,234 @@
     </div>
   </section>
 
+  <!-- おすすめユーザー（追加） -->
+  <style>
+    .user-pickup-grid {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+      gap: 20px;
+      margin-top: 20px;
+    }
+    @media (min-width: 768px) {
+      .user-pickup-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .user-pickup-card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .user-pickup-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    }
+
+    .user-pickup-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 2px solid #f8f8f8;
+    }
+
+    .user-pickup-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .user-pickup-name {
+      font-weight: bold;
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-pickup-subtitle {
+      font-size: 12px;
+      color: #777;
+      margin-bottom: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-pickup-stats {
+      display: flex;
+      gap: 12px;
+      font-size: 12px;
+      color: #555;
+    }
+    .user-stat-val {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .user-pickup-action {
+      flex-shrink: 0;
+    }
+    
+    .follow-btn-compact {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid #ff8a00;
+    }
+    .btn-follow {
+      background: #fff;
+      color: #ff8a00;
+    }
+    .btn-follow:hover {
+      background: #fff8f0;
+    }
+    .btn-following {
+      background: #ff8a00;
+      color: #fff;
+    }
+    .btn-following:hover {
+      background: #e67c00;
+    }
+  </style>
+
+  <section class="section">
+    <div class="section-title">おすすめのユーザー</div>
+    <div class="user-pickup-grid">
+      {% for item in pickup_users %}
+      <div class="user-pickup-card-wrapper" style="position: relative;">
+        <a href="{% url 'follows:customer_user_page' item.account.id %}" class="user-pickup-card">
+          {% if item.account.icon_image %}
+            <img src="{{ item.account.icon_image.url }}" class="user-pickup-icon" alt="{{ item.account.nickname }}">
+          {% else %}
+            <img src="{% static 'images/default_user.png' %}" class="user-pickup-icon" alt="icon">
+          {% endif %}
+          
+          <div class="user-pickup-info">
+            <div class="user-pickup-name">{{ item.account.nickname }}</div>
+            <div class="user-pickup-subtitle">{{ item.account.subtitle|default:"グルメ好き" }}</div>
+            <div class="user-pickup-stats">
+              <span>ログ <span class="user-stat-val">{{ item.account.review_count }}</span></span>
+              <span>いいね <span class="user-stat-val">{{ item.account.total_likes }}</span></span>
+            </div>
+          </div>
+        </a>
+
+        <div style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%);">
+          <form action="{% url 'follows:customer_follow_list' %}" method="post" class="ajax-follow-form">
+            {% csrf_token %}
+            <input type="hidden" name="user_id" value="{{ item.account.id }}">
+            <input type="hidden" name="next" value="{{ request.path }}">
+            {% if item.is_following %}
+              <button type="submit" name="action" value="unfollow" class="follow-btn-compact btn-following">フォロー中</button>
+            {% else %}
+              <button type="submit" name="action" value="follow" class="follow-btn-compact btn-follow">フォローする</button>
+            {% endif %}
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
 </div>
+
+{% block js %}
+<script>
+// CSRFトークンを取得するヘルパー
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const forms = document.querySelectorAll('.ajax-follow-form');
+  
+  forms.forEach(form => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (form.dataset.isProcessing) return;
+      form.dataset.isProcessing = 'true';
+      
+      const formData = new FormData(form);
+      const submitBtn = e.submitter; // Clicked button
+      const action = submitBtn.value;
+      const originalText = submitBtn.innerText;
+      
+      // ボタンを無効化してフィードバック
+      submitBtn.disabled = true;
+      submitBtn.innerText = '処理中...';
+      
+      try {
+        formData.append('action', action); // Append instead of set to ensure it's included
+        
+        console.log('Sending follow request:', { action, user_id: formData.get('user_id') });
+
+        const url = form.getAttribute('action'); // form.action is contaminated by the button named 'action'
+        const response = await fetch(url, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCookie('csrftoken'), // 明示的に追加
+          }
+        });
+        
+        const data = await response.json();
+        console.log('Follow response:', data);
+
+        if (response.ok) {
+          if (data.status === 'followed') {
+            submitBtn.value = 'unfollow';
+            submitBtn.innerText = 'フォロー中';
+            submitBtn.classList.remove('btn-follow');
+            submitBtn.classList.add('btn-following');
+          } else if (data.status === 'unfollowed') {
+            submitBtn.value = 'follow';
+            submitBtn.innerText = 'フォローする';
+            submitBtn.classList.remove('btn-following');
+            submitBtn.classList.add('btn-follow');
+          }
+        } else {
+            const errorMsg = data.error || 'エラーが発生しました。';
+            alert(errorMsg);
+            submitBtn.innerText = originalText;
+        }
+      } catch (err) {
+        console.error('AJAX Error:', err);
+        alert('通信エラーが発生しました。コンソールを確認してください。');
+        submitBtn.innerText = originalText;
+      } finally {
+        submitBtn.disabled = false;
+        delete form.dataset.isProcessing;
+      }
+    });
+  });
+});
+</script>
+{% endblock %}
 {% endblock %}

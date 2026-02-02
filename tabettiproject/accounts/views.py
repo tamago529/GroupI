@@ -331,12 +331,13 @@ class customer_settingsView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # ログインユーザーが CustomerAccount であることを確認
-        try:
-            customer = self.request.user.customeraccount
-            from .forms import CustomerSettingsForm
-            context['form'] = CustomerSettingsForm(instance=customer)
-        except Exception:
-            pass
+        if 'form' not in context:
+            try:
+                customer = self.request.user.customeraccount
+                from .forms import CustomerSettingsForm
+                context['form'] = CustomerSettingsForm(instance=customer)
+            except Exception:
+                pass
         return context
 
     def post(self, request, *args, **kwargs):
@@ -349,6 +350,7 @@ class customer_settingsView(LoginRequiredMixin, TemplateView):
                 messages.success(request, "設定を変更しました。")
                 return redirect("accounts:customer_setting")
             else:
+                messages.error(request, "入力内容に不備があります。確認してください。")
                 return self.render_to_response(self.get_context_data(form=form))
         except Exception as e:
             messages.error(request, f"エラーが発生しました: {e}")
@@ -744,7 +746,7 @@ class customer_topView(TemplateView):
 
         # 上記で annotate してないので、改めて取る（チェーンできるが可読性重視で書き直し）
         # 実際には total_score_val だけで並び替え済み。
-        # 表示用にAvgも欲しいので追加。
+        # 4) 星の合計獲得数ランキング（総スコアで上位5件）
         total_star_stores = Store.objects.prefetch_related("images").annotate(
              total_score_val=Sum('review__score'),
              avg_rating_val=Avg('review__score')
@@ -765,5 +767,55 @@ class customer_topView(TemplateView):
             store.star_states = states
 
         context["total_star_stores"] = total_star_stores
+
+        # 5) 口コミから探す（ランダム4件）
+        from commons.models import Review
+        # order_by('?') は大量データだと遅いが、小規模ならOK
+        pickup_reviews = (
+            Review.objects
+            .select_related("reviewer", "store", "store__area")
+            .prefetch_related("photos")
+            .order_by("?")[:4]
+        )
+        # 評価ヘルパー処理（スター表示用）
+        for r in pickup_reviews:
+            r.avg_rating_val = float(r.score) # Reviewモデルは score (int) だが float扱いにしておく
+            full_stars = int(r.avg_rating_val)
+            half = (r.avg_rating_val - full_stars) >= 0.5
+            states = []
+            for i in range(5):
+                if i < full_stars:
+                    states.append("full")
+                elif i == full_stars and half:
+                    states.append("half")
+                else:
+                    states.append("empty")
+            r.star_states = states
+
+        context["pickup_reviews"] = pickup_reviews
+
+        # 6) ユーザーを探す（ランダム6件）
+        from commons.models import CustomerAccount, Follow
+        random_users = CustomerAccount.objects.all().order_by("?")
+        if self.request.user.is_authenticated:
+            random_users = random_users.exclude(pk=self.request.user.pk)
+        
+        random_users = random_users[:6]
+        
+        pickup_users = []
+        viewer = None
+        if self.request.user.is_authenticated:
+            viewer = CustomerAccount.objects.filter(pk=self.request.user.pk).first()
+
+        for u in random_users:
+            is_following = False
+            if viewer:
+                is_following = Follow.objects.filter(follower=viewer, followee=u).exists()
+            
+            pickup_users.append({
+                "account": u,
+                "is_following": is_following,
+            })
+        context["pickup_users"] = pickup_users
 
         return context

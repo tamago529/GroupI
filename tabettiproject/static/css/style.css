@@ -10,14 +10,23 @@ body {
   font-family: "Helvetica", "Arial", sans-serif;
   color: #333;
   background-color: #f7f7f7;
+  overflow-x: clip; /* overflow-x: hidden を避ける */
 }
 
 /* =========================
    ヘッダー全体
 ========================= */
 .header {
+  position: -webkit-sticky; /* iOS Safari用 */
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 9999;
   border-bottom: 3px solid rgba(254, 172, 41, 1);
   background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  display: block;
 }
 
 /* ===== 上段メニュー ===== */

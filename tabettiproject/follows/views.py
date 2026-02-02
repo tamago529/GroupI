@@ -1,8 +1,9 @@
 from django.views.generic import TemplateView
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.db import IntegrityError, transaction
+from django.contrib import messages
 
 from django.db.models import Sum
 from commons.models import CustomerAccount, Follow, Review,ReviewPhoto
@@ -107,34 +108,50 @@ class Customer_follower_listView(LoginRequiredMixin, TemplateView):
         互換：actionが無い場合は従来通り「存在すれば解除／無ければフォロー」を実行
         """
         customer = CustomerAccount.objects.filter(pk=request.user.pk).first()
+        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
         if not customer:
+            if is_ajax:
+                return JsonResponse({"error": "Login required"}, status=401)
             return redirect("accounts:customer_login")
 
         target_id = request.POST.get("user_id")
         action = request.POST.get("action", "")
 
         if not target_id:
+            if is_ajax:
+                return JsonResponse({"error": "Target user ID is missing"}, status=400)
             return redirect("follows:customer_follower_list")
 
         target = get_object_or_404(CustomerAccount, pk=target_id)
 
         if target.pk == customer.pk:
+            if is_ajax:
+                return JsonResponse({"error": "Cannot follow/unfollow yourself"}, status=400)
             return redirect("follows:customer_follower_list")
 
         rel = Follow.objects.filter(follower=customer, followee=target).first()
         next_url = request.POST.get("next")
-
+        
         # ✅ ミュート切り替え（フォロー関係がある時のみ）
         if action == "toggle_mute":
             if rel:
                 rel.is_muted = not rel.is_muted
                 rel.save(update_fields=["is_muted"])
+            if not is_ajax:
+                messages.info(request, f"{target.nickname}さんのミュート設定を{'変更しました' if rel.is_muted else '解除しました'}。")
+            if is_ajax:
+                return JsonResponse({"status": "muted" if rel and rel.is_muted else "unmuted", "target_id": target_id})
             return redirect(next_url or "follows:customer_follower_list")
 
         # ✅ フォロー解除
         if action == "unfollow":
             if rel:
                 rel.delete()
+                if not is_ajax:
+                    messages.success(request, f"{target.nickname}さんのフォローを解除しました。")
+            if is_ajax:
+                return JsonResponse({"status": "unfollowed", "target_id": target_id})
             return redirect(next_url or "follows:customer_follower_list")
 
         # ✅ フォローする（明示）
@@ -143,20 +160,30 @@ class Customer_follower_listView(LoginRequiredMixin, TemplateView):
                 try:
                     with transaction.atomic():
                         Follow.objects.get_or_create(follower=customer, followee=target)
+                        if not is_ajax:
+                            messages.success(request, f"{target.nickname}さんをフォローしました！")
                 except IntegrityError:
                     pass
+            if is_ajax:
+                return JsonResponse({"status": "followed", "target_id": target_id})
             return redirect(next_url or "follows:customer_follow_list")
 
         # ✅ 互換：action無し（従来のトグル動作）
         if rel:
             rel.delete()
+            messages.success(request, f"{target.nickname}さんのフォローを解除しました。")
+            if is_ajax:
+                return JsonResponse({"status": "unfollowed", "target_id": target_id})
             return redirect(next_url or "follows:customer_follower_list")
 
         try:
             with transaction.atomic():
                 Follow.objects.get_or_create(follower=customer, followee=target)
+            messages.success(request, f"{target.nickname}さんをフォローしました！")
         except IntegrityError:
             pass
+        if is_ajax:
+            return JsonResponse({"status": "followed", "target_id": target_id})
         return redirect(next_url or "follows:customer_follow_list")
 
 
@@ -213,41 +240,55 @@ class Customer_follow_listView(LoginRequiredMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        """
-        フォロー中一覧の操作：
-        - action=toggle_mute -> Follow.is_muted をトグル（adminにも反映）
-        - action=unfollow    -> Follow削除（adminからも消える）
-        """
         customer = CustomerAccount.objects.filter(pk=request.user.pk).first()
+        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
         if not customer:
+            if is_ajax:
+                return JsonResponse({"error": "Login required"}, status=401)
             return redirect("accounts:customer_login")
 
         target_id = request.POST.get("user_id")
         action = request.POST.get("action", "")
-
         if not target_id:
+            if is_ajax:
+                return JsonResponse({"error": "Target user ID is missing"}, status=400)
             return redirect("follows:customer_follow_list")
 
-        rel = Follow.objects.filter(follower=customer, followee_id=target_id).first()
+        target = get_object_or_404(CustomerAccount, pk=target_id)
+        rel = Follow.objects.filter(follower=customer, followee=target).first()
         next_url = request.POST.get("next")
 
-        if not rel:
-            # フォローしていない場合でも、action=follow なら新規作成してnextへ（検索用拡張）
-            if action == "follow":
+        if action == "unfollow":
+            if rel:
+                rel.delete()
+                if not is_ajax:
+                    messages.success(request, f"{target.nickname}さんのフォローを解除しました。")
+            if is_ajax:
+                return JsonResponse({"status": "unfollowed", "target_id": target_id})
+            return redirect(next_url or "follows:customer_follow_list")
+
+        if action == "follow":
+            if not rel:
                 try:
                     with transaction.atomic():
-                        Follow.objects.get_or_create(follower=customer, followee_id=target_id)
+                        Follow.objects.get_or_create(follower=customer, followee=target)
+                        if not is_ajax:
+                            messages.success(request, f"{target.nickname}さんをフォローしました！")
                 except IntegrityError:
                     pass
+            if is_ajax:
+                return JsonResponse({"status": "followed", "target_id": target_id})
             return redirect(next_url or "follows:customer_follow_list")
 
         if action == "toggle_mute":
-            rel.is_muted = not rel.is_muted
-            rel.save(update_fields=["is_muted"])
-            return redirect(next_url or "follows:customer_follow_list")
-
-        if action == "unfollow":
-            rel.delete()
+            if rel:
+                rel.is_muted = not rel.is_muted
+                rel.save(update_fields=["is_muted"])
+                if not is_ajax:
+                    messages.info(request, f"{target.nickname}さんのミュート設定を{'変更しました' if rel.is_muted else '解除しました'}。")
+            if is_ajax:
+                return JsonResponse({"status": "muted" if rel and rel.is_muted else "unmuted", "target_id": target_id})
             return redirect(next_url or "follows:customer_follow_list")
 
         return redirect(next_url or "follows:customer_follow_list")
