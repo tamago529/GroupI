@@ -141,10 +141,45 @@
         <h2 class="info-title">店舗情報（詳細）</h2>
         <table class="detail-table">
           <tbody>
-            <tr><th>店名</th><td>{{ store.store_name }}{% if store.branch_name %} {{ store.branch_name }}{% endif %}</td></tr>
-            <tr><th>住所</th><td>{{ store.address }} <a href="{% url 'stores:customer_store_map' store.pk %}" style="display:inline-block; margin-left:10px; padding:2px 8px; background:#ff9900; color:#fff; text-decoration:none; border-radius:4px; font-size:11px; font-weight:bold;">📍 地図を見る</a></td></tr>
-            <tr><th>ジャンル</th><td>{{ store.scene.scene_name }}</td></tr>
-            <tr><th>営業時間</th><td>{{ store.business_hours|linebreaksbr }}</td></tr>
+            <tr>
+              <th>店名</th>
+              <td>{{ store.store_name }}{% if store.branch_name %} {{ store.branch_name }}{% endif %}</td>
+            </tr>
+            <tr>
+              <th>住所</th>
+              <td>
+                {{ store.address }}
+                <div style="margin-top:12px; width:100%; height:250px; background:#eee;">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    style="border:0;"
+                    src="https://maps.google.com/maps?q={{ store.address|urlencode }}&output=embed"
+                    allowfullscreen>
+                  </iframe>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>ジャンル</th>
+              <td>{{ store.genre }}</td>
+            </tr>
+            <tr>
+              <th>利用シーン</th>
+              <td>{{ store.scene.scene_name }}</td>
+            </tr>
+            <tr>
+              <th>予算</th>
+              <td>¥{{ store.budget }}</td>
+            </tr>
+            <tr>
+              <th>席数</th>
+              <td>{{ store.seats }}席</td>
+            </tr>
+            <tr>
+              <th>営業時間</th>
+              <td>{{ store.business_hours|linebreaksbr }}</td>
+            </tr>
           </tbody>
         </table>
       </section>

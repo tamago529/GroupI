@@ -1,71 +1,105 @@
-<!--運用共通確認画面-->
 {% extends 'company_base.html' %}
 
 {% block content %}
 <style>
-    .confirm-wrapper {
-        max-width: 850px;
-        margin: 100px auto;
-        padding: 0 20px;
-        font-family: sans-serif;
-    }
-    .confirm-box {
-        border: 4px solid #000;
-        background-color: #fff;
-        padding: 100px 40px;
-        text-align: center;
-        margin-bottom: 25px;
-        min-height: 250px;
+    /* 画面全体のバランス調整 */
+    .confirm-container {
         display: flex;
-        align-items: center;
+        flex-direction: column;
         justify-content: center;
+        min-height: 60vh; /* 画面の高さの60%を確保してフッターとの距離を保つ */
+        padding: 40px 20px;
     }
+
+    .confirm-wrapper {
+        max-width: 650px;
+        margin: 0 auto;
+        width: 100%;
+        font-family: "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ ProN W3", Meiryo, メイリオ, sans-serif;
+    }
+
+    /* メッセージボックス：存在感を出すために少し大きく */
+    .confirm-box {
+        background-color: #fff;
+        border: 1px solid #e6e6e6;
+        border-radius: 12px;
+        padding: 80px 40px; /* 余白を広げてボリュームアップ */
+        text-align: center;
+        margin-bottom: 40px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03); /* 影を少し柔らかく広く */
+    }
+
     .confirm-text {
-        font-size: 32px;
+        font-size: 22px; /* 視認性を上げるため少し拡大 */
         font-weight: bold;
         color: #333;
+        line-height: 1.6;
         margin: 0;
     }
+
+    /* ボタンエリア：どっしりした配置 */
     .confirm-button-row {
         display: flex;
-        justify-content: flex-end;
-        gap: 20px;
+        justify-content: center;
+        gap: 24px; /* ボタン間の間隔を広げてゆとりを持たせる */
     }
+
     .btn-base {
         display: inline-block;
-        border: 2px solid #333;
-        border-radius: 12px;
-        padding: 12px 35px;
+        border-radius: 6px;
+        padding: 16px 30px; /* ボタンを少し大きく */
         font-size: 18px;
         font-weight: bold;
         text-decoration: none;
-        color: #000;
-        background-color: #fff;
         text-align: center;
-        min-width: 140px;
-        transition: 0.2s;
+        min-width: 200px; /* ボタンの幅を広げて安定感を出す */
+        transition: all 0.2s ease;
         cursor: pointer;
+        box-sizing: border-box;
     }
-    .btn-cancel:hover { background-color: #f0f0f0; }
-    .btn-ok:hover { background-color: #333; color: #fff; }
+
+    /* キャンセル：グレーの境界線と背景 */
+    .btn-cancel {
+        border: 1px solid #bbb;
+        background: #fff;
+        color: #666;
+    }
+    .btn-cancel:hover {
+        background: #f5f5f5;
+        border-color: #999;
+        color: #333;
+    }
+
+    /* OK：食べログオレンジのグラデーション */
+    .btn-ok {
+        border: 1px solid #e67200;
+        background: linear-gradient(to bottom, #ff9e3d, #ff7e00);
+        color: #ffffff !important;
+        box-shadow: 0 2px 0 #d66a00; /* ボタン下部に立体感を追加 */
+    }
+    .btn-ok:hover {
+        background: #ff8c1a;
+        transform: translateY(-1px); /* 軽く浮き上がる演出 */
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .btn-ok:active {
+        transform: translateY(1px);
+        box-shadow: none;
+    }
 </style>
 
-<div class="confirm-wrapper">
-    <div class="confirm-box">
-        <p class="confirm-text">{{ confirm_message|default:"確認内容" }}</p>
-    </div>
-
-   
-    
+<div class="confirm-container">
+    <div class="confirm-wrapper">
+        <div class="confirm-box">
+            <p class="confirm-text">
+                {{ confirm_message|default:"実行してもよろしいですか？" }}
+            </p>
+        </div>
 
         <div class="confirm-button-row">
-    <!-- ② キャンセル：直前の画面に戻る -->
-    <a href="{{ cancel_url }}" class="btn-base btn-cancel">キャンセル</a>
-
-    <!-- ① OK：実際に削除などの処理を行うURL（next_url）へ飛ばす -->
-    <!-- 🌟 formをやめて、シンプルな a タグにします -->
-    <a href="{{ next_url }}" class="btn-base btn-ok">OK</a>
-</div>
+            <a href="{{ cancel_url }}" class="btn-base btn-cancel">キャンセル</a>
+            <a href="{{ next_url }}" class="btn-base btn-ok">OK</a>
+        </div>
     </div>
 </div>
 {% endblock %}

@@ -637,10 +637,10 @@ class store_account_staff_inputView(TemplateView):
 class customer_topView(TemplateView):
     template_name = "accounts/customer_top.html"
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        # 1) シーン画像の定義
         SCENE_IMAGE_MAP = {
             "お一人様": "images/scene_solo.jpg",
             "家族・こどもと": "images/scene_family.jpg",
@@ -650,13 +650,22 @@ class customer_topView(TemplateView):
             "合コン": "images/scene_gokon.jpg",
         }
 
+        # 2) シーン情報の取得
         scenes = list(Scene.objects.all().order_by("id"))
         for s in scenes:
             s.image_static = SCENE_IMAGE_MAP.get(s.scene_name, "images/scene_default.jpg")
 
         context["scenes"] = scenes
+<<<<<<< HEAD
         return context
 
+=======
+
+        # 3) 人気ランキング（weighted_avg_rating で上位5件）
+        #    search/views.py と同様の計算式: 
+        #    Sum(score * trust) / Sum(trust)
+        
+>>>>>>> 8032c76b5ecff1e3b5839dbea5ce912440b6352b
         from django.db.models import Avg, Count, Sum, F, ExpressionWrapper, FloatField
 
         ranking_stores = Store.objects.prefetch_related("images").annotate(

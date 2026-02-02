@@ -40,25 +40,40 @@ class customer_common_confirmView(View):
             
         field_labels = {
             'username': 'ユーザー名', 'email': 'メールアドレス', 'password': 'パスワード',
-            'last_name': '姓', 'first_name': '名', 'nickname': 'ニックネーム',
-            'phone_number': '電話番号', 'gender': '性別', 'birth_date': '生年月日',
-            'age_group': '年代', 'address': '住所'
+            'nickname': 'ニックネーム', 'phone_number': '電話番号', 
+            'gender': '性別', 'birth_date': '生年月日', 'age_group': '年代', 
+            'address': '住所', 'title': 'タイトル'
         }
 
         for key, value in hidden_data.items():
-            if key in ['agree', 'is_final', 'store_id', 'review_id']: continue
+            if key in ['agree', 'is_final', 'store_id', 'review_id', 'birth_date_year', 'birth_date_month', 'birth_date_day']: continue
             label = field_labels.get(key, key)
             display_val = value
             if key == 'password': display_val = '********'
             
             if key == 'gender' and value:
                 try:
-                    from .models import Gender # モデル構成に合わせて適宜変更してください
+                    from .models import Gender 
                     gender_obj = Gender.objects.get(id=value)
                     display_val = gender_obj.gender
                 except: pass
 
+            if key == 'age_group' and value:
+                try:
+                    from .models import AgeGroup
+                    ag_obj = AgeGroup.objects.get(id=value)
+                    display_val = ag_obj.age_range
+                except: pass
+
             display_data.append((label, display_val, key in ['comment', 'address']))
+
+        # 生年月日の集約表示
+        b_year = hidden_data.get('birth_date_year')
+        b_month = hidden_data.get('birth_date_month')
+        b_day = hidden_data.get('birth_date_day')
+        if b_year and b_month and b_day:
+            display_data.append(('生年月日', f"{b_year}年{b_month}月{b_day}日", False))
+            hidden_data['birth_date'] = f"{b_year}-{b_month}-{b_day}"
 
         hidden_data['is_final'] = 'true'
 
@@ -82,17 +97,27 @@ class customer_common_confirmView(View):
             acc_type, _ = AccountType.objects.get_or_create(account_type="顧客")
 
             # ユーザー作成の実行
+            # 生年月日の再構築
+            b_date = p.get('birth_date')
+            if not b_date:
+                b_year = p.get('birth_date_year')
+                b_month = p.get('birth_date_month')
+                b_day = p.get('birth_date_day')
+                if b_year and b_month and b_day:
+                    b_date = f"{b_year}-{b_month}-{b_day}"
+
+            # ユーザー作成の実行
             new_user = CustomerAccount.objects.create_user(
                 username=p.get('username'), 
                 email=p.get('email'),
                 password=p.get('password'),
-                last_name=p.get('last_name', ''),
-                first_name=p.get('first_name', ''),
                 nickname=p.get('nickname', '新規ユーザー'),
                 phone_number=p.get('phone_number', ''),
-                birth_date=p.get('birth_date') if p.get('birth_date') else None,
+                birth_date=b_date,
                 gender_id=p.get('gender') if p.get('gender') else None,
                 age_group_id=p.get('age_group') if p.get('age_group') else None,
+                address=p.get('address', ''),
+                title=p.get('title', ''),
                 account_type=acc_type
             )
             

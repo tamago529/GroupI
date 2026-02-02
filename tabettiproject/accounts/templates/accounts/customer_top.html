@@ -254,10 +254,42 @@
     font-weight: 700;
     white-space: nowrap;        /* ✅ 2行にしない */
   }
+
+  /* =========================
+   評価（SVG / 半星）
+  ========================= */
+  .stars-svg {
+    display: flex;
+    gap: 2px;
+    line-height: 0;
+  }
+  .svgstar {
+    width: 14px;
+    height: 14px;
+    display: inline-flex;
+  }
+  .svgstar svg { width: 100%; height: 100%; display: block; }
+  .svgstar.full use { fill: #ffa500; }
+  .svgstar.empty use { fill: #ddd; }
+  .svgstar.half use { fill: url(#halfGrad); }
 </style>
 {% endblock %}
 
 {% block content %}
+
+{# ===== SVG定義（半星グラデ + 星形） ===== #}
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="halfGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="50%" stop-color="#ffa500"/>
+      <stop offset="50%" stop-color="#ddd"/>
+    </linearGradient>
+
+    <symbol id="icon-star" viewBox="0 0 24 24">
+      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01z"/>
+    </symbol>
+  </defs>
+</svg>
 
 <!-- ===== ヒーロー ===== -->
 <div class="hero">
@@ -355,45 +387,81 @@
   <section class="section">
     <div class="section-title">人気ランキング</div>
     <div class="cards">
-      <div class="card">
-        <img src="{% static 'img/top_rest1.jpg' %}">
-        <div class="card-body">
-          <div class="card-title">人気店 1</div>
-          <div class="card-sub">★4.7 東京</div>
-        </div>
-      </div>
+      {% for store in ranking_stores %}
+      <a href="{% url 'stores:customer_store_info' store.pk %}" class="card"
+         style="text-decoration:none; color:inherit; display:block;">
+        
+        {# 店舗画像があれば表示、なければデフォルト #}
+        {% if store.images.all %}
+           <img src="{{ store.images.first.image_file.url }}" alt="{{ store.store_name }}">
+        {% else %}
+           <img src="{% static 'images/no_image.png' %}" alt="No Image" style="object-fit:cover; background:#f0f0f0;">
+        {% endif %}
 
-      <div class="card">
-        <img src="{% static 'img/top_rest2.jpg' %}">
         <div class="card-body">
-          <div class="card-title">人気店 2</div>
-          <div class="card-sub">★4.6 大阪</div>
-        </div>
-      </div>
+          <div class="card-title">{{ forloop.counter }}位 {{ store.store_name }}</div>
+          
+          <div style="display:flex; flex-direction:column; align-items:center; gap:4px; margin-top:8px;">
+             <!-- 星表示 -->
+             <div class="stars-svg" aria-label="店舗評価">
+               {% for s in store.star_states %}
+                 <span class="svgstar {{ s }}">
+                   <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-star"></use></svg>
+                 </span>
+               {% endfor %}
+             </div>
+             
+             <div style="font-size:13px; color:#ff8a00; font-weight:bold;">
+               {{ store.avg_rating_val|floatformat:1 }} <span style="color:#666; font-weight:normal; font-size:12px; margin-left:6px;">{{ store.area.area_name }}</span>
+             </div>
+          </div>
 
-      <div class="card">
-        <img src="{% static 'img/top_rest3.jpg' %}">
-        <div class="card-body">
-          <div class="card-title">人気店 3</div>
-          <div class="card-sub">★4.5 福岡</div>
         </div>
-      </div>
+      </a>
+      {% empty %}
+        <p>ランキングデータがまだありません。</p>
+      {% endfor %}
+    </div>
+  </section>
 
-      <div class="card">
-        <img src="{% static 'img/top_rest4.jpg' %}">
-        <div class="card-body">
-          <div class="card-title">人気店 4</div>
-          <div class="card-sub">★4.4 福岡</div>
-        </div>
-      </div>
+  <!-- 星の合計獲得数ランキング -->
+  <section class="section">
+    <div class="section-title">星の合計獲得数ランキング</div>
+    <div class="cards">
+      {% for store in total_star_stores %}
+      <a href="{% url 'stores:customer_store_info' store.pk %}" class="card"
+         style="text-decoration:none; color:inherit; display:block;">
+        
+        {% if store.images.all %}
+           <img src="{{ store.images.first.image_file.url }}" alt="{{ store.store_name }}">
+        {% else %}
+           <img src="{% static 'images/no_image.png' %}" alt="No Image" style="object-fit:cover; background:#f0f0f0;">
+        {% endif %}
 
-      <div class="card">
-        <img src="{% static 'img/top_rest5.jpg' %}">
         <div class="card-body">
-          <div class="card-title">人気店 5</div>
-          <div class="card-sub">★4.3 福岡</div>
+          <div class="card-title">{{ forloop.counter }}位 {{ store.store_name }}</div>
+          
+          <div style="display:flex; flex-direction:column; align-items:center; gap:4px; margin-top:8px;">
+             <!-- 星表示 -->
+             <div class="stars-svg" aria-label="店舗評価">
+               {% for s in store.star_states %}
+                 <span class="svgstar {{ s }}">
+                   <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-star"></use></svg>
+                 </span>
+               {% endfor %}
+             </div>
+             
+             <div style="font-size:13px; color:#ff8a00; font-weight:bold;">
+               ★{{ store.avg_rating_val|floatformat:1 }} 
+               <span style="color:#666; font-weight:normal; font-size:12px; margin-left:6px;">獲得星数: {{ store.total_score_val|default:0 }}</span>
+             </div>
+          </div>
+
         </div>
-      </div>
+      </a>
+      {% empty %}
+        <p>ランキングデータがまだありません。</p>
+      {% endfor %}
     </div>
   </section>
 
