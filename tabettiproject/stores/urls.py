@@ -10,6 +10,7 @@ from .views import (
     customer_store_new_registerView,
     customer_store_new_register_confirmView,
     customer_store_new_register_completeView,
+    customer_reservation_completeView,
 
     # --- 店舗側 ---
     store_basic_editView,
@@ -38,6 +39,7 @@ urlpatterns = [
     path("customer_store_new_register/", customer_store_new_registerView.as_view(), name="customer_store_new_register"),
     path("customer_store_new_register_confirm/", customer_store_new_register_confirmView.as_view(), name="customer_store_new_register_confirm"),
     path("customer_store_new_register_complete/", customer_store_new_register_completeView.as_view(), name="customer_store_new_register_complete"),
+    path("customer_reservation_complete/<int:reservation_id>/", customer_reservation_completeView.as_view(), name="customer_reservation_complete"),
     path("customer_store_map/<int:pk>/", customer_store_mapView.as_view(), name="customer_store_map"),
 
     # --- 店舗側 ---

@@ -978,7 +978,7 @@ class CustomerReservationCreateView(View):
         # 予約ステータス
         status = ReservationStatus.objects.get_or_create(status="予約確定")[0]
 
-        Reservation.objects.create(
+        reservation = Reservation.objects.create(
             booking_user=reservator,
             store=store,
             visit_date=visit_date,
@@ -990,8 +990,25 @@ class CustomerReservationCreateView(View):
             booking_status=status,
         )
 
-        messages.success(request, "予約を受け付けました。")
-        return redirect("stores:customer_store_info", pk=store.id)
+        return redirect("stores:customer_reservation_complete", reservation_id=reservation.id)
+
+
+class customer_reservation_completeView(LoginRequiredMixin, TemplateView):
+    template_name = "stores/customer_reservation_complete.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        reservation = get_object_or_404(Reservation, pk=self.kwargs["reservation_id"])
+        
+        # 予約者がログインユーザー本人、または予約者のメールアドレスが一致するか等の簡易チェック（セキュリティ）
+        customer = _get_customer_from_user(self.request.user)
+        if reservation.booking_user.customer_account != customer:
+            # 他人の予約は見せない
+            from django.core.exceptions import PermissionDenied
+            raise PermissionDenied
+
+        context["reservation"] = reservation
+        return context
 
 
 class customer_store_new_registerView(LoginRequiredMixin, TemplateView):

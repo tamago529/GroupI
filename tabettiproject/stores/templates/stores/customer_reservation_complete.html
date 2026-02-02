@@ -1,0 +1,150 @@
+{% extends 'customer_base.html' %}
+{% load static %}
+
+{% block title %}予約完了 - タベッチ{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+  .complete-container {
+    max-width: 600px;
+    margin: 60px auto;
+    padding: 40px 30px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    border: 1px solid #eee;
+  }
+
+  .complete-icon {
+    font-size: 64px;
+    color: #4caf50;
+    margin-bottom: 24px;
+  }
+
+  .complete-title {
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    color: #333;
+  }
+
+  .complete-text {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+
+  .reservation-summary {
+    background: #fdfaf5;
+    border: 1px solid #f5edde;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 32px;
+    text-align: left;
+  }
+
+  .summary-title {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: #a67c00;
+    border-bottom: 1px solid #f5edde;
+    padding-bottom: 8px;
+  }
+
+  .summary-row {
+    display: flex;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+
+  .summary-label {
+    width: 100px;
+    color: #888;
+    flex-shrink: 0;
+  }
+
+  .summary-value {
+    color: #333;
+    font-weight: 500;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .btn-action {
+    display: inline-block;
+    padding: 14px 28px;
+    border-radius: 30px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.2s;
+    font-size: 15px;
+  }
+
+  .btn-home {
+    background: #ff8a00;
+    color: #fff;
+  }
+
+  .btn-home:hover {
+    background: #e67e00;
+    transform: translateY(-1px);
+  }
+
+  .btn-history {
+    background: #fff;
+    color: #ff8a00;
+    border: 1px solid #ff8a00;
+  }
+
+  .btn-history:hover {
+    background: #fff4e6;
+    transform: translateY(-1px);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="complete-container">
+  <div class="complete-icon">
+    <i class="fas fa-check-circle"></i>
+  </div>
+  <h1 class="complete-title">ご予約が完了しました</h1>
+  <p class="complete-text">
+    ご予約ありがとうございます。<br>
+    予約内容は以下の通りです。
+  </p>
+
+  <div class="reservation-summary">
+    <div class="summary-title">予約内容</div>
+    <div class="summary-row">
+      <div class="summary-label">店舗名</div>
+      <div class="summary-value">{{ reservation.store.store_name }}</div>
+    </div>
+    <div class="summary-row">
+      <div class="summary-label">来店日時</div>
+      <div class="summary-value">{{ reservation.visit_date|date:"Y年m月d日" }} {{ reservation.visit_time|time:"H:i" }}
+      </div>
+    </div>
+    <div class="summary-row">
+      <div class="summary-label">人数</div>
+      <div class="summary-value">{{ reservation.visit_count }}名様</div>
+    </div>
+    <div class="summary-row">
+      <div class="summary-label">コース</div>
+      <div class="summary-value">{{ reservation.course }}</div>
+    </div>
+  </div>
+
+  <div class="btn-group">
+    <a href="{% url 'accounts:customer_top' %}" class="btn-action btn-home">トップページへ戻る</a>
+    <a href="{% url 'reservations:store_reservation_history' %}" class="btn-action btn-history">予約履歴を確認</a>
+  </div>
+</div>
+{% endblock %}
