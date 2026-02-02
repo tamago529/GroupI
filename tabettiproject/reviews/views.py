@@ -116,11 +116,15 @@ class customer_review_listView(View):
                 .order_by("-posted_at")
             )
 
+            # 全件の集計（検索フィルタ前に計算）
             agg = store_reviews.aggregate(avg=Avg("score"))
             avg_rating = float(agg["avg"] or 0.0)
-
-            # ★件数（メモ通り）
             review_count = store_reviews.count()
+
+            # ★ キーワード検索（本文・タイトル）
+            review_keyword = request.GET.get("review_keyword", "").strip()
+            if review_keyword:
+                store_reviews = store_reviews.filter(review_text__icontains=review_keyword)
 
             star_states = self._build_star_states(avg_rating)
 
@@ -157,6 +161,7 @@ class customer_review_listView(View):
             "time": request.GET.get("time", ""),
             "sort": request.GET.get("sort", ""),
             "from_search": request.GET.get("from_search", ""),
+            "review_keyword": request.GET.get("review_keyword", ""),
         }
         return render(request, self.template_name, context)
 

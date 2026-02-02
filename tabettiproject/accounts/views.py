@@ -636,9 +636,42 @@ class store_account_staff_inputView(TemplateView):
 
 class customer_topView(TemplateView):
     template_name = "accounts/customer_top.html"
-
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # 0) エリア情報の取得（主要エリアとその他）
+        all_areas = Area.objects.all().order_by("id")
+        
+        # 主要エリア定義 (DBの area_name と一致させる)
+        major_names = ["東京都", "神奈川県", "愛知県", "大阪府", "京都府", "福岡県"]
+        # 画像マッピング (static/images/...)
+        major_images = {
+            "東京都": "images/area_tokyo.png",
+            "神奈川県": "images/area_kanagawa.png",
+            "愛知県": "images/area_aichi.png",
+            "大阪府": "images/area_osaka.png",
+            "京都府": "images/area_kyoto.png",
+            "福岡県": "images/area_fukuoka_fix.jpg",
+        }
+
+        major_areas = []
+        other_areas = []
+
+        for area in all_areas:
+            if area.area_name in major_names:
+                # 画像属性を一時的に付与
+                area.image_static = major_images.get(area.area_name, "images/no_image.png")
+                major_areas.append(area)
+            else:
+                other_areas.append(area)
+
+        # 順番を固定したい場合 (major_names順に並べ替え)
+        major_areas.sort(key=lambda x: major_names.index(x.area_name) if x.area_name in major_names else 999)
+
+        context["major_areas"] = major_areas
+        context["other_areas"] = other_areas
+        context["areas"] = all_areas # 全件も一応残す
 
         # 1) シーン画像の定義
         SCENE_IMAGE_MAP = {
@@ -656,16 +689,11 @@ class customer_topView(TemplateView):
             s.image_static = SCENE_IMAGE_MAP.get(s.scene_name, "images/scene_default.jpg")
 
         context["scenes"] = scenes
-<<<<<<< HEAD
-        return context
-
-=======
 
         # 3) 人気ランキング（weighted_avg_rating で上位5件）
         #    search/views.py と同様の計算式: 
         #    Sum(score * trust) / Sum(trust)
         
->>>>>>> 8032c76b5ecff1e3b5839dbea5ce912440b6352b
         from django.db.models import Avg, Count, Sum, F, ExpressionWrapper, FloatField
 
         ranking_stores = Store.objects.prefetch_related("images").annotate(

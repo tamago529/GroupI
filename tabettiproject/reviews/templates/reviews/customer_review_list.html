@@ -1,6 +1,20 @@
 {% extends "customer_base.html" %}
 
 {% block title %}口コミ一覧 - {{ shop.store_name }}{% endblock %}
+{% block breadcrumb %}
+<nav class="breadcrumbs">
+  <ol>
+    <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
+    {% if from_search %}
+      <li><a href="{% url 'search:customer_search_list' %}?from_search=1{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">{% if keyword %}{{ keyword }}{% elif area %}{{ area }}{% else %}検索結果{% endif %}</a></li>
+    {% else %}
+      <li><a href="{% url 'search:customer_search_list' %}?keyword={{ store.scene.scene_name }}">{{ store.scene.scene_name }}</a></li>
+    {% endif %}
+    <li><a href="{% url 'stores:customer_store_info' store.pk %}?from_search=1{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">{{ store.store_name }}</a></li>
+    <li><span>口コミ一覧</span></li>
+  </ol>
+</nav>
+{% endblock %}
 
 {% block css %}
 <style>
@@ -203,10 +217,19 @@
   <div class="review-wrapper">
  
     <section class="review-filter">
-      <div class="review-search">
-        <input type="text" placeholder="口コミを検索（未実装）">
-        <button type="button">検索</button>
-      </div>
+      <form class="review-search" method="get">
+        <input type="hidden" name="store_id" value="{{ store_id }}">
+        {# 他の検索条件も維持したい場合はhiddenを追加 #}
+        {% if from_search %}<input type="hidden" name="from_search" value="{{ from_search }}">{% endif %}
+        {% if keyword %}<input type="hidden" name="keyword" value="{{ keyword }}">{% endif %}
+        {% if area %}<input type="hidden" name="area" value="{{ area }}">{% endif %}
+        {% if date %}<input type="hidden" name="date" value="{{ date }}">{% endif %}
+        {% if time %}<input type="hidden" name="time" value="{{ time }}">{% endif %}
+        {% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+
+        <input type="text" name="review_keyword" value="{{ review_keyword }}" placeholder="口コミを検索">
+        <button type="submit">検索</button>
+      </form>
 
       <div class="review-count-row">
         全 <strong>{{ reviews.count }}</strong> 件の口コミ

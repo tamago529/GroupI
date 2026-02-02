@@ -272,7 +272,75 @@
   .svgstar.full use { fill: #ffa500; }
   .svgstar.empty use { fill: #ddd; }
   .svgstar.half use { fill: url(#halfGrad); }
-</style>
+    /* ===== エリア（追加） ===== */
+    .area-major-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 768px) {
+      .area-major-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .area-card {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      aspect-ratio: 16/11;
+      display: block;
+      text-decoration: none;
+    }
+    .area-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+    .area-card:hover img {
+      transform: scale(1.05);
+    }
+    .area-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.6));
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 12px;
+    }
+    .area-name {
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+      letter-spacing: 0.05em;
+    }
+
+    .area-other-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .area-text-link {
+      display: inline-block;
+      padding: 8px 14px;
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      text-decoration: none;
+      color: #555;
+      font-size: 13px;
+      transition: 0.2s;
+    }
+    .area-text-link:hover {
+      background: #ececec;
+      color: #333;
+    }
+
+  </style>
 {% endblock %}
 
 {% block content %}
@@ -365,6 +433,32 @@
       <a class="genre-list-btn" href="{% url 'search:customer_genre_list' %}">
         ＜＜ジャンル一覧へ
       </a>
+    </div>
+  </section>
+
+  <!-- エリアから探す -->
+  <section class="section">
+    <div class="section-title">エリアから探す</div>
+    
+    <!-- 主要エリア（写真付きグリッド） -->
+    <div class="area-major-grid">
+      {% for area in major_areas %}
+        <a href="{% url 'search:customer_search_list' %}?area={{ area.area_name }}" class="area-card">
+           <img src="{% static area.image_static %}" alt="{{ area.area_name }}">
+           <div class="area-card-overlay">
+             <span class="area-name">{{ area.area_name }}</span>
+           </div>
+        </a>
+      {% endfor %}
+    </div>
+
+    <!-- その他エリア（テキストリンク） -->
+    <div class="area-other-list">
+      {% for area in other_areas %}
+        <a href="{% url 'search:customer_search_list' %}?area={{ area.area_name }}" class="area-text-link">
+           {{ area.area_name }}
+        </a>
+      {% endfor %}
     </div>
   </section>
 
