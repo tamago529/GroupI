@@ -2,84 +2,88 @@
 
 {% block content %}
 <style>
-    /* 全体のレイアウト */
-    .complete-wrapper {
-        max-width: 850px;
-        margin: 100px auto;
-        padding: 0 20px;
-        font-family: sans-serif;
+    /* 画面全体のバランス調整：フッターとの距離を確保 */
+    .complete-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 60vh; /* 画面高さの60%を確保してバランスを取る */
+        padding: 40px 20px;
     }
 
-    /* ② 完了メッセージを囲む大きな枠 */
+    .complete-wrapper {
+        max-width: 650px;
+        margin: 0 auto;
+        width: 100%;
+        font-family: "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ ProN W3", Meiryo, メイリオ, sans-serif;
+    }
+
+    /* 完了メッセージボックス */
     .complete-box {
-        border: 2px solid #ccc;    /* 設計図通りのグレーの枠線 */
-        border-radius: 40px;       /* 設計図通りの大きな角丸 */
         background-color: #fff;
-        padding: 80px 40px;        /* 上下に広い余白 */
+        border: 1px solid #e6e6e6;
+        border-radius: 12px; /* 40pxから12pxへ。モダンな角丸に */
+        padding: 80px 40px;
         text-align: center;
-        margin-bottom: 25px;
-        min-height: 200px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        margin-bottom: 40px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
     }
 
     /* メッセージテキスト */
     .complete-text {
-        font-size: 24px;
+        font-size: 22px;
         font-weight: bold;
         color: #333;
+        line-height: 1.6;
         margin: 0;
     }
 
-    /* ① ボタン配置エリア（右寄せ） */
+    /* ボタン配置エリア：右寄せから中央寄せに変更（確認画面と統一） */
     .complete-button-row {
         display: flex;
-        justify-content: flex-end; /* 右端に寄せる */
+        justify-content: center;
     }
 
-    /* ① TOPへボタンのスタイル */
+    /* TOPへボタン：食べログオレンジのメインボタン風 */
     .btn-top {
         display: inline-block;
-        border: 2px solid #333;    /* 設計図の太めの枠線 */
-        border-radius: 15px;       /* ボタンの角丸 */
-        padding: 12px 45px;
+        border: 1px solid #e67200;
+        border-radius: 6px;
+        padding: 16px 60px; /* 横幅を広げて安定感を出す */
         font-size: 18px;
         font-weight: bold;
         text-decoration: none;
-        color: #000;
-        background-color: #fff;
-        transition: all 0.2s;
+        color: #ffffff !important;
+        background: linear-gradient(to bottom, #ff9e3d, #ff7e00);
+        box-shadow: 0 2px 0 #d66a00;
+        transition: all 0.2s ease;
         text-align: center;
+        min-width: 200px;
     }
 
-    /* ホバー時の演出（食べログオレンジ） */
     .btn-top:hover {
-        background-color: #f0f0f0;
-        border-color: #ff9600;
-        color: #ff9600;
-        transform: translateY(-2px);
+        background: #ff8c1a;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .btn-top:active {
+        transform: translateY(1px);
+        box-shadow: none;
     }
 </style>
 
-<div class="complete-wrapper">
-    <!-- ② 完了メッセージ項目 -->
-    <div class="complete-box">
-        <!-- 
-            🌟 ここがポイント！
-            request.GET.msg と書くことで、URLの ?msg=... の中身を直接表示します。
-            何も送られてこなかった場合は「処理」と表示されます。
-        -->
-        <p class="complete-text">
-            {{ request.GET.msg|default:"処理" }}が完了しました
-        </p>
-    </div>
+<div class="complete-container">
+    <div class="complete-wrapper">
+        <div class="complete-box">
+            <p class="complete-text">
+                {{ request.GET.msg|default:"処理" }}が完了しました
+            </p>
+        </div>
 
-    <!-- ① TOPへボタン -->
-    <div class="complete-button-row">
-        <!-- 運用管理トップ画面へ戻る -->
-        <a href="{% url 'accounts:company_top' %}" class="btn-top">TOPへ</a>
+        <div class="complete-button-row">
+            <a href="{% url 'accounts:company_top' %}" class="btn-top">TOPへ戻る</a>
+        </div>
     </div>
 </div>
 {% endblock %}
