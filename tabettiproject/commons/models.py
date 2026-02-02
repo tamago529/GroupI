@@ -562,6 +562,7 @@ class StoreAccountRequest(models.Model):
     address = models.CharField(max_length=255, verbose_name="住所")
     applicant_name = models.CharField(max_length=100, verbose_name="申込者名")
     relation_to_store = models.CharField(max_length=50, verbose_name="店舗との関係")
+    admin_email = models.EmailField(max_length=255, verbose_name="管理者メールアドレス", default="")
     requested_at = models.DateTimeField(auto_now_add=True, verbose_name="申請日時")
     approved_at = models.DateTimeField(null=True, blank=True, verbose_name="承認日時")
 
