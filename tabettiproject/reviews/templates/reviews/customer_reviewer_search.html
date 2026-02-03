@@ -343,7 +343,7 @@
                     <div style="display:flex; justify-content:space-between; gap:12px;">
                         <div style="min-width:0; flex: 1;">
                             <div style="font-weight:bold; font-size:15px;">
-                                <a href="{% url 'reviews:customer_review_list' %}?store_id={{ review.store.pk }}" style="color: #06c; text-decoration: none;">
+                                <a href="{% url 'stores:customer_store_info' review.store.pk %}" style="color: #06c; text-decoration: none;">
                                     {{ review.store.store_name }}{% if review.store.branch_name %} {{ review.store.branch_name }}{% endif %}
                                 </a>
                             </div>

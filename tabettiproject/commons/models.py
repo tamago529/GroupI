@@ -271,7 +271,6 @@ class Store(models.Model):
     email = models.EmailField(max_length=255, verbose_name="メールアドレス")
     phone_number = models.CharField(max_length=20, verbose_name="電話番号")
     address = models.CharField(max_length=255, verbose_name="住所")
-    map_location = models.CharField(max_length=255, verbose_name="地図")
     area = models.ForeignKey("Area", on_delete=models.PROTECT, verbose_name="エリア")
     business_hours = models.CharField(max_length=50, verbose_name="営業時間")
 
@@ -316,7 +315,7 @@ class Store(models.Model):
 
 
 class StoreAccount(Account):
-    store = models.ForeignKey("Store", on_delete=models.PROTECT, verbose_name="店舗情報")
+    store = models.ForeignKey("Store", on_delete=models.CASCADE, verbose_name="店舗情報")
     admin_email = models.EmailField(max_length=255, verbose_name="管理者メールアドレス")
     permission_flag = models.BooleanField(verbose_name="権限フラグ", default=False)
 
@@ -346,7 +345,7 @@ class CompanyAccount(Account):
 # ----------------
 class Review(models.Model):
     reviewer = models.ForeignKey("CustomerAccount", on_delete=models.PROTECT, verbose_name="投稿者")
-    store = models.ForeignKey("Store", on_delete=models.PROTECT, verbose_name="店舗")
+    store = models.ForeignKey("Store", on_delete=models.CASCADE, verbose_name="店舗")
     score = models.IntegerField(verbose_name="点数")
     review_text = models.TextField(verbose_name="レビュー")
     like_count = models.IntegerField(verbose_name="いいね数", default=0)
@@ -639,7 +638,7 @@ class TempRequestMailLog(models.Model):
 class StoreInfoReport(models.Model):
     store = models.ForeignKey(
         "Store",
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         null=True,
         blank=True,
         verbose_name="対象店舗",

@@ -23,7 +23,8 @@
     height: 100%;
     object-fit: cover;
     opacity: 0;
-    animation: hero-fade 15s infinite;
+    animation: hero-fade 20s infinite;
+    backface-visibility: hidden;
   }
 
   .hero-image:nth-of-type(1) {
@@ -38,20 +39,26 @@
     animation-delay: 10s;
   }
 
+  .hero-image:nth-of-type(4) {
+    animation-delay: 15s;
+  }
+
   @keyframes hero-fade {
     0% {
       opacity: 0;
     }
 
-    10% {
+    5% {
       opacity: 1;
     }
 
-    33% {
+    /* 5s(25%)の時点で次が始まるが、
+       さらに少し(5.75s=28.75%)まで表示を維持して重なりを作る */
+    28.75% {
       opacity: 1;
     }
 
-    43% {
+    33.75% {
       opacity: 0;
     }
 
@@ -138,6 +145,135 @@
   .card-sub {
     font-size: 14px;
     color: #666;
+  }
+
+  /* ===== 特集スライダー ===== */
+  .slider-viewport {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    border-radius: 8px;
+    padding: 10px 0;
+  }
+
+  .slider-track {
+    display: flex;
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    gap: 20px;
+  }
+
+  .slider-item {
+    flex: 0 0 calc(33.333% - 14px); /* 3枚表示 */
+    min-width: 280px;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 992px) {
+    .slider-item {
+      flex: 0 0 calc(50% - 10px); /* 2枚表示 */
+    }
+  }
+
+  @media (max-width: 600px) {
+    .slider-item {
+      flex: 0 0 100%; /* 1枚表示 */
+    }
+  }
+
+  .slider-card {
+    display: block;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    height: 100%;
+    transition: transform 0.3s;
+  }
+
+  .slider-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .slider-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+  }
+
+  .slider-card-body {
+    padding: 16px;
+  }
+
+  .slider-card-title {
+    font-size: 17px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+  }
+
+  .slider-card-sub {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.4;
+  }
+
+  /* スライダー制御（ドット等） */
+  .slider-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+  }
+
+  .slider-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ddd;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    transition: background 0.3s;
+  }
+
+  .dot.active {
+    background: #ff8a00;
+  }
+
+  /* スライダー矢印（ドットの横版） */
+  .slider-nav-btn {
+    width: 32px;
+    height: 32px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: all 0.3s;
+    font-size: 14px;
+    color: #333;
+    padding: 0;
+  }
+
+  .slider-nav-btn:hover {
+    border-color: #ff8a00;
+    color: #ff8a00;
+  }
+
+  .slider-viewport {
+    position: relative;
   }
 
   /* ===== ジャンル ===== */
@@ -361,9 +497,10 @@
 
 <!-- ===== ヒーロー ===== -->
 <div class="hero">
-  <img src="{% static 'images/red.png' %}" alt="" class="hero-image">
-  <img src="{% static 'images/blue.jpg' %}" alt="" class="hero-image">
-  <img src="{% static 'images/green.jpg' %}" alt="" class="hero-image">
+  <img src="{% static 'images/red.png' %}" alt="Red Image" class="hero-image">
+  <img src="{% static 'images/blue.png' %}" alt="Blue Image" class="hero-image">
+  <img src="{% static 'images/green123.jpg' %}" alt="Green Image" class="hero-image">
+  <img src="{% static 'images/b.png' %}" alt="B Image" class="hero-image">
 
   <div class="hero-overlay">
     <h1>行きたいお店が、きっと見つかる</h1>
@@ -376,34 +513,86 @@
   <!-- 特集 -->
   <section class="section">
     <div class="section-title">特集・注目コンテンツ</div>
-    <div class="cards">
-      <a href="{% url 'search:customer_search_list' %}?sort=rating" class="card"
-        style="text-decoration:none; color:inherit; display:block;">
-        <img src="{% static 'images/award.jpg' %}">
-        <div class="card-body">
-          <div class="card-title">The Tabecchi Award 2026</div>
-          <div class="card-sub">ユーザー評価の高い受賞店</div>
+    <div class="slider-viewport">
+      <div class="slider-track" id="featureTrack">
+        <!-- 1枚目 -->
+        <div class="slider-item">
+          <a href="{% url 'search:customer_search_list' %}?sort=rating" class="slider-card">
+            <img src="{% static 'images/award.jpg' %}" alt="Award">
+            <div class="slider-card-body">
+              <div class="slider-card-title">The Tabecchi Award 2026</div>
+              <div class="slider-card-sub">ユーザー評価の高い受賞店</div>
+            </div>
+          </a>
         </div>
-      </a>
-
-      <a href="{% url 'search:customer_search_list' %}?sort=reviews" class="card"
-        style="text-decoration:none; color:inherit; display:block;">
-        <img src="{% static 'images/hot_restaurants.jpg' %}">
-        <div class="card-body">
-          <div class="card-title">ホットレストラン</div>
-          <div class="card-sub">今注目の人気店</div>
+        <!-- 2枚目 -->
+        <div class="slider-item">
+          <a href="{% url 'search:customer_search_list' %}?sort=reviews" class="slider-card">
+            <img src="{% static 'images/hot_restaurants.jpg' %}" alt="Hot">
+            <div class="slider-card-body">
+              <div class="slider-card-title">ホットレストラン</div>
+              <div class="slider-card-sub">今注目の人気店</div>
+            </div>
+          </a>
         </div>
-      </a>
-
-      <a href="{% url 'search:customer_genre_list' %}" class="card"
-        style="text-decoration:none; color:inherit; display:block;">
-        <img src="{% static 'images/genre.jpg' %}">
-        <div class="card-body">
-          <div class="card-title">ジャンル特集</div>
-          <div class="card-sub">料理ジャンル別に探す</div>
+        <!-- 3枚目 -->
+        <div class="slider-item">
+          <a href="{% url 'search:customer_genre_list' %}" class="slider-card">
+            <img src="{% static 'images/genre.jpg' %}" alt="Genre">
+            <div class="slider-card-body">
+              <div class="slider-card-title">ジャンル特集</div>
+              <div class="slider-card-sub">料理ジャンル別に探す</div>
+            </div>
+          </a>
         </div>
-      </a>
+        <!-- 4枚目（寿司） -->
+        <div class="slider-item">
+          <a href="{% url 'search:customer_search_list' %}?keyword=寿司" class="slider-card">
+            <img src="{% static 'images/sushi.jpg' %}" alt="Sushi">
+            <div class="slider-card-body">
+              <div class="slider-card-title">厳選！絶品寿司</div>
+              <div class="slider-card-sub">職人の技が光る名店</div>
+            </div>
+          </a>
+        </div>
+        <!-- 5枚目（焼肉） -->
+        <div class="slider-item">
+          <a href="{% url 'search:customer_search_list' %}?keyword=焼肉" class="slider-card">
+            <img src="{% static 'images/yakiniku.jpg' %}" alt="Yakiniku">
+            <div class="slider-card-body">
+              <div class="slider-card-title">スタミナ焼肉特集</div>
+              <div class="slider-card-sub">自分へのご褒美に</div>
+            </div>
+          </a>
+        </div>
+        <!-- 6枚目（一人ごはん） -->
+        <div class="slider-item">
+          <a href="{% url 'search:customer_search_list' %}?keyword=一人" class="slider-card">
+            <img src="{% static 'images/cafe.jpg' %}" alt="Solo">
+            <div class="slider-card-body">
+              <div class="slider-card-title">一人ごはん特集</div>
+              <div class="slider-card-sub">気兼ねなく楽しめるカウンター席</div>
+            </div>
+          </a>
+        </div>
+        <!-- 7枚目（女子会） -->
+        <div class="slider-item">
+          <a href="{% url 'search:customer_search_list' %}?keyword=女子会" class="slider-card">
+            <img src="{% static 'images/izakaya.jpg' %}" alt="Anniversary">
+            <div class="slider-card-body">
+              <div class="slider-card-title">女子会・記念日</div>
+              <div class="slider-card-sub">特別な日を彩る素敵な空間</div>
+            </div>
+          </a>
+        </div>
+      </div>
     </div>
+    <div class="slider-controls">
+      <button class="slider-nav-btn prev" id="sliderPrev" aria-label="前へ">❮</button>
+      <div class="slider-dots" id="sliderDots"></div>
+      <button class="slider-nav-btn next" id="sliderNext" aria-label="次へ">❯</button>
+    </div>
+  </section>
   </section>
 
   <!-- ジャンル -->
@@ -889,6 +1078,112 @@ function getCookie(name) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // --- 特集スライダーの制御 ---
+  const track = document.getElementById('featureTrack');
+  const dotsContainer = document.getElementById('sliderDots');
+  const prevBtn = document.getElementById('sliderPrev');
+  const nextBtn = document.getElementById('sliderNext');
+
+  if (track && dotsContainer) {
+    const items = track.querySelectorAll('.slider-item');
+    let currentIndex = 0;
+    let autoSlideInterval;
+
+    function getItemsPerView() {
+        if (window.innerWidth <= 600) return 1;
+        if (window.innerWidth <= 992) return 2;
+        return 3;
+    }
+
+    // ドットの生成。最大位置（maxIndex + 1）に合わせて生成
+    function renderDots() {
+        dotsContainer.innerHTML = '';
+        const itemsPerView = getItemsPerView();
+        const maxIndex = Math.max(0, items.length - itemsPerView);
+        
+        for(let i = 0; i <= maxIndex; i++) {
+            const dot = document.createElement('button');
+            dot.classList.add('dot');
+            if (i === currentIndex) dot.classList.add('active');
+            dot.addEventListener('click', () => {
+                goToSlide(i);
+                resetAutoSlide();
+            });
+            dotsContainer.appendChild(dot);
+        }
+    }
+
+    renderDots();
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            const itemsPerView = getItemsPerView();
+            const maxIndex = Math.max(0, items.length - itemsPerView);
+            let nextIndex = currentIndex - 1;
+            if (nextIndex < 0) nextIndex = maxIndex;
+            goToSlide(nextIndex);
+            resetAutoSlide();
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            const itemsPerView = getItemsPerView();
+            const maxIndex = Math.max(0, items.length - itemsPerView);
+            let nextIndex = currentIndex + 1;
+            if (nextIndex > maxIndex) nextIndex = 0;
+            goToSlide(nextIndex);
+            resetAutoSlide();
+        });
+    }
+
+    function goToSlide(index) {
+        const itemsPerView = getItemsPerView();
+        const maxIndex = Math.max(0, items.length - itemsPerView);
+        
+        if (index < 0) index = 0;
+        if (index > maxIndex) index = maxIndex;
+
+        currentIndex = index;
+        
+        const itemWidth = items[0].offsetWidth;
+        const gap = 20;
+        const offset = currentIndex * (itemWidth + gap);
+        
+        track.style.transform = `translateX(-${offset}px)`;
+
+        const dots = dotsContainer.querySelectorAll('.dot');
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentIndex);
+        });
+    }
+
+    function autoSlide() {
+        const itemsPerView = getItemsPerView();
+        let nextIndex = currentIndex + 1;
+        if (nextIndex > items.length - itemsPerView) {
+            nextIndex = 0;
+        }
+        goToSlide(nextIndex);
+    }
+
+    function startAutoSlide() {
+        autoSlideInterval = setInterval(autoSlide, 5000);
+    }
+
+    function resetAutoSlide() {
+        clearInterval(autoSlideInterval);
+        startAutoSlide();
+    }
+
+    startAutoSlide();
+    window.addEventListener('resize', () => {
+        renderDots(); // レスポンシブで表示数が変わるため再生成
+        goToSlide(currentIndex); // 位置を再計算
+    });
+  }
+
+  // --- フォロー機能の制御 ---
   const forms = document.querySelectorAll('.ajax-follow-form');
   
   forms.forEach(form => {

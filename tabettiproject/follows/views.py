@@ -344,6 +344,8 @@ class Customer_user_pageView(LoginRequiredMixin, TemplateView):
 
             # ✅ 他人ページなので編集UIを出したくない場合に使う（任意）
             "readonly_mode": True,
+
+            "latest_reviews": Review.objects.filter(reviewer=target).order_by("-posted_at")[:3],
         })
         return context
 

@@ -36,6 +36,7 @@ from commons.models import (
     StoreAccessLog,
     Area,
     Scene,
+    Genre,
 )
 
 from .form import (
@@ -903,6 +904,7 @@ class CustomerReservationCreateView(View):
             visit_time=visit_time,
             course_minutes=course_minutes,
         )
+
         if not ok or end_time is None:
             messages.error(request, reason or "営業時間チェックに失敗しました。")
             return redirect("stores:customer_store_info", pk=store.id)
@@ -1032,6 +1034,8 @@ class customer_store_new_registerView(LoginRequiredMixin, TemplateView):
                     serializable_data[key] = value.isoformat()
                 else:
                     serializable_data[key] = value
+            if "genre_master" in data:
+                display_data["genre_master_obj"] = get_object_or_404(Genre, pk=data["genre_master"])
 
             request.session["store_register_data"] = serializable_data
             return redirect("stores:customer_store_new_register_confirm")

@@ -211,10 +211,7 @@
             {% else %}
             {# ✅ ログイン時：通常メニュー + ログアウト #}
             <a class="menu-item" href="{% url 'accounts:customer_setting' %}" role="menuitem">設定</a>
-            <a class="menu-item" href="#" role="menuitem">メッセージ</a>
-            <a class="menu-item" href="#" role="menuitem">お知らせ</a>
             <a class="menu-item" href="{% url 'reservations:store_reservation_history' %}" role="menuitem">予約確認</a>
-            <a class="menu-item" href="#" role="menuitem">行ったお店</a>
             <a class="menu-item" href="{% url 'reviews:customer_store_preserve' %}" role="menuitem">保存リスト</a>
             <a class="menu-item" href="{% url 'reviews:customer_reviewer_detail' %}" role="menuitem">マイページ</a>
             <a class="menu-item" href="{% url 'accounts:store_account_search' %}" role="menuitem">店舗アカウント申請</a>

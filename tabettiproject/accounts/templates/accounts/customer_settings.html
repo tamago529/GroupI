@@ -157,6 +157,19 @@
     padding: 15px;
     border-radius: 8px;
     background: #fdfdfd;
+    /* Djangoデフォルトの「クリア」「現在:」などのテキストを隠す */
+    font-size: 0;
+    color: transparent;
+  }
+
+  .file-input-wrapper > * {
+    font-size: 14px;
+    color: #333;
+  }
+
+  /* デフォルトのラベル（クリアなど）を非表示 */
+  .file-input-wrapper label:not(.clear-checkbox-wrapper) {
+    display: none;
   }
 
   .preview-container {
@@ -191,25 +204,19 @@
   }
 
   .clear-checkbox-wrapper {
-    display: flex;
+    display: inline-flex !important;
     align-items: center;
     gap: 6px;
-    margin-top: 8px;
+    margin-top: 12px;
     font-size: 12px;
     color: #e02020;
     cursor: pointer;
+    vertical-align: middle;
   }
 
   .clear-checkbox-wrapper input {
     width: auto;
     margin: 0;
-  }
-
-  current-image-info {
-    font-size: 12px;
-    color: #0066cc;
-    margin-bottom: 8px;
-    display: block;
   }
 </style>
 {% endblock %}
@@ -428,16 +435,16 @@ document.addEventListener('DOMContentLoaded', () => {
     setupPreview('icon_image', 'preview-icon_image');
     setupPreview('cover_image', 'preview-cover_image');
 
-    // 「クリア」チェックボックスの装飾（もしあれば）
+    // 「クリア」チェックボックスの装飾
     document.querySelectorAll('.file-input-wrapper').forEach(wrapper => {
         const clearCheckbox = wrapper.querySelector('input[type="checkbox"]');
-        if (clearCheckbox) {
+        if (clearCheckbox && !wrapper.querySelector('.clear-checkbox-wrapper')) {
             const cbWrapper = document.createElement('label');
             cbWrapper.className = 'clear-checkbox-wrapper';
             const labelSpan = document.createElement('span');
             labelSpan.innerText = '現在の画像を削除する';
             
-            // チェックボックスを移動
+            // チェックボックスをラップ
             clearCheckbox.parentNode.insertBefore(cbWrapper, clearCheckbox);
             cbWrapper.appendChild(clearCheckbox);
             cbWrapper.appendChild(labelSpan);

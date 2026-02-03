@@ -1,4 +1,15 @@
 {% extends "customer_base.html" %}
+
+{% block breadcrumb %}
+<nav class="breadcrumbs">
+  <ol>
+    <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
+    <li><a href="{% url 'reservations:store_reservation_history' %}">予約履歴</a></li>
+    <li><span>ご予約内容の確認</span></li>
+  </ol>
+</nav>
+{% endblock %}
+
 {% block content %}
 
 <style>
@@ -179,6 +190,8 @@
     .print-btn{float:none; display:block; width:max-content}
   }
 </style>
+
+
 
 <div class="wrap">
 

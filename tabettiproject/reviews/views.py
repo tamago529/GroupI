@@ -8,7 +8,7 @@ from datetime import date, time
 from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Avg, Max, Count
+from django.db.models import Avg, Max, Count, Q, Exists, OuterRef
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
@@ -28,6 +28,7 @@ from commons.models import (
     StoreInfoReport,
     StoreInfoReportPhoto,
     Follow,
+    Genre,
 )
 
 
@@ -313,6 +314,13 @@ class customer_store_preserveView(LoginRequiredMixin, View):
             messages.error(request, "顧客アカウントでログインしてください。")
             return redirect(reverse("accounts:customer_login"))
 
+        # 1. パラメータ取得
+        genre_id = request.GET.get("genre")
+        min_budget = request.GET.get("min_budget")
+        max_budget = request.GET.get("max_budget")
+        went_status = request.GET.get("went", "any")
+
+        # 2. 基本セットアップ
         saved_status = ReservationStatus.objects.filter(status="保存済み").first()
         if saved_status is None:
             return render(request, self.template_name, {"customer": customer, "saved_list": []})
@@ -321,14 +329,60 @@ class customer_store_preserveView(LoginRequiredMixin, View):
         if reservator is None:
             return render(request, self.template_name, {"customer": customer, "saved_list": []})
 
-        saved_list = (
+        # 3. クエリセット構築
+        queryset = (
             Reservation.objects
             .select_related("store", "booking_status", "store__area", "store__scene")
             .filter(booking_user=reservator, booking_status=saved_status)
-            .order_by("-created_at")
         )
 
-        return render(request, self.template_name, {"customer": customer, "saved_list": saved_list})
+        # --- フィルタ適用 ---
+        # ジャンル
+        if genre_id and genre_id != "all":
+            queryset = queryset.filter(store__genre_master_id=genre_id)
+
+        # 予算
+        if min_budget and min_budget.isdigit():
+            queryset = queryset.filter(store__budget__gte=int(min_budget))
+        if max_budget and max_budget.isdigit():
+            queryset = queryset.filter(store__budget__lte=int(max_budget))
+
+        # 行った・行ってない
+        if went_status in ("yes", "no"):
+            # 「行った」判定：口コミがある or 「保存済み」以外の予約がある
+            has_review = Review.objects.filter(reviewer=customer, store=OuterRef('store_id'))
+            has_other_res = Reservation.objects.filter(
+                booking_user=reservator, 
+                store=OuterRef('store_id')
+            ).exclude(booking_status=saved_status)
+            
+            queryset = queryset.annotate(
+                went_flag=Exists(has_review) | Exists(has_other_res)
+            )
+
+            if went_status == "yes":
+                queryset = queryset.filter(went_flag=True)
+            else:
+                queryset = queryset.filter(went_flag=False)
+
+        saved_list = queryset.order_by("-created_at")
+
+        # 4. サイドバー用データ
+        genres = Genre.objects.all().order_by("name")
+        budget_choices = [1000, 2000, 3000, 4000, 5000, 10000, 15000, 20000, 30000]
+
+        context = {
+            "customer": customer,
+            "saved_list": saved_list,
+            "genres": genres,
+            "budget_choices": budget_choices,
+            # 現在の選択状態
+            "selected_genre": genre_id,
+            "selected_min": min_budget,
+            "selected_max": max_budget,
+            "selected_went": went_status,
+        }
+        return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get("action") or ""
@@ -396,6 +450,8 @@ class customer_reviewer_detailView(LoginRequiredMixin, View):
             "count_reviews": count_reviews,
             "count_following": count_following,
             "count_followers": count_followers,
+
+            "latest_reviews": Review.objects.filter(reviewer=customer).order_by("-posted_at")[:3],
         }
         return render(request, self.template_name, context)
 
@@ -443,12 +499,29 @@ class customer_reviewer_review_listView(LoginRequiredMixin, View):
         cover_field = getattr(customer, "cover_image", None)
         icon_field = getattr(customer, "icon_image", None)
 
-        my_reviews = (
+        # 1. パラメータ取得
+        genre_id = request.GET.get("genre")
+        min_budget = request.GET.get("min_budget")
+        max_budget = request.GET.get("max_budget")
+
+        my_reviews_qs = (
             Review.objects
-            .select_related("store")
+            .select_related("store", "store__genre_master")
             .filter(reviewer=customer)
-            .order_by("-posted_at")
         )
+
+        # --- フィルタ適用 ---
+        # ジャンル
+        if genre_id and genre_id != "all":
+            my_reviews_qs = my_reviews_qs.filter(store__genre_master_id=genre_id)
+
+        # 予算
+        if min_budget and min_budget.isdigit():
+            my_reviews_qs = my_reviews_qs.filter(store__budget__gte=int(min_budget))
+        if max_budget and max_budget.isdigit():
+            my_reviews_qs = my_reviews_qs.filter(store__budget__lte=int(max_budget))
+
+        my_reviews = my_reviews_qs.order_by("-posted_at")
 
         reviewed_store_rows = (
             Review.objects
@@ -462,6 +535,8 @@ class customer_reviewer_review_listView(LoginRequiredMixin, View):
         )
 
         store_choices = Store.objects.order_by("store_name", "branch_name")
+        genres = Genre.objects.all().order_by("name")
+        budget_choices = [1000, 2000, 3000, 4000, 5000, 10000, 15000, 20000, 30000]
 
         context = {
             "customer": customer,
@@ -477,6 +552,13 @@ class customer_reviewer_review_listView(LoginRequiredMixin, View):
             "my_reviews_total": my_reviews.count(),
 
             "store_choices": store_choices,
+            "genres": genres,
+            "budget_choices": budget_choices,
+
+            # 現在の選択状態
+            "selected_genre": genre_id,
+            "selected_min": min_budget,
+            "selected_max": max_budget,
         }
         return render(request, self.template_name, context)
 
@@ -495,7 +577,6 @@ class customer_reviewer_review_listView(LoginRequiredMixin, View):
                 messages.error(request, "店舗を選択してください。")
                 return redirect(reverse("reviews:customer_reviewer_review_list"))
 
-            time_slot = (request.POST.get("time_slot") or "").strip()
             score_raw = (request.POST.get("score") or "").strip()
             title = (request.POST.get("title") or "").strip()
             body = (request.POST.get("body") or "").strip()
@@ -506,9 +587,7 @@ class customer_reviewer_review_listView(LoginRequiredMixin, View):
             except ValueError:
                 score = 0
 
-            if time_slot not in ("昼", "夜"):
-                messages.error(request, "時間帯（昼/夜）を選択してください。")
-                return redirect(reverse("reviews:customer_reviewer_review_list"))
+
 
             if score < 1 or score > 5:
                 messages.error(request, "星評価（1〜5）を選択してください。")
@@ -526,7 +605,7 @@ class customer_reviewer_review_listView(LoginRequiredMixin, View):
                 messages.error(request, "同意にチェックしてください。")
                 return redirect(reverse("reviews:customer_reviewer_review_list"))
 
-            review_text = f"【{time_slot}】{title}\n{body}"
+            review_text = f"{title}\n{body}"
 
             Review.objects.create(
                 reviewer=customer,

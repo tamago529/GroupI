@@ -11,6 +11,8 @@ from django.views import View
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.utils import timezone
+from django.core.paginator import Paginator
+from django.views.generic import ListView
 from datetime import timedelta, datetime
 from dataclasses import dataclass
 
@@ -100,16 +102,28 @@ class store_reservation_historyView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         customer = _get_customer_user(self.request)
+        page = self.request.GET.get("page") or 1
 
-        reservations = (
+        reservations_qs = (
             Reservation.objects
             .select_related("store", "booking_user", "booking_status")
-            .prefetch_related("store__images")  # 追加
+            .prefetch_related("store__images")
             .filter(booking_user__customer_account=customer)
             .order_by("-visit_date", "-visit_time", "-id")
         )
 
-        ctx["reservations"] = reservations
+        paginator = Paginator(reservations_qs, 5)
+        reservations_page = paginator.get_page(page)
+
+        page_range = paginator.get_elided_page_range(
+            number=reservations_page.number,
+            on_each_side=3,
+            on_ends=2
+        )
+
+        ctx["reservations"] = reservations_page
+        ctx["page_range"] = page_range
+        ctx["total_count"] = reservations_qs.count()
         return ctx
 
 

@@ -332,11 +332,40 @@
                 <h2 style="font-size:15px; border-bottom:2px solid #ddd; padding-bottom:8px;">💡 得意ジャンル・こだわり</h2>
                 <div style="font-size: 14px; line-height: 1.6; color: #444; white-space: pre-wrap; padding: 10px 0;">
                     {{ customer.genre_focus|default:"未設定" }}
-                </div>
             </div>
-
-            <h2 style="font-size:15px; border-bottom:2px solid #ddd; padding-bottom:8px;">👑 おすすめレストラン</h2>
-            <div style="text-align:center; padding:50px; color:#ccc;">読み込み中...</div>
+            
+            <h2 style="font-size:15px; border-bottom:2px solid #ddd; padding-bottom:8px;">🍴 最近の口コミ</h2>
+            <div style="margin-top: 15px;">
+                {% if latest_reviews %}
+                    {% for rv in latest_reviews %}
+                    <div style="border-bottom: 1px dotted #ccc; padding: 15px 0;">
+                        <div style="font-weight:bold; font-size:14px; margin-bottom:5px;">
+                            <a href="{% url 'stores:customer_store_info' rv.store.pk %}" style="color: #06c; text-decoration: none;">
+                                {{ rv.store.store_name }}{% if rv.store.branch_name %} {{ rv.store.branch_name }}{% endif %}
+                            </a>
+                            <span style="font-size:12px; font-weight:normal; color:#666; margin-left:10px;">
+                                {{ rv.posted_at|date:"Y/m/d" }} 投稿
+                            </span>
+                        </div>
+                        <div style="font-size:13px; color:#e60012; font-weight:bold; margin-bottom:5px;">
+                            評価：{{ rv.score|floatformat:1 }} / 5.0
+                        </div>
+                        <div style="font-size:13px; line-height:1.6; color:#444;">
+                            {{ rv.review_text|truncatewords:30|linebreaksbr }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div style="margin-top: 15px; text-align: right;">
+                        <a href="{% if readonly_mode %}{% url 'reviews:customer_reviewer_other_review_list' customer.pk %}{% else %}{% url 'reviews:customer_reviewer_review_list' %}{% endif %}" style="font-size: 13px; color: #06c; text-decoration: none;">
+                            すべての口コミを見る(全 {{ stats_reviews }}件) ≫
+                        </a>
+                    </div>
+                {% else %}
+                    <div style="padding: 20px 0; color: #999; font-size: 13px;">
+                        最近投稿された口コミはありません。
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

@@ -18,7 +18,7 @@ class CompanyStoreEditForm(forms.ModelForm):
             "store_name",
             "branch_name",
             "area",
-            "genre",
+            "genre_master",
             "address",
             "phone_number",
             "email",
@@ -51,8 +51,6 @@ class CompanyStoreEditForm(forms.ModelForm):
 
             "seats": forms.NumberInput(attrs={"min": 0}),
             "budget": forms.NumberInput(attrs={"min": 0, "placeholder": "￥"}),
-
-            "genre": forms.TextInput(attrs={"placeholder": "カフェ、焼肉など"}),
             "reservable": forms.CheckboxInput(attrs={"style": "width: auto;"}),
         }
 
@@ -78,7 +76,7 @@ class StoreBasicForm(forms.ModelForm):
             "close_time_2",
             "seats",
             "budget",
-            "genre",
+            "genre_master",
             "scene",
             "reservable",
         ]
@@ -90,8 +88,6 @@ class StoreBasicForm(forms.ModelForm):
             "close_time_1": forms.TimeInput(attrs={"type": "time"}),
             "open_time_2": forms.TimeInput(attrs={"type": "time"}),
             "close_time_2": forms.TimeInput(attrs={"type": "time"}),
-
-            "genre": forms.TextInput(attrs={"placeholder": "カフェ、焼肉など"}),
         }
 
 
@@ -187,7 +183,7 @@ class StoreRegistrationForm(forms.ModelForm):
             "store_name",
             "branch_name",
             "area",
-            "genre",
+            "genre_master",
             "address",
             "phone_number",
             "email",
@@ -216,5 +212,4 @@ class StoreRegistrationForm(forms.ModelForm):
             "close_time_2": forms.TimeInput(attrs={"type": "time"}),
             "seats": forms.NumberInput(attrs={"min": 0}),
             "budget": forms.NumberInput(attrs={"min": 0, "placeholder": "￥"}),
-            "genre": forms.TextInput(attrs={"placeholder": "例：イタリアン、和食など"}),
         }

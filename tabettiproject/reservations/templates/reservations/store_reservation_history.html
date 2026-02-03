@@ -1,4 +1,14 @@
 {% extends "customer_base.html" %}
+
+{% block breadcrumb %}
+<nav class="breadcrumbs">
+  <ol>
+    <li><a href="{% url 'accounts:customer_top' %}">トップ</a></li>
+    <li><span>予約履歴</span></li>
+  </ol>
+</nav>
+{% endblock %}
+
 {% block content %}
 
 <style>
@@ -42,7 +52,38 @@
   .actions{margin-left:auto;display:flex;flex-direction:column;gap:8px;}
   .btn{height:36px;min-width:170px;border-radius:4px;border:1px solid #cfc8bd;background:#fff;font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center;text-decoration:none;color:#333;}
   .btn-primary{border:none;background:var(--brand);color:#fff;}
+  
+  /* Pagination (Match Search List) */
+  .pagination {
+    text-align: center;
+    margin: 32px 0;
+  }
+  .pagination a {
+    margin: 0 6px;
+    color: var(--brand); /* Match reservation list orange/brand color */
+    text-decoration: none;
+    font-size: 14px;
+  }
+  .pagination a:hover {
+    text-decoration: underline;
+  }
+  .pagination .current {
+    margin: 0 6px;
+    font-weight: bold;
+    color: #fff;
+    background: var(--brand);
+    padding: 4px 10px;
+    border-radius: 20px;
+    display: inline-block;
+    font-size: 14px;
+  }
+  .pagination .ellipsis {
+    margin: 0 6px;
+    color: #666;
+  }
 </style>
+
+
 
 <div class="wrap">
 
@@ -99,6 +140,28 @@
             </div>
           {% endfor %}
         </div>
+
+        {% if reservations.paginator.num_pages > 1 %}
+          <div class="pagination">
+            {% if reservations.has_previous %}
+              <a href="?page={{ reservations.previous_page_number }}">前へ</a>
+            {% endif %}
+
+            {% for num in page_range %}
+              {% if num == reservations.paginator.ELLIPSIS %}
+                <span class="ellipsis">{{ num }}</span>
+              {% elif reservations.number == num %}
+                <span class="current">{{ num }}</span>
+              {% else %}
+                <a href="?page={{ num }}">{{ num }}</a>
+              {% endif %}
+            {% endfor %}
+
+            {% if reservations.has_next %}
+              <a href="?page={{ reservations.next_page_number }}">次へ</a>
+            {% endif %}
+          </div>
+        {% endif %}
       {% else %}
         <div class="empty-box">
           現在、ご予約中のレストランはありません。

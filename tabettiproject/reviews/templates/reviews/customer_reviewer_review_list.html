@@ -164,6 +164,17 @@
     background: #f9f9f7;
   }
 
+  .selection-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 10px;
+    text-decoration: none;
+    color: #06c;
+    border-bottom: 1px dotted #eee;
+  }
+  .selection-item:hover {
+    background: #f9f9f7;
+  }
   .selection-item-active {
     background: #fff9e6;
     border-left: 3px solid #ffa500;
@@ -577,43 +588,42 @@
   <div class="columns-flex">
 
     <aside class="side-col">
-      <section class="selection-box">
-        <div class="selection-box-head">エリア<span>📍</span></div>
-        <a href="#" class="selection-item-active">
-          <span>すべて</span> <span>&gt;</span>
-        </a>
-        <a href="#" class="map-view-link">📍 このエリアを地図で見る</a>
-      </section>
 
       <section class="selection-box">
         <div class="selection-box-head">ジャンル<span>🍴</span></div>
-        <a href="#" class="selection-item-active">
+        <a href="?genre=all&min_budget={{ selected_min|default:'' }}&max_budget={{ selected_max|default:'' }}" 
+           class="{% if not selected_genre or selected_genre == 'all' %}selection-item-active{% else %}selection-item{% endif %}">
           <span>すべて</span> <span>&gt;</span>
         </a>
+        {% for g in genres %}
+        <a href="?genre={{ g.id }}&min_budget={{ selected_min|default:'' }}&max_budget={{ selected_max|default:'' }}" 
+           class="{% if selected_genre == g.id|stringformat:'s' %}selection-item-active{% else %}selection-item{% endif %}">
+          <span>{{ g.name }}</span> <span>&gt;</span>
+        </a>
+        {% endfor %}
       </section>
 
       <div class="filter-box">
         <form action="" method="get">
-          <div class="filter-section-label">口コミ対象</div>
-          <div class="filter-group">
-            <label><input type="radio" name="target" checked> すべて</label>
-            <label><input type="radio" name="target"> 夜の口コミ</label>
-            <label><input type="radio" name="target"> 昼の口コミ</label>
-          </div>
+          {% if selected_genre and selected_genre != 'all' %}
+          <input type="hidden" name="genre" value="{{ selected_genre }}">
+          {% endif %}
 
           <div class="filter-section-label">予算</div>
           <div class="filter-group">
-            <div style="display:flex; gap:10px; margin-bottom:8px;">
-              <label><input type="radio" name="b_type" checked> 🌙</label>
-              <label><input type="radio" name="b_type"> ☀️</label>
-            </div>
             <div style="display:flex; align-items:center; gap:3px;">
-              <select name="min" class="select-sm" aria-label="予算の下限">
-                <option>下限なし</option>
+              <select name="min_budget" class="select-sm" aria-label="予算の下限">
+                <option value="">下限なし</option>
+                {% for b in budget_choices %}
+                <option value="{{ b }}" {% if selected_min == b|stringformat:"s" %}selected{% endif %}>￥{{ b }}</option>
+                {% endfor %}
               </select>
               <span>〜</span>
-              <select name="max" class="select-sm" aria-label="予算の上限">
-                <option>上限なし</option>
+              <select name="max_budget" class="select-sm" aria-label="予算の上限">
+                <option value="">上限なし</option>
+                {% for b in budget_choices %}
+                <option value="{{ b }}" {% if selected_max == b|stringformat:"s" %}selected{% endif %}>￥{{ b }}</option>
+                {% endfor %}
               </select>
             </div>
           </div>
@@ -634,28 +644,8 @@
         <div class="content-header">
           <h2 style="font-size: 18px; margin: 0;">口コミ一覧</h2>
           <a href="#" style="font-size: 12px; color: #06c; text-decoration: none;">
-            検索条件を変更 <img src="..." alt="..." width="12" height="12" class="icon-inline">
           </a>
         </div>
-
-        <div style="font-size: 12px; color: #999; margin-bottom: 10px;">
-          🔍 検索条件が指定されていません。
-        </div>
-
-        <nav class="sort-nav">
-          <ul class="sort-list">
-            <li><a href="#" class="active">更新日順</a></li>
-            <li style="color:#ccc;">|</li>
-            <li><a href="#">訪問月順</a></li>
-            <li style="color:#ccc;">|</li>
-            <li><a href="#">評価順</a></li>
-            <li style="color:#ccc;">|</li>
-            <li><a href="#">行った回数順</a></li>
-            <li style="color:#ccc;">|</li>
-            <li><a href="#">タベッチ総合ランキング</a></li>
-          </ul>
-          <a href="#" style="color:#06c; text-decoration:none; font-weight:bold;">地図表示</a>
-        </nav>
 
         <div style="font-size: 13px; margin: 15px 0 10px;">
           <strong>全 {{ my_reviews_total }}</strong> 件
@@ -669,7 +659,12 @@
             <!-- 左側：タイトル/時間帯/本文（全部左揃え） -->
             <div class="review-left" style="min-width:0;">
               <div class="review-title" style="font-weight:bold; font-size:15px;">
-                {{ rv.store.store_name }}{% if rv.store.branch_name %} {{ rv.store.branch_name }}{% endif %}
+                <a href="{% url 'stores:customer_store_info' rv.store.pk %}" style="color: #06c; text-decoration: none;">
+                  {{ rv.store.store_name }}{% if rv.store.branch_name %} {{ rv.store.branch_name }}{% endif %}
+                </a>
+                <span style="font-size:13px; color:#666; font-weight:normal; margin-left:8px;">
+                  [予算: ￥{{ rv.store.budget }}]
+                </span>
               </div>
 
               <div class="review-meta" style="font-size:12px; color:#666; margin-top:4px;">
@@ -729,7 +724,6 @@
     <form id="reviewPostForm" method="post" action="{% url 'reviews:customer_reviewer_review_list' %}">
       {% csrf_token %}
       <input type="hidden" name="action" value="create_review">
-      <input type="hidden" name="time_slot" id="timeSlotInput" value="">
       <input type="hidden" name="score" id="scoreInput" value="">
 
       <div class="modal-body">
@@ -745,13 +739,7 @@
           </select>
         </div>
 
-        <div class="field">
-          <span class="label">時間帯</span>
-          <div class="time-slot">
-            <button type="button" class="slot-btn" data-slot="昼">☀ 昼</button>
-            <button type="button" class="slot-btn" data-slot="夜">🌙 夜</button>
-          </div>
-        </div>
+
 
         <div class="field">
           <span class="label">評価</span>
@@ -798,8 +786,6 @@
     const cancelBtn = document.getElementById("cancelBtn");
 
     const storeSelect = document.getElementById("storeSelect");
-    const slotBtns = modal.querySelectorAll(".slot-btn");
-    const timeSlotInput = document.getElementById("timeSlotInput");
 
     const starsWrap = document.getElementById("stars");
     const stars = starsWrap.querySelectorAll(".star");
@@ -821,9 +807,8 @@
     function updateSubmitState() {
       const okStore = !!(storeSelect && storeSelect.value);
       const okAgree = agree.checked;
-      const okSlot = timeSlotInput.value === "昼" || timeSlotInput.value === "夜";
       const okScore = Number(scoreInput.value || "0") >= 1;
-      submitBtn.disabled = !(okStore && okAgree && okSlot && okScore);
+      submitBtn.disabled = !(okStore && okAgree && okScore);
     }
 
     // 複数の「口コミを投稿」ボタンに対応
@@ -842,14 +827,7 @@
       storeSelect.addEventListener("change", updateSubmitState);
     }
 
-    slotBtns.forEach(btn => {
-      btn.addEventListener("click", () => {
-        slotBtns.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        timeSlotInput.value = btn.dataset.slot;
-        updateSubmitState();
-      });
-    });
+
 
     function paintStars(v) {
       stars.forEach(s => {

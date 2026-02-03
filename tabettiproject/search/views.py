@@ -264,7 +264,8 @@ def customer_search_listView(request):
         store_qs = store_qs.filter(
             Q(store_name__icontains=keyword) |
             Q(genre__icontains=keyword) |
-            Q(address__icontains=keyword)
+            Q(address__icontains=keyword) |
+            Q(scene__scene_name__icontains=keyword)
         )
 
     # 人数連動フィルタリング

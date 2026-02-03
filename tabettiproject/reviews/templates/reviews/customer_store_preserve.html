@@ -54,6 +54,12 @@
     background: #fafafa;
   }
 
+  .side-link.active {
+    background: #79a52c;
+    color: #fff;
+    font-weight: bold;
+  }
+
   .side-box .inner {
     padding: 12px;
     font-size: 12px;
@@ -217,82 +223,72 @@
 <div class="page-wrap">
   <div class="content-grid">
 
-    <!-- 左：絞り込み（見た目だけ） -->
+    <!-- 左：絞り込み -->
     <aside class="side">
-      <div class="side-box">
-        <h3>エリアから探す</h3>
-        <a class="side-link" href="#">すべて</a>
-        <div class="inner">
-          <a href="#" style="color:#06c; text-decoration:none;">このエリアを地図で見る</a>
+      <form method="get" action="{% url 'reviews:customer_store_preserve' %}">
+        <div class="side-box">
+          <h3>ジャンルから探す</h3>
+          <a class="side-link {% if not selected_genre or selected_genre == 'all' %}active{% endif %}" 
+             href="{% url 'reviews:customer_store_preserve' %}?genre=all&min_budget={{ selected_min|default:'' }}&max_budget={{ selected_max|default:'' }}&went={{ selected_went|default:'any' }}">
+            ・すべて
+          </a>
+          {% for g in genres %}
+            <a class="side-link {% if selected_genre == g.id|stringformat:'s' %}active{% endif %}" 
+               href="{% url 'reviews:customer_store_preserve' %}?genre={{ g.id }}&min_budget={{ selected_min|default:'' }}&max_budget={{ selected_max|default:'' }}&went={{ selected_went|default:'any' }}">
+              ・{{ g.name }}
+            </a>
+            {% if selected_genre == g.id|stringformat:'s' %}
+              <input type="hidden" name="genre" value="{{ g.id }}">
+            {% endif %}
+          {% endfor %}
+          {% if not selected_genre or selected_genre == 'all' %}
+            <input type="hidden" name="genre" value="all">
+          {% endif %}
         </div>
-      </div>
 
-      <div class="side-box">
-        <h3>ジャンルから探す</h3>
-        <a class="side-link" href="#">すべて</a>
-      </div>
+        <div class="side-box">
+          <h3>保存検索</h3>
+          <div class="inner">
+            <div class="side-row">
+              <label style="width:48px;">下限</label>
+              <select name="min_budget">
+                <option value="">下限なし</option>
+                {% for price in budget_choices %}
+                  <option value="{{ price }}" {% if selected_min == price|stringformat:'s' %}selected{% endif %}>{{ price }}円</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="side-row">
+              <label style="width:48px;">上限</label>
+              <select name="max_budget">
+                <option value="">上限なし</option>
+                {% for price in budget_choices %}
+                  <option value="{{ price }}" {% if selected_max == price|stringformat:'s' %}selected{% endif %}>{{ price }}円</option>
+                {% endfor %}
+              </select>
+            </div>
 
-      <div class="side-box">
-        <h3>予約</h3>
-        <div class="inner">
-          <div class="side-row">
-            <label style="width:48px;">下限</label>
-            <select>
-              <option>下限なし</option>
-            </select>
-          </div>
-          <div class="side-row">
-            <label style="width:48px;">上限</label>
-            <select>
-              <option>上限なし</option>
-            </select>
-          </div>
+            <div style="margin-top:10px; font-weight:bold; font-size:12px;">行った・行ってない</div>
+            <div class="side-row">
+              <input type="radio" name="went" id="went_any" value="any" {% if selected_went == 'any' or not selected_went %}checked{% endif %}>
+              <label for="went_any">指定なし</label>
+            </div>
+            <div class="side-row">
+              <input type="radio" name="went" id="went_yes" value="yes" {% if selected_went == 'yes' %}checked{% endif %}>
+              <label for="went_yes">行った</label>
+            </div>
+            <div class="side-row">
+              <input type="radio" name="went" id="went_no" value="no" {% if selected_went == 'no' %}checked{% endif %}>
+              <label for="went_no">行ってない</label>
+            </div>
 
-          <div style="margin-top:10px; font-weight:bold; font-size:12px;">営業時間</div>
-          <div class="side-row">
-            <select>
-              <option>指定なし</option>
-            </select>
-          </div>
-
-          <div class="side-row" style="margin-top:10px;">
-            <input type="checkbox" id="open_now">
-            <label for="open_now">日曜営業あり</label>
-          </div>
-
-          <div style="margin-top:10px; font-weight:bold; font-size:12px;">行った・行ってない</div>
-          <div class="side-row">
-            <input type="radio" name="went" id="went_any" checked>
-            <label for="went_any">指定なし</label>
-          </div>
-          <div class="side-row">
-            <input type="radio" name="went" id="went_yes">
-            <label for="went_yes">行った</label>
-          </div>
-          <div class="side-row">
-            <input type="radio" name="went" id="went_no">
-            <label for="went_no">行ってない</label>
-          </div>
-
-          <button class="btn-green" type="button">絞り込む</button>
-          <button class="btn-outline" type="button">詳細条件</button>
-        </div>
-      </div>
-
-      <div class="side-box">
-        <h3>コレクション一覧</h3>
-        <div class="inner">
-          <div class="side-row">
-            <input type="text" placeholder="コレクション名">
-            <button type="button" class="btn-green" style="width:64px; padding:8px 0;">作成</button>
-          </div>
-          <div style="font-size:11px; color:#888; margin-top:6px;">
-            コレクションがありません<br>
-            コレクションを作成することで<br>
-            お店を管理することができます
+            <button class="btn-green" type="submit" style="margin-top: 15px;">絞り込む</button>
+            <a href="{% url 'reviews:customer_store_preserve' %}" class="btn-outline" style="display:block; text-align:center; text-decoration:none; margin-top:8px; line-height:30px;">
+              クリア
+            </a>
           </div>
         </div>
-      </div>
+      </form>
     </aside>
 
     <!-- 右：保存リスト -->
@@ -319,7 +315,9 @@
         <div class="preserve-card">
           <div>
             <div class="preserve-name">
-              {{ r.store.store_name }} {{ r.store.branch_name }}
+              <a href="{% url 'stores:customer_store_info' r.store.pk %}" style="color: #06c; text-decoration: none;">
+                {{ r.store.store_name }} {{ r.store.branch_name }}
+              </a>
             </div>
             <div class="preserve-meta">
               保存日時：{{ r.created_at|date:"Y/m/d H:i" }}<br>
