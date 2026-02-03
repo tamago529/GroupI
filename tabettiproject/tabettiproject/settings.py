@@ -150,7 +150,7 @@ SESSION_COOKIE_NAME = "site_sessionid"
 ADMIN_SESSION_COOKIE_NAME = "admin_sessionid"
 
 # --- メール送信（Gmail SMTP）---
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = "commons.backends.FixedEmailBackend"
 
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
