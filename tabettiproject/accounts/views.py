@@ -40,6 +40,7 @@ class company_account_managementView(CompanyOnlyMixin, ListView):
     template_name = "accounts/company_account_management.html"
     model = Account
     context_object_name = "accounts"
+    paginate_by = 10
 
     def get_queryset(self):
         queryset = super().get_queryset().select_related("account_type")
@@ -122,13 +123,19 @@ class company_store_reviewView(LoginRequiredMixin, TemplateView):
         ctx = super().get_context_data(**kwargs)
         pending = ApplicationStatus.objects.get(status="申請中")
         
-        requests = (
+        requests_all = (
             StoreAccountRequest.objects 
             .filter(request_status=pending)
             .order_by("-requested_at")
         )
 
-        ctx["requests"] = requests
+        # ✅ ページネーション追加 (1ページ 10件)
+        from django.core.paginator import Paginator
+        page = self.request.GET.get("page") or 1
+        paginator = Paginator(requests_all, 10)
+        requests_page = paginator.get_page(page)
+
+        ctx["requests"] = requests_page
         return ctx
     
 from django.conf import settings
@@ -568,6 +575,12 @@ class store_account_request_createView(LoginRequiredMixin, View):
             validate_email(admin_email)
         except ValidationError:
             messages.error(request, "管理者メールアドレスの形式が正しくありません。")
+            return redirect("accounts:store_account_search")
+
+        # ✅ 顧客アカウントとしての重複チェック
+        # Accountモデル（基底）に対して、emailが一貫して顧客として存在するか確認
+        if Account.objects.filter(email__iexact=admin_email, account_type__account_type="顧客").exists():
+            messages.error(request, f"メールアドレス「{admin_email}」は既に顧客アカウントとして登録されているため、店舗管理者用として使用できません。")
             return redirect("accounts:store_account_search")
 
         status_pending = ApplicationStatus.objects.get(status="申請中")

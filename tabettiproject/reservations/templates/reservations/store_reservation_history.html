@@ -52,6 +52,12 @@
   .actions{margin-left:auto;display:flex;flex-direction:column;gap:8px;}
   .btn{height:36px;min-width:170px;border-radius:4px;border:1px solid #cfc8bd;background:#fff;font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center;text-decoration:none;color:#333;}
   .btn-primary{border:none;background:var(--brand);color:#fff;}
+
+  /* Status Badges */
+  .badge-confirmed { background: #e3f2fd; color: #0d47a1; border-color: #bbdefb; }
+  .badge-canceled  { background: #ffebee; color: #c62828; border-color: #ffcdd2; }
+  .badge-visited   { background: #e8f5e9; color: #2e7d32; border-color: #c8e6c9; }
+  .badge-saved     { background: #f3e5f5; color: #7b1fa2; border-color: #e1bee7; }
   
   /* Pagination (Match Search List) */
   .pagination {
@@ -123,7 +129,14 @@
                 </div>
 
                 <div class="badges">
-                  <span class="badge">ステータス：{{ r.booking_status.status }}</span>
+                  <span class="badge 
+                    {% if r.booking_status.status == '予約確定' %}badge-confirmed
+                    {% elif r.booking_status.status == 'キャンセル' %}badge-canceled
+                    {% elif r.booking_status.status == '来店済み' %}badge-visited
+                    {% elif r.booking_status.status == '保存済み' %}badge-saved
+                    {% endif %}">
+                    ステータス：{{ r.booking_status.status }}
+                  </span>
                   <span class="badge">予約ID：{{ r.id }}</span>
                 </div>
               </div>

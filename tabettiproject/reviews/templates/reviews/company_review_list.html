@@ -175,21 +175,64 @@
     .btn-back:hover {
         background-color: #f0f0f0;
     }
+
+    /* 5. ページネーション */
+    .sa-pager {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 14px;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+
+    .sa-link {
+        color: #1e73c9;
+        text-decoration: none;
+        font-size: 13px;
+    }
+
+    .sa-link:hover {
+        text-decoration: underline;
+    }
+
+    .sa-link-disabled {
+        color: #aaa;
+        pointer-events: none;
+        text-decoration: none;
+        font-size: 13px;
+    }
+
+    .sa-pageinfo {
+        font-size: 12px;
+        color: #666;
+    }
 </style>
 
 <div class="review-manage-wrapper">
     <h1 class="page-title">口コミ閲覧（管理）</h1>
 
-    <!-- フィルタエリア -->
-   <form method="get" id="filter-form">
-    <label class="filter-label">
-        <!-- 🌟 onchange を追加して、チェックしたら即座に送信するようにします -->
-        <input type="checkbox" name="reported" value="1" id="reportedFilter" 
-               onchange="this.form.submit()"
-               {% if only_reported %}checked{% endif %}>
-        <span>通報済みのみ表示</span>
-    </label>
-</form>
+    <!-- フィルタ・検索エリア -->
+    <div class="filter-section" style="display: flex; flex-direction: column; align-items: flex-start; gap: 15px;">
+        <form method="get" id="filter-form" style="display: flex; align-items: center; gap: 20px; width: 100%;">
+            <label class="filter-label">
+                <input type="checkbox" name="reported" value="1" id="reportedFilter" 
+                       onchange="this.form.submit()"
+                       {% if only_reported %}checked{% endif %}>
+                <span>通報済みのみ表示</span>
+            </label>
+
+            <div style="flex-grow: 1; display: flex; gap: 8px;">
+                <input type="text" name="q" value="{{ query }}" placeholder="ユーザー名、店舗名、口コミ内容で検索..." 
+                       style="flex-grow: 1; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                <button type="submit" style="padding: 8px 20px; background: #333; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">検索</button>
+                {% if query or only_reported %}
+                    <a href="{% url 'reviews:company_review_list' %}" style="padding: 8px 15px; background: #eee; color: #666; border-radius: 4px; text-decoration: none; font-size: 13px; display: flex; align-items: center;">クリア</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
 
     <!-- 口コミ一覧 -->
     <div class="review-list">
@@ -233,6 +276,27 @@
             {% endif %}
         {% endfor %}
     </div>
+
+    <!-- ページネーション -->
+    {% if reviews and reviews.has_other_pages %}
+    <div class="sa-pager">
+      {% if reviews.has_previous %}
+      <a class="sa-link"
+        href="?reported={% if only_reported %}1{% else %}0{% endif %}&q={{ query }}&page={{ reviews.previous_page_number }}">前へ</a>
+      {% else %}
+      <span class="sa-link sa-link-disabled">前へ</span>
+      {% endif %}
+
+      <span class="sa-pageinfo">Page {{ reviews.number }} / {{ reviews.paginator.num_pages }}</span>
+
+      {% if reviews.has_next %}
+      <a class="sa-link"
+        href="?reported={% if only_reported %}1{% else %}0{% endif %}&q={{ query }}&page={{ reviews.next_page_number }}">次へ</a>
+      {% else %}
+      <span class="sa-link sa-link-disabled">次へ</span>
+      {% endif %}
+    </div>
+    {% endif %}
 
     <!-- 戻るボタン -->
     <div class="footer-nav">

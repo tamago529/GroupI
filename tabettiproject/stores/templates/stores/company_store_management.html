@@ -106,6 +106,39 @@
     .nav-links a:hover {
         background-color: #f0f0f0;
     }
+
+    /* ページネーション */
+    .sa-pager {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 14px;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+
+    .sa-link {
+        color: #1e73c9;
+        text-decoration: none;
+        font-size: 13px;
+    }
+
+    .sa-link:hover {
+        text-decoration: underline;
+    }
+
+    .sa-link-disabled {
+        color: #aaa;
+        pointer-events: none;
+        text-decoration: none;
+        font-size: 13px;
+    }
+
+    .sa-pageinfo {
+        font-size: 12px;
+        color: #666;
+    }
 </style>
 
 <div class="store-admin-wrapper">
@@ -141,6 +174,25 @@
             </div>
         {% endfor %}
     </div>
+
+    <!-- ページネーション -->
+    {% if stores and stores.has_other_pages %}
+    <div class="sa-pager">
+      {% if stores.has_previous %}
+      <a class="sa-link" href="?q={{ query|urlencode }}&page={{ stores.previous_page_number }}">前へ</a>
+      {% else %}
+      <span class="sa-link sa-link-disabled">前へ</span>
+      {% endif %}
+
+      <span class="sa-pageinfo">Page {{ stores.number }} / {{ stores.paginator.num_pages }}</span>
+
+      {% if stores.has_next %}
+      <a class="sa-link" href="?q={{ query|urlencode }}&page={{ stores.next_page_number }}">次へ</a>
+      {% else %}
+      <span class="sa-link sa-link-disabled">次へ</span>
+      {% endif %}
+    </div>
+    {% endif %}
 
     <!-- ⑤ 下部のナビゲーションリンク -->
     <div class="nav-links">

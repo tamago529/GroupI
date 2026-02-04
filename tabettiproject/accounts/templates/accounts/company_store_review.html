@@ -112,6 +112,39 @@
   color:#777;
   padding:20px;
 }
+
+/* ページネーション */
+.sa-pager {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.sa-link {
+    color: #1e73c9;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.sa-link:hover {
+    text-decoration: underline;
+}
+
+.sa-link-disabled {
+    color: #aaa;
+    pointer-events: none;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.sa-pageinfo {
+    font-size: 12px;
+    color: #666;
+}
 </style>
 
 <div class="review-wrapper">
@@ -165,6 +198,25 @@
           {% endfor %}
         </tbody>
       </table>
+
+      <!-- ページネーション -->
+      {% if requests and requests.has_other_pages %}
+      <div class="sa-pager">
+        {% if requests.has_previous %}
+        <a class="sa-link" href="?page={{ requests.previous_page_number }}">前へ</a>
+        {% else %}
+        <span class="sa-link sa-link-disabled">前へ</span>
+        {% endif %}
+
+        <span class="sa-pageinfo">Page {{ requests.number }} / {{ requests.paginator.num_pages }}</span>
+
+        {% if requests.has_next %}
+        <a class="sa-link" href="?page={{ requests.next_page_number }}">次へ</a>
+        {% else %}
+        <span class="sa-link sa-link-disabled">次へ</span>
+        {% endif %}
+      </div>
+      {% endif %}
     {% else %}
       <div class="empty">
         現在、申請中の店舗はありません。

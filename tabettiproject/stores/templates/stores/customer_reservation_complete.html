@@ -1,0 +1,199 @@
+{% extends 'customer_base.html' %}
+{% load static %}
+
+{% block title %}予約完了 - タベッチ{% endblock %}
+
+{% block css %}
+<style>
+  .complete-wrap {
+    max-width: 700px;
+    margin: 60px auto;
+    padding: 0 16px;
+  }
+
+  .complete-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    padding: 40px;
+    text-align: center;
+  }
+
+  .success-icon {
+    width: 80px;
+    height: 80px;
+    background: #4caf50;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    margin: 0 auto 24px;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+  }
+
+  .complete-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 12px;
+  }
+
+  .complete-msg {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 40px;
+    line-height: 1.6;
+  }
+
+  .reservation-info {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 40px;
+    text-align: left;
+  }
+
+  .reservation-info h2 {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .info-label {
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  .info-val {
+    font-size: 15px;
+    color: #1e293b;
+    font-weight: bold;
+  }
+
+  .info-val.store-name {
+    color: #ff8a00;
+  }
+
+  .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .btn-base {
+    display: inline-block;
+    padding: 14px 40px;
+    border-radius: 30px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.2s;
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .btn-primary {
+    background: #ff8a00;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(255, 138, 0, 0.25);
+  }
+
+  .btn-primary:hover {
+    background: #e67e00;
+    transform: translateY(-2px);
+  }
+
+  .btn-outline {
+    background: #fff;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+  }
+
+  .btn-outline:hover {
+    background: #f8fafc;
+    color: #1e293b;
+    border-color: #cbd5e1;
+  }
+
+  @media (max-width: 480px) {
+    .complete-card {
+      padding: 30px 20px;
+    }
+    .complete-title {
+      font-size: 22px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="complete-wrap">
+  <div class="complete-card">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width: 40px; height: 40px;">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </div>
+    
+    <h1 class="complete-title">予約が完了しました</h1>
+    <p class="complete-msg">
+      ご利用ありがとうございます。<br>
+      ご登録いただいたメールアドレスに予約確認メールを送信しました。
+    </p>
+
+    <div class="reservation-info">
+      <h2>予約内容の確認</h2>
+      <div class="info-list">
+        <div class="info-item">
+          <span class="info-label">予約ID</span>
+          <span class="info-val">#{{ reservation.id }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">店名</span>
+          <span class="info-val store-name">{{ reservation.store.store_name }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">来店日</span>
+          <span class="info-val">{{ reservation.visit_date }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">来店時間</span>
+          <span class="info-val">{{ reservation.visit_time|time:"H:i" }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">人数</span>
+          <span class="info-val">{{ reservation.visit_count }}名</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">コース</span>
+          <span class="info-val">{{ reservation.course }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a href="{% url 'accounts:customer_top' %}" class="btn-base btn-primary">トップページへ戻る</a>
+      <a href="{% url 'reservations:store_reservation_history' %}" class="btn-base btn-outline">予約履歴を確認する</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

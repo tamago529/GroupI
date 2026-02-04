@@ -236,7 +236,7 @@ def customer_search_listView(request):
     # ---------- 店舗ベースクエリ ----------
     store_qs = (
         Store.objects
-        .select_related("area", "scene")
+        .select_related("area", "scene", "genre_master")
         .annotate(
             has_account=models.Count("storeaccount", distinct=True),
             weighted_avg_rating=models.Sum(

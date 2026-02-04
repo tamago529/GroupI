@@ -32,7 +32,6 @@
     .account-sub-info { font-size: 14px; color: #666; }
     .btn-item { padding: 8px 25px; border: 2px solid #333; border-radius: 12px; background-color: #fff; font-size: 18px; font-weight: bold; text-decoration: none; color: #000; }
 
-    /* 見つからない時のメッセージ */
     .no-results {
         text-align: center;
         padding: 50px;
@@ -41,6 +40,39 @@
         border-radius: 15px;
         color: #888;
         font-size: 18px;
+    }
+
+    /* ページネーション */
+    .sa-pager {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 14px;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+
+    .sa-link {
+        color: #1e73c9;
+        text-decoration: none;
+        font-size: 13px;
+    }
+
+    .sa-link:hover {
+        text-decoration: underline;
+    }
+
+    .sa-link-disabled {
+        color: #aaa;
+        pointer-events: none;
+        text-decoration: none;
+        font-size: 13px;
+    }
+
+    .sa-pageinfo {
+        font-size: 12px;
+        color: #666;
     }
 </style>
 
@@ -113,6 +145,27 @@
             </div>
         {% endfor %}
     </div>
+
+    <!-- ページネーション -->
+    {% if is_paginated %}
+    <div class="sa-pager">
+      {% if page_obj.has_previous %}
+      <a class="sa-link"
+        href="?q={{ query }}&type={{ selected_type }}&page={{ page_obj.previous_page_number }}">前へ</a>
+      {% else %}
+      <span class="sa-link sa-link-disabled">前へ</span>
+      {% endif %}
+
+      <span class="sa-pageinfo">Page {{ page_obj.number }} / {{ paginator.num_pages }}</span>
+
+      {% if page_obj.has_next %}
+      <a class="sa-link"
+        href="?q={{ query }}&type={{ selected_type }}&page={{ page_obj.next_page_number }}">次へ</a>
+      {% else %}
+      <span class="sa-link sa-link-disabled">次へ</span>
+      {% endif %}
+    </div>
+    {% endif %}
 
     <div class="footer-nav">
         <a href="{% url 'accounts:company_top' %}">運用トップへ戻る</a>

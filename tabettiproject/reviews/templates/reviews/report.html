@@ -121,10 +121,55 @@
         justify-content: space-between;
         align-items: center;
     }
+
+    /* ページネーション */
+    .sa-pager {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 14px;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+
+    .sa-link {
+        color: #1e73c9;
+        text-decoration: none;
+        font-size: 13px;
+    }
+
+    .sa-link:hover {
+        text-decoration: underline;
+    }
+
+    .sa-link-disabled {
+        color: #aaa;
+        pointer-events: none;
+        text-decoration: none;
+        font-size: 13px;
+    }
+
+    .sa-pageinfo {
+        font-size: 12px;
+        color: #666;
+    }
 </style>
 
 <div class="report-wrapper">
     <h1 class="page-title">報告管理</h1>
+
+    <div class="filter-section" style="margin-bottom: 20px; background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
+        <form method="get" id="filter-form">
+            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: bold; color: #555;">
+                <input type="checkbox" name="pending" value="1" 
+                       {% if only_pending %}checked{% endif %}
+                       onchange="document.getElementById('hidden-pending').value = this.checked ? '1' : '0'; this.form.submit();">
+                <span>未処理のみ表示</span>
+                <input type="hidden" name="pending" id="hidden-pending" value="{% if only_pending %}1{% else %}0{% endif %}">
+            </label>
+        </form>
+    </div>
 
     <div class="report-grid">
         {% for report in reports %}
@@ -141,6 +186,25 @@
             <p>報告はありません。</p>
         {% endfor %}
     </div>
+
+    <!-- ページネーション -->
+    {% if reports and reports.has_other_pages %}
+    <div class="sa-pager">
+      {% if reports.has_previous %}
+      <a class="sa-link" href="?pending={% if only_pending %}1{% else %}0{% endif %}&page={{ reports.previous_page_number }}">前へ</a>
+      {% else %}
+      <span class="sa-link sa-link-disabled">前へ</span>
+      {% endif %}
+
+      <span class="sa-pageinfo">Page {{ reports.number }} / {{ reports.paginator.num_pages }}</span>
+
+      {% if reports.has_next %}
+      <a class="sa-link" href="?pending={% if only_pending %}1{% else %}0{% endif %}&page={{ reports.next_page_number }}">次へ</a>
+      {% else %}
+      <span class="sa-link sa-link-disabled">次へ</span>
+      {% endif %}
+    </div>
+    {% endif %}
 
     <div class="footer-actions">
         <a href="{% url 'accounts:company_top' %}" class="btn-back">戻る</a>
@@ -180,6 +244,18 @@
     
     document.getElementById('deleteReviewBtn').href = finalUrl;
     document.getElementById('reportModal').style.display = 'flex';
+}
+
+function closeReport() {
+    document.getElementById('reportModal').style.display = 'none';
+}
+
+// 背景クリックで閉じる
+window.onclick = function(event) {
+    let modal = document.getElementById('reportModal');
+    if (event.target == modal) {
+        closeReport();
+    }
 }
 </script>
 {% endblock %}

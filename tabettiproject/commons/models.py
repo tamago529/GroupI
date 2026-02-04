@@ -518,6 +518,16 @@ class StoreImage(models.Model):
         verbose_name="画像ステータス",
     )
 
+    # 投稿者（顧客が投稿した場合に記録）
+    uploaded_by = models.ForeignKey(
+        "Account",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="投稿者",
+        related_name="uploaded_store_images",
+    )
+
     class Meta:
         db_table = "store_images"
         verbose_name = "店舗画像"

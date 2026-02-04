@@ -11,6 +11,8 @@ from .views import (
     customer_store_new_register_confirmView,
     customer_store_new_register_completeView,
     customer_reservation_completeView,
+    customer_store_photo_uploadView,
+    customer_store_photosView,
 
     # --- 店舗側 ---
     store_basic_editView,
@@ -41,6 +43,8 @@ urlpatterns = [
     path("customer_store_new_register_complete/", customer_store_new_register_completeView.as_view(), name="customer_store_new_register_complete"),
     path("customer_reservation_complete/<int:reservation_id>/", customer_reservation_completeView.as_view(), name="customer_reservation_complete"),
     path("customer_store_map/<int:pk>/", customer_store_mapView.as_view(), name="customer_store_map"),
+    path("customer_store_photo_upload/<int:pk>/", customer_store_photo_uploadView.as_view(), name="customer_store_photo_upload"),
+    path("customer_store_photos/<int:pk>/", customer_store_photosView.as_view(), name="customer_store_photos"),
 
     # --- 店舗側 ---
     path("store_basic_edit/", store_basic_editView.as_view(), name="store_basic_edit"),

@@ -501,7 +501,7 @@ class customer_mapView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["stores"] = Store.objects.all()
+        context["stores"] = Store.objects.prefetch_related('images').all()
         return context
 
 
@@ -595,7 +595,7 @@ class customer_store_infoView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        store = get_object_or_404(Store, pk=self.kwargs["pk"])
+        store = get_object_or_404(Store.objects.select_related("genre_master", "area", "scene"), pk=self.kwargs["pk"])
         context["store"] = store
 
         # アクセスログの記録
@@ -1147,11 +1147,17 @@ class company_store_managementView(TemplateView):
 
         query = self.request.GET.get("q", "").strip()
         if query:
-            stores = Store.objects.filter(Q(store_name__icontains=query)).order_by("store_name")
+            stores_all = Store.objects.filter(Q(store_name__icontains=query)).order_by("store_name")
         else:
-            stores = Store.objects.all().order_by("store_name")
+            stores_all = Store.objects.all().order_by("store_name")
 
-        context["stores"] = stores
+        # ✅ ページネーション追加 (1ページ 10件)
+        from django.core.paginator import Paginator
+        page = self.request.GET.get("page") or 1
+        paginator = Paginator(stores_all, 10)
+        stores_page = paginator.get_page(page)
+
+        context["stores"] = stores_page
         context["query"] = query
         return context
 
@@ -1331,3 +1337,79 @@ def store_delete_execute(request, pk):
     msg = f"店舗「{name}」の削除"
     encoded_msg = urllib.parse.quote(msg)
     return redirect(reverse("commons:company_common_complete") + f"?message={encoded_msg}")
+
+
+# =========================
+# 顧客：店舗写真アップロード
+# =========================
+class customer_store_photo_uploadView(LoginRequiredMixin, View):
+    """
+    ログイン中の顧客が店舗に写真を投稿する
+    """
+    login_url = "/accounts/customer_login/"
+    
+    def post(self, request, pk):
+        store = get_object_or_404(Store, pk=pk)
+        
+        # アップロードされた画像を取得
+        uploaded_file = request.FILES.get("photo")
+        if not uploaded_file:
+            messages.error(request, "画像ファイルを選択してください。")
+            return redirect("stores:customer_store_info", pk=pk)
+        
+        # ImageStatus の取得（デフォルトは「公開」など）
+        from commons.models import ImageStatus
+        default_status = ImageStatus.objects.filter(status="公開").first()
+        if not default_status:
+            default_status = ImageStatus.objects.first()
+        
+        if not default_status:
+            messages.error(request, "画像ステータスが設定されていません。管理者に連絡してください。")
+            return redirect("stores:customer_store_info", pk=pk)
+        
+        # StoreImage を作成
+        store_image = StoreImage(
+            store=store,
+            image_file=uploaded_file,
+            image_status=default_status,
+            uploaded_by=request.user,
+        )
+        store_image.save()
+        
+        messages.success(request, "写真を投稿しました！")
+        return redirect("stores:customer_store_photos", pk=pk)
+
+
+# =========================
+# 顧客：店舗写真タブ
+# =========================
+class customer_store_photosView(TemplateView):
+    """
+    店舗の写真タブ - 写真の一覧表示と投稿
+    """
+    template_name = "stores/customer_store_photos.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        store = get_object_or_404(Store.objects.select_related("genre_master", "area", "scene"), pk=self.kwargs["pk"])
+        context["store"] = store
+        
+        # 店舗画像一覧
+        context["store_images"] = StoreImage.objects.filter(store=store).select_related("uploaded_by").order_by("-id")
+        
+        # 共通コンテキスト
+        customer = _get_customer_from_user(self.request.user)
+        context["is_saved"] = _get_is_saved_for_customer(customer=customer, store=store)
+        context.update(_get_store_rating_context(store))
+        
+        # 検索条件（パンくず用）
+        context.update({
+            "keyword": self.request.GET.get("keyword", ""),
+            "area": self.request.GET.get("area", ""),
+            "date": self.request.GET.get("date", ""),
+            "time": self.request.GET.get("time", ""),
+            "sort": self.request.GET.get("sort", ""),
+            "from_search": self.request.GET.get("from_search", ""),
+        })
+        
+        return context

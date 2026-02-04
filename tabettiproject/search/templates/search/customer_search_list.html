@@ -390,7 +390,7 @@
       <div class="shop-meta">
         {{ store.area.area_name }} /
         {{ store.scene.scene_name }} /
-        {{ store.genre }}
+        {{ store.genre_master.name|default:store.genre }}
       </div>
 
       <!-- ネット予約カレンダー（店舗アカウント紐づきのみ） -->

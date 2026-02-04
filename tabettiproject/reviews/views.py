@@ -759,7 +759,7 @@ class store_review_reportView(TemplateView):
             review=review,
             reporter=request.user,
             report_text=report_text,
-            report_status=False
+            report_status=True
         )
 
         messages.success(request, "口コミを通報しました。運営にて内容を確認いたします。")
@@ -790,7 +790,9 @@ class company_review_listView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        # ✅ フィルタ・検索
         only_reported = self.request.GET.get("reported") == "1"
+        query = self.request.GET.get("q", "").strip()
 
         reported_review_ids = (
             ReviewReport.objects
@@ -803,10 +805,24 @@ class company_review_listView(TemplateView):
 
         if only_reported:
             qs = qs.filter(reviewreport__report_status=True).distinct()
+        
+        if query:
+            qs = qs.filter(
+                Q(reviewer__nickname__icontains=query) |
+                Q(review_text__icontains=query) |
+                Q(store__store_name__icontains=query)
+            ).distinct()
 
-        context["reviews"] = qs.order_by("-posted_at")
+        # ✅ ページネーション追加 (1ページ 10件)
+        from django.core.paginator import Paginator
+        page = self.request.GET.get("page") or 1
+        paginator = Paginator(qs.order_by("-posted_at"), 10)
+        reviews_page = paginator.get_page(page)
+
+        context["reviews"] = reviews_page
         context["reported_review_ids"] = reported_review_ids
         context["only_reported"] = only_reported
+        context["query"] = query
         return context
     
 def review_delete_execute(request, pk):
@@ -866,7 +882,7 @@ class customer_report_input(LoginRequiredMixin, View):
                 review=review,
                 reporter=request.user,
                 report_text=message,
-                report_status=False
+                report_status=True
             )
             msg = "口コミの通報が完了しました。"
         else:
@@ -880,13 +896,28 @@ class reportView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        reports = (
+        
+        # ✅ フィルタ
+        only_pending = self.request.GET.get("pending") != "0" # デフォルトON
+
+        reports_qs = (
             ReviewReport.objects
             .select_related("review", "reporter", "review__reviewer")
             .all()
             .order_by("-reported_at")
         )
-        context["reports"] = reports
+        
+        if only_pending:
+            reports_qs = reports_qs.filter(report_status=True)
+
+        # ✅ ページネーション追加 (1ページ 10件)
+        from django.core.paginator import Paginator
+        page = self.request.GET.get("page") or 1
+        paginator = Paginator(reports_qs, 10)
+        reports_page = paginator.get_page(page)
+
+        context["reports"] = reports_page
+        context["only_pending"] = only_pending
         return context
 
 def review_delete_execute(request, pk):

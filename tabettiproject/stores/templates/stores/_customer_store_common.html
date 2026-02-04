@@ -413,7 +413,7 @@
   </div>
 
   <div class="meta-info-text">
-    ジャンル：{{ store.genre }}<br>
+    ジャンル：{{ store.genre_master.name|default:store.genre }}<br>
     利用シーン：{{ store.scene.scene_name }}<br>
     予算：￥{{ store.budget }}〜
   </div>
@@ -426,7 +426,9 @@
       <li class="{% if active_main == 'menu' %}active{% endif %}">
         <a href="{% url 'stores:customer_menu_course' store.pk %}?from_search={{ from_search }}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">メニュー・コース</a>
       </li>
-      <li><span>写真</span></li>
+      <li class="{% if active_main == 'photos' %}active{% endif %}">
+        <a href="{% url 'stores:customer_store_photos' store.pk %}?from_search={{ from_search }}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if area %}&area={{ area|urlencode }}{% endif %}{% if date %}&date={{ date|urlencode }}{% endif %}{% if time %}&time={{ time|urlencode }}{% endif %}{% if sort %}&sort={{ sort|urlencode }}{% endif %}">写真</a>
+      </li>
 
       {# active_main は 'reviews' に統一（include でもそう渡す） #}
       <li class="{% if active_main == 'reviews' %}active{% endif %}">
