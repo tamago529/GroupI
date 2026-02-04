@@ -272,6 +272,8 @@ class Store(models.Model):
     phone_number = models.CharField(max_length=20, verbose_name="電話番号")
     address = models.CharField(max_length=255, verbose_name="住所")
     area = models.ForeignKey("Area", on_delete=models.PROTECT, verbose_name="エリア")
+    latitude = models.FloatField(null=True, blank=True, verbose_name="緯度")
+    longitude = models.FloatField(null=True, blank=True, verbose_name="経度")
     business_hours = models.CharField(max_length=50, verbose_name="営業時間")
 
     # 営業時間（1枠目）

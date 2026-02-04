@@ -52,7 +52,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     // 1. 地図初期化
-    const map = L.map('map-element').setView([35.6812, 139.7671], 15);
+    const map = L.map('map-element').setView([35.6812, 139.7671], 13);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution: '© OpenStreetMap'
     }).addTo(map);
@@ -79,7 +79,9 @@
             address: "{{ shop.address|escapejs }}",
             genre: "{{ shop.genre|escapejs }}",
             hours: "{{ shop.business_hours|escapejs }}",
-            phone: "{{ shop.phone_number|escapejs }}"
+            phone: "{{ shop.phone_number|escapejs }}",
+            lat: {% if shop.latitude %}{{ shop.latitude }}{% else %}null{% endif %},
+            lng: {% if shop.longitude %}{{ shop.longitude }}{% else %}null{% endif %}
         }{% if not forloop.last %},{% endif %}
         {% endfor %}
     ];
@@ -108,6 +110,9 @@
             return;
         }
 
+        // 位置情報取得完了メッセージ
+        document.getElementById('loading-status').innerText = "位置情報を取得しました。周辺の店舗を検索しています...";
+
         const userLat = position.coords.latitude;
         const userLng = position.coords.longitude;
 
@@ -118,82 +123,96 @@
 
         const userLatLng = L.latLng(userLat, userLng);
 
-        map.setView(userLatLng, 15);
         L.marker(userLatLng, {icon: currentPosIcon}).addTo(map).bindPopup("<b>あなたの現在地</b>");
 
+        // 半径2kmのサークルを描画
+        const searchCircle = L.circle(userLatLng, {
+            color: '#ff8a00',
+            fillColor: '#ff8a00',
+            fillOpacity: 0.1,
+            radius: 2000
+        }).addTo(map);
+
+        // 円が全体入るように表示調整
+        map.fitBounds(searchCircle.getBounds());
+
         const listContainer = document.getElementById('shop-list-container');
-        listContainer.innerHTML = '';
         let foundCount = 0;
+        let sideContent = '';
 
         for (const shop of myShopList) {
             if (!navigator.onLine) break;
 
             try {
-                // 住所から座標を取得（ジオコーディング）
-                const res = await fetch(`https://msearch.gsi.go.jp/address-search/AddressSearch?q=${encodeURIComponent(shop.address)}`);
-                if (!res.ok) throw new Error("Network response was not ok");
-                
-                const data = await res.json();
+                let sLat, sLng;
 
-                if (data && data.length > 0) {
-                    const sLat = data[0].geometry.coordinates[1];
-                    const sLng = data[0].geometry.coordinates[0];
+                // DBに座標があればそれを使う (高速化)
+                if (shop.lat !== null && shop.lng !== null) {
+                    sLat = shop.lat;
+                    sLng = shop.lng;
+                } else {
+                    // 座標がない場合はAPIで取得 (フォールバック)
+                    if (!navigator.onLine) break;
                     
-                    if (!isValidLatLng(sLat, sLng)) {
-                        console.warn(`不正な座標をスキップしました: ${shop.name}`, sLat, sLng);
+                    const res = await fetch(`https://msearch.gsi.go.jp/address-search/AddressSearch?q=${encodeURIComponent(shop.address)}`);
+                    if (!res.ok) throw new Error("Network response was not ok");
+                    
+                    const data = await res.json();
+                    if (data && data.length > 0) {
+                        sLat = data[0].geometry.coordinates[1];
+                        sLng = data[0].geometry.coordinates[0];
+                    } else {
+                        console.warn(`住所が見つかりませんでした: ${shop.name}`);
                         continue;
                     }
-                } else {
-                    console.warn(`住所が見つかりませんでした (スキップ): ${shop.name} [${shop.address}]`);
-                    continue;
+                    await new Promise(r => setTimeout(r, 70));
                 }
-                    const distance = userLatLng.distanceTo(shopLatLng);
 
-                    // 半径1km以内の判定
-                    if (distance <= 1000) {
-                        foundCount++;
+                if (!isValidLatLng(sLat, sLng)) continue;
 
-                        // 地図のピンにポップアップを設定
-                        L.marker(shopLatLng, {icon: bluePinIcon}).addTo(map)
-                            .bindPopup(`
-                                <div style="min-width:150px;">
-                                    <div style="font-weight:bold; color:#06c;">${shop.name}</div>
-                                    <div style="font-size:11px; color:#e67e22; margin-bottom:5px;">${shop.genre}</div>
-                                    <a href="${shop.detailUrl}" style="color:#06c; text-decoration:none; font-size:12px; font-weight:bold;">▶ 詳細を見る</a>
+                const shopLatLng = L.latLng(sLat, sLng);
+                const distance = userLatLng.distanceTo(shopLatLng);
+
+                // 半径2km以内の判定
+                if (distance <= 2000) {
+                    foundCount++;
+
+                    // 地図のピン
+                    L.marker(shopLatLng, {icon: bluePinIcon}).addTo(map)
+                        .bindPopup(`
+                            <div style="min-width:150px;">
+                                <div style="font-weight:bold; color:#06c;">${shop.name}</div>
+                                <div style="font-size:11px; color:#e67e22; margin-bottom:5px;">${shop.genre}</div>
+                                <a href="${shop.detailUrl}" style="color:#06c; text-decoration:none; font-size:12px; font-weight:bold;">▶ 詳細を見る</a>
+                            </div>
+                        `);
+
+                    // 左側のカード
+                    sideContent += `
+                        <a href="${shop.detailUrl}" class="shop-link">
+                            <article class="shop-card">
+                                <div class="shop-img"></div>
+                                <div>
+                                    <div class="shop-genre">${shop.genre}</div>
+                                    <div class="shop-name">${shop.name}</div>
+                                    <div class="shop-info">🕒 ${shop.hours}</div>
+                                    <div class="shop-info">📞 ${shop.phone}</div>
+                                    <div style="font-size:10px; color:#999; margin-top:5px;">📍 現在地から 約${Math.round(distance)}m</div>
                                 </div>
-                            `);
-
-                        // 左側の店舗カード
-                        const card = `
-                            <a href="${shop.detailUrl}" class="shop-link">
-                                <article class="shop-card">
-                                    <div class="shop-img"></div>
-                                    <div>
-                                        <div class="shop-genre">${shop.genre}</div>
-                                        <div class="shop-name">${shop.name}</div>
-                                        <div class="shop-info">🕒 ${shop.hours}</div>
-                                        <div class="shop-info">📞 ${shop.phone}</div>
-                                        <div style="font-size:10px; color:#999; margin-top:5px;">📍 現在地から 約${Math.round(distance)}m</div>
-                                    </div>
-                                </article>
-                            </a>`;
-                        listContainer.innerHTML += card;
-                    }
+                            </article>
+                        </a>`;
                 }
             } catch (e) { 
-                console.error("住所変換エラー:", e);
-                if (!navigator.onLine) {
-                    document.getElementById('loading-status').innerHTML = '<span style="color:red;">情報が取得できませんでした インターネット状況をご確認してください</span>';
-                    return;
-                }
+                console.error("Shop processing error:", e);
             }
-            await new Promise(r => setTimeout(r, 150));
         }
         
-        if (!navigator.onLine) {
-            document.getElementById('loading-status').innerHTML = '<span style="color:red;">情報が取得できませんでした インターネット状況をご確認してください</span>';
-        } else {
-            document.getElementById('loading-status').innerText = foundCount > 0 ? `1km圏内に ${foundCount} 件の店舗が見つかりました` : "近くに店舗が見つかりませんでした";
+        // サイドバーを一括更新
+        listContainer.innerHTML = sideContent || '<div style="padding:20px; color:#999; text-align:center;">近くに店舗が見つかりませんでした</div>';
+        
+        if (navigator.onLine) {
+            const msg = foundCount > 0 ? `2km圏内に ${foundCount} 件の店舗が見つかりました` : "近くに店舗が見つかりませんでした";
+            document.getElementById('loading-status').innerHTML = `<span style="font-weight:bold; color:#0056b3;">${msg}</span>`;
         }
     }
 

@@ -41,7 +41,7 @@ class CompanyStoreEditForm(forms.ModelForm):
             "email": forms.EmailInput(attrs={"placeholder": "メールアドレスを入力"}),
 
             "business_hours": forms.Textarea(
-                attrs={"rows": 2, "placeholder": "営業時間（自由記述）例）11:00-15:00 / 17:00-22:00"}
+                attrs={"rows": 2, "placeholder": "例）11:00-15:00 / 17:00-22:00"}
             ),
 
             "open_time_1": forms.TimeInput(attrs={"type": "time"}),

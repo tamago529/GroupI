@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from django.contrib.auth.forms import AuthenticationForm,PasswordResetForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm, SetPasswordForm
 from django.contrib.auth import authenticate, get_user_model, login
 from commons.models import Account, CustomerAccount, StoreAccount, AccountType
 from django.urls import reverse
@@ -241,6 +241,7 @@ class StorePasswordResetForm(PasswordResetForm):
         user = qs.order_by("pk").first()
         return [user] if user else []
 
+
     def save(
         self,
         domain_override=None,
@@ -303,3 +304,12 @@ class CustomerLoginForm(AuthenticationForm):
     def clean(self):
         # 標準の認証処理に任せる（authenticate呼び出し等は親がやる）
         return super().clean()
+
+class StoreSetPasswordForm(SetPasswordForm):
+    email = forms.EmailField(label="ログインID（メールアドレス）", required=True)
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if email and self.user.email != email:
+            raise ValidationError("メールアドレスが一致しません。")
+        return email

@@ -2,109 +2,118 @@
 
 {% block content %}
 <style>
-/* ===== Layout ===== */
-.detail-container{
-  max-width:1000px;
-  margin:40px auto;
-  padding:0 20px;
-  font-family:sans-serif;
-}
-.detail-title{
-  font-size:24px;
-  margin-bottom:30px;
-  border-left:5px solid #ff9600;
-  padding-left:15px;
-}
+  /* ===== Layout ===== */
+  .detail-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px;
+    font-family: sans-serif;
+  }
 
-/* ===== Upper Section ===== */
-.info-section{
-  display:flex;
-  gap:30px;
-  margin-bottom:40px;
-  align-items:flex-start;
-}
+  .detail-title {
+    font-size: 24px;
+    margin-bottom: 30px;
+    border-left: 5px solid #ff9600;
+    padding-left: 15px;
+  }
 
-/* Info Box */
-.info-box{
-  flex:1;
-  border:2px solid #333;
-  padding:20px;
-  background:#fff;
-}
-.info-box h3{
-  margin-top:0;
-  margin-bottom:15px;
-}
-.info-box p{
-  font-size:14px;
-  margin:6px 0;
-}
+  /* ===== Upper Section ===== */
+  .info-section {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 40px;
+    align-items: flex-start;
+  }
 
-/* Image Box */
-.image-box{
-  flex:1.5;
-  border:2px solid #333;
-  padding:20px;
-  background:#f9f9f9;
-  text-align:center;
-}
-.image-box h3{
-  margin-top:0;
-}
-.license-img{
-  max-width:100%;
-  height:auto;
-  border:1px solid #ccc;
-  margin-top:15px;
-}
+  /* Info Box */
+  .info-box {
+    flex: 1;
+    border: 2px solid #333;
+    padding: 20px;
+    background: #fff;
+  }
 
-/* ===== Bottom ===== */
-.bottom-actions{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.right-buttons{
-  display:flex;
-  gap:15px;
-}
+  .info-box h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
 
-/* ===== Buttons ===== */
-.btn{
-  padding:12px 28px;
-  border:2px solid #333;
-  background:#fff;
-  font-weight:bold;
-  font-size:16px;
-  cursor:pointer;
-  text-decoration:none;
-  color:#000;
-}
-.btn:hover{
-  background:#f0f0f0;
-}
-.btn-permit:hover{
-  background:#ff9600;
-  color:#fff;
-}
+  .info-box p {
+    font-size: 14px;
+    margin: 6px 0;
+  }
 
-/* ===== Modal ===== */
-.modal-overlay{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.5);
-  justify-content:center;
-  align-items:center;
-  z-index:1000;
-}
-.modal-content{
-  background:#fff;
-  padding:40px;
-  border:2px solid #333;
-  border-radius:10px;
-  text-align:center;
-}
+  /* Image Box */
+  .image-box {
+    flex: 1.5;
+    border: 2px solid #333;
+    padding: 20px;
+    background: #f9f9f9;
+    text-align: center;
+  }
+
+  .image-box h3 {
+    margin-top: 0;
+  }
+
+  .license-img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #ccc;
+    margin-top: 15px;
+  }
+
+  /* ===== Bottom ===== */
+  .bottom-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .right-buttons {
+    display: flex;
+    gap: 15px;
+  }
+
+  /* ===== Buttons ===== */
+  .btn {
+    padding: 12px 28px;
+    border: 2px solid #333;
+    background: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    color: #000;
+  }
+
+  .btn:hover {
+    background: #f0f0f0;
+  }
+
+  .btn-permit:hover {
+    background: #ff9600;
+    color: #fff;
+  }
+
+  /* ===== Modal ===== */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background: #fff;
+    padding: 40px;
+    border: 2px solid #333;
+    border-radius: 10px;
+    text-align: center;
+  }
 </style>
 
 <div class="detail-container">
@@ -128,14 +137,11 @@
       <h3>② 営業許可証（画像）</h3>
 
       {% if req.license_image %}
-        <img
-          class="license-img"
-          src="{{ req.license_image.url }}"
-          alt="営業許可証">
+      <img class="license-img" src="{{ req.license_image.url }}" alt="営業許可証">
       {% else %}
-        <p style="margin-top:20px; color:#888;">
-          画像がアップロードされていません
-        </p>
+      <p style="margin-top:20px; color:#888;">
+        画像がアップロードされていません
+      </p>
       {% endif %}
     </div>
   </div>
@@ -148,7 +154,7 @@
 
     <div class="right-buttons">
       <button class="btn btn-permit" onclick="showPopup()">許可</button>
-      <a href="#" class="btn">不可</a>
+      <button class="btn" onclick="showRejectPopup()">不可</button>
     </div>
   </div>
 </div>
@@ -160,27 +166,43 @@
     <p>この店舗アカウントを許可してもよろしいですか？</p>
     <div style="margin-top:20px; display:flex; gap:12px; justify-content:center;">
       <button class="btn" type="button" onclick="closePopup()">キャンセル</button>
-      <!-- 次はここを POST にする -->
       <form method="post" action="{% url 'accounts:company_store_review_permit' req.id %}">
         {% csrf_token %}
         <button class="btn btn-permit" type="submit">実行する</button>
       </form>
+    </div>
+  </div>
+</div>
 
+<!-- Reject Modal -->
+<div class="modal-overlay" id="rejectModal">
+  <div class="modal-content">
+    <h2>却下確認</h2>
+    <p>この店舗アカウント申請を却下してもよろしいですか？<br>（申請者に通知は行われませんが、ステータスが「却下」になります）</p>
+    <div style="margin-top:20px; display:flex; gap:12px; justify-content:center;">
+      <button class="btn" type="button" onclick="closeRejectPopup()">キャンセル</button>
       <form method="post" action="{% url 'accounts:company_store_review_reject' req.id %}">
         {% csrf_token %}
-        <button class="btn" type="submit">却下する</button>
+        <button class="btn" type="submit" style="background:#ccc;">却下する</button>
       </form>
     </div>
   </div>
 </div>
 
 <script>
-function showPopup(){
-  document.getElementById('permitModal').style.display = 'flex';
-}
-function closePopup(){
-  document.getElementById('permitModal').style.display = 'none';
-}
+  function showPopup() {
+    document.getElementById('permitModal').style.display = 'flex';
+  }
+  function closePopup() {
+    document.getElementById('permitModal').style.display = 'none';
+  }
+
+  function showRejectPopup() {
+    document.getElementById('rejectModal').style.display = 'flex';
+  }
+  function closeRejectPopup() {
+    document.getElementById('rejectModal').style.display = 'none';
+  }
 </script>
 
 {% endblock %}

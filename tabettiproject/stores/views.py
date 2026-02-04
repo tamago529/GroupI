@@ -5,6 +5,7 @@ import calendar
 import os
 import random
 import urllib.parse
+import requests
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
 
@@ -1034,8 +1035,6 @@ class customer_store_new_registerView(LoginRequiredMixin, TemplateView):
                     serializable_data[key] = value.isoformat()
                 else:
                     serializable_data[key] = value
-            if "genre_master" in data:
-                display_data["genre_master_obj"] = get_object_or_404(Genre, pk=data["genre_master"])
 
             request.session["store_register_data"] = serializable_data
             return redirect("stores:customer_store_new_register_confirm")
@@ -1057,6 +1056,8 @@ class customer_store_new_register_confirmView(LoginRequiredMixin, TemplateView):
             display_data["area_obj"] = get_object_or_404(Area, pk=data["area"])
         if "scene" in data:
             display_data["scene_obj"] = get_object_or_404(Scene, pk=data["scene"])
+        if "genre_master" in data:
+            display_data["genre_master_obj"] = get_object_or_404(Genre, pk=data["genre_master"])
 
         context["data"] = display_data
         return context
@@ -1074,6 +1075,21 @@ class customer_store_new_register_confirmView(LoginRequiredMixin, TemplateView):
         if form.is_valid():
             store = form.save(commit=False)
             store.creator = _get_customer_from_user(request.user)
+
+            # 住所から座標を自動取得
+            if store.address:
+                try:
+                    url = f"https://msearch.gsi.go.jp/address-search/AddressSearch?q={urllib.parse.quote(store.address)}"
+                    response = requests.get(url, timeout=5)
+                    if response.status_code == 200:
+                        geo_data = response.json()
+                        if geo_data and len(geo_data) > 0:
+                            coords = geo_data[0]['geometry']['coordinates']
+                            store.longitude = coords[0]
+                            store.latitude = coords[1]
+                except Exception as e:
+                    print(f"Geocoding error: {e}")
+            
             store.save()
 
             if "store_register_data" in request.session:
@@ -1101,6 +1117,26 @@ class company_store_infoView(UpdateView):
     def get_success_url(self):
         messages.success(self.request, "店舗情報を更新しました。")
         return reverse("stores:company_store_info", kwargs={"pk": self.object.pk})
+
+    def form_valid(self, form):
+        store = form.save(commit=False)
+        # 住所が変更された場合、または座標が未設定の場合に再取得
+        if "address" in form.changed_data or not store.latitude:
+            if store.address:
+                try:
+                    url = f"https://msearch.gsi.go.jp/address-search/AddressSearch?q={urllib.parse.quote(store.address)}"
+                    response = requests.get(url, timeout=5)
+                    if response.status_code == 200:
+                        geo_data = response.json()
+                        if geo_data and len(geo_data) > 0:
+                            coords = geo_data[0]['geometry']['coordinates']
+                            store.longitude = coords[0]
+                            store.latitude = coords[1]
+                except Exception as e:
+                    print(f"Geocoding error: {e}")
+        
+        store.save()
+        return super().form_valid(form)
 
 
 class company_store_managementView(TemplateView):

@@ -1,128 +1,140 @@
-{% extends "store_base.html" %}  
+{% extends "store_base.html" %}
 {% load static %}
 {% block content %}
 <style>
-/* ページ全体 */
-.login-page{
-  min-height: calc(100vh - 120px);
-  display:flex;
-  justify-content:center;
-  padding:40px 12px 70px;
-  background:#fff;
-  color:#333;
-  font-family:"Hiragino Kaku Gothic ProN","メイリオ",sans-serif;
-}
+  /* ページ全体 */
+  .login-page {
+    min-height: calc(100vh - 120px);
+    display: flex;
+    justify-content: center;
+    padding: 40px 12px 70px;
+    background: #fff;
+    color: #333;
+    font-family: "Hiragino Kaku Gothic ProN", "メイリオ", sans-serif;
+  }
 
-/* 中央カード */
-.login-card{
-  width: 520px;
-  max-width: 100%;
-  border:1px solid #d8d8d8;
-  background:#fff;
-}
+  /* 中央カード */
+  .login-card {
+    width: 520px;
+    max-width: 100%;
+    border: 1px solid #d8d8d8;
+    background: #fff;
+  }
 
-/* カード内 */
-.login-card__inner{
-  padding:28px 36px 26px;
-}
+  /* カード内 */
+  .login-card__inner {
+    padding: 28px 36px 26px;
+  }
 
-/* 見出し（ロゴ行っぽく） */
-.brand{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  margin-bottom:18px;
-}
-.brand__logo-img{
-  width:26px;
-  height:26px;
-  border-radius:4px;
-  object-fit:cover;
-  display:block;
-}
+  /* 見出し（ロゴ行っぽく） */
+  .brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
 
-.brand__title{
-  font-size:16px;
-  font-weight:700;
-  letter-spacing:0.02em;
-}
+  .brand__logo-img {
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    object-fit: cover;
+    display: block;
+  }
 
-/* フォーム */
-.form-group{
-  margin:14px 0 0;
-}
-.form-group label{
-  display:block;
-  font-size:12px;
-  font-weight:700;
-  margin-bottom:6px;
-}
-.form-group input{
-  width:100%;
-  box-sizing:border-box;
-  padding:10px 12px;
-  border:1px solid #bfbfbf;
-  border-radius:3px;
-  font-size:13px;
-}
-.form-group input:focus{
-  outline:none;
-  border-color:#2a69a8;
-  box-shadow:0 0 0 2px rgba(42,105,168,0.15);
-}
+  .brand__title {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
 
-/* 自動ログイン */
-.auto-login{
-  margin-top:12px;
-  font-size:12px;
-  color:#333;
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-.auto-login small{
-  display:block;
-  margin-left:22px;
-  color:#666;
-  margin-top:4px;
-}
+  /* フォーム */
+  .form-group {
+    margin: 14px 0 0;
+  }
 
-/* ボタン */
-.btn-login{
-  display:block;
-  width: 260px;
-  margin:16px auto 0;
-  padding:12px 0;
-  background:#2a69a8;
-  color:#fff;
-  border:none;
-  border-radius:3px;
-  font-weight:700;
-  cursor:pointer;
-}
-.btn-login:hover{opacity:.92;}
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
 
-/* リンク */
-.links{
-  text-align:center;
-  margin-top:14px;
-  font-size:12px;
-}
-.links a{
-  color:#1e73c9;
-  text-decoration:none;
-}
-.links a:hover{text-decoration:underline;}
+  .form-group input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid #bfbfbf;
+    border-radius: 3px;
+    font-size: 13px;
+  }
 
-/* 下部の案内（軽く） */
-.login-footer{
-  border-top:1px solid #e6e6e6;
-  padding:18px 18px;
-  text-align:center;
-  font-size:12px;
-  color:#666;
-}
+  .form-group input:focus {
+    outline: none;
+    border-color: #2a69a8;
+    box-shadow: 0 0 0 2px rgba(42, 105, 168, 0.15);
+  }
+
+  /* 自動ログイン */
+  .auto-login {
+    margin-top: 12px;
+    font-size: 12px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .auto-login small {
+    display: block;
+    margin-left: 22px;
+    color: #666;
+    margin-top: 4px;
+  }
+
+  /* ボタン */
+  .btn-login {
+    display: block;
+    width: 260px;
+    margin: 16px auto 0;
+    padding: 12px 0;
+    background: #2a69a8;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .btn-login:hover {
+    opacity: .92;
+  }
+
+  /* リンク */
+  .links {
+    text-align: center;
+    margin-top: 14px;
+    font-size: 12px;
+  }
+
+  .links a {
+    color: #1e73c9;
+    text-decoration: none;
+  }
+
+  .links a:hover {
+    text-decoration: underline;
+  }
+
+  /* 下部の案内（軽く） */
+  .login-footer {
+    border-top: 1px solid #e6e6e6;
+    padding: 18px 18px;
+    text-align: center;
+    font-size: 12px;
+    color: #666;
+  }
 </style>
 
 <div class="login-page">
@@ -130,45 +142,40 @@
     <div class="login-card__inner">
 
       <div class="brand">
-  <img
-    class="brand__logo-img"
-    src="{% static 'images/Tabecchi_icon.png' %}"
-    alt="タベッチ"
-    width="26"
-    height="26"
-  >
-  <div class="brand__title">タベッチ 店舗管理画面ログイン</div>
-</div>
+        <img class="brand__logo-img" src="{% static 'images/Tabecchi_icon.png' %}" alt="タベッチ" width="26" height="26">
+        <div class="brand__title">タベッチ 店舗管理画面ログイン</div>
+      </div>
 
-{% if messages %}
-  <div style="margin:10px 0; padding:10px; border:1px solid #f3c2c2; background:#fff5f5; color:#c53030; font-size:12px;">
-    {% for message in messages %}
-      <div>{{ message }}</div>
-    {% endfor %}
-  </div>
-{% endif %}
-{% if form.errors %}
-  <div style="margin:12px 0; padding:10px; border:1px solid #f3c7c7; background:#fff2f2; color:#b42318;">
-    {{ form.non_field_errors }}
-    {{ form.username.errors }}
-    {{ form.password.errors }}
-  </div>
-{% endif %}
+      {% if messages %}
+      <div
+        style="margin:10px 0; padding:10px; border:1px solid #f3c2c2; background:#fff5f5; color:#c53030; font-size:12px;">
+        {% for message in messages %}
+        <div>{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% if form.errors %}
+      <div style="margin:12px 0; padding:10px; border:1px solid #f3c7c7; background:#fff2f2; color:#b42318;">
+        {{ form.non_field_errors }}
+        {{ form.username.errors }}
+        {{ form.password.errors }}
+      </div>
+      {% endif %}
 
 
 
 
       <form method="post" action="{% url 'accounts:store_login' %}">
-  {% csrf_token %}
+        {% csrf_token %}
 
-  <div class="form-group">
-    <label for="login_id">ログインID(メールアドレス)</label>
-    <input id="login_id" name="username" type="email" required placeholder="owner@example.com">
-  </div>
-  <div class="form-group">
-    <label for="password">パスワード</label>
-    <input id="password" name="password" type="password" placeholder="8〜20桁の半角英数">
-  </div>
+        <div class="form-group">
+          <label for="login_id">ログインID(メールアドレス)</label>
+          <input id="login_id" name="username" type="email" required placeholder="owner@example.com">
+        </div>
+        <div class="form-group">
+          <label for="password">パスワード</label>
+          <input id="password" name="password" type="password" placeholder="8〜20桁の半角英数">
+        </div>
         <button class="btn-login" type="submit">ログインする</button>
       </form>
 
@@ -177,6 +184,9 @@
     <div class="login-footer">
       <div><a href="{% url 'accounts:customer_login' %}">まだアカウントをお持ちではない方はこちら</a></div>
       <div><a href="{% url 'accounts:store_mail_send' %}">パスワードを忘れた方はこちら</a></div>
+      <div style="margin-top:10px; border-top:1px solid #eee; padding-top:10px;">
+        <a href="{% url 'accounts:customer_top' %}" style="font-weight:bold; color:#555;">顧客トップ画面へ戻る</a>
+      </div>
     </div>
   </div>
 </div>

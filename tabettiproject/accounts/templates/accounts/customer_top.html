@@ -88,6 +88,32 @@
 
   .hero-overlay p {
     font-size: 18px;
+    margin-bottom: 24px;
+  }
+
+  /* 現在位置で探すボタン */
+  .btn-location-search {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #ff5722; /* 視認性の高いオレンジ */
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 12px 24px;
+    border-radius: 50px;
+    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(255, 87, 34, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-location-search:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 87, 34, 0.6);
+  }
+  .btn-location-search svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
   }
 
   /* =========================
@@ -505,6 +531,13 @@
   <div class="hero-overlay">
     <h1>行きたいお店が、きっと見つかる</h1>
     <p>日本最大級のグルメレビューサイト</p>
+    
+    <a href="{% url 'stores:customer_map' %}" class="btn-location-search">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+      </svg>
+      現在位置で探す
+    </a>
   </div>
 </div>
 

@@ -15,7 +15,7 @@ from django.views.generic.base import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 from commons.models import StoreAccount, Account, Scene, Store, StoreAccountRequest, ApplicationStatus, Area, CustomerAccount, StoreAccountRequestLog, AccountType
-from .forms import CustomerLoginForm, CustomerRegisterForm, CustomerPasswordResetForm, StorePasswordResetForm, StoreLoginForm
+from .forms import CustomerLoginForm, CustomerRegisterForm, CustomerPasswordResetForm, StorePasswordResetForm, StoreLoginForm, StoreSetPasswordForm
 from django.contrib.auth.views import (
     PasswordResetView, PasswordResetDoneView,
     PasswordResetConfirmView, PasswordResetCompleteView,
@@ -616,6 +616,7 @@ class storemail_sendView(PasswordResetView):
 class store_password_reset_confirmView(PasswordResetConfirmView):
     template_name = "accounts/store_password_reset_confirm.html"
     success_url = reverse_lazy("accounts:store_password_reset_complete")
+    form_class = StoreSetPasswordForm
 
 
 class store_password_reset_completeView(PasswordResetCompleteView):
@@ -624,12 +625,6 @@ class store_password_reset_completeView(PasswordResetCompleteView):
 class store_account_staff_confirmView(TemplateView):
     template_name = "accounts/store_account_staff_confirm.html"
 
-class store_password_reset_confirmView(PasswordResetConfirmView):
-    template_name = "accounts/store_password_reset_confirm.html"
-    success_url = reverse_lazy("accounts:store_password_reset_complete")
-
-class store_password_reset_completeView(PasswordResetCompleteView):
-    template_name = "accounts/store_password_reset_complete.html"
 
 
 class store_account_staff_inputView(TemplateView):
