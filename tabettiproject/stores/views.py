@@ -863,7 +863,9 @@ class StoreTimeSlotsJsonView(View):
 # -----------------------------
 # 予約：作成
 # -----------------------------
-class CustomerReservationCreateView(View):
+class CustomerReservationCreateView(LoginRequiredMixin, View):
+    login_url = "accounts:customer_login"
+
     def post(self, request, store_id):
         store = get_object_or_404(Store, pk=store_id)
         form = CustomerReserveForm(request.POST)

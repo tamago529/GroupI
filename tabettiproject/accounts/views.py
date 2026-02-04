@@ -626,6 +626,10 @@ class storemail_sendView(PasswordResetView):
         self.from_email = settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER
         return super().dispatch(request, *args, **kwargs)
 
+
+class store_password_doneView(PasswordResetDoneView):
+    template_name = "accounts/store_mail_sent_info.html"
+
 class store_password_reset_confirmView(PasswordResetConfirmView):
     template_name = "accounts/store_password_reset_confirm.html"
     success_url = reverse_lazy("accounts:store_password_reset_complete")

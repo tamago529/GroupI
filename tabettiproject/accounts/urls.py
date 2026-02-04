@@ -18,6 +18,7 @@ urlpatterns = [
     path("company_store_review/<int:request_id>/permit/",views.company_store_review_permitView.as_view(),name="company_store_review_permit",),
     path("company_store_review/<int:request_id>/reject/",views.company_store_review_rejectView.as_view(),name="company_store_review_reject",),
     path("store/password_reset/", views.storemail_sendView.as_view(), name="store_password_reset"),
+    path("store/password_reset/done/", views.store_password_doneView.as_view(), name="store_password_done"),
     path("store/reset/<uidb64>/<token>/", views.store_password_reset_confirmView.as_view(), name="store_password_reset_confirm"),
     path("store/reset/done/", views.store_password_reset_completeView.as_view(), name="store_password_reset_complete"),
     path('account_delete_execute/<int:pk>/', views.account_delete_execute, name='account_delete_execute'),
