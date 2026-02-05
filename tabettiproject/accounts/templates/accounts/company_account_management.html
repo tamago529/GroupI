@@ -1,4 +1,5 @@
 {% extends 'company_base.html' %}
+{% load static %}
 
 {% block content %}
 <style>
@@ -20,7 +21,7 @@
     .search-input { flex: 1; padding: 12px 20px; border: 2px solid #333; border-radius: 15px; font-size: 18px; }
     .filter-row { display: flex; gap: 20px; align-items: center; padding-left: 10px; }
     .filter-label { display: flex; align-items: center; gap: 8px; font-weight: bold; cursor: pointer; }
-    
+
     .account-list { display: flex; flex-direction: column; gap: 15px; }
     .account-item {
         display: flex; justify-content: space-between; align-items: center;
@@ -30,7 +31,7 @@
     .type-badge { font-size: 12px; padding: 2px 8px; border-radius: 5px; background: #333; color: #fff; width: fit-content; }
     .account-name { font-size: 22px; font-weight: bold; color: #333; }
     .account-sub-info { font-size: 14px; color: #666; }
-    .btn-item { padding: 8px 25px; border: 2px solid #333; border-radius: 12px; background-color: #fff; font-size: 18px; font-weight: bold; text-decoration: none; color: #000; }
+    .btn-item { padding: 8px 25px; border: 2px solid #333; border-radius: 12px; background-color: #fff; font-size: 18px; font-weight: bold; text-decoration: none; color: #000; cursor: pointer; }
 
     .no-results {
         text-align: center;
@@ -52,27 +53,151 @@
         padding-top: 20px;
         border-top: 1px solid #eee;
     }
+    .sa-link { color: #1e73c9; text-decoration: none; font-size: 13px; }
+    .sa-link:hover { text-decoration: underline; }
+    .sa-link-disabled { color: #aaa; pointer-events: none; text-decoration: none; font-size: 13px; }
+    .sa-pageinfo { font-size: 12px; color: #666; }
 
-    .sa-link {
-        color: #1e73c9;
-        text-decoration: none;
-        font-size: 13px;
+    /* =========================
+       追加：プロフィールモーダル
+    ========================= */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.55);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 18px;
+    }
+    .modal-overlay.is-open { display: flex; }
+
+    .modal {
+        width: min(900px, 100%);
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid rgba(0,0,0,0.12);
+        box-shadow: 0 18px 60px rgba(0,0,0,0.25);
+        overflow: hidden;
+    }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        border-bottom: 1px solid #eee;
+        background: #fafafa;
+    }
+    .modal-title {
+        font-size: 16px;
+        font-weight: 800;
+        color: #222;
+        margin: 0;
+    }
+    .modal-close {
+        border: 1px solid #333;
+        background: #fff;
+        border-radius: 10px;
+        padding: 6px 12px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+    .modal-body {
+        padding: 18px;
+        max-height: 75vh;
+        overflow: auto;
     }
 
-    .sa-link:hover {
-        text-decoration: underline;
+    .profile-top {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+        margin-bottom: 16px;
     }
-
-    .sa-link-disabled {
-        color: #aaa;
-        pointer-events: none;
-        text-decoration: none;
-        font-size: 13px;
+    .profile-icon {
+        width: 84px;
+        height: 84px;
+        border-radius: 12px;
+        object-fit: cover;
+        background: #eee;
+        border: 1px solid #ddd;
+        flex: 0 0 auto;
     }
-
-    .sa-pageinfo {
+    .profile-main {
+        flex: 1;
+        min-width: 0;
+    }
+    .profile-name {
+        font-size: 20px;
+        font-weight: 900;
+        margin: 0 0 4px;
+        color: #222;
+        word-break: break-word;
+    }
+    .profile-sub {
         font-size: 12px;
         color: #666;
+        margin: 0 0 6px;
+        word-break: break-word;
+    }
+    .profile-chip {
+        display: inline-block;
+        font-size: 11px;
+        padding: 3px 10px;
+        border-radius: 999px;
+        background: #333;
+        color: #fff;
+        font-weight: 800;
+        margin-right: 6px;
+        margin-top: 6px;
+    }
+
+    .profile-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px 16px;
+        margin-top: 10px;
+    }
+    .profile-field {
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 10px 12px;
+        background: #fff;
+    }
+    .profile-label {
+        display: block;
+        font-size: 11px;
+        color: #777;
+        margin-bottom: 4px;
+        font-weight: 700;
+    }
+    .profile-value {
+        font-size: 13px;
+        color: #222;
+        word-break: break-word;
+        white-space: pre-wrap;
+    }
+
+    .profile-wide {
+        grid-column: 1 / -1;
+    }
+
+    .profile-cover {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 1px solid #eee;
+        background: #eee;
+        margin-top: 10px;
+    }
+
+    @media (max-width: 720px) {
+        .profile-grid { grid-template-columns: 1fr; }
+        .profile-top { flex-direction: column; }
+        .profile-icon { width: 72px; height: 72px; }
     }
 </style>
 
@@ -83,25 +208,25 @@
                 <input type="text" name="q" class="search-input" placeholder="名前、ID、メールアドレスで検索" value="{{ query }}">
                 <button type="submit" class="btn-search">検索</button>
             </div>
-            
+
             <div class="filter-row">
                 <span style="font-size: 14px; color: #666;">絞り込み：</span>
-                
+
                 <label class="filter-label">
-                    <input type="radio" name="type" value="all" 
-                        {% if selected_type == 'all' %}checked{% endif %} 
+                    <input type="radio" name="type" value="all"
+                        {% if selected_type == 'all' %}checked{% endif %}
                         onchange="this.form.submit()"> すべて
                 </label>
-                
+
                 <label class="filter-label">
-                    <input type="radio" name="type" value="customer" 
-                        {% if selected_type == 'customer' %}checked{% endif %} 
+                    <input type="radio" name="type" value="customer"
+                        {% if selected_type == 'customer' %}checked{% endif %}
                         onchange="this.form.submit()"> 顧客
                 </label>
-                
+
                 <label class="filter-label">
-                    <input type="radio" name="type" value="store" 
-                        {% if selected_type == 'store' %}checked{% endif %} 
+                    <input type="radio" name="type" value="store"
+                        {% if selected_type == 'store' %}checked{% endif %}
                         onchange="this.form.submit()"> 店舗
                 </label>
             </div>
@@ -124,16 +249,42 @@
                     </span>
                     <span class="account-sub-info">ID: {{ acc.username }} / {{ acc.email }}</span>
                 </div>
-               <!-- HTML内の削除ボタン部分 -->
-<div class="item-actions">
-    <button class="btn-item" onclick="showDetail('{{ acc.username }}')">詳細</button>
 
-    <!-- 🌟 修正：next_url の飛び先を削除実行Viewにする -->
-    <!-- また、パラメータ名を confirm_message に合わせます -->
-    <a href="{% url 'commons:company_common_confirm' %}?confirm_message={{ acc.username }}を削除しますか？&next_url={% url 'accounts:account_delete_execute' acc.pk %}" class="btn-item">
-        削除
-    </a>
-</div>
+                <div class="item-actions">
+                    {# 顧客プロフィール（customer_setting相当）を data-* に詰めて渡す #}
+                    <button
+                        type="button"
+                        class="btn-item js-detail-btn"
+                        data-username="{{ acc.username|default:''|escapejs }}"
+                        data-email="{{ acc.email|default:''|escapejs }}"
+                        data-account-type="{{ acc.account_type.account_type|default:''|escapejs }}"
+
+                        {# 顧客だけ持つ情報（無い場合は空文字） #}
+                        data-nickname="{% if acc.customeraccount %}{{ acc.customeraccount.nickname|default:''|escapejs }}{% endif %}"
+                        data-last-name="{% if acc.customeraccount %}{{ acc.customeraccount.last_name|default:''|escapejs }}{% endif %}"
+                        data-first-name="{% if acc.customeraccount %}{{ acc.customeraccount.first_name|default:''|escapejs }}{% endif %}"
+                        data-last-name-kana="{% if acc.customeraccount %}{{ acc.customeraccount.last_name_kana|default:''|escapejs }}{% endif %}"
+                        data-first-name-kana="{% if acc.customeraccount %}{{ acc.customeraccount.first_name_kana|default:''|escapejs }}{% endif %}"
+                        data-gender="{% if acc.customeraccount and acc.customeraccount.gender %}{{ acc.customeraccount.gender.gender|default:''|escapejs }}{% endif %}"
+                        data-phone-number="{% if acc.customeraccount %}{{ acc.customeraccount.phone_number|default:''|escapejs }}{% endif %}"
+                        data-occupation="{% if acc.customeraccount %}{{ acc.customeraccount.occupation|default:''|escapejs }}{% endif %}"
+                        data-camera="{% if acc.customeraccount %}{{ acc.customeraccount.camera|default:''|escapejs }}{% endif %}"
+                        data-standard-score="{% if acc.customeraccount %}{{ acc.customeraccount.standard_score|default:''|escapejs }}{% endif %}"
+                        data-introduction="{% if acc.customeraccount %}{{ acc.customeraccount.introduction|default:''|escapejs }}{% endif %}"
+                        data-title="{% if acc.customeraccount %}{{ acc.customeraccount.title|default:''|escapejs }}{% endif %}"
+                        data-subtitle="{% if acc.customeraccount %}{{ acc.customeraccount.subtitle|default:''|escapejs }}{% endif %}"
+                        data-genre-focus="{% if acc.customeraccount %}{{ acc.customeraccount.genre_focus|default:''|escapejs }}{% endif %}"
+
+                        data-icon-url="{% if acc.customeraccount and acc.customeraccount.icon_image %}{{ acc.customeraccount.icon_image.url|escapejs }}{% endif %}"
+                        data-cover-url="{% if acc.customeraccount and acc.customeraccount.cover_image %}{{ acc.customeraccount.cover_image.url|escapejs }}{% endif %}"
+                    >
+                        詳細
+                    </button>
+
+                    <a href="{% url 'commons:company_common_confirm' %}?confirm_message={{ acc.username }}を削除しますか？&next_url={% url 'accounts:account_delete_execute' acc.pk %}" class="btn-item">
+                        削除
+                    </a>
+                </div>
             </div>
         {% empty %}
             <div class="no-results">
@@ -172,11 +323,246 @@
     </div>
 </div>
 
-<!-- モーダルは完全に削除しました -->
+<!-- =========================
+     追加：プロフィールモーダル本体
+========================= -->
+<div class="modal-overlay" id="profileModalOverlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+    <div class="modal-header">
+      <h3 class="modal-title" id="profileModalTitle">プロフィール詳細</h3>
+      <button type="button" class="modal-close" id="profileModalClose">閉じる</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="profile-top">
+        <img id="pmIcon" class="profile-icon" src="{% static 'images/noimage.jpg' %}" alt="プロフィール画像">
+        <div class="profile-main">
+          <p class="profile-name" id="pmName">-</p>
+          <p class="profile-sub" id="pmSub">ID: - / -</p>
+          <span class="profile-chip" id="pmType">-</span>
+        </div>
+      </div>
+
+      <img id="pmCover" class="profile-cover" src="{% static 'images/noimage.jpg' %}" alt="カバー画像" style="display:none;">
+
+      <div class="profile-grid" id="pmGrid">
+        <div class="profile-field">
+          <span class="profile-label">ニックネーム</span>
+          <div class="profile-value" id="pmNickname">-</div>
+        </div>
+
+        <div class="profile-field">
+          <span class="profile-label">性別</span>
+          <div class="profile-value" id="pmGender">-</div>
+        </div>
+
+        <div class="profile-field">
+          <span class="profile-label">姓 / 名</span>
+          <div class="profile-value" id="pmRealName">-</div>
+        </div>
+
+        <div class="profile-field">
+          <span class="profile-label">せい / めい</span>
+          <div class="profile-value" id="pmKanaName">-</div>
+        </div>
+
+        <div class="profile-field">
+          <span class="profile-label">メールアドレス</span>
+          <div class="profile-value" id="pmEmail">-</div>
+        </div>
+
+        <div class="profile-field">
+          <span class="profile-label">携帯電話番号</span>
+          <div class="profile-value" id="pmPhone">-</div>
+        </div>
+
+        <div class="profile-field">
+          <span class="profile-label">職業</span>
+          <div class="profile-value" id="pmOccupation">-</div>
+        </div>
+
+        <div class="profile-field">
+          <span class="profile-label">使っているカメラ</span>
+          <div class="profile-value" id="pmCamera">-</div>
+        </div>
+
+        <div class="profile-field">
+          <span class="profile-label">標準点</span>
+          <div class="profile-value" id="pmStandardScore">-</div>
+        </div>
+
+        <div class="profile-field profile-wide">
+          <span class="profile-label">自己紹介</span>
+          <div class="profile-value" id="pmIntroduction">-</div>
+        </div>
+
+        <div class="profile-field profile-wide">
+          <span class="profile-label">レビュアーページタイトル</span>
+          <div class="profile-value" id="pmTitle">-</div>
+        </div>
+
+        <div class="profile-field profile-wide">
+          <span class="profile-label">サブタイトル</span>
+          <div class="profile-value" id="pmSubtitle">-</div>
+        </div>
+
+        <div class="profile-field profile-wide">
+          <span class="profile-label">得意ジャンル・こだわり</span>
+          <div class="profile-value" id="pmGenreFocus">-</div>
+        </div>
+      </div>
+
+      <div id="pmNote" style="display:none; margin-top:10px; font-size:12px; color:#666;">
+        ※このアカウントは顧客ではないため、顧客プロフィール（customer_setting）の情報はありません。
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
-    function showDetail(username) {
-        alert(username + " の詳細を表示します");
+(function () {
+  const overlay = document.getElementById("profileModalOverlay");
+  const btnClose = document.getElementById("profileModalClose");
+
+  const els = {
+    name: document.getElementById("pmName"),
+    sub: document.getElementById("pmSub"),
+    type: document.getElementById("pmType"),
+    nickname: document.getElementById("pmNickname"),
+    gender: document.getElementById("pmGender"),
+    realName: document.getElementById("pmRealName"),
+    kanaName: document.getElementById("pmKanaName"),
+    email: document.getElementById("pmEmail"),
+    phone: document.getElementById("pmPhone"),
+    occupation: document.getElementById("pmOccupation"),
+    camera: document.getElementById("pmCamera"),
+    standardScore: document.getElementById("pmStandardScore"),
+    introduction: document.getElementById("pmIntroduction"),
+    title: document.getElementById("pmTitle"),
+    subtitle: document.getElementById("pmSubtitle"),
+    genreFocus: document.getElementById("pmGenreFocus"),
+    icon: document.getElementById("pmIcon"),
+    cover: document.getElementById("pmCover"),
+    note: document.getElementById("pmNote"),
+    grid: document.getElementById("pmGrid"),
+  };
+
+  const defaultNoImage = "{% static 'images/noimage.jpg' %}";
+
+  function openModal() {
+    overlay.classList.add("is-open");
+    overlay.setAttribute("aria-hidden", "false");
+    // ESCで閉じる
+    document.addEventListener("keydown", onEsc);
+  }
+
+  function closeModal() {
+    overlay.classList.remove("is-open");
+    overlay.setAttribute("aria-hidden", "true");
+    document.removeEventListener("keydown", onEsc);
+  }
+
+  function onEsc(e) {
+    if (e.key === "Escape") closeModal();
+  }
+
+  function safeText(v) {
+    const s = (v ?? "").toString().trim();
+    return s ? s : "-";
+  }
+
+  function safeImg(url) {
+    const s = (url ?? "").toString().trim();
+    return s ? s : "";
+  }
+
+  function setCover(url) {
+    const u = safeImg(url);
+    if (u) {
+      els.cover.src = u;
+      els.cover.style.display = "";
+      els.cover.onerror = function () {
+        this.onerror = null;
+        this.src = defaultNoImage;
+      };
+    } else {
+      els.cover.style.display = "none";
+      els.cover.src = defaultNoImage;
     }
+  }
+
+  function setIcon(url) {
+    const u = safeImg(url);
+    els.icon.src = u || defaultNoImage;
+    els.icon.onerror = function () {
+      this.onerror = null;
+      this.src = defaultNoImage;
+    };
+  }
+
+  function fillFromBtn(btn) {
+    const type = btn.dataset.accountType || "";
+    const isCustomer = (type === "顧客");
+
+    const username = btn.dataset.username || "";
+    const email = btn.dataset.email || "";
+
+    els.type.textContent = safeText(type);
+    els.sub.textContent = `ID: ${safeText(username)} / ${safeText(email)}`;
+    els.email.textContent = safeText(email);
+
+    if (!isCustomer) {
+      // 顧客以外は説明だけ出す
+      els.name.textContent = safeText(username);
+      els.note.style.display = "";
+      els.grid.style.display = "none";
+      setIcon("");
+      setCover("");
+      return;
+    }
+
+    els.note.style.display = "none";
+    els.grid.style.display = "";
+
+    const nickname = btn.dataset.nickname || "";
+    const lastName = btn.dataset.lastName || "";
+    const firstName = btn.dataset.firstName || "";
+    const lastKana = btn.dataset.lastNameKana || "";
+    const firstKana = btn.dataset.firstNameKana || "";
+
+    els.name.textContent = safeText(nickname);
+    els.nickname.textContent = safeText(nickname);
+    els.gender.textContent = safeText(btn.dataset.gender);
+    els.realName.textContent = `${safeText(lastName)} ${safeText(firstName)}`;
+    els.kanaName.textContent = `${safeText(lastKana)} ${safeText(firstKana)}`;
+
+    els.phone.textContent = safeText(btn.dataset.phoneNumber);
+    els.occupation.textContent = safeText(btn.dataset.occupation);
+    els.camera.textContent = safeText(btn.dataset.camera);
+    els.standardScore.textContent = safeText(btn.dataset.standardScore);
+    els.introduction.textContent = safeText(btn.dataset.introduction);
+    els.title.textContent = safeText(btn.dataset.title);
+    els.subtitle.textContent = safeText(btn.dataset.subtitle);
+    els.genreFocus.textContent = safeText(btn.dataset.genreFocus);
+
+    setIcon(btn.dataset.iconUrl);
+    setCover(btn.dataset.coverUrl);
+  }
+
+  // 詳細ボタン（委譲）
+  document.addEventListener("click", function (e) {
+    const btn = e.target.closest(".js-detail-btn");
+    if (!btn) return;
+    fillFromBtn(btn);
+    openModal();
+  });
+
+  // overlayクリックで閉じる（中身クリックは閉じない）
+  overlay.addEventListener("click", function (e) {
+    if (e.target === overlay) closeModal();
+  });
+
+  btnClose.addEventListener("click", closeModal);
+})();
 </script>
 {% endblock %}
