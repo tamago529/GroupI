@@ -266,7 +266,7 @@
                         data-last-name-kana="{% if acc.customeraccount %}{{ acc.customeraccount.last_name_kana|default:''|escapejs }}{% endif %}"
                         data-first-name-kana="{% if acc.customeraccount %}{{ acc.customeraccount.first_name_kana|default:''|escapejs }}{% endif %}"
                         data-gender="{% if acc.customeraccount and acc.customeraccount.gender %}{{ acc.customeraccount.gender.gender|default:''|escapejs }}{% endif %}"
-                        data-phone-number="{% if acc.customeraccount %}{{ acc.customeraccount.phone_number|default:''|escapejs }}{% endif %}"
+                        data-phone-number="{% if acc.customeraccount %}{{ acc.customeraccount.phone_number|default:''|escape }}{% endif %}"
                         data-occupation="{% if acc.customeraccount %}{{ acc.customeraccount.occupation|default:''|escapejs }}{% endif %}"
                         data-camera="{% if acc.customeraccount %}{{ acc.customeraccount.camera|default:''|escapejs }}{% endif %}"
                         data-standard-score="{% if acc.customeraccount %}{{ acc.customeraccount.standard_score|default:''|escapejs }}{% endif %}"
@@ -335,7 +335,7 @@
 
     <div class="modal-body">
       <div class="profile-top">
-        <img id="pmIcon" class="profile-icon" src="{% static 'images/noimage.jpg' %}" alt="プロフィール画像">
+        <img id="pmIcon" class="profile-icon" src="{% static 'images/default_icon.jpg' %}" alt="プロフィール画像">
         <div class="profile-main">
           <p class="profile-name" id="pmName">-</p>
           <p class="profile-sub" id="pmSub">ID: - / -</p>
@@ -343,7 +343,7 @@
         </div>
       </div>
 
-      <img id="pmCover" class="profile-cover" src="{% static 'images/noimage.jpg' %}" alt="カバー画像" style="display:none;">
+      <img id="pmCover" class="profile-cover" src="{% static 'images/default_cover.jpg' %}" alt="カバー画像" style="display:none;">
 
       <div class="profile-grid" id="pmGrid">
         <div class="profile-field">
@@ -466,11 +466,20 @@
     if (e.key === "Escape") closeModal();
   }
 
-  function safeText(v) {
-    const s = (v ?? "").toString().trim();
-    return s ? s : "-";
-  }
+  function decodeUnicodeEscapes(str) {
+  return (str ?? "").toString().replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => {
+    try {
+      return String.fromCharCode(parseInt(hex, 16));
+    } catch {
+      return _;
+    }
+  });
+}
 
+  function safeText(v) {
+  const s = decodeUnicodeEscapes(v).trim();
+  return s ? s : "-";
+}
   function safeImg(url) {
     const s = (url ?? "").toString().trim();
     return s ? s : "";
