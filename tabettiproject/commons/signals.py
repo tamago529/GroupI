@@ -1,6 +1,6 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from commons.models import Review, CustomerAccount
+from commons.models import Review, CustomerAccount, Follow
 
 
 @receiver(post_save, sender=Review)
@@ -33,3 +33,25 @@ def update_reviewer_trust_score_on_review_delete(sender, instance, **kwargs):
         
         # 信頼度スコアを更新
         instance.reviewer.update_trust_score()
+
+
+@receiver(post_save, sender=Follow)
+def update_follower_count_on_follow_save(sender, instance, created, **kwargs):
+    """
+    フォロー時に被フォロー者のフォロワー数と信頼度スコアを更新
+    """
+    if instance.followee:
+        instance.followee.follower_count = Follow.objects.filter(followee=instance.followee).count()
+        instance.followee.save(update_fields=['follower_count'])
+        instance.followee.update_trust_score()
+
+
+@receiver(post_delete, sender=Follow)
+def update_follower_count_on_follow_delete(sender, instance, **kwargs):
+    """
+    フォロー解除時に被フォロー者のフォロワー数と信頼度スコアを更新
+    """
+    if instance.followee:
+        instance.followee.follower_count = Follow.objects.filter(followee=instance.followee).count()
+        instance.followee.save(update_fields=['follower_count'])
+        instance.followee.update_trust_score()

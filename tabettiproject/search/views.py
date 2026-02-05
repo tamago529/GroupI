@@ -233,6 +233,14 @@ def customer_search_listView(request):
 
     date_list = [base_date + timedelta(days=i) for i in range(12)]
 
+    # 加重平均の重み計算式（シグナル/モデルメソッドと同期）
+    weight_expr = models.ExpressionWrapper(
+        (models.F("review__reviewer__trust_score") / 10.0) * 
+        ((1.0 + models.F("review__like_count") / 5.0) * (1.0 + models.F("review__like_count") / 5.0) * (1.0 + models.F("review__like_count") / 5.0)) * 
+        (1.0 + models.F("review__reviewer__follower_count") / 10.0),
+        output_field=models.FloatField()
+    )
+
     # ---------- 店舗ベースクエリ ----------
     store_qs = (
         Store.objects
@@ -240,8 +248,8 @@ def customer_search_listView(request):
         .annotate(
             has_account=models.Count("storeaccount", distinct=True),
             weighted_avg_rating=models.Sum(
-                models.F("review__score") * models.F("review__reviewer__trust_score")
-            ) / models.Sum(models.F("review__reviewer__trust_score")),
+                models.F("review__score") * weight_expr
+            ) / models.Sum(weight_expr),
             avg_rating=models.Avg("review__score"),
             review_count=models.Count("review", distinct=True),
         )
@@ -388,14 +396,7 @@ def customer_search_listView(request):
         if rating > 5:
             rating = 5.0
 
-        rounded = (int(rating * 2)) / 2.0
-        full = int(rounded)
-        half = 1 if (rounded - full) >= 0.5 else 0
-        empty = 5 - full - half
-        if empty < 0:
-            empty = 0
-
-        s.star_states = (["full"] * full) + (["half"] * half) + (["empty"] * empty)
+        s.star_states = Store.build_star_states(rating)
         s.display_rating = rating
 
         if s.has_account:

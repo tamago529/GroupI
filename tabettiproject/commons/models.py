@@ -171,6 +171,7 @@ class CustomerAccount(Account):
     gender = models.ForeignKey("Gender", on_delete=models.PROTECT, verbose_name="性別")
     review_count = models.IntegerField(verbose_name="口コミ数", default=0)
     total_likes = models.IntegerField(verbose_name="総いいね数", default=0)
+    follower_count = models.IntegerField(verbose_name="フォロワー数", default=0)
     standard_score = models.IntegerField(verbose_name="標準点", default=0)
     trust_score = models.FloatField(verbose_name="信頼度スコア", default=50.0)
     inquiry_log = models.TextField(verbose_name="問い合わせ内容", blank=True, default="")
@@ -200,53 +201,47 @@ class CustomerAccount(Account):
     def calculate_trust_score(self):
         """
         ユーザーの信頼度スコアを計算 (0-100点)
-        
-        計算要素:
-        - アカウント年齢 (0-25点)
-        - レビュー数 (0-25点)
-        - レビューの質 (0-30点)
-        - レビューの一貫性 (0-20点)
+        より実績による差が顕著に出るように調整
         """
         from datetime import datetime
         from django.db.models import Avg, StdDev
         
         score = 0.0
         
-        # 1. アカウント年齢スコア (0-25点)
+        # 1. アカウント年齢スコア (0-20点) - 2年で満点
         if self.date_joined:
             account_age_days = (datetime.now(self.date_joined.tzinfo) - self.date_joined).days
-            # 365日以上で満点、線形に増加
-            age_score = min(25.0, (account_age_days / 365.0) * 25.0)
+            age_score = min(20.0, (account_age_days / 730.0) * 20.0)
             score += age_score
         
-        # 2. レビュー数スコア (0-25点)
-        # 50件以上で満点、線形に増加
-        review_score = min(25.0, (self.review_count / 50.0) * 25.0)
+        # 2. レビュー数スコア (0-20点) - 100件で満点
+        review_score = min(20.0, (self.review_count / 100.0) * 20.0)
         score += review_score
         
-        # 3. レビューの質スコア (0-30点)
+        # 3. レビューの質スコア (0-20点) - 平均5いいね以上で満点（基準を下げて活性化）
         if self.review_count > 0:
-            # 平均いいね数を計算
             avg_likes = self.total_likes / self.review_count
-            # 平均10いいね以上で満点、線形に増加
-            quality_score = min(30.0, (avg_likes / 10.0) * 30.0)
+            quality_score = min(20.0, (avg_likes / 5.0) * 20.0)
             score += quality_score
         
         # 4. レビューの一貫性スコア (0-20点)
         reviews = self.review_set.all()
         if reviews.count() >= 3:
-            # 評価点数の標準偏差を計算
             stats = reviews.aggregate(std_dev=StdDev('score'))
             std_dev = stats['std_dev'] or 0
-            
-            # 標準偏差が小さいほど一貫性が高い
-            # 標準偏差0で満点、2.0以上で0点
-            consistency_score = max(0.0, 20.0 - (std_dev / 2.0) * 20.0)
+            consistency_score = max(0.0, 20.0 - (std_dev / 1.5) * 20.0)
             score += consistency_score
         elif reviews.count() > 0:
-            # レビュー数が少ない場合は中間点
-            score += 10.0
+            score += 5.0 # 未実績時のベースを下げて差を出す
+
+        # 5. フォロワー数スコア (0-20点) - 50人で満点
+        follower_score = min(20.0, (self.follower_count / 50.0) * 20.0)
+        score += follower_score
         
+        # 実績が極端に少ないユーザーは低く抑えるための係数
+        if self.review_count < 3:
+            score *= 0.5
+
         return round(score, 2)
 
     def update_trust_score(self):
@@ -314,6 +309,70 @@ class Store(models.Model):
 
     def __str__(self):
         return f"{self.store_name} - {self.branch_name}"
+
+    def get_weighted_rating_context(self):
+        """
+        レビュアーの信頼度(trust_score)を加重値として店舗評価を計算する
+        """
+        from django.db.models import Sum, F, Avg, Count, FloatField, ExpressionWrapper
+        # 劇的な影響力強化 (累乗による非線形重みづけ):
+        # 重み W = (信頼度/10) * (1 + いいね数/5)^3 * (1 + フォロワー数/10)
+        # Djangoの型エラーを避けるため ExpressionWrapper を使用
+        weight_expr = ExpressionWrapper(
+            (F("reviewer__trust_score") / 10.0) * 
+            ((1.0 + F("like_count") / 5.0) * (1.0 + F("like_count") / 5.0) * (1.0 + F("like_count") / 5.0)) * 
+            (1.0 + F("reviewer__follower_count") / 10.0),
+            output_field=FloatField()
+        )
+        
+        agg = self.review_set.aggregate(
+            weighted_sum=Sum(ExpressionWrapper(F("score") * weight_expr, output_field=FloatField())),
+            weight_total=Sum(weight_expr),
+            avg=Avg("score"),
+            cnt=Count("id"),
+        )
+        # 以下略
+
+        # 加重平均を計算（重み合計が0の場合は単純平均、それもなければ0）
+        if agg["weight_total"]:
+            avg_rating = float(agg["weighted_sum"]) / float(agg["weight_total"])
+        else:
+            avg_rating = float(agg["avg"] or 0.0)
+
+        # 5.0を超えないようにキャップ
+        if avg_rating > 5.0:
+            avg_rating = 5.0
+
+        review_count = int(agg["cnt"] or 0)
+        return {
+            "avg_rating": avg_rating,
+            "review_count": review_count,
+            "star_states": self.build_star_states(avg_rating),
+        }
+
+    @staticmethod
+    def build_star_states(avg_rating: float) -> list[str]:
+        """
+        星の状態（full/half/empty）を判定してリストで返す
+        """
+        rating = float(avg_rating or 0.0)
+        full = int(rating)
+        frac = rating - full
+
+        if frac >= 0.9:
+            full += 1
+            half = 0
+        elif frac >= 0.5:
+            half = 1
+        else:
+            half = 0
+
+        if full >= 5:
+            full = 5
+            half = 0
+
+        empty = max(0, 5 - full - half)
+        return (["full"] * full) + (["half"] * half) + (["empty"] * empty)
 
 
 class StoreAccount(Account):
