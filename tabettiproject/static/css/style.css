@@ -17,10 +17,6 @@ body {
    ヘッダー全体
 ========================= */
 .header {
-  position: -webkit-sticky; /* iOS Safari用 */
-  position: sticky;
-  top: 0;
-  left: 0;
   width: 100%;
   z-index: 9999;
   border-bottom: 3px solid rgba(254, 172, 41, 1);
