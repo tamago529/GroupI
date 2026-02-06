@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
+import environ
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -24,10 +25,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-_p0ohz^33d#g&v98-s*u9$*o6+@^23z*8@)%2pt(erz&-$@*^q'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['your-domain.com', 'サーバーIP']
 
+env = environ.Env()
+env.read_env(os.path.join(BASE_DIR, '.env'))
+SECRET_KEY = env('SECRET_KEY')
+DEBUG = env('DEBUG')
 
 # Application definition
 
@@ -86,11 +91,11 @@ WSGI_APPLICATION = 'tabettiproject.wsgi.application'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': env.db(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+    )
 }
+
 
 
 # Password validation
@@ -163,3 +168,5 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 SERVER_EMAIL = DEFAULT_FROM_EMAIL  # 念のため（エラー通知など）
 
 LOGIN_URL = "accounts:customer_login"
+
+
