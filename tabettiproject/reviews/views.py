@@ -67,35 +67,6 @@ class customer_review_listView(View):
         # フェイルセーフ（とりあえず1件）
         return Store.objects.order_by("pk").first()
 
-    # ---------------------------------
-    # 星状態生成（★/半★/☆）
-    # ---------------------------------
-    def _build_star_states(self, avg_rating: float) -> list[str]:
-        """
-        星のルール（確定）:
-        - 2.0 -> ★★☆☆☆
-        - 2.5〜2.9 -> ★★☆½☆
-        - 2.9以上 -> 繰り上げ（★★★☆☆）
-        """
-        rating = float(avg_rating or 0.0)
-
-        full = int(rating)
-        frac = rating - full
-
-        if frac >= 0.9:
-            full += 1
-            half = 0
-        elif frac >= 0.5:
-            half = 1
-        else:
-            half = 0
-
-        if full >= 5:
-            full = 5
-            half = 0
-
-        empty = max(0, 5 - full - half)
-        return (["full"] * full) + (["half"] * half) + (["empty"] * empty)
 
     # =================================
     # GET：口コミ一覧表示
@@ -117,17 +88,16 @@ class customer_review_listView(View):
                 .order_by("-posted_at")
             )
 
-            # 全件の集計（検索フィルタ前に計算）
-            agg = store_reviews.aggregate(avg=Avg("score"))
-            avg_rating = float(agg["avg"] or 0.0)
-            review_count = store_reviews.count()
+            # 加重平均を含む評価情報の取得
+            rating_ctx = store.get_weighted_rating_context()
+            avg_rating = rating_ctx["avg_rating"]
+            review_count = rating_ctx["review_count"]
+            star_states = rating_ctx["star_states"]
 
             # ★ キーワード検索（本文・タイトル）
             review_keyword = request.GET.get("review_keyword", "").strip()
             if review_keyword:
                 store_reviews = store_reviews.filter(review_text__icontains=review_keyword)
-
-            star_states = self._build_star_states(avg_rating)
 
         # 保存済み判定（ログイン時のみ）
         is_saved = False

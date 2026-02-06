@@ -710,11 +710,18 @@ class customer_topView(TemplateView):
         
         from django.db.models import Avg, Count, Sum, F, ExpressionWrapper, FloatField
 
+        # 加重平均の重み計算式（累算出方式）
+        weight_expr = ExpressionWrapper(
+            (F("review__reviewer__trust_score") / 10.0) * 
+            ((1.0 + F("review__like_count") / 5.0) * (1.0 + F("review__like_count") / 5.0) * (1.0 + F("review__like_count") / 5.0)) * 
+            (1.0 + F("review__reviewer__follower_count") / 10.0),
+            output_field=FloatField()
+        )
+
         ranking_stores = Store.objects.prefetch_related("images").annotate(
             weighted_avg_rating=Sum(
-                F('review__score') * F('review__reviewer__trust_score'),
-                output_field=FloatField()
-            ) / Sum(F('review__reviewer__trust_score'), output_field=FloatField()),
+                F('review__score') * weight_expr
+            ) / Sum(weight_expr),
             review_count_val=Count('review'),
         ).order_by('-weighted_avg_rating', 'id')[:5]
 
@@ -724,18 +731,8 @@ class customer_topView(TemplateView):
             rating = store.weighted_avg_rating if store.weighted_avg_rating else 0.0
             store.avg_rating_val = rating
             
-            # 星の生成（半星対応）
-            full_stars = int(rating)
-            half = (rating - full_stars) >= 0.5
-            states = []
-            for i in range(5):
-                if i < full_stars:
-                    states.append("full")
-                elif i == full_stars and half:
-                    states.append("half")
-                else:
-                    states.append("empty")
-            store.star_states = states
+            # 星の生成（一元化されたルールを使用）
+            store.star_states = Store.build_star_states(rating)
 
         context["ranking_stores"] = ranking_stores
 
@@ -765,18 +762,7 @@ class customer_topView(TemplateView):
         ).order_by('-total_score_val', 'id')[:5]
 
         for store in total_star_stores:
-            rating = store.avg_rating_val if store.avg_rating_val else 0.0
-            full_stars = int(rating)
-            half = (rating - full_stars) >= 0.5
-            states = []
-            for i in range(5):
-                if i < full_stars:
-                    states.append("full")
-                elif i == full_stars and half:
-                    states.append("half")
-                else:
-                    states.append("empty")
-            store.star_states = states
+            store.star_states = Store.build_star_states(rating)
 
         context["total_star_stores"] = total_star_stores
 

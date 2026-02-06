@@ -383,60 +383,11 @@ def _get_customer_from_user(user) -> CustomerAccount | None:
 # ============================================================
 # ★星評価 共通（Storeにavg_rating等が無い前提）
 # ============================================================
-def build_star_states(avg_rating: float) -> list[str]:
-    """
-    星のルール（確定）:
-    - 2.0 -> ★★☆☆☆
-    - 2.5〜2.9 -> ★★☆½☆
-    - 2.9以上 -> 繰り上げ（★★★☆☆）
-    """
-    rating = float(avg_rating or 0.0)
-    full = int(rating)
-    frac = rating - full
-
-    if frac >= 0.9:
-        full += 1
-        half = 0
-    elif frac >= 0.5:
-        half = 1
-    else:
-        half = 0
-
-    if full >= 5:
-        full = 5
-        half = 0
-
-    empty = 5 - full - half
-    return (["full"] * full) + (["half"] * half) + (["empty"] * empty)
-
-
 def _get_store_rating_context(store: Store) -> dict[str, object]:
     """
     Reviewから毎回集計してテンプレ用の値を返す
     """
-    agg = Review.objects.filter(store=store).aggregate(
-        weighted_sum=Sum(F("score") * F("reviewer__trust_score")),
-        weight_total=Sum("reviewer__trust_score"),
-        avg=Avg("score"),
-        cnt=Count("id"),
-    )
-
-    # 加重平均を計算（重み合計が0の場合は単純平均、それもなければ0）
-    if agg["weight_total"]:
-        avg_rating = float(agg["weighted_sum"]) / float(agg["weight_total"])
-    else:
-        avg_rating = float(agg["avg"] or 0.0)
-
-    # 5.0を超えないようにキャップ（念のため）
-    if avg_rating > 5.0:
-        avg_rating = 5.0
-
-    review_count = int(agg["cnt"] or 0)
-    return {
-        "avg_rating": avg_rating,
-        "review_count": review_count,
-        "star_states": build_star_states(avg_rating),
-    }
+    return store.get_weighted_rating_context()
 
 
 def _get_is_saved_for_customer(*, customer: CustomerAccount | None, store: Store) -> bool:

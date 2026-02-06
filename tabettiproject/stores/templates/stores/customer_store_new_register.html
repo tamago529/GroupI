@@ -11,8 +11,9 @@
     padding: 30px;
     background: #fff;
     border-radius: 8px;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
   }
+
   .register-title {
     font-size: 24px;
     font-weight: bold;
@@ -21,15 +22,18 @@
     border-bottom: 2px solid #ff8a00;
     color: #333;
   }
+
   .form-group {
     margin-bottom: 20px;
   }
+
   .form-group label {
     display: block;
     font-weight: bold;
     margin-bottom: 8px;
     color: #444;
   }
+
   .form-control {
     width: 100%;
     padding: 12px;
@@ -38,11 +42,13 @@
     font-size: 15px;
     box-sizing: border-box;
   }
+
   .form-control:focus {
     border-color: #ff8a00;
     outline: none;
-    box-shadow: 0 0 5px rgba(255,138,0,0.2);
+    box-shadow: 0 0 5px rgba(255, 138, 0, 0.2);
   }
+
   .errorlist {
     color: #d32f2f;
     font-size: 13px;
@@ -50,6 +56,7 @@
     padding-left: 0;
     list-style: none;
   }
+
   .btn-submit {
     display: block;
     width: 100%;
@@ -64,14 +71,17 @@
     transition: background 0.2s;
     margin-top: 30px;
   }
+
   .btn-submit:hover {
     background: #e67e00;
   }
+
   .time-range {
     display: flex;
     align-items: center;
     gap: 10px;
   }
+
   .time-range .form-control {
     width: auto;
   }
@@ -81,10 +91,10 @@
 {% block content %}
 <div class="register-container">
   <h1 class="register-title">店舗情報を登録する</h1>
-  
+
   <form method="post">
     {% csrf_token %}
-    
+
     <div class="form-group">
       <label for="{{ form.store_name.id_for_label }}">店舗名 <span style="color:red;">*</span></label>
       {{ form.store_name }}
@@ -146,7 +156,7 @@
     </div>
 
     <div class="form-group">
-      <label for="{{ form.business_hours.id_for_label }}">営業時間（自由記述）</label>
+      <label for="{{ form.business_hours.id_for_label }}">営業時間</label>
       {{ form.business_hours }}
       {{ form.business_hours.errors }}
     </div>

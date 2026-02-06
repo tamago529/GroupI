@@ -67,7 +67,8 @@
     border-bottom: 1px dotted #ccc;
   }
 
-  .menu-left {
+  .menu-left > div:last-child {
+    min-width: 0;
     display: flex;
     gap: 14px;
   }
@@ -75,6 +76,7 @@
   .menu-image {
     width: 120px;
     height: 120px;
+    flex-shrink: 0;
     background: #f3f3f3;
     border-radius: 4px;
     overflow: hidden;
@@ -91,6 +93,7 @@
     font-weight: bold;
     font-size: 15px;
     margin-bottom: 6px;
+    word-break: break-word;
   }
 
   .menu-desc {
